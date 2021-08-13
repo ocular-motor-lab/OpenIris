@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,62 +7,43 @@ using System.Threading.Tasks;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using System.ComponentModel.Composition;
+using SpinnakerNET;
+using System.Windows.Forms;
 
 namespace SpinnakerInterface
 {
     [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Test", typeof(EyeTrackingSystemSettings))]
+
     class SpinnakerTestSystem : EyeTrackingSystem
     {
+        private Form myUI;
+
         public override EyeCollection<CameraEye> CreateCameras()
         {
-            // TODO: add parameter to constructor to be able to select 2 different cameras
+                if (myUI == null)
+                {
+                    myUI = new SpinnakerUI();
+                    myUI.Show();
+                }
+            var CAMLIST = SpinnakerCameraEye.EnumerateCameras();
+            if (CAMLIST == null) return null;
 
-            var cameraLeft = new SpinnakerCameraEye(0)
-            {
-                WhichEye = Eye.Left
-            };
-
-            cameraLeft.Start();
-
-
-            // TODO: Add some cound to make sure the cameras are syncrhonized properly
-            // Look at micromedical 
-            // CameraEyeFlyCapture.SyncCameras(cameraLeftEye, cameraRightEye, settings.FrameRate);
-            //
-
-            return new EyeCollection<CameraEye>(cameraLeft, null);
+            SpinnakerCameraEye.BeginSynchronizedAcquisition();
+            return new EyeCollection<CameraEye>(CAMLIST[0], CAMLIST[1]);
         }
-    }
 
-    [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Test Binoc", typeof(EyeTrackingSystemSettings))]
-    class SpinnakerTestSystemBinoc : EyeTrackingSystem
-    {
-        public override EyeCollection<CameraEye> CreateCameras()
+        //public override GrabbedImages PreProcessImagesFromCameras(GrabbedImages images)
+        //{
+        //    return base.PreProcessImagesFromCameras(images);
+        //}
+
+        public override Form OpenEyeTrackingSystemUI
         {
-            // TODO: Check if you have to cameras
-
-            // TODO: add parameter to constructor to be able to select 2 different cameras
-
-            var cameraLeft = new SpinnakerCameraEye(0)
+            get
             {
-                WhichEye = Eye.Left
-            };
-
-            cameraLeft.Start();
-
-            var cameraRight = new SpinnakerCameraEye(1)
-            {
-                WhichEye = Eye.Right
-            };
-
-            cameraRight.Start();
-
-            // TODO: Add some cound to make sure the cameras are syncrhonized properly
-            // Look at micromedical 
-            // CameraEyeFlyCapture.SyncCameras(cameraLeftEye, cameraRightEye, settings.FrameRate);
-            //
-
-            return new EyeCollection<CameraEye>(cameraLeft, cameraRight);
+                return myUI;
+            }
         }
+
     }
 }

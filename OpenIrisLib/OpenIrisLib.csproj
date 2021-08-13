@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
+  <PropertyGroup>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{ED3AD445-A2FD-41C2-A77C-CE0C22B08192}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OpenIris</RootNamespace>
+    <AssemblyName>OpenIrisLib</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisLib.xml</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>..\CodeAnalysisRules.ruleset</CodeAnalysisRuleSet>
+    <NullableContextOptions>enable</NullableContextOptions>
+    <LangVersion>8.0</LangVersion>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\..\bin\x64\Release\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
+    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisLib.xml</DocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <LangVersion>8.0</LangVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Emgu.CV.UI, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.World, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.World.dll</HintPath>
+    </Reference>
+    <Reference Include="MathWorks.MATLAB.ProductionServer.Client">
+      <HintPath>..\..\..\..\..\..\..\..\Program Files\MATLAB\R2018b\toolbox\compiler_sdk\mps_clients\dotnet\MathWorks.MATLAB.ProductionServer.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Calibration\EyeCalibrationManual.cs" />
+    <Compile Include="Calibration\EyeCalibration.cs" />
+    <Compile Include="Calibration\CalibrationParameters.cs" />
+    <Compile Include="Calibration\EyeCalibrationManualUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Calibration\EyeCalibrationManualUI.Designer.cs">
+      <DependentUpon>EyeCalibrationManualUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Calibration\HeadCalibration.cs" />
+    <Compile Include="HeadTracker.cs" />
+    <Compile Include="IEyeTrackingAlgorithm.cs" />
+    <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
+    <Compile Include="ImageProcessing\EyeTrackingSimpleBlobAlgorithm.cs" />
+    <Compile Include="EyeTrackerGuiViewModel.cs" />
+    <Compile Include="UI\DebugImagesPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\DebugImagesPanel.Designer.cs">
+      <DependentUpon>DebugImagesPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\IAlgorithmUI.cs" />
+    <Compile Include="Calibration\ICalibrationUserInterface.cs" />
+    <Compile Include="EyeTrackerData\DataBuffer.cs" />
+    <Compile Include="EyeTrackerData\CornealReflectionData.cs" />
+    <Compile Include="EyeTrackingSystems\EyeTrackingSystemDualWebCam.cs" />
+    <Compile Include="EyeTrackingSystems\EyeTrackingSystemWebCam.cs" />
+    <Compile Include="EyeTrackingSystems\EyeTrackingSystem.cs" />
+    <Compile Include="ImageGrabbing\CameraEye.cs" />
+    <Compile Include="ImageProcessing\CornealReflectionTracking.cs" />
+    <Compile Include="ImageProcessing\EyeLidTracking.cs" />
+    <Compile Include="ImageProcessing\ImageProcessingExtentionMethods.cs" />
+    <Compile Include="ImageProcessing\PositionTrackerEllipseFitting.cs" />
+    <Compile Include="ImageProcessing\PupilTracking.cs" />
+    <Compile Include="ImageProcessing\TorsionTracking.cs" />
+    <Compile Include="RemoteService\IEyeTrackerWebService.cs" />
+    <Compile Include="UI\EyeTrackerUICommand.cs" />
+    <Compile Include="UI\ImageEyeDrawing.cs" />
+    <Compile Include="UI\ProgressBarDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\ProgressBarDialog.Designer.cs">
+      <DependentUpon>ProgressBarDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
+    <Compile Include="Util\OpenIrisException.cs" />
+    <Compile Include="Util\PluginListTypeConverter.cs" />
+    <Compile Include="Util\Consumer.cs" />
+    <Compile Include="CalibrationSession.cs" />
+    <Compile Include="EyeTrackerData\ExtraData.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="Calibration\EyePhysicalModel.cs" />
+    <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
+    <Compile Include="EyeTrackerImageGrabber.cs" />
+    <Compile Include="EyeTrackerProcessor.cs" />
+    <Compile Include="RecordingSession.cs" />
+    <Compile Include="EyeTrackerPluginManager.cs" />
+    <Compile Include="EyeTrackerData\CalibratedEyeData.cs" />
+    <Compile Include="EyeTrackerData\EyeTrackerData.cs" />
+    <Compile Include="EyeTrackerData\HeadData.cs" />
+    <Compile Include="EyeTrackerData\EyelidData.cs" />
+    <Compile Include="EyeTrackerData\IrisData.cs" />
+    <Compile Include="EyeTrackerData\PupilData.cs" />
+    <Compile Include="Util\EyeCollection.cs" />
+    <Compile Include="ImageGrabbing\IMovableImageEyeSource.cs" />
+    <Compile Include="UI\ImageGrabberUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\ImageGrabberUI.Designer.cs">
+      <DependentUpon>ImageGrabberUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EyeTrackerData\Eye.cs" />
+    <Compile Include="Util\EyeTrackerLog.cs" />
+    <Compile Include="Util\SoundRecorder.cs" />
+    <Compile Include="ImageGrabbing\CameraEyeVideoSimulation.cs" />
+    <Compile Include="EyeTrackingSystems\EyeTrackingSystemSimulation.cs" />
+    <Compile Include="ImageGrabbing\VideoEye.cs" />
+    <Compile Include="ImageProcessing\EyeTrackingJOMalgorithm.cs" />
+    <Compile Include="UI\BatchAnalysis.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\BatchAnalysis.Designer.cs">
+      <DependentUpon>BatchAnalysis.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\GeneralForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\GeneralForm.Designer.cs">
+      <DependentUpon>GeneralForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\NamespaceDoc.cs" />
+    <Compile Include="EyeTracker.cs" />
+    <Compile Include="EyeTrackerData\ImageEyeTimestamp.cs" />
+    <Compile Include="Util\EyeTrackerDebug.cs" />
+    <Compile Include="UI\EyeTrackerImageEyeBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\EyeTrackerImageEyeBox.Designer.cs">
+      <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\EyeTrackerQuickSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\EyeTrackerQuickSettings.Designer.cs">
+      <DependentUpon>EyeTrackerQuickSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\EyeTrackerSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\EyeTrackerSettingsForm.Designer.cs">
+      <DependentUpon>EyeTrackerSettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\EyeTrackerTrace.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\EyeTrackerTrace.Designer.cs">
+      <DependentUpon>EyeTrackerTrace.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImageGrabbing\IImageEyeSource.cs" />
+    <Compile Include="UI\VideoPlayerUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\VideoPlayerUI.Designer.cs">
+      <DependentUpon>VideoPlayerUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Util\Range.cs" />
+    <Compile Include="EyeTrackerData\ImageEye.cs" />
+    <Compile Include="ImageProcessing\EyeTrackerMask.cs" />
+    <Compile Include="RemoteService\IEyeTrackerService.cs" />
+    <Compile Include="RemoteService\EyeTrackerRemoteService.cs" />
+    <Compile Include="EyeTrackerSettings.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="ImageProcessing\IrisTracker.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EyeTrackerData\EyeData.cs" />
+    <Compile Include="UI\SelectVideoDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\SelectVideoDialog.Designer.cs">
+      <DependentUpon>SelectVideoDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SliderTextControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\SliderTextControl.Designer.cs">
+      <DependentUpon>SliderTextControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Util\SerializableDictionary.cs" />
+    <Compile Include="Util\TaskErrorHandler.cs" />
+    <Compile Include="VideoPlayer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Calibration\EyeCalibrationManualUI.resx">
+      <DependentUpon>EyeCalibrationManualUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\DebugImagesPanel.resx">
+      <DependentUpon>DebugImagesPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\ImageGrabberUI.resx">
+      <DependentUpon>ImageGrabberUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\BatchAnalysis.resx">
+      <DependentUpon>BatchAnalysis.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\EyeTrackerImageEyeBox.resx">
+      <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\eyeTrackerQuickSettings.resx">
+      <DependentUpon>EyeTrackerQuickSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\EyeTrackerSettingsForm.resx">
+      <DependentUpon>EyeTrackerSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\EyeTrackerTrace.resx">
+      <DependentUpon>EyeTrackerTrace.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\GeneralForm.resx">
+      <DependentUpon>GeneralForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\ProgressBarDialog.resx">
+      <DependentUpon>ProgressBarDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\SelectVideoDialog.resx">
+      <DependentUpon>SelectVideoDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\SliderTextControl.resx">
+      <DependentUpon>SliderTextControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\VideoPlayerUI.resx">
+      <DependentUpon>VideoPlayerUI.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\analyzers\dotnet\cs\Humanizer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.CodeQuality.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetCore.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+  <Import Project="..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets" Condition="Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

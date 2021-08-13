@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<EyeTrackerSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <TrackingMode>Binocular</TrackingMode>
+  <DataFileName>OKN</DataFileName>
+  <DataFolder>C:\secure\Data\Raw\Torsion\DataTest</DataFolder>
+  <VideoFormat>UncompressedAVI</VideoFormat>
+  <ServiceListeningPort>9000</ServiceListeningPort>
+  <VideoRecordingBufferSize>50</VideoRecordingBufferSize>
+  <DarkThresholdLeftEye>57</DarkThresholdLeftEye>
+  <DarkThresholdRightEye>45</DarkThresholdRightEye>
+  <InitialCroppingRectangle>
+    <Location>
+      <X>100</X>
+      <Y>20</Y>
+    </Location>
+    <Size>
+      <Width>400</Width>
+      <Height>400</Height>
+    </Size>
+    <X>100</X>
+    <Y>20</Y>
+    <Width>400</Width>
+    <Height>400</Height>
+  </InitialCroppingRectangle>
+  <PupilTrackingMethod>Blobs</PupilTrackingMethod>
+  <MinPupRad>10</MinPupRad>
+  <MaxPupRad>60</MaxPupRad>
+  <CentroidWin>
+    <Width>250</Width>
+    <Height>250</Height>
+  </CentroidWin>
+  <IrisDetectionMethod>Manual</IrisDetectionMethod>
+  <IrisRadiusLeft>64</IrisRadiusLeft>
+  <IrisRadiusRight>56</IrisRadiusRight>
+  <MaxIrisRad>100</MaxIrisRad>
+  <IrisScalingFactor>4</IrisScalingFactor>
+  <MaxTorsion>25</MaxTorsion>
+  <IrisImageOptimizationMethod>Sobel</IrisImageOptimizationMethod>
+  <IrisCropping>5</IrisCropping>
+  <UseIrisMask>true</UseIrisMask>
+</EyeTrackerSettings>

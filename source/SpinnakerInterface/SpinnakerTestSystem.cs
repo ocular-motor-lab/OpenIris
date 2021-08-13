@@ -16,15 +16,8 @@ namespace SpinnakerInterface
 
     class SpinnakerTestSystem : EyeTrackingSystem
     {
-        private Form myUI;
-
         public override EyeCollection<CameraEye> CreateCameras()
         {
-                if (myUI == null)
-                {
-                    myUI = new SpinnakerUI();
-                    myUI.Show();
-                }
             var CAMLIST = SpinnakerCameraEye.EnumerateCameras();
             if (CAMLIST == null) return null;
 
@@ -37,13 +30,20 @@ namespace SpinnakerInterface
         //    return base.PreProcessImagesFromCameras(images);
         //}
 
-        public override Form OpenEyeTrackingSystemUI
+        public override ToolStripMenuItem[] GetToolStripMenuItems()
         {
-            get
+            var menu1 = new ToolStripMenuItem();
+            menu1.Text = "test1";
+            menu1.ShortcutKeys = Keys.F11;
+            menu1.Click += (o, e) =>
             {
-                return myUI;
-            }
-        }
+                MessageBox.Show("hello! f11 pressed");
+            };
 
-    }
+            return new ToolStripMenuItem[]
+            {
+                menu1
+            };
+        }
+    } 
 }

@@ -215,6 +215,16 @@ namespace OpenIris
         /// </summary>
         /// <returns></returns>
         public virtual Form? OpenEyeTrackingSystemUI => null;
+
+        /// <summary>
+        /// Gets custom menu items for this system to show in the main window
+        /// </summary>
+        /// <returns></returns>
+        public virtual ToolStripMenuItem[] GetToolStripMenuItems()
+        {
+            return null;
+        }
+
     }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member

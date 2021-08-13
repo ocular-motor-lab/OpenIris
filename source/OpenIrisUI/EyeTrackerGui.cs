@@ -280,6 +280,29 @@ namespace OpenIris.UI
             {
                 videoPlayerUI.Update(eyeTracker.VideoPlayer);
             }
+
+            if (eyeTracker.EyeTrackingSystem != null)
+            {
+                if (systemToolStripMenuItem.Tag == null || systemToolStripMenuItem.Tag != eyeTracker.EyeTrackingSystem)
+                {
+                    systemToolStripMenuItem.DropDownItems.Clear();
+                    var items = eyeTracker.EyeTrackingSystem.GetToolStripMenuItems();
+                    if (items != null)
+                    {
+                        systemToolStripMenuItem.DropDownItems.AddRange(items);
+                        systemToolStripMenuItem.Visible = true;
+                    }
+                    else
+                    {
+                        systemToolStripMenuItem.Visible = false;
+                    }
+                    systemToolStripMenuItem.Tag = eyeTracker.EyeTrackingSystem;
+                }
+            }
+            else
+            {
+                systemToolStripMenuItem.Visible = false;
+            }
         }
 
         private void UpdateTabSetup()

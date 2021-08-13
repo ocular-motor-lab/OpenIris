@@ -1,0 +1,13 @@
+﻿[*.cs]
+
+# CS0108: Member hides inherited member; missing new keyword
+dotnet_diagnostic.CS0108.severity = error
+
+# CS0114: Member hides inherited member; missing override keyword
+dotnet_diagnostic.CS0114.severity = error
+
+# CA1303: Do not pass literals as localized parameters
+dotnet_diagnostic.CA1303.severity = none
+
+# CA1305: Specify IFormatProvider
+dotnet_diagnostic.CA1305.severity = none

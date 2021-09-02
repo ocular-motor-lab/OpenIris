@@ -349,3 +349,10 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 zip.exe
+ls.exe
+cygiconv-2.dll
+cygintl-8.dll
+cygwin1.dll
+FILE_LIST_2021_0902_0957.flst
+OpenIris_SourceOnly_2021_0902_0957.zip
+snapshot_source_only.bat

@@ -94,8 +94,7 @@ namespace OpenIris.UI
                 eyeTrackerViewModel.ResetReferenceCommand.Bind(resetReferenceToolStripMenuItem);
                 eyeTrackerViewModel.ResetCalibrationCommand.Bind(resetCalibrationToolStripMenuItem);
 
-                eyeTrackerViewModel.StartRecordingCommand.Bind(startRecordingToolStripMenuItem);
-                eyeTrackerViewModel.StopRecordingCommand.Bind(stopRecordingToolStripMenuItem);
+                eyeTrackerViewModel.StartStopRecordingCommand.Bind(startStopRecordingToolStripMenuItem);
                 eyeTrackerViewModel.StartStopRecordingCommand.Bind(buttonRecord);
 
                 eyeTrackerViewModel.StartTrackingCommand.Bind(startTrackingToolStripMenuItem);
@@ -225,16 +224,19 @@ namespace OpenIris.UI
             // Record buttons
             if (eyeTracker.RecordingSession?.Stopping ?? false)
             {
+                startStopRecordingToolStripMenuItem.Text = "Stop recording";
                 buttonRecord.Text = "WAIT, closing files";
                 buttonRecord.BackColor = Color.Salmon;
             }
             else if (eyeTracker.Recording)
             {
+                startStopRecordingToolStripMenuItem.Text = "Stop recording";
                 buttonRecord.Text = "Stop recording";
                 buttonRecord.BackColor = Color.Salmon;
             }
             else
             {
+                startStopRecordingToolStripMenuItem.Text = "Start recording";
                 buttonRecord.Text = "Start recording";
                 buttonRecord.BackColor = SystemColors.Control;
             }

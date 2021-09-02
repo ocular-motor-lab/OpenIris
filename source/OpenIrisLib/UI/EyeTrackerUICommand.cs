@@ -70,7 +70,8 @@ namespace OpenIris.UI
             bindings.Add(menuItem, this);
 
             menuItem.Enabled = enabled;
-            menuItem.Click += (o, e) => Execute(o);
+            menuItem.Click += (o, e) => 
+            Execute(o);
 
             CanExecuteChanged += (ob, e) => menuItem.Enabled = enabled;
         }

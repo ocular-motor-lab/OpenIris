@@ -58,9 +58,7 @@ namespace OpenIris.UI
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.recordToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.stopRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.startStopRecordingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fullScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.calibrationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -301,29 +299,17 @@ namespace OpenIris.UI
             // recordToolStripMenuItem
             // 
             this.recordToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.startRecordingToolStripMenuItem,
-            this.stopRecordingToolStripMenuItem,
-            this.toolStripSeparator3});
+            this.startStopRecordingToolStripMenuItem});
             this.recordToolStripMenuItem.Name = "recordToolStripMenuItem";
             this.recordToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
             this.recordToolStripMenuItem.Text = "Record";
             // 
-            // startRecordingToolStripMenuItem
+            // startStopRecordingToolStripMenuItem
             // 
-            this.startRecordingToolStripMenuItem.Name = "startRecordingToolStripMenuItem";
-            this.startRecordingToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.startRecordingToolStripMenuItem.Text = "Start Recording";
-            // 
-            // stopRecordingToolStripMenuItem
-            // 
-            this.stopRecordingToolStripMenuItem.Name = "stopRecordingToolStripMenuItem";
-            this.stopRecordingToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.stopRecordingToolStripMenuItem.Text = "Stop Recording";
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(152, 6);
+            this.startStopRecordingToolStripMenuItem.Name = "startStopRecordingToolStripMenuItem";
+            this.startStopRecordingToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F4;
+            this.startStopRecordingToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.startStopRecordingToolStripMenuItem.Text = "Start Recording";
             // 
             // viewToolStripMenuItem
             // 
@@ -596,7 +582,7 @@ namespace OpenIris.UI
             this.tabSetup.Location = new System.Drawing.Point(4, 24);
             this.tabSetup.Name = "tabSetup";
             this.tabSetup.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSetup.Size = new System.Drawing.Size(1032, 496);
+            this.tabSetup.Size = new System.Drawing.Size(1099, 595);
             this.tabSetup.TabIndex = 0;
             this.tabSetup.Text = "Set up";
             // 
@@ -616,9 +602,9 @@ namespace OpenIris.UI
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 490F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 490F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1026, 490);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 589F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 589F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1093, 589);
             this.tableLayoutPanel1.TabIndex = 28;
             // 
             // panel3
@@ -626,19 +612,19 @@ namespace OpenIris.UI
             this.panel3.Controls.Add(this.panelAlgorithmQuickSettingsLeftEye);
             this.panel3.Controls.Add(this.imageBoxLeftEye);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(650, 3);
+            this.panel3.Location = new System.Drawing.Point(683, 3);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(373, 484);
+            this.panel3.Size = new System.Drawing.Size(407, 583);
             this.panel3.TabIndex = 41;
             // 
             // panelAlgorithmQuickSettingsLeftEye
             // 
             this.panelAlgorithmQuickSettingsLeftEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelAlgorithmQuickSettingsLeftEye.Location = new System.Drawing.Point(4, 270);
+            this.panelAlgorithmQuickSettingsLeftEye.Location = new System.Drawing.Point(4, 369);
             this.panelAlgorithmQuickSettingsLeftEye.Margin = new System.Windows.Forms.Padding(2);
             this.panelAlgorithmQuickSettingsLeftEye.Name = "panelAlgorithmQuickSettingsLeftEye";
-            this.panelAlgorithmQuickSettingsLeftEye.Size = new System.Drawing.Size(367, 227);
+            this.panelAlgorithmQuickSettingsLeftEye.Size = new System.Drawing.Size(401, 227);
             this.panelAlgorithmQuickSettingsLeftEye.TabIndex = 32;
             // 
             // imageBoxLeftEye
@@ -651,7 +637,7 @@ namespace OpenIris.UI
             this.imageBoxLeftEye.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
             this.imageBoxLeftEye.Location = new System.Drawing.Point(4, 3);
             this.imageBoxLeftEye.Name = "imageBoxLeftEye";
-            this.imageBoxLeftEye.Size = new System.Drawing.Size(367, 261);
+            this.imageBoxLeftEye.Size = new System.Drawing.Size(401, 360);
             this.imageBoxLeftEye.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.imageBoxLeftEye.TabIndex = 29;
             this.imageBoxLeftEye.TabStop = false;
@@ -664,17 +650,17 @@ namespace OpenIris.UI
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(271, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(373, 484);
+            this.panel2.Size = new System.Drawing.Size(406, 583);
             this.panel2.TabIndex = 41;
             // 
             // panelAlgorithmQuickSettingsRightEye
             // 
             this.panelAlgorithmQuickSettingsRightEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelAlgorithmQuickSettingsRightEye.Location = new System.Drawing.Point(6, 270);
+            this.panelAlgorithmQuickSettingsRightEye.Location = new System.Drawing.Point(6, 369);
             this.panelAlgorithmQuickSettingsRightEye.Margin = new System.Windows.Forms.Padding(2);
             this.panelAlgorithmQuickSettingsRightEye.Name = "panelAlgorithmQuickSettingsRightEye";
-            this.panelAlgorithmQuickSettingsRightEye.Size = new System.Drawing.Size(368, 227);
+            this.panelAlgorithmQuickSettingsRightEye.Size = new System.Drawing.Size(401, 227);
             this.panelAlgorithmQuickSettingsRightEye.TabIndex = 31;
             // 
             // imageBoxRightEye
@@ -687,7 +673,7 @@ namespace OpenIris.UI
             this.imageBoxRightEye.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
             this.imageBoxRightEye.Location = new System.Drawing.Point(6, 3);
             this.imageBoxRightEye.Name = "imageBoxRightEye";
-            this.imageBoxRightEye.Size = new System.Drawing.Size(368, 261);
+            this.imageBoxRightEye.Size = new System.Drawing.Size(401, 360);
             this.imageBoxRightEye.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.imageBoxRightEye.TabIndex = 30;
             this.imageBoxRightEye.TabStop = false;
@@ -704,7 +690,7 @@ namespace OpenIris.UI
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(262, 484);
+            this.panel1.Size = new System.Drawing.Size(262, 583);
             this.panel1.TabIndex = 27;
             // 
             // groupBox2
@@ -779,7 +765,7 @@ namespace OpenIris.UI
             this.richTextBox1.Location = new System.Drawing.Point(3, 384);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(256, 98);
+            this.richTextBox1.Size = new System.Drawing.Size(256, 197);
             this.richTextBox1.TabIndex = 37;
             this.richTextBox1.Text = "";
             this.richTextBox1.WordWrap = false;
@@ -951,7 +937,7 @@ namespace OpenIris.UI
             this.tabCalibration.Location = new System.Drawing.Point(4, 24);
             this.tabCalibration.Name = "tabCalibration";
             this.tabCalibration.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCalibration.Size = new System.Drawing.Size(1032, 496);
+            this.tabCalibration.Size = new System.Drawing.Size(1099, 595);
             this.tabCalibration.TabIndex = 4;
             this.tabCalibration.Text = "Calibration";
             this.tabCalibration.UseVisualStyleBackColor = true;
@@ -964,7 +950,7 @@ namespace OpenIris.UI
             this.tabViewer.Location = new System.Drawing.Point(4, 24);
             this.tabViewer.Name = "tabViewer";
             this.tabViewer.Padding = new System.Windows.Forms.Padding(3);
-            this.tabViewer.Size = new System.Drawing.Size(1032, 496);
+            this.tabViewer.Size = new System.Drawing.Size(1099, 595);
             this.tabViewer.TabIndex = 1;
             this.tabViewer.Text = "Viewer";
             // 
@@ -982,8 +968,8 @@ namespace OpenIris.UI
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.eyeTrackerTrace);
-            this.splitContainer1.Size = new System.Drawing.Size(1026, 490);
-            this.splitContainer1.SplitterDistance = 113;
+            this.splitContainer1.Size = new System.Drawing.Size(1093, 589);
+            this.splitContainer1.SplitterDistance = 135;
             this.splitContainer1.TabIndex = 0;
             // 
             // tableLayoutPanel5
@@ -1000,16 +986,16 @@ namespace OpenIris.UI
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(1026, 113);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(1093, 135);
             this.tableLayoutPanel5.TabIndex = 37;
             // 
             // eyeTrackerImageEyeBoxLeftEyeSmall
             // 
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Dock = System.Windows.Forms.DockStyle.Fill;
             this.eyeTrackerImageEyeBoxLeftEyeSmall.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
-            this.eyeTrackerImageEyeBoxLeftEyeSmall.Location = new System.Drawing.Point(413, 3);
+            this.eyeTrackerImageEyeBoxLeftEyeSmall.Location = new System.Drawing.Point(440, 3);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Name = "eyeTrackerImageEyeBoxLeftEyeSmall";
-            this.eyeTrackerImageEyeBoxLeftEyeSmall.Size = new System.Drawing.Size(404, 107);
+            this.eyeTrackerImageEyeBoxLeftEyeSmall.Size = new System.Drawing.Size(431, 129);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.eyeTrackerImageEyeBoxLeftEyeSmall.TabIndex = 34;
             this.eyeTrackerImageEyeBoxLeftEyeSmall.TabStop = false;
@@ -1020,7 +1006,7 @@ namespace OpenIris.UI
             this.eyeTrackerImageEyeBoxRightEyeSmall.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
             this.eyeTrackerImageEyeBoxRightEyeSmall.Location = new System.Drawing.Point(3, 3);
             this.eyeTrackerImageEyeBoxRightEyeSmall.Name = "eyeTrackerImageEyeBoxRightEyeSmall";
-            this.eyeTrackerImageEyeBoxRightEyeSmall.Size = new System.Drawing.Size(404, 107);
+            this.eyeTrackerImageEyeBoxRightEyeSmall.Size = new System.Drawing.Size(431, 129);
             this.eyeTrackerImageEyeBoxRightEyeSmall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.eyeTrackerImageEyeBoxRightEyeSmall.TabIndex = 0;
             this.eyeTrackerImageEyeBoxRightEyeSmall.TabStop = false;
@@ -1029,9 +1015,9 @@ namespace OpenIris.UI
             // 
             this.panelHeadViewer.Controls.Add(this.labelHeadData);
             this.panelHeadViewer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelHeadViewer.Location = new System.Drawing.Point(823, 3);
+            this.panelHeadViewer.Location = new System.Drawing.Point(877, 3);
             this.panelHeadViewer.Name = "panelHeadViewer";
-            this.panelHeadViewer.Size = new System.Drawing.Size(200, 107);
+            this.panelHeadViewer.Size = new System.Drawing.Size(213, 129);
             this.panelHeadViewer.TabIndex = 35;
             // 
             // labelHeadData
@@ -1050,7 +1036,7 @@ namespace OpenIris.UI
             this.eyeTrackerTrace.Location = new System.Drawing.Point(0, 0);
             this.eyeTrackerTrace.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.eyeTrackerTrace.Name = "eyeTrackerTrace";
-            this.eyeTrackerTrace.Size = new System.Drawing.Size(1026, 373);
+            this.eyeTrackerTrace.Size = new System.Drawing.Size(1093, 450);
             this.eyeTrackerTrace.TabIndex = 0;
             // 
             // tabDebug
@@ -1059,7 +1045,7 @@ namespace OpenIris.UI
             this.tabDebug.Location = new System.Drawing.Point(4, 24);
             this.tabDebug.Name = "tabDebug";
             this.tabDebug.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDebug.Size = new System.Drawing.Size(1032, 496);
+            this.tabDebug.Size = new System.Drawing.Size(1099, 595);
             this.tabDebug.TabIndex = 2;
             this.tabDebug.Text = "Debug";
             this.tabDebug.UseVisualStyleBackColor = true;
@@ -1069,7 +1055,7 @@ namespace OpenIris.UI
             this.panel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel6.Location = new System.Drawing.Point(3, 3);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(1026, 490);
+            this.panel6.Size = new System.Drawing.Size(1093, 589);
             this.panel6.TabIndex = 0;
             // 
             // tabTiming
@@ -1079,7 +1065,7 @@ namespace OpenIris.UI
             this.tabTiming.Location = new System.Drawing.Point(4, 24);
             this.tabTiming.Name = "tabTiming";
             this.tabTiming.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTiming.Size = new System.Drawing.Size(1032, 496);
+            this.tabTiming.Size = new System.Drawing.Size(1099, 595);
             this.tabTiming.TabIndex = 3;
             this.tabTiming.Text = "Timing";
             this.tabTiming.UseVisualStyleBackColor = true;
@@ -1110,7 +1096,7 @@ namespace OpenIris.UI
             this.tabPageLog.Location = new System.Drawing.Point(4, 24);
             this.tabPageLog.Name = "tabPageLog";
             this.tabPageLog.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLog.Size = new System.Drawing.Size(1032, 496);
+            this.tabPageLog.Size = new System.Drawing.Size(1099, 595);
             this.tabPageLog.TabIndex = 5;
             this.tabPageLog.Text = "Log";
             this.tabPageLog.UseVisualStyleBackColor = true;
@@ -1122,7 +1108,7 @@ namespace OpenIris.UI
             this.richTextBoxLogLarge.Location = new System.Drawing.Point(3, 3);
             this.richTextBoxLogLarge.Name = "richTextBoxLogLarge";
             this.richTextBoxLogLarge.ReadOnly = true;
-            this.richTextBoxLogLarge.Size = new System.Drawing.Size(1026, 490);
+            this.richTextBoxLogLarge.Size = new System.Drawing.Size(1093, 589);
             this.richTextBoxLogLarge.TabIndex = 0;
             this.richTextBoxLogLarge.Text = "";
             this.richTextBoxLogLarge.WordWrap = false;
@@ -1248,14 +1234,13 @@ namespace OpenIris.UI
         private System.Windows.Forms.Label labelTiming;
         private System.Windows.Forms.Label labelDiagnosticsGrabbing;
         private System.Windows.Forms.ToolStripMenuItem recordToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem startRecordingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem startStopRecordingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fullScreenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem calibrationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem calibrateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveCalibrationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadCalibrationToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openSoundRecorderToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
@@ -1291,7 +1276,6 @@ namespace OpenIris.UI
         private System.Windows.Forms.Label labelHeadData;
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.ToolStripMenuItem trimVideosToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem stopRecordingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cancelCalibrationToolStripMenuItem;
         private System.Windows.Forms.ImageList imageList2;
         private System.Windows.Forms.Panel panel1;

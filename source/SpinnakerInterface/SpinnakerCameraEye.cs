@@ -31,7 +31,8 @@ namespace SpinnakerInterface
         static bool __TriggersEnabled = false;
         public static bool TriggersEnabled => __TriggersEnabled;
         public static void EnableTriggers(bool Enable) => MASTERCAM.EnableMasterTriggers(Enable);
-        public static void ToggleTriggers(object sender, System.EventArgs e) => EnableTriggers(!TriggersEnabled);
+        //public static void ToggleTriggers(object sender, System.EventArgs e) => EnableTriggers(!TriggersEnabled);
+        public static void ToggleTriggers() => EnableTriggers(!TriggersEnabled);
 
         public static List<SpinnakerCameraEye> EnumerateCameras()
         {

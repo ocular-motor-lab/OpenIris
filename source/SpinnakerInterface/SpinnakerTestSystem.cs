@@ -30,19 +30,26 @@ namespace SpinnakerInterface
         //    return base.PreProcessImagesFromCameras(images);
         //}
 
+        // These show up in the "System" menu in the GUI.
         public override ToolStripMenuItem[] GetToolStripMenuItems()
         {
-            var menu1 = new ToolStripMenuItem();
-            menu1.Text = "test1";
-            menu1.ShortcutKeys = Keys.F11;
-            menu1.Click += (o, e) =>
+            var menu_autoexposure = new ToolStripMenuItem();
+            menu_autoexposure.Text = "Auto Exposure Once";
+            menu_autoexposure.ShortcutKeys = Keys.F10;
+            menu_autoexposure.Click += (o, e) =>
+            { foreach (var CAM in SpinnakerCameraEye.CAMLIST) CAM.AutoExposureOnce(); };
+
+            var menu_togtrig = new ToolStripMenuItem();
+            menu_togtrig.Text = "Toggle Camera Triggers";
+            menu_togtrig.ShortcutKeys = Keys.F12;
+            menu_togtrig.Click += (o, e) =>
             {
-                MessageBox.Show("hello! f11 pressed");
+                SpinnakerCameraEye.ToggleTriggers();
             };
 
             return new ToolStripMenuItem[]
             {
-                menu1
+                menu_autoexposure, menu_togtrig
             };
         }
     } 

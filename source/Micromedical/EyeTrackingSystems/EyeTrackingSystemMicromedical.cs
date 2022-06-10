@@ -75,7 +75,7 @@ namespace OpenIris
 
                 if (settings.UseHeadSensor)
                 {
-                    headSensor = new HeadSensorTeensyMPU();
+                    headSensor = new HeadSensorTeensyMPU(settings);
                     headSensor.StartHeadSensorAndSyncWithCamera(cameraRightEye);
                 }
 
@@ -193,6 +193,45 @@ namespace OpenIris
             }
         }
         private bool useHeadSensor = false;
+
+
+        public bool UseHeadSensorRotation
+        {
+            get
+            {
+                return this.useHeadSensorRotation;
+            }
+            set
+            {
+                if (value != this.useHeadSensorRotation)
+                {
+                    this.useHeadSensorRotation = value;
+                    this.OnPropertyChanged(this, "UseHeadSensorRotation");
+                }
+            }
+        }
+        private bool useHeadSensorRotation = false;
+
+        public double[][] HeadSensorRotation
+        {
+            get
+            {
+                return this.headSensorRotation;
+            }
+            set
+            {
+                if (value != this.headSensorRotation) // TODO: Does not detect changes to the inside values
+                {
+                    this.headSensorRotation = value;
+                    this.OnPropertyChanged(this, "headSensorRotation");
+                }
+            }
+        }
+        
+        private double[][] headSensorRotation = {
+            new double[] { -0.8192, -0.0000,    -0.5736     },
+            new double[] {  0.5540,  0.2588,    -0.7912     },
+            new double[] {  0.1485, -0.9659,    - 0.2120    } };
 
         public bool AutoExposure
         {

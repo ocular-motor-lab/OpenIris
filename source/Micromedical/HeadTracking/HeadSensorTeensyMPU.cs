@@ -21,6 +21,20 @@ namespace OpenIris
     public sealed class HeadSensorTeensyMPU : IHeadDataSource
     {
         /// <summary>
+        /// Eye tracking system settings.
+        /// </summary>
+        private EyeTrackingSystemSettingsMicromedical settings;
+
+        /// <summary>
+        /// Constructor for Head sensors. 
+        /// </summary>
+        /// <param name="settings"></param>
+        public HeadSensorTeensyMPU(EyeTrackingSystemSettingsMicromedical settings)
+        {
+            this.settings = settings;
+        }
+
+        /// <summary>
         /// This is the data sent by the TEENSY to the camera, minus the 4-byte header "flag" value of 0xffffffff.
         /// Sensors are: Accel X/Y/Z, +/-32768 == +/-2G
         ///              Temperature
@@ -29,6 +43,8 @@ namespace OpenIris
         /// </summary>
         class HeadDataPacket
         {
+            EyeTrackingSystemSettingsMicromedical settings;
+
             /// <summary>
             /// Number of bytes sent by Teensy for each packet.
             /// 4-byte header "flag" value of 0xffffffff (not saved to SerDat),
@@ -57,8 +73,11 @@ namespace OpenIris
             // Note there is one extra Int16 here, so the length is a multiple of 2, so swap() works correctly.
             public readonly Int16[] SensorData = new Int16[10];
 
-            public HeadDataPacket(byte[] pktbytes)
+            public HeadDataPacket(byte[] pktbytes, EyeTrackingSystemSettingsMicromedical settings)
             {
+
+                this.settings = settings;
+
                 // Now just read the packet data. The packet's FrameCount
                 // increments by 2, and contains the SYNC bit as the lowest bit.
                 // Here, we separate them out, and divide the count by 2.
@@ -85,6 +104,21 @@ namespace OpenIris
             /// <returns></returns>
             public HeadData ConvertPacketToHeadData(ulong initialSensorFrameNumber, ulong initialCameraFrameNumber)
             {
+                var AccelerometerX = (double)SensorData[0] / short.MaxValue * 8.0; // 2019-10-30 Changed to 8.0 from 2.0 after adding the magnetometer to match the arduino code
+                var AccelerometerY = (double)SensorData[1] / short.MaxValue * 8.0; // 2019-10-30 Changed to 8.0 from 2.0 after adding the magnetometer to match the arduino code
+                var AccelerometerZ = (double)SensorData[2] / short.MaxValue * 8.0; // 2019-10-30 Changed to 8.0 from 2.0 after adding the magnetometer to match the arduino code
+
+                if (settings.UseHeadSensorRotation)
+                {
+                    var m = settings.HeadSensorRotation;
+                    var AccelerometerX_temp = AccelerometerX * m[0][0] + AccelerometerY * m[0][1] + AccelerometerZ * m[0][2];
+                    var AccelerometerY_temp = AccelerometerX * m[1][0] + AccelerometerY * m[1][1] + AccelerometerZ * m[1][2];
+                    var AccelerometerZ_temp = AccelerometerX * m[2][0] + AccelerometerY * m[2][1] + AccelerometerZ * m[2][2];
+                    AccelerometerX = AccelerometerX_temp;
+                    AccelerometerY = AccelerometerY_temp;
+                    AccelerometerZ = AccelerometerZ_temp;
+                }
+
                 return new HeadData
                 {
                     TimeStamp = new ImageEyeTimestamp
@@ -105,9 +139,9 @@ namespace OpenIris
                     // The values correspond with the fraction of 1G that is projected along each axis
                     // When the subject is upright X=-1, y=0, Z=0
 
-                    AccelerometerX = (double)SensorData[0] / short.MaxValue * 8.0, // 2019-10-30 Changed to 8.0 from 2.0 after adding the magnetometer to match the arduino code
-                    AccelerometerY = (double)SensorData[1] / short.MaxValue * 8.0, // 2019-10-30 Changed to 8.0 from 2.0 after adding the magnetometer to match the arduino code
-                    AccelerometerZ = (double)SensorData[2] / short.MaxValue * 8.0, // 2019-10-30 Changed to 8.0 from 2.0 after adding the magnetometer to match the arduino code
+                    AccelerometerX = AccelerometerX,
+                    AccelerometerY = AccelerometerY,
+                    AccelerometerZ = AccelerometerZ,
 
                     MagnetometerX = (double)SensorData[6] / 1000.0,
                     MagnetometerY = (double)SensorData[7] / 1000.0,
@@ -117,10 +151,10 @@ namespace OpenIris
         }
 
         private CameraEyeFlyCapture? camera;
-        
+
         private ulong initialCameraFrameNumber;
         private ulong initialSensorFrameNumber;
-        
+
         public void StartHeadSensorAndSyncWithCamera(CameraEyeFlyCapture camera)
         {
             if (camera is null) throw new ArgumentNullException(nameof(camera));
@@ -158,15 +192,15 @@ namespace OpenIris
                 {
                     var result = this.camera.GetPacketWithHeader(out byte[] pktbytes, HeadDataPacket.Header, HeadDataPacket.PktSize);
 
-                    // If there was no packet sleep a bit and come back later because
-                    // the call to GetPacket is nto blocking
-                    if (!result)
+                // If there was no packet sleep a bit and come back later because
+                // the call to GetPacket is nto blocking
+                if (!result)
                     {
                         Thread.Sleep(2);
                         continue;
                     }
 
-                    var packet = new HeadDataPacket(pktbytes);
+                    var packet = new HeadDataPacket(pktbytes, settings);
                     if (packet.SYNC)
                     {
                         syncPacket = packet;
@@ -220,7 +254,7 @@ namespace OpenIris
 
             if (!result) return null;
 
-            var packet = new HeadDataPacket(pktbytes);
+            var packet = new HeadDataPacket(pktbytes, settings);
             return packet.ConvertPacketToHeadData(initialSensorFrameNumber, initialCameraFrameNumber);
         }
 

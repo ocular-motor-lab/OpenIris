@@ -9,6 +9,7 @@ namespace OpenIris
 
     using System;
     using System.Collections.Concurrent;
+    using System.ComponentModel;
     using System.ComponentModel.Composition;
     using System.Diagnostics;
     using System.Threading;
@@ -298,6 +299,5 @@ namespace OpenIris
     /// </summary>
     public class CalibrationSettings : EyeTrackerSettingsBase
     {
-
     }
 }

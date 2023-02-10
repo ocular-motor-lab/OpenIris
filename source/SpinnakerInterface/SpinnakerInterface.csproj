@@ -34,8 +34,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SpinnakerNET_v140">
-      <HintPath>.\SpinnakerNET_v140.dll</HintPath>
+    <Reference Include="SpinnakerNET_v140, Version=1.29.0.5, Culture=neutral, PublicKeyToken=e3ed2bf1f221d241, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\FLIR Systems\Spinnaker\bin64\vs2015\SpinnakerNET_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />

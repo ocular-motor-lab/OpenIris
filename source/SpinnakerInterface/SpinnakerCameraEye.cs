@@ -55,8 +55,8 @@ namespace SpinnakerInterface
             CAMLIST.Add(new SpinnakerCameraEye(cam_list[0], Eye.Left));
             CAMLIST.Add(new SpinnakerCameraEye(cam_list[1], Eye.Right));
 
-            CAMLIST[0].CameraOrientation = CameraOrientation.Rotated180;
-            CAMLIST[1].CameraOrientation = CameraOrientation.Rotated180;
+            //JOM CAMLIST[0].CameraOrientation = CameraOrientation.Rotated180;
+            //JOM CAMLIST[1].CameraOrientation = CameraOrientation.Rotated180;
 
             // Pick one of the cameras (MUST be a Blackfly) to be the MASTER.
             MASTERCAM = null;
@@ -174,7 +174,8 @@ namespace SpinnakerInterface
         }
 
         //const double FRAME_RATE = 499;
-        const double FRAME_RATE = 100;
+        //const double FRAME_RATE = 100;
+        const double FRAME_RATE = 250;
         const int ROI_XSIZE = 400, ROI_YSIZE = 300;
 
         private Vector2 FRAME_SIZE_MAX;  // These are read in from the camera, and stored for convenience.

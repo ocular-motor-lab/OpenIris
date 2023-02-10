@@ -56,7 +56,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="pupil">Pupil information.</param>
         /// <param name="trackingSettings">Configuration parameters.</param>
         /// <returns>The number of pixels of the iris radius.</returns>
-        public IrisData FindIris(ImageEye imageEye, PupilData pupil, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public IrisData FindIris(ImageEye imageEye, PupilData pupil, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             ////TODO: this should return more properties of the iris. Probably an ellipse or a custom object
 

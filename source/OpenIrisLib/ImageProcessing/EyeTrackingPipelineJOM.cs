@@ -19,8 +19,8 @@ namespace OpenIris
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingAlgorithm)), PluginDescriptionAttribute("JOM", typeof(EyeTrackingJOMalgorithmSettings))]
-    public sealed class EyeTrackingJOMalgorithm : IEyeTrackingAlgorithm, IDisposable
+    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("JOM", typeof(EyeTrackingPipelineJOMSettings))]
+    public sealed class EyeTrackingPipelineJOM : IEyeTrackingPipeline, IDisposable
     {
         private readonly PupilTracking pupilTracker;
         private readonly CornealReflectionTracking cornealReflectionTracker;
@@ -33,7 +33,7 @@ namespace OpenIris
         /// <summary>
         /// Initializes a new instance of the ImageEyeProcess class.
         /// </summary>
-        public EyeTrackingJOMalgorithm()
+        public EyeTrackingPipelineJOM()
         {
             pupilTracker = new PupilTracking();
             cornealReflectionTracker = new CornealReflectionTracking();
@@ -60,11 +60,11 @@ namespace OpenIris
         /// <param name="eyeCalibrationParameters">Calibration info.</param>
         /// <param name="trackingSetting">Configuration parameters.</param>
         /// <returns>The data obtained from processing the image.</returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingAlgorithmSettings trackingSetting)
+        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSetting)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (eyeCalibrationParameters is null) throw new ArgumentNullException(nameof(eyeCalibrationParameters));
-            var settings = trackingSetting as EyeTrackingJOMalgorithmSettings ?? throw new ArgumentNullException(nameof(trackingSetting));
+            var settings = trackingSetting as EyeTrackingPipelineJOMSettings ?? throw new ArgumentNullException(nameof(trackingSetting));
 
             // Copy the calibration variables just in case they change during the processing to avoid
             // inconsistencies The next frame will use the updated calibration
@@ -129,11 +129,11 @@ namespace OpenIris
         }
         
         /// <summary>
-        /// Gets the current algorithm UI
+        /// Gets the current pipeline UI
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        public IAlgorithmUI? GetAlgorithmUI(Eye whichEye)
+        public IPipelineUI? GetPipelineUI(Eye whichEye)
         {
             return new UI.EyeTrackerQuickSettings(whichEye);
         }
@@ -142,11 +142,11 @@ namespace OpenIris
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     /// <summary>
-    /// Settings for any algorithm that uses thresholds for pupil and reflections. Important to make them compatible with the remote
+    /// Settings for any pipeline that uses thresholds for pupil and reflections. Important to make them compatible with the remote
     /// UI client
     /// </summary>
     [Serializable]
-    public class EyeTrackingAlgorithmSettingsWithThresholds : EyeTrackingAlgorithmSettings
+    public class EyeTrackingPipelineSettingsWithThresholds : EyeTrackingPipelineSettings
     {
         /// <summary>
         /// Gets or sets threshold to find the dark pixels that should belong to the pupil (left eye)
@@ -248,7 +248,7 @@ namespace OpenIris
     }
 
     [Serializable]
-    public class EyeTrackingJOMalgorithmSettings : EyeTrackingAlgorithmSettingsWithThresholds
+    public class EyeTrackingPipelineJOMSettings : EyeTrackingPipelineSettingsWithThresholds
     {
         #region General tracking settings
 

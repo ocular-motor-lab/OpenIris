@@ -27,7 +27,7 @@ namespace OpenIris
             get;
         }
 
-        EyeTrackingAlgorithmSettings? Settings
+        EyeTrackingPipelineSettings? Settings
         {
             [OperationContract]
             [WebGet]

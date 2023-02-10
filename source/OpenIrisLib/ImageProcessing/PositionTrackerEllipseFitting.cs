@@ -56,7 +56,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="pupilReference"></param>
         /// <param name="trackingSettings"></param>
         /// <returns></returns>
-        public PupilData CalculatePosition(ImageEye imageEye, Image<Gray, byte>? mask, PupilData pupilAprox, PupilData pupilReference, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public PupilData CalculatePosition(ImageEye imageEye, Image<Gray, byte>? mask, PupilData pupilAprox, PupilData pupilReference, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             var desiredMaxSize = 200;
             var threshold = (imageEye.WhichEye == Eye.Left) ? trackingSettings.DarkThresholdLeftEye : trackingSettings.DarkThresholdRightEye;

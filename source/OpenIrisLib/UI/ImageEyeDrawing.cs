@@ -26,11 +26,11 @@ namespace OpenIris
         /// <param name="calibrationParameters"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public static Image<Bgr, byte>? DrawAllData(ImageEye? imageEye, EyeCalibration calibrationParameters, EyeTrackingAlgorithmSettings settings)
+        public static Image<Bgr, byte>? DrawAllData(ImageEye? imageEye, EyeCalibration calibrationParameters, EyeTrackingPipelineSettings settings)
         {
             if (imageEye == null) return null;
 
-            var trackingSettings = settings as EyeTrackingAlgorithmSettingsWithThresholds;
+            var trackingSettings = settings as EyeTrackingPipelineSettingsWithThresholds;
 
             var image = imageEye.Image.Convert<Bgr, byte>();
 

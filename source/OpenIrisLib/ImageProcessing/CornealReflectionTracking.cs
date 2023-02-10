@@ -42,7 +42,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="referencePupil">Position of the pupil in the reference image.</param>
         /// <param name="trackingSettings">Settings for tracking.</param>
         /// <returns></returns>
-        public CornealReflectionData[] FindCornealReflections(ImageEye imageEye, PupilData pupilAprox, PupilData referencePupil, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public CornealReflectionData[] FindCornealReflections(ImageEye imageEye, PupilData pupilAprox, PupilData referencePupil, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
 
@@ -62,7 +62,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="pupilAprox"></param>
         /// <param name="trackingSettings">Configuration parameters.</param>
         /// <returns>Pupil ellipse.</returns>
-        public static CornealReflectionData[] FindCornealReflectionsBlob(CvBlobDetector detector, CvBlobs blobs, ImageEye imageEye, PupilData pupilAprox, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public static CornealReflectionData[] FindCornealReflectionsBlob(CvBlobDetector detector, CvBlobs blobs, ImageEye imageEye, PupilData pupilAprox, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             if (detector is null) throw new ArgumentNullException(nameof(detector));
             if (blobs is null) throw new ArgumentNullException(nameof(blobs));

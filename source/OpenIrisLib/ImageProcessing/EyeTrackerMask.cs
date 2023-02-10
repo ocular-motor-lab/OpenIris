@@ -29,7 +29,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="eyeGlobe">Eye globe position and size.</param>
         /// <param name="setttings">Configuration parameters.</param>
         /// <returns>The mask, ones in the good pixels zeros in masked ones.</returns>
-        public Image<Gray, byte> GetMask(ImageEye imageEye, EyelidData eyelid, EyePhysicalModel eyeGlobe, EyeTrackingJOMalgorithmSettings setttings)
+        public Image<Gray, byte> GetMask(ImageEye imageEye, EyelidData eyelid, EyePhysicalModel eyeGlobe, EyeTrackingPipelineJOMSettings setttings)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (eyelid is null) throw new ArgumentNullException(nameof(eyelid));

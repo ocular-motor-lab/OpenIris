@@ -49,36 +49,40 @@ namespace OpenIris.UI
             // 
             this.propertyGridGeneralSettings.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.propertyGridGeneralSettings.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGridGeneralSettings.Location = new System.Drawing.Point(3, 16);
+            this.propertyGridGeneralSettings.Location = new System.Drawing.Point(4, 20);
+            this.propertyGridGeneralSettings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.propertyGridGeneralSettings.Name = "propertyGridGeneralSettings";
-            this.propertyGridGeneralSettings.Size = new System.Drawing.Size(257, 665);
+            this.propertyGridGeneralSettings.Size = new System.Drawing.Size(343, 818);
             this.propertyGridGeneralSettings.TabIndex = 1;
             // 
             // propertyGridSystemSettings
             // 
             this.propertyGridSystemSettings.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.propertyGridSystemSettings.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGridSystemSettings.Location = new System.Drawing.Point(3, 16);
+            this.propertyGridSystemSettings.Location = new System.Drawing.Point(4, 20);
+            this.propertyGridSystemSettings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.propertyGridSystemSettings.Name = "propertyGridSystemSettings";
-            this.propertyGridSystemSettings.Size = new System.Drawing.Size(257, 665);
+            this.propertyGridSystemSettings.Size = new System.Drawing.Size(343, 818);
             this.propertyGridSystemSettings.TabIndex = 2;
             // 
             // propertyGridTrackingSettings
             // 
             this.propertyGridTrackingSettings.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.propertyGridTrackingSettings.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGridTrackingSettings.Location = new System.Drawing.Point(3, 16);
+            this.propertyGridTrackingSettings.Location = new System.Drawing.Point(4, 20);
+            this.propertyGridTrackingSettings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.propertyGridTrackingSettings.Name = "propertyGridTrackingSettings";
-            this.propertyGridTrackingSettings.Size = new System.Drawing.Size(257, 665);
+            this.propertyGridTrackingSettings.Size = new System.Drawing.Size(343, 818);
             this.propertyGridTrackingSettings.TabIndex = 2;
             // 
             // propertyGridCalibrationSettings
             // 
             this.propertyGridCalibrationSettings.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.propertyGridCalibrationSettings.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGridCalibrationSettings.Location = new System.Drawing.Point(3, 16);
+            this.propertyGridCalibrationSettings.Location = new System.Drawing.Point(4, 20);
+            this.propertyGridCalibrationSettings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.propertyGridCalibrationSettings.Name = "propertyGridCalibrationSettings";
-            this.propertyGridCalibrationSettings.Size = new System.Drawing.Size(258, 665);
+            this.propertyGridCalibrationSettings.Size = new System.Drawing.Size(343, 818);
             this.propertyGridCalibrationSettings.TabIndex = 3;
             // 
             // tableLayoutPanel1
@@ -94,11 +98,12 @@ namespace OpenIris.UI
             this.tableLayoutPanel1.Controls.Add(this.groupBox4, 3, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1077, 690);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1436, 849);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // groupBox1
@@ -106,9 +111,11 @@ namespace OpenIris.UI
             this.groupBox1.Controls.Add(this.propertyGridGeneralSettings);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(3, 3);
+            this.groupBox1.Location = new System.Drawing.Point(4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(263, 684);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(351, 842);
             this.groupBox1.TabIndex = 4;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "General settings";
@@ -118,9 +125,11 @@ namespace OpenIris.UI
             this.groupBox2.Controls.Add(this.propertyGridSystemSettings);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(272, 3);
+            this.groupBox2.Location = new System.Drawing.Point(363, 4);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(263, 684);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox2.Size = new System.Drawing.Size(351, 842);
             this.groupBox2.TabIndex = 5;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "System settings";
@@ -130,31 +139,36 @@ namespace OpenIris.UI
             this.groupBox3.Controls.Add(this.propertyGridTrackingSettings);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox3.Location = new System.Drawing.Point(541, 3);
+            this.groupBox3.Location = new System.Drawing.Point(722, 4);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(263, 684);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox3.Size = new System.Drawing.Size(351, 842);
             this.groupBox3.TabIndex = 6;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Tracking settings";
+            this.groupBox3.Text = "Eye tracking pipeline settings";
             // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.propertyGridCalibrationSettings);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox4.Location = new System.Drawing.Point(810, 3);
+            this.groupBox4.Location = new System.Drawing.Point(1081, 4);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(264, 684);
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox4.Size = new System.Drawing.Size(351, 842);
             this.groupBox4.TabIndex = 7;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Calibration settings";
             // 
             // EyeTrackerSettingsForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1077, 690);
+            this.ClientSize = new System.Drawing.Size(1436, 849);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "EyeTrackerSettingsForm";
             this.Text = "EyeTrackerConfiguration";
             this.tableLayoutPanel1.ResumeLayout(false);

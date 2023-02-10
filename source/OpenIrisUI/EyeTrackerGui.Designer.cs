@@ -93,10 +93,10 @@ namespace OpenIris.UI
             this.tabSetup = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.panelAlgorithmQuickSettingsLeftEye = new System.Windows.Forms.Panel();
+            this.panelPipelineQuickSettingsLeftEye = new System.Windows.Forms.Panel();
             this.imageBoxLeftEye = new Emgu.CV.UI.ImageBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.panelAlgorithmQuickSettingsRightEye = new System.Windows.Forms.Panel();
+            this.panelPipelineQuickSettingsRightEye = new System.Windows.Forms.Panel();
             this.imageBoxRightEye = new Emgu.CV.UI.ImageBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
@@ -609,7 +609,7 @@ namespace OpenIris.UI
             // 
             // panel3
             // 
-            this.panel3.Controls.Add(this.panelAlgorithmQuickSettingsLeftEye);
+            this.panel3.Controls.Add(this.panelPipelineQuickSettingsLeftEye);
             this.panel3.Controls.Add(this.imageBoxLeftEye);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(683, 3);
@@ -617,15 +617,15 @@ namespace OpenIris.UI
             this.panel3.Size = new System.Drawing.Size(407, 583);
             this.panel3.TabIndex = 41;
             // 
-            // panelAlgorithmQuickSettingsLeftEye
+            // panelPipelineQuickSettingsLeftEye
             // 
-            this.panelAlgorithmQuickSettingsLeftEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.panelPipelineQuickSettingsLeftEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelAlgorithmQuickSettingsLeftEye.Location = new System.Drawing.Point(4, 369);
-            this.panelAlgorithmQuickSettingsLeftEye.Margin = new System.Windows.Forms.Padding(2);
-            this.panelAlgorithmQuickSettingsLeftEye.Name = "panelAlgorithmQuickSettingsLeftEye";
-            this.panelAlgorithmQuickSettingsLeftEye.Size = new System.Drawing.Size(401, 227);
-            this.panelAlgorithmQuickSettingsLeftEye.TabIndex = 32;
+            this.panelPipelineQuickSettingsLeftEye.Location = new System.Drawing.Point(4, 369);
+            this.panelPipelineQuickSettingsLeftEye.Margin = new System.Windows.Forms.Padding(2);
+            this.panelPipelineQuickSettingsLeftEye.Name = "panelPipelineQuickSettingsLeftEye";
+            this.panelPipelineQuickSettingsLeftEye.Size = new System.Drawing.Size(401, 227);
+            this.panelPipelineQuickSettingsLeftEye.TabIndex = 32;
             // 
             // imageBoxLeftEye
             // 
@@ -645,7 +645,7 @@ namespace OpenIris.UI
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.panel2.Controls.Add(this.panelAlgorithmQuickSettingsRightEye);
+            this.panel2.Controls.Add(this.panelPipelineQuickSettingsRightEye);
             this.panel2.Controls.Add(this.imageBoxRightEye);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(271, 3);
@@ -653,15 +653,15 @@ namespace OpenIris.UI
             this.panel2.Size = new System.Drawing.Size(406, 583);
             this.panel2.TabIndex = 41;
             // 
-            // panelAlgorithmQuickSettingsRightEye
+            // panelPipelineQuickSettingsRightEye
             // 
-            this.panelAlgorithmQuickSettingsRightEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.panelPipelineQuickSettingsRightEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelAlgorithmQuickSettingsRightEye.Location = new System.Drawing.Point(6, 369);
-            this.panelAlgorithmQuickSettingsRightEye.Margin = new System.Windows.Forms.Padding(2);
-            this.panelAlgorithmQuickSettingsRightEye.Name = "panelAlgorithmQuickSettingsRightEye";
-            this.panelAlgorithmQuickSettingsRightEye.Size = new System.Drawing.Size(401, 227);
-            this.panelAlgorithmQuickSettingsRightEye.TabIndex = 31;
+            this.panelPipelineQuickSettingsRightEye.Location = new System.Drawing.Point(6, 369);
+            this.panelPipelineQuickSettingsRightEye.Margin = new System.Windows.Forms.Padding(2);
+            this.panelPipelineQuickSettingsRightEye.Name = "panelPipelineQuickSettingsRightEye";
+            this.panelPipelineQuickSettingsRightEye.Size = new System.Drawing.Size(401, 227);
+            this.panelPipelineQuickSettingsRightEye.TabIndex = 31;
             // 
             // imageBoxRightEye
             // 
@@ -1297,8 +1297,8 @@ namespace OpenIris.UI
         private System.Windows.Forms.Button buttonCalibrate;
         private System.Windows.Forms.TextBox textBoxSession;
         private System.Windows.Forms.Button buttonRecord;
-        private System.Windows.Forms.Panel panelAlgorithmQuickSettingsLeftEye;
-        private System.Windows.Forms.Panel panelAlgorithmQuickSettingsRightEye;
+        private System.Windows.Forms.Panel panelPipelineQuickSettingsLeftEye;
+        private System.Windows.Forms.Panel panelPipelineQuickSettingsRightEye;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;

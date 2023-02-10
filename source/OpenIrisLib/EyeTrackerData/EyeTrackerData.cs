@@ -293,7 +293,7 @@ namespace OpenIris
         /// <param name="calibration">Calibration used to processed this images.</param>
         /// <param name="trackingSettings">Tracking settings used to process this image.</param>
         /// <param name="frameRate">Frame rate of the image grabber.</param>
-        public EyeTrackerImagesAndData(EyeCollection<ImageEye?> images, CalibrationParameters calibration, EyeTrackingAlgorithmSettings trackingSettings, double frameRate)
+        public EyeTrackerImagesAndData(EyeCollection<ImageEye?> images, CalibrationParameters calibration, EyeTrackingPipelineSettings trackingSettings, double frameRate)
         {
             Images = images;
             Calibration = calibration;
@@ -331,6 +331,6 @@ namespace OpenIris
         /// <summary>
         /// Gets the tracking settings at the time the images were processed.
         /// </summary>
-        public EyeTrackingAlgorithmSettings TrackingSettings { get; set; }
+        public EyeTrackingPipelineSettings TrackingSettings { get; set; }
     }
 }

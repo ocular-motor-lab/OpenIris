@@ -38,9 +38,9 @@ namespace OpenIris
                 classesAvailable = EyeTrackerPluginManager.CalibrationFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
             }
 
-            if (typeof(T) == typeof(IEyeTrackingAlgorithm))
+            if (typeof(T) == typeof(IEyeTrackingPipeline))
             {
-                classesAvailable = EyeTrackerPluginManager.EyeTrackingAlgorithmFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
+                classesAvailable = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
             }
 
             if (classesAvailable is null) throw new InvalidOperationException("Wrong type");

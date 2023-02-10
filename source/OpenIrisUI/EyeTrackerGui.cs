@@ -211,7 +211,7 @@ namespace OpenIris.UI
                 eyeTrackerTrace.Init(settings);
             }
 
-            // Algorithm settings
+            // Eye tracking pipeline settings
             tabSetup.Enabled = eyeTracker.Tracking;
 
             // Player
@@ -309,7 +309,7 @@ namespace OpenIris.UI
 
         private void UpdateTabSetup()
         {
-            var panels = new EyeCollection<Panel>(panelAlgorithmQuickSettingsLeftEye, panelAlgorithmQuickSettingsRightEye);
+            var panels = new EyeCollection<Panel>(panelPipelineQuickSettingsLeftEye, panelPipelineQuickSettingsRightEye);
 
             try
             {
@@ -325,21 +325,21 @@ namespace OpenIris.UI
 
                 var eyes = new Eye[] { Eye.Left, Eye.Right };
 
-                // Update algorithm UIs
+                // Update pipeline UIs
                 foreach (var eye in eyes)
                 {
-                    var algorithmUI = eyeTracker.ImageProcessor?.AlgorithmUI?[eye] as UserControl;
+                    var pipelineUI = eyeTracker.ImageProcessor?.PipelineUI?[eye] as UserControl;
 
-                    if (panels[eye].Controls.Contains(algorithmUI)) continue;
+                    if (panels[eye].Controls.Contains(pipelineUI)) continue;
 
                     panels[eye].Controls.Clear();
 
-                    if (algorithmUI is UserControl)
+                    if (pipelineUI is UserControl)
                     {
-                        algorithmUI.Dock = DockStyle.Fill;
-                        algorithmUI.Location = new Point(0, 0);
-                        algorithmUI.Size = panels[eye].ClientSize;
-                        panels[eye].Controls.Add(algorithmUI);
+                        pipelineUI.Dock = DockStyle.Fill;
+                        pipelineUI.Location = new Point(0, 0);
+                        pipelineUI.Size = panels[eye].ClientSize;
+                        panels[eye].Controls.Add(pipelineUI);
                     }
                 }
 
@@ -351,7 +351,7 @@ namespace OpenIris.UI
                     {
                         var imageBoxes = new EyeCollection<ImageBox>(imageBoxLeftEye, imageBoxRightEye);
 
-                        var ui = eyeTracker.ImageProcessor?.AlgorithmUI?[eye];
+                        var ui = eyeTracker.ImageProcessor?.PipelineUI?[eye];
 
                         if (ui is null)
                         {
@@ -362,7 +362,7 @@ namespace OpenIris.UI
                         }
                         else
                         {
-                            ui.UpdateAlgorithmUI(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
+                            ui.UpdatePipelineUI(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
                         }
                     }
                 }

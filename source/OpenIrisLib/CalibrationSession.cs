@@ -66,7 +66,7 @@ namespace OpenIris
         /// Calibrates the physical model of the eyeball and its relationship to the camera.
         /// </summary>
         /// <returns>The new calibration parametrers. Null if calibration was cancelled.</returns>
-        internal async Task<CalibrationParameters?> CalibrateEyeModel(CalibrationSettings calibrationSettings, EyeTrackingAlgorithmSettings settings)
+        internal async Task<CalibrationParameters?> CalibrateEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings settings)
         {
             using var cancellation = new CancellationTokenSource();
 
@@ -115,7 +115,7 @@ namespace OpenIris
         /// Calibrates the zero eye position and gets a reference image for torsion.
         /// </summary>
         /// <returns>The new calibration parametrers. Null if calibration was cancelled.</returns>
-        internal async Task<CalibrationParameters> CalibrateZeroReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingAlgorithmSettings settings)
+        internal async Task<CalibrationParameters> CalibrateZeroReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings settings)
         {
             if (currentCalibration is null) currentCalibration = CalibrationParameters.Default;
 

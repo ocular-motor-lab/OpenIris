@@ -26,8 +26,8 @@ namespace OpenIris
     [Serializable]
     public sealed class EyeTrackerSettings : EyeTrackerSettingsXml
     {
-        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemSettings;
-        private EyeTrackerSettingsDictionary<EyeTrackingAlgorithmSettings> allTrackingAlgorithmSettings;
+        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;
+        private EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> allEyeTrackingPipelinesSettings;
         private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
 
         /// <summary>
@@ -35,10 +35,10 @@ namespace OpenIris
         /// </summary>
         public EyeTrackerSettings()
         {
-            allEyeTrackerSystemSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
-            allTrackingAlgorithmSettings = new EyeTrackerSettingsDictionary<EyeTrackingAlgorithmSettings>();
+            allEyeTrackerSystemsSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
+            allEyeTrackingPipelinesSettings = new EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings>();
             allCalibrationImplementations = new EyeTrackerSettingsDictionary<CalibrationSettings>();
-            TrackingAlgorithm = trackingAlgorithm;
+            EyeTrackingPipeline = eyeTrackingPipeline;
             EyeTrackerSystem = eyeTrackerSystem;
             CalibrationMethod = calibrationMethod;
 
@@ -53,7 +53,7 @@ namespace OpenIris
         [Browsable(false)]
         public EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> AllEyeTrackerSystemSettings 
         {
-            get => allEyeTrackerSystemSettings;
+            get => allEyeTrackerSystemsSettings;
             set
             {
                 if (value is null) return;
@@ -64,18 +64,18 @@ namespace OpenIris
                     v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingSystemSettings));
                 }
 
-                allEyeTrackerSystemSettings = value;
+                allEyeTrackerSystemsSettings = value;
             }
         }
 
         /// <summary>
-        /// This collection holds the settings for all the algorithms systems and will be serialized
+        /// This collection holds the settings for all the eye tracking pipelines and will be serialized
         /// into the XML file.
         /// </summary>
         [Browsable(false)]
-        public EyeTrackerSettingsDictionary<EyeTrackingAlgorithmSettings> AllTrackingAlgorithmSettings
+        public EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> AllTrackingPipelinesSettings
         {
-            get => allTrackingAlgorithmSettings;
+            get => allEyeTrackingPipelinesSettings;
             set
             {
                 if (value is null) return;
@@ -83,10 +83,10 @@ namespace OpenIris
                 foreach (var v in value.Values)
                 {
                     // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingAlgorithmSettings));
+                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingPipelineSettings));
                 }
 
-                allTrackingAlgorithmSettings = value;
+                allEyeTrackingPipelinesSettings = value;
             }
         }
 
@@ -122,12 +122,12 @@ namespace OpenIris
         public EyeTrackingSystemSettings EyeTrackingSystemSettings { get { return AllEyeTrackerSystemSettings[eyeTrackerSystem]; } }
 
         /// <summary>
-        /// This property will return the settings for the current algorithm. It will show in the UI but it
+        /// This property will return the settings for the current pipeline. It will show in the UI but it
         /// will not be serialized.
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public EyeTrackingAlgorithmSettings TrackingAlgorithmSettings { get { return AllTrackingAlgorithmSettings[trackingAlgorithm]; } }
+        public EyeTrackingPipelineSettings TrackingpipelineSettings { get { return AllTrackingPipelinesSettings[eyeTrackingPipeline]; } }
 
         /// <summary>
         /// This property will return the settings for the current calibration. It will show in the UI but it
@@ -169,7 +169,7 @@ namespace OpenIris
 
                 // TODO: very ugly line to just make sure the settings are updated properly
                 // Need to set the mm per pixel for the tracking settings
-                foreach (var t in AllTrackingAlgorithmSettings.Values)
+                foreach (var t in AllTrackingPipelinesSettings.Values)
                 {
                     t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
                 }
@@ -177,39 +177,39 @@ namespace OpenIris
         }
         private string eyeTrackerSystem = "Simulation";
 
-        [Category("B) Choose a tracking algorithm"), Description("Tracking algorithm. What algorithm for tracking position, torsion etc you want to use?")]
-        [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingAlgorithm>))]
-        public string TrackingAlgorithm
+        [Category("B) Choose a tracking pipeline"), Description("Tracking pipeline. What pipeline for tracking position, torsion etc you want to use?")]
+        [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingPipeline>))]
+        public string EyeTrackingPipeline
         {
-            get { TrackingAlgorithmSettings.AlgorithmName = trackingAlgorithm; return trackingAlgorithm; }
+            get { TrackingpipelineSettings.EyeTrackingPipelineName = eyeTrackingPipeline; return eyeTrackingPipeline; }
             set
             {
                 // If the dictionary does not contain the settings for the current eye tracking
                 // system, get the defaults and add them.
-                if (!AllTrackingAlgorithmSettings.ContainsKey(value))
+                if (!AllTrackingPipelinesSettings.ContainsKey(value))
                 {
-                    var trackingSettings = (EyeTrackingAlgorithmSettings?)EyeTrackerPluginManager.EyeTrackingAlgorithmFactory?.GetDefaultSettings(value)
-                        ?? throw new InvalidOperationException("Bad EyeTrackingAlgorithmFactory");
-                    trackingSettings.AlgorithmName = value;
+                    var trackingSettings = (EyeTrackingPipelineSettings?)EyeTrackerPluginManager.EyeTrackingPipelineFactory?.GetDefaultSettings(value)
+                        ?? throw new InvalidOperationException("Bad EyeTrackingPipelineFactory");
+                    trackingSettings.EyeTrackingPipelineName = value;
 
-                    AllTrackingAlgorithmSettings.Add(value, trackingSettings);
+                    AllTrackingPipelinesSettings.Add(value, trackingSettings);
 
-                    AllTrackingAlgorithmSettings[value].PropertyChanged += (o, e) =>
+                    AllTrackingPipelinesSettings[value].PropertyChanged += (o, e) =>
                     {
-                        OnPropertyChanged(o, nameof(TrackingAlgorithmSettings));
+                        OnPropertyChanged(o, nameof(TrackingpipelineSettings));
                     };
                 }
 
-                if (value != trackingAlgorithm)
+                if (value != eyeTrackingPipeline)
                 {
-                    trackingAlgorithm = value;
+                    eyeTrackingPipeline = value;
 
 
-                    OnPropertyChanged(this, nameof(TrackingAlgorithm));
+                    OnPropertyChanged(this, nameof(EyeTrackingPipeline));
                 }
             }
         }
-        private string trackingAlgorithm = "JOM";
+        private string eyeTrackingPipeline = "JOM";
 
         [Category("C) Choose a calibration method"), Description("Calibration method")]
         [TypeConverter(typeof(PluginListTypeConverter<CalibrationSession>))]

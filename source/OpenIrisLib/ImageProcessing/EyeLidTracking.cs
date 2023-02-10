@@ -114,7 +114,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="eyeGlobe"></param>
         /// <param name="trackingSettings"></param>
         /// <returns></returns>
-        public EyelidData FindEyelids(ImageEye imageEye, PupilData pupil, EyePhysicalModel eyeGlobe, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public EyelidData FindEyelids(ImageEye imageEye, PupilData pupil, EyePhysicalModel eyeGlobe, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             switch (trackingSettings.EyelidTrackingMethod)
             {
@@ -141,7 +141,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="trackingSettings">Configuration parameters.</param>
         /// <returns>Eyelids as an array of 8 points. First 4 points are the top eyelid from left to right,
         /// the next 4 are the bottom eyelid from left to right.</returns>
-        public static EyelidData FindEyelidsHoughLines(Image<Bgr, byte>? debugImage, ImageEye imageEye, PupilData pupil, EyePhysicalModel eyeGlobe, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public static EyelidData FindEyelidsHoughLines(Image<Bgr, byte>? debugImage, ImageEye imageEye, PupilData pupil, EyePhysicalModel eyeGlobe, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             var DEBUG = EyeTracker.DEBUG;
 
@@ -539,7 +539,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="trackingSettings">Configuration parameters.</param>
         /// <returns>Eyelids as an array of 8 points. First 4 points are the top eyelid from left to right,
         /// the next 4 are the bottom eyelid from left to right.</returns>
-        public static EyelidData FindEyelidsFixed(ImageEye imageEye, PupilData pupil, EyePhysicalModel eyeGlobe, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public static EyelidData FindEyelidsFixed(ImageEye imageEye, PupilData pupil, EyePhysicalModel eyeGlobe, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             var pupilRadius = (pupil.Size.Width + pupil.Size.Height) / 2.0;
 

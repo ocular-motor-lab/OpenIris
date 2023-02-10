@@ -39,7 +39,7 @@ namespace OpenIris
             get { return this.proxy.Status; }
         }
 
-        public EyeTrackingAlgorithmSettings Settings
+        public EyeTrackingPipelineSettings Settings
         {
             get { return this.proxy.Settings; }
         }

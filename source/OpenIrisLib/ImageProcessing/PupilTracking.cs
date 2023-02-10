@@ -53,7 +53,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="eyeRoi"></param>
         /// <param name="trackingSettings"></param>
         /// <returns></returns>
-        public PupilData FindPupil(ImageEye imageEye, Rectangle eyeRoi, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public PupilData FindPupil(ImageEye imageEye, Rectangle eyeRoi, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
@@ -224,7 +224,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="trackingSettings">Configuration parameters.</param>
         /// <returns>Pupil ellipse.</returns>
         [Obsolete]
-        public static PupilData FindPupilHoughCircles(ImageEye imageEye, Rectangle eyeRoi, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public static PupilData FindPupilHoughCircles(ImageEye imageEye, Rectangle eyeRoi, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
 

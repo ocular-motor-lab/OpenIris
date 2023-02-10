@@ -48,7 +48,7 @@ namespace OpenIris
         /// Settings that affect the calibration. They will be saved and load with the calibration.
         /// For instant the pupil thresholds.
         /// </summary>
-        public EyeTrackingAlgorithmSettings? TrackingSettings { get; set; }
+        public EyeTrackingPipelineSettings? TrackingSettings { get; set; }
 
         /// <summary>
         /// Additional parameters that can be specific for each calibration method. Make sure this is serializable.

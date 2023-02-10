@@ -1,6 +1,6 @@
 ﻿
 //-----------------------------------------------------------------------
-// <copyright file="IEyeTrackingAlgorithm.cs" company="Jonhs Hopkins University">
+// <copyright file="IEyeTrackingPipeline.cs" company="Jonhs Hopkins University">
 //     Copyright (c) 2014-2020 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -17,9 +17,9 @@ namespace OpenIris
     using System.Runtime.Serialization;
 
     /// <summary>
-    /// Interface for all eye tracking algorithms that process images to get data.
+    /// Interface for all eye tracking pipelines that process images to get data.
     /// </summary>
-    public interface IEyeTrackingAlgorithm
+    public interface IEyeTrackingPipeline
     {
         /// <summary>
         /// Process the images to get data.
@@ -28,50 +28,50 @@ namespace OpenIris
         /// <param name="eyeCalibrationParameters"></param>
         /// <param name="trackingSettings"></param>
         /// <returns></returns>
-        (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingAlgorithmSettings trackingSettings);
+        (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSettings);
 
         /// <summary>
-        /// Get the UI to change parameters of the algorithm.
+        /// Get the UI to change parameters of the eye tracking pipeline.
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        IAlgorithmUI? GetAlgorithmUI(Eye whichEye);
+        IPipelineUI? GetPipelineUI(Eye whichEye);
     }
 
     /// <summary>
-    /// Base clase for settings of eye tracking algorithms.
+    /// Base clase for settings of eye tracking pipelines.
     /// </summary>
     /// // There may be a better solution https://stackoverflow.com/questions/16220242/generally-accepted-way-to-avoid-knowntype-attribute-for-every-derived-class
     [Serializable]
     [KnownType("GetDerivedTypes")] // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.knowntypeattribute?view=netframework-4.8
-    public class EyeTrackingAlgorithmSettings : EyeTrackerSettingsBase
+    public class EyeTrackingPipelineSettings : EyeTrackerSettingsBase
     {
         /// <summary>
         /// Gets the derived types for the serialization over wcf.
         /// </summary>
         /// <returns></returns>
-        public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingAlgorithmSettings))).ToArray();
+        public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingPipelineSettings))).ToArray();
 
         /// <summary>
         /// Initializes the settings.
         /// </summary>
-        public EyeTrackingAlgorithmSettings()
+        public EyeTrackingPipelineSettings()
         {
-            AlgorithmName = "JOM algorithm";
+            EyeTrackingPipelineName = "JOM pipeline";
         }
 
         /// <summary>
-        /// Name of the algorithm will be automatically set.
+        /// Name of the pipeline will be automatically set.
         /// </summary>
         [Browsable(false)]
-        public string AlgorithmName { get; set; }
+        public string EyeTrackingPipelineName { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum radius of the pupil. This is a bit complicated. 
         /// The mm per pixel is a setting that depends on the eye tracking system, resolution of the cameras and distance to 
         /// the eyes. Whenever the eye tracking system is changed it will also change this setting. That way all the settings
         /// about eye properties can be set in milimiters (system independent) and then convert to pixels using this values.
-        /// That is, the algorithms need values in pixels but it is much easier and consistent to think in miliminters for sizes
+        /// That is, the pipelines need values in pixels but it is much easier and consistent to think in miliminters for sizes
         /// of eye parts.
         /// </summary>
         [Browsable(false)]

@@ -206,7 +206,7 @@ namespace OpenIris
                         // Propagate the event
                         grabbedImages = EyeTrackingSystem.PreProcessImages(grabbedImages) ?? grabbedImages;
                         RecordingSession?.TryRecordImages(grabbedImages);
-                        ImageProcessor.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingAlgorithmSettings, ImageGrabber.FrameRate));
+                        ImageProcessor.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings, ImageGrabber.FrameRate));
                     };
 
                     ImageProcessor.ImagesProcessed += (_, processedImages) =>
@@ -447,7 +447,7 @@ namespace OpenIris
                 CalibrationSession = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod)
                     ?? throw new InvalidOperationException("No factory");
 
-                var tempCalibrationParameters = await CalibrationSession.CalibrateEyeModel(Settings.CalibrationSettings, Settings.TrackingAlgorithmSettings);
+                var tempCalibrationParameters = await CalibrationSession.CalibrateEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
                 if (tempCalibrationParameters is null) return;
 
                 // IMPORTANT!! Need to update calibration so the zero reference processing is done with a
@@ -455,7 +455,7 @@ namespace OpenIris
                 // TODO: think a better way of doing this.
                 Calibration = tempCalibrationParameters;
 
-                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingAlgorithmSettings);
+                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
             }
             catch
             {
@@ -503,7 +503,7 @@ namespace OpenIris
                 CalibrationSession = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod) 
                     ?? throw new InvalidOperationException("No factory");
 
-                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingAlgorithmSettings);
+                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
             }
             catch
             {

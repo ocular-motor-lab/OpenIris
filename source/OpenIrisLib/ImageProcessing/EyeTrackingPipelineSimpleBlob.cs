@@ -20,8 +20,8 @@ namespace OpenIris
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingAlgorithm)), PluginDescriptionAttribute("SimpleBlob", typeof(EyeTrackingAlgorithmSettingsWithThresholds))]
-    public sealed class EyeTrackingSimpleBlobAlgorithm : IEyeTrackingAlgorithm, IDisposable
+    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimpleBlob", typeof(EyeTrackingPipelineSettingsWithThresholds))]
+    public sealed class EyeTrackingPipelineSimpleBlob : IEyeTrackingPipeline, IDisposable
     {
         private readonly CvBlobDetector detector = new CvBlobDetector();
         private readonly CvBlobs blobs = new CvBlobs();
@@ -42,9 +42,9 @@ namespace OpenIris
         /// <param name="eyeCalibrationParameters"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingAlgorithmSettings settings)
+        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings settings)
         {
-            var trackingSettings = settings as EyeTrackingAlgorithmSettingsWithThresholds ?? throw new Exception("Wrong type of settings");
+            var trackingSettings = settings as EyeTrackingPipelineSettingsWithThresholds ?? throw new Exception("Wrong type of settings");
 
             var maxPupRad = 10 / trackingSettings.MmPerPix;
             var irisRad = (float)(12 / trackingSettings.MmPerPix);
@@ -79,7 +79,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        public IAlgorithmUI? GetAlgorithmUI(Eye whichEye)
+        public IPipelineUI? GetPipelineUI(Eye whichEye)
         {
             return null;
         }

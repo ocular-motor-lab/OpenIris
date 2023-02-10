@@ -74,7 +74,7 @@ namespace OpenIris.UI
         /// Updates the image in the control.
         /// </summary>
         /// <param name="imageEye">New image to draw.</param>
-        public void UpdateImageEyeBox(ImageEye imageEye, EyeCalibration calibration, EyeTrackingAlgorithmSettings settings)
+        public void UpdateImageEyeBox(ImageEye imageEye, EyeCalibration calibration, EyeTrackingPipelineSettings settings)
         {
             this.imageBoxEye.SuspendLayout();
 

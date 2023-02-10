@@ -68,7 +68,7 @@ namespace OpenIris.UI
             propertyGridCalibrationSettings.PropertySort = PropertySort.Categorized;
 
             propertyGridGeneralSettings.SelectedObject = settings;
-            propertyGridTrackingSettings.SelectedObject = settings.TrackingAlgorithmSettings;
+            propertyGridTrackingSettings.SelectedObject = settings.TrackingpipelineSettings;
             propertyGridSystemSettings.SelectedObject = settings.EyeTrackingSystemSettings;
             propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
         }
@@ -78,7 +78,7 @@ namespace OpenIris.UI
             var settings = propertyGridGeneralSettings.SelectedObject as EyeTrackerSettings ?? throw new InvalidOperationException("never should happen");
 
             propertyGridSystemSettings.SelectedObject = settings.EyeTrackingSystemSettings;
-            propertyGridTrackingSettings.SelectedObject = settings.TrackingAlgorithmSettings;
+            propertyGridTrackingSettings.SelectedObject = settings.TrackingpipelineSettings;
             propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
 
             propertyGridGeneralSettings.Refresh();

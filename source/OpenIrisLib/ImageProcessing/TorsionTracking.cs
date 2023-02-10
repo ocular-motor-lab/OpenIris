@@ -32,7 +32,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="imageTorsion">The image used to calculate the torsion angle.</param>
         /// <param name="dataQuality">Index of data quality [0-100]</param>
         /// <returns>The torsion angle.</returns>
-        public double CalculateTorsionAngle(ImageEye imageEye, EyePhysicalModel eyeModel, Image<Gray, byte>? imageTorsionReference, Image<Gray, byte>? mask, PupilData pupil, IrisData iris, EyeTrackingJOMalgorithmSettings trackingSettings, out Image<Gray, byte>? imageTorsion, out double dataQuality)
+        public double CalculateTorsionAngle(ImageEye imageEye, EyePhysicalModel eyeModel, Image<Gray, byte>? imageTorsionReference, Image<Gray, byte>? mask, PupilData pupil, IrisData iris, EyeTrackingPipelineJOMSettings trackingSettings, out Image<Gray, byte>? imageTorsion, out double dataQuality)
         {
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
 
@@ -96,7 +96,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="iris">Iris circle.</param>
         /// <param name="trackingSettings">Configuration parameters.</param>
         /// <returns>The iris image used to calculate torsion.</returns>
-        public static Image<Gray, byte>? GetTorsionImage(ImageEye imageEye, EyePhysicalModel eyeModel, Image<Gray, byte>? mask, PupilData pupil, IrisData iris, EyeTrackingJOMalgorithmSettings trackingSettings)
+        public static Image<Gray, byte>? GetTorsionImage(ImageEye imageEye, EyePhysicalModel eyeModel, Image<Gray, byte>? mask, PupilData pupil, IrisData iris, EyeTrackingPipelineJOMSettings trackingSettings)
         {
             try
             {

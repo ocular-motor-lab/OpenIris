@@ -30,7 +30,7 @@ namespace OpenIris
     {
         private readonly bool allowDroppedFrames;
         private readonly int bufferSize;
-        private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingAlgorithm>?)> algorithm;
+        private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)> pipeline;
         private BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? inputBuffer;
         private BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? outputBuffer;
 
@@ -50,8 +50,8 @@ namespace OpenIris
             this.bufferSize = allowDroppedFrames ? 100 : 1;
             this.allowDroppedFrames = allowDroppedFrames;
 
-            algorithm = new ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingAlgorithm>?)>();
-            AlgorithmUI = new EyeCollection<IAlgorithmUI?>(null, null);
+            pipeline = new ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)>();
+            PipelineUI = new EyeCollection<IPipelineUI?>(null, null);
         }
 
         /// <summary>
@@ -60,9 +60,9 @@ namespace OpenIris
         internal event EventHandler<EyeTrackerImagesAndData>? ImagesProcessed;
 
         /// <summary>
-        /// User interface for the current algorithm. For each eye.
+        /// User interface for the current pipeline. For each eye.
         /// </summary>
-        public EyeCollection<IAlgorithmUI?> AlgorithmUI { get; private set; }
+        public EyeCollection<IPipelineUI?> PipelineUI { get; private set; }
 
         /// <summary>
         /// Gets the total number of frames received.
@@ -211,11 +211,11 @@ namespace OpenIris
 
                     EyeTrackerDebug.TrackTimeBeginingFrame();
 
-                    var eyeTrackingAlgorithm = GetCurrentEyeTrackingAlgorithm(item.images.TrackingSettings.AlgorithmName, image.WhichEye);
+                    var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(item.images.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
                     var calibration = item.images.Calibration.EyeCalibrationParameters[image.WhichEye];
                     var settings = item.images.TrackingSettings;
 
-                    (image.EyeData, image.ImageTorsion) = eyeTrackingAlgorithm.Process(image, calibration, settings);
+                    (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(image, calibration, settings);
 
                     EyeTrackerDebug.TrackTimeEndFrame();
                 }
@@ -274,42 +274,42 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Method to create the algorithm object to process the images. For each frame it has to check if the settings
-        /// have changed and it needs to update to a new algorithm. It creates an algorithm object for each thread and 
-        /// each eye to avoid conflicts in multithreading. Otherwise the algorithm classes would need to be thread safe
+        /// Method to create the pipeline object to process the images. For each frame it has to check if the settings
+        /// have changed and it needs to update to a new pipeline. It creates an pipeline object for each thread and 
+        /// each eye to avoid conflicts in multithreading. Otherwise the pipeline classes would need to be thread safe
         /// which is quite hard.
         /// </summary>
-        /// <param name="newAlgorithmName">New algorithm name.</param>
+        /// <param name="newPipelineName">New pipeline name.</param>
         /// <param name="whichEye">Which eye we are working with.</param>
-        /// <returns>The new algorithm object.</returns>
-        private IEyeTrackingAlgorithm GetCurrentEyeTrackingAlgorithm(string newAlgorithmName, Eye whichEye)
+        /// <returns>The new pipeline object.</returns>
+        private IEyeTrackingPipeline GetCurrentEyeTrackingPipeline(string newPipelineName, Eye whichEye)
         {
             var ID = Thread.CurrentThread.ManagedThreadId;
 
-            (var currentName, var currentAlgorithm) = algorithm.ContainsKey(ID) ? algorithm[ID] : ("", null);
+            (var currentName, var currentPipeline) = pipeline.ContainsKey(ID) ? pipeline[ID] : ("", null);
 
-            // if this thread does not have an algorithm 
-            if (currentName != newAlgorithmName || currentAlgorithm is null)
+            // if this thread does not have an pipeline 
+            if (currentName != newPipelineName || currentPipeline is null)
             {
-                currentAlgorithm = new EyeCollection<IEyeTrackingAlgorithm>(
-                   EyeTrackerPluginManager.EyeTrackingAlgorithmFactory?.Create(newAlgorithmName) ?? throw new InvalidOperationException("bad"),
-                   EyeTrackerPluginManager.EyeTrackingAlgorithmFactory?.Create(newAlgorithmName) ?? throw new InvalidOperationException("bad")); ;
+                currentPipeline = new EyeCollection<IEyeTrackingPipeline>(
+                   EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"),
+                   EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad")); ;
 
-                AlgorithmUI[Eye.Left] = currentAlgorithm[Eye.Left].GetAlgorithmUI(Eye.Left);
-                AlgorithmUI[Eye.Right] = currentAlgorithm[Eye.Right].GetAlgorithmUI(Eye.Right);
+                PipelineUI[Eye.Left] = currentPipeline[Eye.Left].GetPipelineUI(Eye.Left);
+                PipelineUI[Eye.Right] = currentPipeline[Eye.Right].GetPipelineUI(Eye.Right);
 
-                if (algorithm.ContainsKey(ID))
+                if (pipeline.ContainsKey(ID))
                 {
-                    algorithm[ID] = (newAlgorithmName, currentAlgorithm);
+                    pipeline[ID] = (newPipelineName, currentPipeline);
                 }
                 else
                 {
-                    var result = algorithm.TryAdd(ID, (newAlgorithmName, currentAlgorithm));
+                    var result = pipeline.TryAdd(ID, (newPipelineName, currentPipeline));
                     if (!result) throw new InvalidOperationException("bad dictionary.");
                 }
             }
 
-            return currentAlgorithm[whichEye];
+            return currentPipeline[whichEye];
         }
     }
 }

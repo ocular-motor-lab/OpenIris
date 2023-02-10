@@ -13,9 +13,9 @@ namespace SimpleEyeTrackerUI
         private string fileName;
         private VideoEye video;
 
-        private EyeTrackingJOMalgorithm imageProcessor;
+        private EyeTrackingPipelineJOM imageProcessor;
         private EyeCalibration calibration;
-        private EyeTrackingJOMalgorithmSettings settings;
+        private EyeTrackingPipelineJOMSettings settings;
 
         private Timer timer;
 
@@ -36,7 +36,7 @@ namespace SimpleEyeTrackerUI
             // Initialize eye tracker.
             //======================================================================================
             EyeTrackerPluginManager.Init(true);
-            this.imageProcessor = new EyeTrackingJOMalgorithm();
+            this.imageProcessor = new EyeTrackingPipelineJOM();
 
             //======================================================================================
             // Initialize settings.
@@ -44,7 +44,7 @@ namespace SimpleEyeTrackerUI
 
             // Some can go with default values. Others need to be set depending on the resolution and
             // brightnessof the image
-            this.settings = new EyeTrackingJOMalgorithmSettings
+            this.settings = new EyeTrackingPipelineJOMSettings
             {
 
                 // Select the specific algorithms to be used for each processing step.

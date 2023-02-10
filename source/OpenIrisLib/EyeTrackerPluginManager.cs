@@ -47,11 +47,11 @@ namespace OpenIris
 
                 EyeTrackingsyStemFactory = new EyeTrackerPluginLoader<EyeTrackingSystem, IEyeTrackingSystemMetadata>(catalog);
                 CalibrationFactory = new EyeTrackerPluginLoader<CalibrationSession, IEyeTrackerPluginMetadata>(catalog);
-                EyeTrackingAlgorithmFactory = new EyeTrackerPluginLoader<IEyeTrackingAlgorithm, IEyeTrackerPluginMetadata>(catalog);
+                EyeTrackingPipelineFactory = new EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>(catalog);
 
                 ExtraSettingsTypesForXML = new List<Type>();
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingsyStemFactory.ClassesAvaiable.Select(t => t.SettingsType));
-                ExtraSettingsTypesForXML.AddRange(EyeTrackingAlgorithmFactory.ClassesAvaiable.Select(t => t.SettingsType));
+                ExtraSettingsTypesForXML.AddRange(EyeTrackingPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
                 ExtraSettingsTypesForXML.AddRange(CalibrationFactory.ClassesAvaiable.Select(t => t.SettingsType));
             }
             catch(Exception ex)
@@ -76,9 +76,9 @@ namespace OpenIris
         public static EyeTrackerPluginLoader<CalibrationSession, IEyeTrackerPluginMetadata>? CalibrationFactory { get; private set; }
 
         /// <summary>
-        /// Factory for eye tracking algorithms.
+        /// Factory for eye tracking pipelines.
         /// </summary>
-        public static EyeTrackerPluginLoader<IEyeTrackingAlgorithm, IEyeTrackerPluginMetadata>? EyeTrackingAlgorithmFactory { get; private set; }
+        public static EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>? EyeTrackingPipelineFactory { get; private set; }
     }
 
     /// <summary>

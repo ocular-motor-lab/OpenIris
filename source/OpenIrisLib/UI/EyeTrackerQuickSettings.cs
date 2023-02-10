@@ -20,9 +20,9 @@ namespace OpenIris.UI
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.
     /// </summary>
-    public partial class EyeTrackerQuickSettings : UserControl, IAlgorithmUI
+    public partial class EyeTrackerQuickSettings : UserControl, IPipelineUI
     {
-        private EyeTrackingJOMalgorithmSettings trackingSettings;
+        private EyeTrackingPipelineJOMSettings trackingSettings;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerQuickSettings class.
@@ -36,7 +36,7 @@ namespace OpenIris.UI
             trackBarIrisRadius.Maximum = 500;
             trackBarIrisRadius.Minimum = 0;
 
-            trackingSettings = new EyeTrackingJOMalgorithmSettings();
+            trackingSettings = new EyeTrackingPipelineJOMSettings();
         }
 
         /// <summary>
@@ -47,9 +47,9 @@ namespace OpenIris.UI
         /// <summary>
         /// Updates the control.
         /// </summary>
-        public void UpdateValues(EyeTrackingAlgorithmSettingsWithThresholds currentTrackingSettings)
+        public void UpdateValues(EyeTrackingPipelineSettingsWithThresholds currentTrackingSettings)
         {
-            trackingSettings = currentTrackingSettings as EyeTrackingJOMalgorithmSettings;
+            trackingSettings = currentTrackingSettings as EyeTrackingPipelineJOMSettings;
             
             if (trackingSettings is null) return;
 
@@ -186,14 +186,14 @@ namespace OpenIris.UI
         }
 
         /// <summary>
-        /// Update the algorithm UI.
+        /// Update the pipeline UI.
         /// </summary>
         /// <param name="imageBox">image box for the eye image.</param>
         /// <param name="dataAndImages"></param>
-        public void UpdateAlgorithmUI(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
+        public void UpdatePipelineUI(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
         {
             var image = dataAndImages.Images[WhichEye];
-            var settings = dataAndImages.TrackingSettings as EyeTrackingAlgorithmSettingsWithThresholds ?? throw new Exception();
+            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelineSettingsWithThresholds ?? throw new Exception();
             var eyeCalibration = dataAndImages.Calibration.EyeCalibrationParameters[WhichEye];
 
             UpdateValues(settings);

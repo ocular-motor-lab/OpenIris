@@ -43,11 +43,12 @@ namespace OpenIris
         /// Value indicating weather frames can be dropped. This means the call to Process images
         /// will be blocking if the buffer is fulll.
         /// </param>
-        internal EyeTrackerProcessor(bool allowDroppedFrames)
+        /// <param name="bufferSize">Number of frames held in the buffer.</param>
+        internal EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize = 100)
         {
             // TODO: it may make sense to make this dependent on the frame rate. But not sure.
             // Code is cleaner like this. Maybe it makes more sense to make it a setting.
-            this.bufferSize = allowDroppedFrames ? 100 : 1;
+            this.bufferSize = allowDroppedFrames ? bufferSize : 1;
             this.allowDroppedFrames = allowDroppedFrames;
 
             pipeline = new ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)>();

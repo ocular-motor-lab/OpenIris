@@ -36,12 +36,14 @@ namespace OpenIris
         private (double TimeStamp, long FrameCounter) lastCheckGrabbing;
         private bool started;
         private bool stopping;
+        private int bufferSize;
 
         /// <summary>
         /// Initializes an instance of the class <see cref="EyeTrackerImageGrabber"/> for grabbing from cameras.
         /// </summary>
         /// <param name="sources">Image sources, cameras or videos.</param>
-        internal EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources)
+        /// <param name="bufferSize">Number of frames held in the buffer.</param>
+        internal EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, int bufferSize = 100)
         {
             // Check if the sources are videos and get the video player
             videoPlayer = (sources.FirstOrDefault(s=>s is VideoEye) as VideoEye)?.VideoPlayer;
@@ -51,6 +53,7 @@ namespace OpenIris
             FrameRate = CheckFrameRate(sources);
 
             imageSources = sources;
+            this.bufferSize = bufferSize;
         }
 
         /// <summary>
@@ -146,7 +149,7 @@ namespace OpenIris
                 if (usingCameras)
                 {
                     // Setup the queue and the threads for the cameras
-                    cameraBuffer = new BlockingCollection<ImageEye>(100);
+                    cameraBuffer = new BlockingCollection<ImageEye>(bufferSize);
                     cameraQueues = new EyeCollection<Queue<ImageEye>?>(imageSources.Select(c => (c != null) ? new Queue<ImageEye>() : null));
                     cameraTasks = Task.WhenAll(imageSources.Select(s => Task.Factory.StartNew(() => 
                         CameraLoop(s as CameraEye), 

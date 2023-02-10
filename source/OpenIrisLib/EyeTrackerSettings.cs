@@ -138,7 +138,7 @@ namespace OpenIris
         public CalibrationSettings CalibrationSettings { get { return AllCalibrationImplementations[calibrationMethod]; } }
 
 
-        #region A) Main settings
+        #region A) Choose an eye tracking system"
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
         [NeedsRestarting]
@@ -177,6 +177,10 @@ namespace OpenIris
         }
         private string eyeTrackerSystem = "Simulation";
 
+        #endregion A) Choose an eye tracking system"
+
+        #region B) Choose a tracking pipeline
+
         [Category("B) Choose a tracking pipeline"), Description("Tracking pipeline. What pipeline for tracking position, torsion etc you want to use?")]
         [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingPipeline>))]
         public string EyeTrackingPipeline
@@ -211,6 +215,10 @@ namespace OpenIris
         }
         private string eyeTrackingPipeline = "JOM";
 
+        #endregion B) Choose a tracking pipeline
+
+        #region C) Choose a calibration method
+
         [Category("C) Choose a calibration method"), Description("Calibration method")]
         [TypeConverter(typeof(PluginListTypeConverter<CalibrationSession>))]
         public string CalibrationMethod
@@ -241,6 +249,10 @@ namespace OpenIris
             }
         }
         private string calibrationMethod = "Auto"; // Default value
+
+        #endregion C) Choose a calibration method
+
+        #region D) General settings
 
         [Category("D) General settings"), Description("Value indicating where debuging images should be shown")]
         public bool Debug
@@ -273,7 +285,24 @@ namespace OpenIris
         }
         private Eye trackingMode = Eye.Both; // Default value
 
-        #endregion A) Main settings
+
+        [Category("D) General settings"), Description("Gets the size of the buffer.")]
+        [NeedsRestarting]
+        public int BufferSize
+        {
+            get { return bufferSize; }
+            set
+            {
+                if (value != bufferSize)
+                {
+                    bufferSize = value;
+                    OnPropertyChanged(this, nameof(BufferSize));
+                }
+            }
+        }
+        private int bufferSize = 100; // Default value
+
+        #endregion D) General settings
 
         #region E) Recording settings
 

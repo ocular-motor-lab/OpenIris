@@ -139,9 +139,9 @@ namespace OpenIris.ImageGrabbing
         /// be thread safe.
         /// </summary>
         /// <param name="frameNumber">Frame number to scroll to.</param>
-        public void Scroll(long frameNumber)
+        public void Scroll(ulong frameNumber)
         {
-            if (frameNumber != (long)Video.GetCaptureProperty(CapProp.PosFrames))
+            if (frameNumber != Video.GetCaptureProperty(CapProp.PosFrames))
             {
                 Video.SetCaptureProperty(CapProp.PosFrames, (double)frameNumber);
             }

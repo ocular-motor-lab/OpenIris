@@ -25,9 +25,8 @@ namespace OpenIris
         private readonly EyeTrackingSystem eyeTrackingSystem;
         private readonly EyeTrackingSystemSettings eyeTrackingSystemSettings;
         private Timer? frameRateTimer;
-        private long lastFrameNumber;
-        private long nextFrameScroll;
-        private bool scrolling;
+        private ulong lastFrameNumber;
+        private (bool isOn, ulong frameNumber) scrolling;
 
         /// <summary>
         /// Initializes a new instance of the VideoPlayer class.
@@ -111,7 +110,7 @@ namespace OpenIris
             // Scroll to the begining if necessary
             if (FrameRange.Begin > 0)
             {
-                var begin = FrameRange.Begin;
+                var begin = (ulong)FrameRange.Begin;
                 Videos.ForEach(v => v?.Scroll(begin));
             }
 
@@ -154,13 +153,13 @@ namespace OpenIris
         /// <summary>
         /// Gets or sets the current frame number.
         /// </summary>
-        public long CurrentFrameNumber
+        public ulong CurrentFrameNumber
         {
             get
             {
                 // This is confusing. Not sure if correct. But it is necessary to keep
                 // consistency during scrolling.
-                return scrolling ? nextFrameScroll : lastFrameNumber;
+                return scrolling.isOn ? scrolling.frameNumber : lastFrameNumber;
             }
         }
 
@@ -241,7 +240,7 @@ namespace OpenIris
         /// Scrolls the playback to the specified frame number.
         /// </summary>
         /// <param name="frameNumber">Frame number to play next.</param>
-        public void Scroll(long frameNumber)
+        public void Scroll(ulong frameNumber)
         {
             switch (state)
             {
@@ -252,8 +251,7 @@ namespace OpenIris
                     // possible to reenter here. That is, if we were scrolling but get a new command
                     // to scrool we must not ignore the new command, instead we need to change 
                     // change the frame we want to scroll to
-                    scrolling = true;
-                    nextFrameScroll = frameNumber;
+                    scrolling = (true, frameNumber);
 
                     if (state == VideoPlayerState.Finished)
                     {
@@ -281,7 +279,7 @@ namespace OpenIris
                 case VideoPlayerState.Stopping:
                     state = VideoPlayerState.Stopping;
 
-                    Videos?.ForEach(v => v?.Stop());
+                    Videos?.ForEach(video => video?.Stop());
 
                     state = VideoPlayerState.Idle;
                     break;
@@ -302,40 +300,28 @@ namespace OpenIris
             {
                 case VideoPlayerState.Idle:
                 case VideoPlayerState.Stopping:
+                case VideoPlayerState.Finished:
                     return null;
                 case VideoPlayerState.Playing:
                 case VideoPlayerState.Paused:
-                case VideoPlayerState.Finished:
+
+                    // Check if the videos are finished.
+                    if (lastFrameNumber >= (ulong)FrameRange.End)
+                    {
+                        if (state != VideoPlayerState.Finished)
+                        {
+                            state = VideoPlayerState.Finished;
+                            scrolling = (false, 0);
+
+                            VideoFinished?.Invoke(this, new EventArgs());
+                        }
+                        return null;
+                    }
 
                     // If scrolling move all the videos to the next frame.
-                    if (scrolling)
+                    if (scrolling.isOn)
                     {
-                        var scrollToFrame = nextFrameScroll;
-
-                        Videos.ForEach(video => video?.Scroll(scrollToFrame));
-
-                        // This is just in case during the scrolling the frame changed. this can happen often
-                        // while scrolling to new parts of the video continuosly.
-                        if (scrollToFrame == nextFrameScroll)
-                        {
-                            scrolling = false;
-                        }
-                    }
-                    else
-                    {
-                        // Check if the videos are finished.
-                        if (lastFrameNumber >= FrameRange.End)
-                        {
-                            // It is important to check if all the queues are empty. If the image grabber is
-                            // lagging behind it would finish before actually processing everything.
-
-                            if (state != VideoPlayerState.Finished)
-                            {
-                                state = VideoPlayerState.Finished;
-                                VideoFinished?.Invoke(this, new EventArgs());
-                            }
-                            return null;
-                        }
+                        Videos.ForEach(video => video?.Scroll(scrolling.frameNumber));
                     }
 
                     // Grab the images from the videos.
@@ -347,21 +333,28 @@ namespace OpenIris
 
                         var image = video.GrabImageEye();
 
-                        // If paused don't let the frames to advance.
-                        if (state == VideoPlayerState.Paused)
-                        {
-                            video.Scroll(video.LastFrameNumber);
-                        }
-
                         if (image is null) continue;
 
-                        lastFrameNumber = (long)image.TimeStamp.FrameNumber;
+                        lastFrameNumber = image.TimeStamp.FrameNumber;
 
                         images[video.WhichEye] = image;
                     }
 
-                    var grabbedImages = eyeTrackingSystem.PreProcessImagesFromVideos(new EyeCollection<ImageEye?>(images));
+                    // If paused keep grabbing the same frame
+                    if (state == VideoPlayerState.Paused)
+                    {
+                        Videos.ForEach(video => video?.Scroll(lastFrameNumber));
+                    }
+
+                    // If wanted to scroll and got the right frame number we are not scrolling anymore
+                    if (scrolling.isOn & scrolling.frameNumber == lastFrameNumber)
+                    {
+                        scrolling = (false, 0);
+                    }
+
+                    var grabbedImages = eyeTrackingSystem.PreProcessImagesFromVideos(images);
                     ImagesGrabbed?.Invoke(this, grabbedImages);
+
 
                     return grabbedImages;
 
@@ -444,7 +437,6 @@ namespace OpenIris
                     (_, null) => Eye.Left,
                     (_, _) => Eye.Both,
                 },
-                _ => throw new InvalidOperationException("Wrong number of videos."),
             };
         }
 

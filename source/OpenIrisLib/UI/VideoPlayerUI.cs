@@ -75,8 +75,8 @@ namespace OpenIris.UI
                     {
                         buttonVideoPauseResume.Text = "Resume";
                     }
-                    hScrollBarPlayBack.Minimum = 1;
-                    hScrollBarPlayBack.Maximum = (int)videoPlayer.FrameCount;
+                    hScrollBarPlayBack.Minimum = (int)videoPlayer.FrameRange.Begin;
+                    hScrollBarPlayBack.Maximum = (int)videoPlayer.FrameRange.End;
                     hScrollBarPlayBack.SmallChange = 1;
                     hScrollBarPlayBack.LargeChange = 10;
 
@@ -97,7 +97,7 @@ namespace OpenIris.UI
                                 timeElapsed.ToString(@"mm\:ss\.F") + "/" + timeTotal.ToString(@"mm\:ss\.F");
                             break;
                     }
-                    hScrollBarPlayBack.Value = (int)videoPlayer.CurrentFrameNumber + 1;
+                    hScrollBarPlayBack.Value = (int)videoPlayer.CurrentFrameNumber;
 
                     Invalidate();
                     Refresh();
@@ -112,7 +112,7 @@ namespace OpenIris.UI
                 return;
             }
 
-            videoPlayer?.Scroll(e.NewValue - 1);
+            videoPlayer?.Scroll((ulong)e.NewValue);
         }
 
         private void ButtonVideoPauseResume_Click(object sender, EventArgs e)

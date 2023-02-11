@@ -11,7 +11,7 @@ namespace OpenIris.UI
     using System.Windows.Forms;
 
     /// <summary>
-    /// 
+    /// In the UI the scroll bar goes from Frame 1 to Frame totalNumberOfFrames, in the video you go from 0 to totalNumberOfFrames-1
     /// </summary>
     public partial class VideoPlayerUI : UserControl
     {
@@ -97,7 +97,7 @@ namespace OpenIris.UI
                                 timeElapsed.ToString(@"mm\:ss\.F") + "/" + timeTotal.ToString(@"mm\:ss\.F");
                             break;
                     }
-                    hScrollBarPlayBack.Value = (int)videoPlayer.CurrentFrameNumber;
+                    hScrollBarPlayBack.Value = (int)videoPlayer.CurrentFrameNumber + 1;
 
                     Invalidate();
                     Refresh();
@@ -112,7 +112,7 @@ namespace OpenIris.UI
                 return;
             }
 
-            videoPlayer?.Scroll(e.NewValue);
+            videoPlayer?.Scroll(e.NewValue - 1);
         }
 
         private void ButtonVideoPauseResume_Click(object sender, EventArgs e)

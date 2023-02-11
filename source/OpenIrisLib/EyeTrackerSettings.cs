@@ -169,12 +169,16 @@ namespace OpenIris
 
                 // TODO: very ugly line to just make sure the settings are updated properly
                 // Need to set the mm per pixel for the tracking settings
+                // Updated on 2/10/23. A little less ugly but still not great. 
+                // at least fixed the problem of updating the mmperpix in pipeline when 
+                // it gets updated on the system settings. 
                 foreach (var t in AllTrackingPipelinesSettings.Values)
                 {
-                    t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
+                    t.GetMmPerPix = ()=> EyeTrackingSystemSettings.MmPerPix;
                 }
             }
         }
+
         private string eyeTrackerSystem = "Simulation";
 
         #endregion A) Choose an eye tracking system"

@@ -46,8 +46,8 @@ namespace OpenIris
         {
             var trackingSettings = settings as EyeTrackingPipelineSettingsWithThresholds ?? throw new Exception("Wrong type of settings");
 
-            var maxPupRad = 10 / trackingSettings.MmPerPix;
-            var irisRad = (float)(12 / trackingSettings.MmPerPix);
+            var maxPupRad = 10 / trackingSettings.GetMmPerPix();
+            var irisRad = (float)(12 / trackingSettings.GetMmPerPix());
             var minPupArea = Math.PI * Math.Pow(trackingSettings.MinPupRadPix, 2);
             var thresholdDark = (imageEye.WhichEye == Eye.Left) ? trackingSettings.DarkThresholdLeftEye : trackingSettings.DarkThresholdRightEye;
             var imageSizeForBlobSearch = 200;// imageEye.Size.Width;

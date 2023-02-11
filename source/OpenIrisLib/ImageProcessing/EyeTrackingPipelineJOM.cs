@@ -226,7 +226,7 @@ namespace OpenIris
         /// Gets the minimum radius of the pupil in pixels
         /// </summary>
         [Browsable(false)]
-        public double MinPupRadPix { get { return this.minPupRadmm / this.MmPerPix; } }
+        public double MinPupRadPix { get { return this.minPupRadmm / this.GetMmPerPix(); } }
 
         /// <summary>
         /// Gets or sets the minimum radius of the pupil in mm
@@ -342,13 +342,13 @@ namespace OpenIris
         /// Gets or sets the minimum radius of the pupil
         /// </summary>
         [Browsable(false)]
-        public double MinCRRadPix { get { return this.minCRRadmm / this.MmPerPix; } }
+        public double MinCRRadPix { get { return this.minCRRadmm / this.GetMmPerPix(); } }
 
         /// <summary>
         /// Gets or sets the maximum radius of the CRs (glints)
         /// </summary>
         [Browsable(false)]
-        public double MaxCRRadPix { get { return this.maxCRRadmm / this.MmPerPix; } }
+        public double MaxCRRadPix { get { return this.maxCRRadmm / this.GetMmPerPix(); } }
 
         /// <summary>
         /// Gets or sets the minimum radius of the CR  in mm
@@ -453,7 +453,7 @@ namespace OpenIris
 
             set
             {
-                if (value != this.irisRadiusPixLeft)
+                if (value != this.irisRadiusPixLeft & value <= this.MaxIrisRadPixd)
                 {
                     this.irisRadiusPixLeft = value;
                     this.OnPropertyChanged(this, nameof(IrisRadiusPixLeft));
@@ -476,7 +476,7 @@ namespace OpenIris
 
             set
             {
-                if (value != this.irisRadiusPixRight)
+                if (value != this.irisRadiusPixRight & value <= this.MaxIrisRadPixd)
                 {
                     this.irisRadiusPixRight = value;
                     this.OnPropertyChanged(this, nameof(IrisRadiusPixRight));
@@ -490,7 +490,7 @@ namespace OpenIris
         /// Gets or sets the maximum radius of the iris
         /// </summary>
         [Browsable(false)]
-        public double MaxIrisRadPixd { get { return this.maxIrisRadmm / this.MmPerPix; } }
+        public int MaxIrisRadPixd { get { return (int)Math.Ceiling(this.maxIrisRadmm / this.GetMmPerPix()); } }
 
         /// <summary>
         /// Gets or sets the maximum radius of the iris

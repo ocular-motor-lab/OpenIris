@@ -210,7 +210,7 @@ namespace OpenIris
                 {
                     if (image is null) continue;
 
-                    EyeTrackerDebug.TrackTimeBeginingFrame();
+                    EyeTrackerDebug.TrackTimeBeginingFrame(image.TimeStamp);
 
                     var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(item.images.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
                     var calibration = item.images.Calibration.EyeCalibrationParameters[image.WhichEye];

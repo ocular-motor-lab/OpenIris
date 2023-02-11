@@ -182,13 +182,12 @@ namespace OpenIris.ImageGrabbing
             };
 
             // Retrieve the new frame
-            var tempImage = Video.QueryFrame().ToImage<Gray, byte>();
+            var grayImage = Video.QueryFrame().ToImage<Gray, byte>();
 
-            LastFrameNumber = (long)timestamp.FrameNumberRaw;
-
-            var imageEye = new ImageEye(tempImage.Bitmap, WhichEye, timestamp);
+            var imageEye = new ImageEye(grayImage.Bitmap, WhichEye, timestamp);
             imageEye.CorrectOrientation(CameraOrientation);
 
+            LastFrameNumber = (long)timestamp.FrameNumberRaw;
             return imageEye;
         }
     }

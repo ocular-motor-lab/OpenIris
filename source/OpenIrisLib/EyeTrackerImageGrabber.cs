@@ -298,6 +298,8 @@ namespace OpenIris
                     CurrentFrameNumber = grabbedImages.GetFrameNumber();
                     NumberFramesGrabbed++;
 
+                    // grabbedImages[Eye.Left].TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+                    // grabbedImages[Eye.Right].TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
                     ImagesGrabbed?.Invoke(this, grabbedImages);
                 }
             }

@@ -15,6 +15,7 @@ namespace OpenIris
     using System.Drawing;
     using System.ComponentModel;
     using System.Runtime.Serialization;
+    using System.Xml.Serialization;
 
     /// <summary>
     /// Interface for all eye tracking pipelines that process images to get data.
@@ -57,7 +58,7 @@ namespace OpenIris
         /// </summary>
         public EyeTrackingPipelineSettings()
         {
-            EyeTrackingPipelineName = "JOM pipeline";
+            EyeTrackingPipelineName = "JOM";
         }
 
         /// <summary>
@@ -74,8 +75,9 @@ namespace OpenIris
         /// That is, the pipelines need values in pixels but it is much easier and consistent to think in miliminters for sizes
         /// of eye parts.
         /// </summary>
+        [XmlIgnore]
         [Browsable(false)]
-        public double MmPerPix { get; set; }
+        public Func<double> GetMmPerPix { get; set; } = () => 1;
 
         /// <summary>
         /// Gets or sets the left part to the frame that is not processed. Right, top, left, bottom.

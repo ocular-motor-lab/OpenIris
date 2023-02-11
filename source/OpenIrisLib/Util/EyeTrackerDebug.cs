@@ -27,7 +27,7 @@ namespace OpenIris
         static EyeTrackerDebug()
         {
             deltaTimes = new ConcurrentDictionary<string, double>();
-            previousMessages = new (double, string, double)[50];
+            previousPeriods = new (double, string, double)[50];
             stopWatch = Stopwatch.StartNew();
             Images = new ConcurrentDictionary<string, EyeCollection<Image<Bgr, byte>?>>();
         }
@@ -46,7 +46,7 @@ namespace OpenIris
         /// For each thread (ThreadID is the key of the dictionary) saves
         /// the last message tracked, the time it happened, and the time of the begining of the frame.
         /// </summary>
-        private static readonly (double beginTime, string message, double time)[] previousMessages;
+        private static readonly (double beginTime, string periodName, double endTime)[] previousPeriods;
 
         /// <summary>
         /// Collection of debug images with a name associated to them.
@@ -123,39 +123,38 @@ namespace OpenIris
         /// <summary>
         /// Tracks a partial time.
         /// </summary>
-        /// <param name="message">Message describing the partial time step.</param>
-        public static void TrackTime(string message)
+        /// <param name="timePeriodName">Message describing the partial time step.</param>
+        public static void TrackTime(string timePeriodName)
         {
             if (DEBUG)
             {
                 var threadID = Thread.CurrentThread.ManagedThreadId;
-                var previousMessage = previousMessages[threadID];
-                var time = EyeTrackerDebug.TimeElapsed.TotalMilliseconds;
-                var newMessage = (previousMessage.beginTime, message, time);
+                var previousPeriod = previousPeriods[threadID];
 
-                switch (message)
+                var beginTime = previousPeriod.endTime;
+                var endTime = EyeTrackerDebug.TimeElapsed.TotalMilliseconds;
+                var newPeriod = (beginTime, timePeriodName, endTime);
+
+                switch (timePeriodName)
                 {
-                    case "FRAME START":
-                        newMessage.beginTime = EyeTrackerDebug.TimeElapsed.TotalMilliseconds;
-                        break;
                     case "FRAME FINISH":
-                        var deltaTime = newMessage.time - previousMessage.beginTime;
+                        var deltaTime = newPeriod.endTime - newPeriod.beginTime;
 
-                        var deltaMessage = "TOTAL";
+                        var deltaMessage = "TOTAL processing";
 
                         if (!deltaTimes.ContainsKey(deltaMessage)) deltaTimes.TryAdd(deltaMessage, deltaTime);
 
                         deltaTimes[deltaMessage] = (deltaTimes[deltaMessage] * 0.95) + (deltaTime * 0.05);
 
                         // Remove the previous times for this thread
-                        newMessage = (0.0, "", 0.0);
+                        newPeriod = (0.0, "", 0.0);
                         break;
                     default:
                         // Delta message serves a code for a section of the code
                         // the times with the same delta message will be averaged and displayed
                         // together
-                        deltaMessage = (previousMessage.message ?? "").PadRight(20) + "->" + message;
-                        deltaTime = newMessage.time - previousMessage.time;
+                        deltaMessage = (previousPeriod.periodName ?? "").PadRight(20) + "->" + timePeriodName;
+                        deltaTime = newPeriod.endTime - newPeriod.beginTime;
 
                         if (!deltaTimes.ContainsKey(deltaMessage))    deltaTimes.TryAdd(deltaMessage, deltaTime);
 
@@ -163,14 +162,19 @@ namespace OpenIris
                         break;
                 }
                 
-                previousMessages[threadID] = newMessage;
+                previousPeriods[threadID] = newPeriod;
             }
         }
 
         /// <summary>
         /// Tracks the time from the begining of the frame processing.
         /// </summary>
-        public static void TrackTimeBeginingFrame() => TrackTime("FRAME START");
+        public static void TrackTimeBeginingFrame(ImageEyeTimestamp timestamp)
+        {
+            var threadID = Thread.CurrentThread.ManagedThreadId;
+            previousPeriods[threadID] = (timestamp.TimeGrabbed * 1000.0, "FRAME GRABBED", timestamp.TimeGrabbed * 1000.0);
+            TrackTime("FRAME START processing");
+        }
 
         /// <summary>
         /// Tracks the time to the end of the frame processing.

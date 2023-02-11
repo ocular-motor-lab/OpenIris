@@ -53,13 +53,17 @@ namespace OpenIris.UI
             
             if (trackingSettings is null) return;
 
+            if (trackBarIrisRadius.Maximum != trackingSettings.MaxIrisRadPixd)
+            {
+                trackBarIrisRadius.Maximum = trackingSettings.MaxIrisRadPixd;
+            }
             
             if (WhichEye == Eye.Left)
             {
                 trackBarPupilThreshold.Value = trackingSettings.DarkThresholdLeftEye;
                 textBoxPupilThreshold.Text = trackingSettings.DarkThresholdLeftEye.ToString();
 
-                trackBarIrisRadius.Value = (int)Math.Min(trackBarIrisRadius.Maximum, (trackingSettings.IrisRadiusPixLeft / trackingSettings.MaxIrisRadPixd * 100.0));
+                trackBarIrisRadius.Value = (int)Math.Round(trackingSettings.IrisRadiusPixLeft);
                 textBoxReflectionThreshold.Text = trackingSettings.BrightThresholdLeftEye.ToString();
 
                 trackBarReflectionThreshold.Value = trackingSettings.BrightThresholdLeftEye;
@@ -67,7 +71,7 @@ namespace OpenIris.UI
             }
             else
             {
-                trackBarIrisRadius.Value = (int)Math.Min(trackBarIrisRadius.Maximum, (trackingSettings.IrisRadiusPixRight / trackingSettings.MaxIrisRadPixd * 100.0));
+                trackBarIrisRadius.Value = (int)Math.Round(trackingSettings.IrisRadiusPixRight);
                 textBoxIrisRadius.Text = trackingSettings.IrisRadiusPixRight.ToString();
 
                 trackBarPupilThreshold.Value = trackingSettings.DarkThresholdRightEye;
@@ -138,7 +142,7 @@ namespace OpenIris.UI
         {
             if (int.TryParse(textBoxIrisRadius.Text, out int value))
             {
-                value = Math.Max(Math.Min(value, 500), 0);
+                value = Math.Max(Math.Min(value, trackingSettings.MaxIrisRadPixd), 0);
 
                 if (WhichEye == Eye.Left)
                 {

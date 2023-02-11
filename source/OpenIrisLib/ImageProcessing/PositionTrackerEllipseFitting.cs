@@ -590,7 +590,7 @@ namespace OpenIris.ImageProcessing
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // -- Thresholding -- Get the binary image with the dark pixels
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            int blurSize = (int)Math.Round(2 * scaleFactor);
+            int blurSize = (int)Math.Max(Math.Round(2 * scaleFactor),1);
             var imgTemp = imageEye.Image.Copy(roiPupil).Resize(resizeWidth, resizeHeight, Emgu.CV.CvEnum.Inter.Cubic).SmoothBlur(blurSize, blurSize);
             var imgPupilBinary = imgTemp.SmoothBlur(10, 10).ThresholdBinaryInv(new Gray(threshold), new Gray(255));
 

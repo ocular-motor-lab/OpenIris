@@ -13,6 +13,15 @@ namespace OpenIris
     [Serializable]
     public class ImageEyeTimestamp : IEquatable<ImageEyeTimestamp>
     {
+        /// <summary>
+        /// Initializes a new instance of timestamp.
+        /// </summary>
+        public ImageEyeTimestamp()
+        {
+            DateTimeGrabbed = DateTime.Now;
+            TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+        }
+
         /// <summary>   
         /// Gets or sets the Seconds from some reference. I.e. connecting to the camera.
         /// </summary>
@@ -32,13 +41,13 @@ namespace OpenIris
         /// <summary>
         /// Gets or sets the timestamp from the time the image is grabbed on the computer.
         /// </summary>
-        public DateTime DateTimeGrabbed { get; set; } = DateTime.Now;
+        public DateTime DateTimeGrabbed { get; set; }
 
         /// <summary>
         /// Gets or sets the ammount of time in seconds since the eye tracker started.
         /// Note that this is not a reliable timestamp. It is used for debuging purposes.
         /// </summary>
-        public double TimeGrabbed { get; set; } = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+        public double TimeGrabbed { get; set; }
 
         /// <summary>
         /// Compares two timestamps.

@@ -39,7 +39,7 @@ namespace OpenIris
             double threshdoldBright = (imageEye.WhichEye == Eye.Left) ? trackingSettings?.BrightThresholdLeftEye ?? 0 : trackingSettings?.BrightThresholdRightEye ?? 0;
             Rectangle croppingRectangle = (imageEye.WhichEye == Eye.Left) ? settings.CroppingLeftEye : settings.CroppingRightEye;
 
-            DrawAllData(image, imageEye.EyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingRectangle);
+            DrawAllData(image, imageEye.EyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingRectangle, settings.GetMmPerPix());
             return image;
         }
 
@@ -52,7 +52,7 @@ namespace OpenIris
         /// <param name="thresholdDark"></param>
         /// <param name="threshdoldBright"></param>
         /// <param name="croppingRectangle"></param>
-        public static void DrawAllData(Image<Bgr, byte>? image, EyeData data, EyePhysicalModel eyeGlobe, double thresholdDark, double threshdoldBright, Rectangle croppingRectangle)
+        public static void DrawAllData(Image<Bgr, byte>? image, EyeData data, EyePhysicalModel eyeGlobe, double thresholdDark, double threshdoldBright, Rectangle croppingRectangle, double mmPerPix)
         {
             if (image is null)  return;
 
@@ -78,6 +78,8 @@ namespace OpenIris
             ImageEyeDrawing.DrawIris(image, data, eyeGlobe);
 
             ImageEyeDrawing.DrawCross(image, data);
+
+            ImageEyeDrawing.DrawMMScale(image, mmPerPix);
         }
 
         public static void DrawCross(Image<Bgr, byte> image, EyeData data)
@@ -318,6 +320,30 @@ namespace OpenIris
                 circle = new CircleF(circle.Center, circle.Radius);
                 image.Draw(circle, new Bgr(Color.White), 1);
             }
+        }
+
+        public static void DrawMMScale(Image<Bgr, byte> image, double mmPerPix)
+        {
+            CvInvoke.Line(image,
+                    new Point(
+                        2,
+                        image.Size.Height - 2),
+                    new Point(
+                        2 + (int)Math.Round(10.0 / mmPerPix),
+                        image.Size.Height - 2),
+                    new Bgr(Color.White).MCvScalar,
+                    2,
+                    Emgu.CV.CvEnum.LineType.AntiAlias);
+            CvInvoke.Line(image,
+                    new Point(
+                        2,
+                        image.Size.Height - 4),
+                    new Point(
+                        2 + (int)Math.Round(10.0 / mmPerPix),
+                        image.Size.Height - 4),
+                    new Bgr(Color.Black).MCvScalar,
+                    2,
+                    Emgu.CV.CvEnum.LineType.AntiAlias);
         }
     }
 }

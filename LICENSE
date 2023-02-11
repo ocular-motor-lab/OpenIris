@@ -1,7 +1,25 @@
-                    GNU GENERAL PUBLIC LICENSE
+Section 1 (Overview):
+
+OpenIris uses a Dual License business model offering licenses for two 
+distinct purposes - open source and commercial development
+
+1. If you wish to use the open source license, this software is licensed 
+under GPL V3. You agree that you will contribute all your source code to 
+the open source community and you will give them the right to share it with 
+everyone too. The complete GPL v3 terms are included in Section 2. 
+
+2. If you want to have a commercial advantage by having a closed source 
+solution, you must obtain a commercial licenses by contacting Jorge Otero-Millan. 
+By obtaining a commercial license, you are no longer obligated to publish your 
+source code.
+
+========================================================================
+Section 2 (Open Source License):
+
+                      GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
- Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
@@ -645,7 +663,7 @@ the "copyright" line and a pointer to where the full notice is found.
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Also add information on how to contact you by electronic and paper mail.
 
@@ -664,11 +682,11 @@ might be different; for a GUI interface, you would use an "about box".
   You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU GPL, see
-<https://www.gnu.org/licenses/>.
+<http://www.gnu.org/licenses/>.
 
   The GNU General Public License does not permit incorporating your program
 into proprietary programs.  If your program is a subroutine library, you
 may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
-<https://www.gnu.org/licenses/why-not-lgpl.html>.
+<http://www.gnu.org/philosophy/why-not-lgpl.html>.

@@ -54,7 +54,11 @@ namespace OpenIris.UI
             {
                 trackBarIrisRadius.Maximum = trackingSettings.MaxIrisRadPixd;
             }
-            
+
+            trackingSettings.IrisRadiusPixLeft = Math.Min(trackingSettings.IrisRadiusPixLeft, trackingSettings.MaxIrisRadPixd);
+            trackingSettings.IrisRadiusPixRight = Math.Min(trackingSettings.IrisRadiusPixRight, trackingSettings.MaxIrisRadPixd);
+
+
             if (WhichEye == Eye.Left)
             {
                 trackBarPupilThreshold.Value = trackingSettings.DarkThresholdLeftEye;
@@ -127,11 +131,11 @@ namespace OpenIris.UI
         {
             if (WhichEye == Eye.Left)
             {
-                trackingSettings.IrisRadiusPixLeft = (int)(trackingSettings.MaxIrisRadPixd * trackBarIrisRadius.Value / 100.0);
+                trackingSettings.IrisRadiusPixLeft = trackBarIrisRadius.Value;
             }
             else
             {
-                trackingSettings.IrisRadiusPixRight = (int)(trackingSettings.MaxIrisRadPixd * trackBarIrisRadius.Value / 100.0);
+                trackingSettings.IrisRadiusPixRight = trackBarIrisRadius.Value;
             }
         }
 

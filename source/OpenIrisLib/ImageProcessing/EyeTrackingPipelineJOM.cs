@@ -135,7 +135,7 @@ namespace OpenIris
         /// <returns></returns>
         public IPipelineUI? GetPipelineUI(Eye whichEye)
         {
-            return new UI.EyeTrackerQuickSettings(whichEye);
+            return new UI.EyeTrackerPipelineQuickSettings(whichEye);
         }
     }
 
@@ -146,7 +146,7 @@ namespace OpenIris
     /// UI client
     /// </summary>
     [Serializable]
-    public class EyeTrackingPipelineSettingsWithThresholds : EyeTrackingPipelineSettings
+    public class EyeTrackingPipelineWithThresholdsSettings : EyeTrackingPipelineSettings
     {
         /// <summary>
         /// Gets or sets threshold to find the dark pixels that should belong to the pupil (left eye)
@@ -248,7 +248,7 @@ namespace OpenIris
     }
 
     [Serializable]
-    public class EyeTrackingPipelineJOMSettings : EyeTrackingPipelineSettingsWithThresholds
+    public class EyeTrackingPipelineJOMSettings : EyeTrackingPipelineWithThresholdsSettings
     {
         #region General tracking settings
 

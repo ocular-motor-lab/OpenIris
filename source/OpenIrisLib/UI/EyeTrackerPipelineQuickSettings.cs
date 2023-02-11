@@ -8,11 +8,8 @@ namespace OpenIris.UI
 #nullable enable
 
     using System;
-    using System.ComponentModel;
-    using System.Drawing;
     using System.Windows.Forms;
     using OpenIris;
-    using OpenIris.ImageProcessing;
     using Emgu.CV;
     using Emgu.CV.UI;
     using Emgu.CV.Structure;
@@ -20,14 +17,14 @@ namespace OpenIris.UI
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.
     /// </summary>
-    public partial class EyeTrackerQuickSettings : UserControl, IPipelineUI
+    public partial class EyeTrackerPipelineQuickSettings : UserControl, IPipelineUI
     {
         private EyeTrackingPipelineJOMSettings trackingSettings;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerQuickSettings class.
         /// </summary>
-        public EyeTrackerQuickSettings(Eye whichEye)
+        public EyeTrackerPipelineQuickSettings(Eye whichEye)
         {
             InitializeComponent();
 
@@ -47,7 +44,7 @@ namespace OpenIris.UI
         /// <summary>
         /// Updates the control.
         /// </summary>
-        public void UpdateValues(EyeTrackingPipelineSettingsWithThresholds currentTrackingSettings)
+        public void UpdateValues(EyeTrackingPipelineWithThresholdsSettings currentTrackingSettings)
         {
             trackingSettings = currentTrackingSettings as EyeTrackingPipelineJOMSettings;
             
@@ -197,7 +194,7 @@ namespace OpenIris.UI
         public void UpdatePipelineUI(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
         {
             var image = dataAndImages.Images[WhichEye];
-            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelineSettingsWithThresholds ?? throw new Exception();
+            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelineWithThresholdsSettings ?? throw new Exception();
             var eyeCalibration = dataAndImages.Calibration.EyeCalibrationParameters[WhichEye];
 
             UpdateValues(settings);

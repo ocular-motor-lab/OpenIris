@@ -27,7 +27,7 @@ namespace OpenIris
         static EyeTrackerDebug()
         {
             deltaTimes = new ConcurrentDictionary<string, double>();
-            previousPeriods = new (double, string, double)[50];
+            previousPeriods = new (double, string, double, double)[50];
             stopWatch = Stopwatch.StartNew();
             Images = new ConcurrentDictionary<string, EyeCollection<Image<Bgr, byte>?>>();
         }
@@ -46,7 +46,7 @@ namespace OpenIris
         /// For each thread (ThreadID is the key of the dictionary) saves
         /// the last message tracked, the time it happened, and the time of the begining of the frame.
         /// </summary>
-        private static readonly (double beginTime, string periodName, double endTime)[] previousPeriods;
+        private static readonly (double beginTime, string periodName, double endTime, double frameStartTime)[] previousPeriods;
 
         /// <summary>
         /// Collection of debug images with a name associated to them.
@@ -133,35 +133,36 @@ namespace OpenIris
 
                 var beginTime = previousPeriod.endTime;
                 var endTime = EyeTrackerDebug.TimeElapsed.TotalMilliseconds;
-                var newPeriod = (beginTime, timePeriodName, endTime);
+                var newPeriod = (beginTime, timePeriodName, endTime, previousPeriod.frameStartTime);
+
+                var deltaTime = 0.0;
+                var deltaMessage = "";
 
                 switch (timePeriodName)
                 {
                     case "FRAME FINISH":
-                        var deltaTime = newPeriod.endTime - newPeriod.beginTime;
+                        deltaTime = newPeriod.endTime - newPeriod.frameStartTime;
+                        deltaMessage = "TOTAL processing";
 
-                        var deltaMessage = "TOTAL processing";
-
-                        if (!deltaTimes.ContainsKey(deltaMessage)) deltaTimes.TryAdd(deltaMessage, deltaTime);
-
-                        deltaTimes[deltaMessage] = (deltaTimes[deltaMessage] * 0.95) + (deltaTime * 0.05);
-
-                        // Remove the previous times for this thread
-                        newPeriod = (0.0, "", 0.0);
                         break;
                     default:
                         // Delta message serves a code for a section of the code
                         // the times with the same delta message will be averaged and displayed
                         // together
-                        deltaMessage = (previousPeriod.periodName ?? "").PadRight(20) + "->" + timePeriodName;
+                        deltaMessage = (previousPeriod.periodName ?? "").PadRight(20) + "-> " + timePeriodName;
                         deltaTime = newPeriod.endTime - newPeriod.beginTime;
 
-                        if (!deltaTimes.ContainsKey(deltaMessage))    deltaTimes.TryAdd(deltaMessage, deltaTime);
-
-                        deltaTimes[deltaMessage] = (deltaTimes[deltaMessage] * 0.99) + (deltaTime * 0.01);
                         break;
                 }
-                
+
+
+                if (!deltaTimes.ContainsKey(deltaMessage))
+                {
+                    deltaTimes.TryAdd(deltaMessage, deltaTime);
+                }
+
+                deltaTimes[deltaMessage] = (deltaTimes[deltaMessage] * 0.99) + (deltaTime * 0.01);
+
                 previousPeriods[threadID] = newPeriod;
             }
         }
@@ -172,7 +173,7 @@ namespace OpenIris
         public static void TrackTimeBeginingFrame(ImageEyeTimestamp timestamp)
         {
             var threadID = Thread.CurrentThread.ManagedThreadId;
-            previousPeriods[threadID] = (timestamp.TimeGrabbed * 1000.0, "FRAME GRABBED", timestamp.TimeGrabbed * 1000.0);
+            previousPeriods[threadID] = (timestamp.TimeGrabbed * 1000.0, "FRAME GRABBED", timestamp.TimeGrabbed * 1000.0, EyeTrackerDebug.TimeElapsed.TotalMilliseconds);
             TrackTime("FRAME START processing");
         }
 

@@ -176,11 +176,11 @@
     <Compile Include="UI\EyeTrackerImageEyeBox.Designer.cs">
       <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\EyeTrackerQuickSettings.cs">
+    <Compile Include="UI\EyeTrackerPipelineQuickSettings.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UI\EyeTrackerQuickSettings.Designer.cs">
-      <DependentUpon>EyeTrackerQuickSettings.cs</DependentUpon>
+    <Compile Include="UI\EyeTrackerPipelineQuickSettings.Designer.cs">
+      <DependentUpon>EyeTrackerPipelineQuickSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\EyeTrackerSettingsForm.cs">
       <SubType>Form</SubType>
@@ -244,8 +244,8 @@
     <EmbeddedResource Include="UI\EyeTrackerImageEyeBox.resx">
       <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\eyeTrackerQuickSettings.resx">
-      <DependentUpon>EyeTrackerQuickSettings.cs</DependentUpon>
+    <EmbeddedResource Include="UI\EyeTrackerPipelineQuickSettings.resx">
+      <DependentUpon>EyeTrackerPipelineQuickSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackerSettingsForm.resx">
       <DependentUpon>EyeTrackerSettingsForm.cs</DependentUpon>

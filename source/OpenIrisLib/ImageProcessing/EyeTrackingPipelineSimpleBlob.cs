@@ -20,7 +20,7 @@ namespace OpenIris
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimpleBlob", typeof(EyeTrackingPipelineSettingsWithThresholds))]
+    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimpleBlob", typeof(EyeTrackingPipelineWithThresholdsSettings))]
     public sealed class EyeTrackingPipelineSimpleBlob : IEyeTrackingPipeline, IDisposable
     {
         private readonly CvBlobDetector detector = new CvBlobDetector();
@@ -44,7 +44,7 @@ namespace OpenIris
         /// <returns></returns>
         public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings settings)
         {
-            var trackingSettings = settings as EyeTrackingPipelineSettingsWithThresholds ?? throw new Exception("Wrong type of settings");
+            var trackingSettings = settings as EyeTrackingPipelineWithThresholdsSettings ?? throw new Exception("Wrong type of settings");
 
             var maxPupRad = 10 / trackingSettings.GetMmPerPix();
             var irisRad = (float)(12 / trackingSettings.GetMmPerPix());

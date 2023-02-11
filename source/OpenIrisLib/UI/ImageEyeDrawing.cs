@@ -30,7 +30,7 @@ namespace OpenIris
         {
             if (imageEye == null) return null;
 
-            var trackingSettings = settings as EyeTrackingPipelineSettingsWithThresholds;
+            var trackingSettings = settings as EyeTrackingPipelineWithThresholdsSettings;
 
             var image = imageEye.Image.Convert<Bgr, byte>();
 

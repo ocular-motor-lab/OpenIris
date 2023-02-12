@@ -305,24 +305,27 @@ namespace OpenIris
                 case VideoPlayerState.Playing:
                 case VideoPlayerState.Paused:
 
-                    // Check if the videos are finished.
-                    if (lastFrameNumber >= (ulong)FrameRange.End)
-                    {
-                        if (state != VideoPlayerState.Finished)
-                        {
-                            state = VideoPlayerState.Finished;
-                            scrolling = (false, 0);
-
-                            VideoFinished?.Invoke(this, new EventArgs());
-                        }
-                        return null;
-                    }
-
                     // If scrolling move all the videos to the next frame.
                     if (scrolling.isOn)
                     {
                         Videos.ForEach(video => video?.Scroll(scrolling.frameNumber));
                     }
+                    else
+                    {
+                        // Check if the videos are finished.
+                        if (lastFrameNumber >= (ulong)FrameRange.End)
+                        {
+                            if (state != VideoPlayerState.Finished)
+                            {
+                                state = VideoPlayerState.Finished;
+                                scrolling = (false, 0);
+
+                                VideoFinished?.Invoke(this, new EventArgs());
+                            }
+                            return null;
+                        }
+                    }
+
 
                     // Grab the images from the videos.
                     var images = new EyeCollection<ImageEye?>(new ImageEye?[Videos.Count]);

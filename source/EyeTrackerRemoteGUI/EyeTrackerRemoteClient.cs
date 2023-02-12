@@ -48,7 +48,7 @@ namespace OpenIris
 
                     if (eyeTrackerStatus.Tracking)
                     {
-                        var settings = eyeTracker.Settings as EyeTrackingPipelineWithThresholdsSettings ?? 
+                        var settings = eyeTracker.Settings as EyeTrackingPipelinePupilCRSettings ?? 
                             throw new InvalidOperationException("Wrong settings.");
 
                         var calibrationParameters = eyeTracker.GetCalibrationParameters();

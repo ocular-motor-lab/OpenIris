@@ -8,15 +8,19 @@ using Emgu.CV.UI;
 namespace OpenIris
 {
     /// <summary>
-    /// Interface for UI for pipelines
+    /// Interface for UI for pipelines, one per eye
     /// </summary>
     public interface IPipelineUI
     {
+        Eye WhichEye { get; }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="imageBox"></param>
         /// <param name="dataAndImages"></param>
-        void UpdatePipelineUI(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages);
+        void UpdatePipelineEyeimage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages);
+
+        void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages);
     }
 }

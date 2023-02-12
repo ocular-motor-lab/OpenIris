@@ -135,120 +135,14 @@ namespace OpenIris
         /// <returns></returns>
         public IPipelineUI? GetPipelineUI(Eye whichEye)
         {
-            return new UI.EyeTrackerPipelineQuickSettings(whichEye);
+            return new UI.EyeTrackingPipelineJOMQuickSettings(whichEye);
         }
     }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-    /// <summary>
-    /// Settings for any pipeline that uses thresholds for pupil and reflections. Important to make them compatible with the remote
-    /// UI client
-    /// </summary>
     [Serializable]
-    public class EyeTrackingPipelineWithThresholdsSettings : EyeTrackingPipelineSettings
-    {
-        /// <summary>
-        /// Gets or sets threshold to find the dark pixels that should belong to the pupil (left eye)
-        /// </summary>
-        [Category("Pupil tracking settings"), Description("Threshold to find the dark pixels that should belong to the pupil (left eye).")]
-        public int DarkThresholdLeftEye
-        {
-            get { return this.thresholdDarkLeftEye; }
-            set
-            {
-                if (value != this.thresholdDarkLeftEye)
-                {
-                    this.thresholdDarkLeftEye = value;
-                    this.OnPropertyChanged(this, nameof(DarkThresholdLeftEye));
-                }
-            }
-        }
-        private int thresholdDarkLeftEye = 60;
-
-        /// <summary>
-        /// Gets or sets threshold to find the dark pixels that should belong to the pupil (right eye)
-        /// </summary>
-        [Category("Pupil tracking settings"), Description("Threshold to find the dark pixels that should belong to the pupil (right eye).")]
-        public int DarkThresholdRightEye
-        {
-            get { return this.thresholdDarkRightEye; }
-            set
-            {
-                if (value != this.thresholdDarkRightEye)
-                {
-                    this.thresholdDarkRightEye = value;
-                    this.OnPropertyChanged(this, nameof(DarkThresholdRightEye));
-                }
-            }
-        }
-        private int thresholdDarkRightEye = 60;
-
-        /// <summary>
-        /// Gets or sets threshold to find the bright pixels that should belong to the reflexions
-        /// (left eye)
-        /// </summary>
-        [Category("Corneal Reflection tracking settings"), Description("Threshold to find the bright pixels that should belong to the reflexions (left eye).")]
-        public int BrightThresholdLeftEye
-        {
-            get { return this.thresholdBrightLeftEye; }
-            set
-            {
-                if (value != this.thresholdBrightLeftEye)
-                {
-                    this.thresholdBrightLeftEye = value;
-                    this.OnPropertyChanged(this, nameof(BrightThresholdLeftEye));
-                }
-            }
-        }
-        private int thresholdBrightLeftEye = 250;
-
-        /// <summary>
-        /// Gets or sets threshold to find the bright pixels that should belong to the reflexions
-        /// (right eye)
-        /// </summary>
-        [Category("Corneal Reflection tracking settings"), Description("Threshold to find the bright pixels that should belong to the reflexions (right eye).")]
-        public int BrightThresholdRightEye
-        {
-            get { return this.thresholdBrightRightEye; }
-            set
-            {
-                if (value != this.thresholdBrightRightEye)
-                {
-                    this.thresholdBrightRightEye = value;
-                    this.OnPropertyChanged(this, nameof(BrightThresholdRightEye));
-                }
-            }
-        }
-        private int thresholdBrightRightEye = 250;
-
-        /// <summary>
-        /// Gets the minimum radius of the pupil in pixels
-        /// </summary>
-        [Browsable(false)]
-        public double MinPupRadPix { get { return this.minPupRadmm / this.GetMmPerPix(); } }
-
-        /// <summary>
-        /// Gets or sets the minimum radius of the pupil in mm
-        /// </summary>
-        [Category("Pupil tracking settings"), Description("Minimum radius of the pupil in mms.")]
-        public double MinPupRadmm
-        {
-            get { return this.minPupRadmm; }
-            set
-            {
-                if (value != this.minPupRadmm)
-                {
-                    this.minPupRadmm = value;
-                    this.OnPropertyChanged(this, nameof(MinPupRadmm));
-                }
-            }
-        }
-        private double minPupRadmm = 1;
-    }
-
-    [Serializable]
-    public class EyeTrackingPipelineJOMSettings : EyeTrackingPipelineWithThresholdsSettings
+    public class EyeTrackingPipelineJOMSettings : EyeTrackingPipelinePupilCRSettings
     {
         #region General tracking settings
 
@@ -337,59 +231,6 @@ namespace OpenIris
             }
         }
         private CornealReflectionTracking.CornealReflectionTrackingMethod cornealReflectionTrackingMethod = CornealReflectionTracking.CornealReflectionTrackingMethod.Blob;
-
-        /// <summary>
-        /// Gets or sets the minimum radius of the pupil
-        /// </summary>
-        [Browsable(false)]
-        public double MinCRRadPix { get { return this.minCRRadmm / this.GetMmPerPix(); } }
-
-        /// <summary>
-        /// Gets or sets the maximum radius of the CRs (glints)
-        /// </summary>
-        [Browsable(false)]
-        public double MaxCRRadPix { get { return this.maxCRRadmm / this.GetMmPerPix(); } }
-
-        /// <summary>
-        /// Gets or sets the minimum radius of the CR  in mm
-        /// </summary>
-        [Category("Corneal Reflection tracking settings"), Description("Minimum radius of the CR in mmms.")]
-        public double MinCRRadmm
-        {
-            get
-            {
-                return this.minCRRadmm;
-            }
-
-            set
-            {
-                if (value != this.minCRRadmm)
-                {
-                    this.minCRRadmm = value;
-                    this.OnPropertyChanged(this, nameof(MinCRRadmm));
-                }
-            }
-        }
-
-        private double minCRRadmm = 0.3;
-
-        /// <summary>
-        /// Gets or sets the maximum radius of the CRs (glints)
-        /// </summary>
-        [Category("Corneal Reflection tracking settings"), Description("Maximum radius of the CR in mms.")]
-        public double MaxCRRadmm
-        {
-            get { return maxCRRadmm; }
-            set
-            {
-                if (value != this.maxCRRadmm)
-                {
-                    this.maxCRRadmm = value;
-                    this.OnPropertyChanged(this, nameof(MaxCRRadmm));
-                }
-            }
-        }
-        private double maxCRRadmm = 5;
 
         #endregion corneal reflection tracking settings
 

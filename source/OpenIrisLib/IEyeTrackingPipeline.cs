@@ -10,12 +10,14 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Structure;
+    using Emgu.CV.UI;
     using System;
     using System.Linq;
     using System.Drawing;
     using System.ComponentModel;
     using System.Runtime.Serialization;
     using System.Xml.Serialization;
+    using System.Windows.Forms;
 
     /// <summary>
     /// Interface for all eye tracking pipelines that process images to get data.
@@ -48,7 +50,8 @@ namespace OpenIris
     public class EyeTrackingPipelineSettings : EyeTrackerSettingsBase
     {
         /// <summary>
-        /// Gets the derived types for the serialization over wcf.
+        /// Gets the derived types for the serialization over wcf. This is necessary for the settings to be loaded. It's complicated. Because we are loading plugins in runtime we 
+        /// don't know a prioiry the types. 
         /// </summary>
         /// <returns></returns>
         public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingPipelineSettings))).ToArray();

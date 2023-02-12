@@ -328,18 +328,23 @@ namespace OpenIris.UI
                 // Update pipeline UIs
                 foreach (var eye in eyes)
                 {
-                    var pipelineUI = eyeTracker.ImageProcessor?.PipelineUI?[eye] as UserControl;
+                    var pipelineUI = eyeTracker.ImageProcessor?.PipelineUI?[eye];
+                    var pipelineUIControl = pipelineUI as UserControl;
 
-                    if (panels[eye].Controls.Contains(pipelineUI)) continue;
+                    if (panels[eye].Controls.Contains(pipelineUIControl))
+                    {
+                        pipelineUI.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);
+                        continue;
+                    }
 
                     panels[eye].Controls.Clear();
 
-                    if (pipelineUI is UserControl)
+                    if (pipelineUIControl is UserControl)
                     {
-                        pipelineUI.Dock = DockStyle.Fill;
-                        pipelineUI.Location = new Point(0, 0);
-                        pipelineUI.Size = panels[eye].ClientSize;
-                        panels[eye].Controls.Add(pipelineUI);
+                        pipelineUIControl.Dock = DockStyle.Fill;
+                        pipelineUIControl.Location = new Point(0, 0);
+                        pipelineUIControl.Size = panels[eye].ClientSize;
+                        panels[eye].Controls.Add(pipelineUIControl);
                     }
                 }
 
@@ -362,7 +367,7 @@ namespace OpenIris.UI
                         }
                         else
                         {
-                            ui.UpdatePipelineUI(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
+                            ui.UpdatePipelineEyeimage(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
                         }
                     }
                 }

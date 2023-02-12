@@ -62,7 +62,7 @@ namespace OpenIris.ImageProcessing
         /// <param name="pupilAprox"></param>
         /// <param name="trackingSettings">Configuration parameters.</param>
         /// <returns>Pupil ellipse.</returns>
-        public static CornealReflectionData[] FindCornealReflectionsBlob(CvBlobDetector detector, CvBlobs blobs, ImageEye imageEye, PupilData pupilAprox, EyeTrackingPipelineJOMSettings trackingSettings)
+        public static CornealReflectionData[] FindCornealReflectionsBlob(CvBlobDetector detector, CvBlobs blobs, ImageEye imageEye, PupilData pupilAprox, EyeTrackingPipelinePupilCRSettings trackingSettings)
         {
             if (detector is null) throw new ArgumentNullException(nameof(detector));
             if (blobs is null) throw new ArgumentNullException(nameof(blobs));

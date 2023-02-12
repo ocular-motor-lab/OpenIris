@@ -451,10 +451,10 @@ namespace SubjectiveTracker
             {
                 data.CurrentFrameNumber = videoPlayer.CurrentFrameNumber;
 
-                if (Mod(data.CurrentFrameNumber, data.Options.EveryOtherFrame) != 0)
+                if (Mod((int)data.CurrentFrameNumber, data.Options.EveryOtherFrame) != 0)
                 {
                     var newFrameNumber = Math.Ceiling(data.CurrentFrameNumber / (double)data.Options.EveryOtherFrame) * data.Options.EveryOtherFrame;
-                    videoPlayer.Scroll((long)newFrameNumber);
+                    videoPlayer.Scroll((ulong)newFrameNumber);
                     return;
                 }
             }
@@ -462,10 +462,10 @@ namespace SubjectiveTracker
             {
                 data.CurrentFrameNumber = videoPlayer.CurrentFrameNumber;
 
-                if (Mod(data.CurrentFrameNumber, data.Options.EveryOtherFrame) != 0)
+                if (Mod((long)data.CurrentFrameNumber, data.Options.EveryOtherFrame) != 0)
                 {
                     var newFrameNumber = Math.Floor(data.CurrentFrameNumber / (double)data.Options.EveryOtherFrame) * data.Options.EveryOtherFrame;
-                    videoPlayer.Scroll((long)newFrameNumber);
+                    videoPlayer.Scroll((ulong)newFrameNumber);
                     return;
                 }
             }

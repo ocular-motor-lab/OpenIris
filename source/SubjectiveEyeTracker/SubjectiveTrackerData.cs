@@ -17,7 +17,7 @@ namespace SubjectiveTracker
     {
         public string[] VideoFiles;
 
-        public long CurrentFrameNumber;
+        public ulong CurrentFrameNumber;
 
         public ObservableCollection<string> MarkerNames;
 
@@ -109,7 +109,7 @@ namespace SubjectiveTracker
     public class MarkerData
     {
         public string MarkerName;
-        public long FrameNumber;
+        public ulong FrameNumber;
         public Point Location;
         public LeftRight LeftRight;
 

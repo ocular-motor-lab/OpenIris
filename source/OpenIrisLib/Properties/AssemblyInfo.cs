@@ -7,12 +7,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("VOG library")]
+[assembly: AssemblyTitle("Oprn Itid library")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Johns Hopkins University")]
-[assembly: AssemblyProduct("3D EyeTracker")]
-[assembly: AssemblyCopyright("Copyright © Jorge Otero-Millan 2013-2017")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Open Iris")]
+[assembly: AssemblyCopyright("Copyright © Jorge Otero-Millan 2013-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

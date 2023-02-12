@@ -6,12 +6,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("3D EyeTracker user interface")]
+[assembly: AssemblyTitle("OpenIris application")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Johns Hopkins University")]
-[assembly: AssemblyProduct("3D EyeTracker")]
-[assembly: AssemblyCopyright("Copyright © Jorge Otero-Millan 2013-2019")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("OpenIris")]
+[assembly: AssemblyCopyright("Copyright © Jorge Otero-Millan 2013-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -69,6 +69,11 @@ namespace OpenIris.ImageProcessing
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
 
+            int blurSize = (int)Math.Round(trackingSettings.MinCRRadPix / 2);
+            var threshold = (imageEye.WhichEye == Eye.Left) ? trackingSettings.BrightThresholdLeftEye : trackingSettings.BrightThresholdRightEye;
+            var maxBlobArea = trackingSettings.MaxCRRadPix * Math.PI * Math.PI;
+            var minBlobArea = trackingSettings.MinCRRadPix * Math.PI * Math.PI;
+
             // Add some padding to the pupil ROI just in case make the ROI always square. This may
             // help in some occasions.
             var squareSize = Math.Max(pupilAprox.Size.Width, pupilAprox.Size.Height);
@@ -82,9 +87,7 @@ namespace OpenIris.ImageProcessing
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // -- Thresholding -- Get the binary image with the dark pixels
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            int blurSize = (int)Math.Round(2.0);
             var imgTemp = imageEye.Image.Copy(roiPupil).SmoothBlur(blurSize, blurSize);
-            var threshold = (imageEye.WhichEye == Eye.Left) ? trackingSettings.BrightThresholdLeftEye : trackingSettings.BrightThresholdRightEye;
             var imgPupilBinary = imgTemp.ThresholdBinary(new Gray(threshold), new Gray(255));
             // TODO: image open and close
 
@@ -98,15 +101,12 @@ namespace OpenIris.ImageProcessing
             
             detector.Detect(imgPupilBinary, blobs);
 
-            var maxBlobSize = trackingSettings.MaxCRRadPix * Math.PI * Math.PI;
-            var minBlobSize = trackingSettings.MinCRRadPix * Math.PI * Math.PI;
-
             foreach (var item in blobs)
             {
                 CvBlob blob = item.Value;
 
                 // If area is too small
-                if (blob.Area > maxBlobSize || blob.Area < minBlobSize)
+                if (blob.Area > maxBlobArea || blob.Area < minBlobArea)
                 {
                     continue;
                 }
@@ -134,7 +134,7 @@ namespace OpenIris.ImageProcessing
                 var imgDebug = imgPupilBinary.Convert<Bgr, byte>();
                 foreach (var cr in crs)
                 {
-                    imgDebug.Draw(new CircleF(cr.Center, cr.Size.Width / 2), new Bgr(Color.Red), 2);
+                    imgDebug.Draw(new CircleF(new PointF(cr.Center.X - roiPupil.X, cr.Center.Y - roiPupil.Y), cr.Size.Width * 2), new Bgr(Color.Red), 2);
                 }
 
                 EyeTrackerDebug.AddImage("CR", imageEye.WhichEye, imgDebug);

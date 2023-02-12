@@ -38,7 +38,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        IPipelineUI? GetPipelineUI(Eye whichEye);
+        EyeTrackingPipelineUI? GetPipelineUI(Eye whichEye);
     }
 
     /// <summary>

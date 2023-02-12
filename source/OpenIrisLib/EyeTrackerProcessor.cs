@@ -52,7 +52,7 @@ namespace OpenIris
             this.allowDroppedFrames = allowDroppedFrames;
 
             pipeline = new ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)>();
-            PipelineUI = new EyeCollection<IPipelineUI?>(null, null);
+            PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(null, null);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace OpenIris
         /// <summary>
         /// User interface for the current pipeline. For each eye.
         /// </summary>
-        public EyeCollection<IPipelineUI?> PipelineUI { get; private set; }
+        public EyeCollection<EyeTrackingPipelineUI?> PipelineUI { get; private set; }
 
         /// <summary>
         /// Gets the total number of frames received.

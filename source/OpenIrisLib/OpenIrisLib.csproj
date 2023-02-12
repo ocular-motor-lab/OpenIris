@@ -118,7 +118,9 @@
     <Compile Include="RemoteService\IEyeTrackerWebService.cs" />
     <Compile Include="UI\EyeTrackerUICommand.cs" />
     <Compile Include="UI\ImageEyeDrawing.cs" />
-    <Compile Include="UI\IPipelineUI.cs" />
+    <Compile Include="UI\EyeTrackingPipelineUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="UI\ProgressBarDialog.cs">
       <SubType>Form</SubType>
     </Compile>

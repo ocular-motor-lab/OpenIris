@@ -329,9 +329,8 @@ namespace OpenIris.UI
                 foreach (var eye in eyes)
                 {
                     var pipelineUI = eyeTracker.ImageProcessor?.PipelineUI?[eye];
-                    var pipelineUIControl = pipelineUI as UserControl;
 
-                    if (panels[eye].Controls.Contains(pipelineUIControl))
+                    if (panels[eye].Controls.Contains(pipelineUI))
                     {
                         pipelineUI.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);
                         continue;
@@ -339,13 +338,10 @@ namespace OpenIris.UI
 
                     panels[eye].Controls.Clear();
 
-                    if (pipelineUIControl is UserControl)
-                    {
-                        pipelineUIControl.Dock = DockStyle.Fill;
-                        pipelineUIControl.Location = new Point(0, 0);
-                        pipelineUIControl.Size = panels[eye].ClientSize;
-                        panels[eye].Controls.Add(pipelineUIControl);
-                    }
+                    pipelineUI.Dock = DockStyle.Fill;
+                    pipelineUI.Location = new Point(0, 0);
+                    pipelineUI.Size = panels[eye].ClientSize;
+                    panels[eye].Controls.Add(pipelineUI);
                 }
 
                 // Update Eye Images
@@ -360,14 +356,11 @@ namespace OpenIris.UI
 
                         if (ui is null)
                         {
-                            imageBoxes[eye].Image = ImageEyeDrawing.DrawAllData(
-                                data.Images[eye],
-                                data.Calibration.EyeCalibrationParameters[eye],
-                                data.TrackingSettings);
+                            EyeTrackingPipelineUI.UpdatePipelineEyeImage(eye, imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
                         }
                         else
                         {
-                            ui.UpdatePipelineEyeimage(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
+                            ui.UpdatePipelineEyeImage(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
                         }
                     }
                 }

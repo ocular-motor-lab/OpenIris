@@ -87,7 +87,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        public IPipelineUI? GetPipelineUI(Eye whichEye)
+        public EyeTrackingPipelineUI? GetPipelineUI(Eye whichEye)
         {
             return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye);
         }

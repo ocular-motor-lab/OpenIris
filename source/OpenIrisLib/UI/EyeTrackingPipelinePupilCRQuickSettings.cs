@@ -17,7 +17,7 @@ namespace OpenIris.UI
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.
     /// </summary>
-    public partial class EyeTrackingPipelinePupilCRQuickSettings : UserControl, IPipelineUI
+    public partial class EyeTrackingPipelinePupilCRQuickSettings : EyeTrackingPipelineUI
     {
         private EyeTrackingPipelinePupilCRSettings trackingSettings;
 
@@ -25,18 +25,12 @@ namespace OpenIris.UI
         /// Initializes a new instance of the EyeTrackerQuickSettings class.
         /// </summary>
         public EyeTrackingPipelinePupilCRQuickSettings(Eye whichEye)
+            : base(whichEye)
         {
             InitializeComponent();
 
-            WhichEye = whichEye;
-
             trackingSettings = new EyeTrackingPipelinePupilCRSettings();
         }
-
-        /// <summary>
-        /// Gets or sets left or right eye.
-        /// </summary>
-        public Eye WhichEye { get; }
 
         /// <summary>
         /// Updates the control.
@@ -145,7 +139,7 @@ namespace OpenIris.UI
         /// </summary>
         /// <param name="imageBox">image box for the eye image.</param>
         /// <param name="dataAndImages"></param>
-        public void UpdatePipelineEyeimage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
+        public override void UpdatePipelineEyeImage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
         {
             var image = dataAndImages.Images[WhichEye];
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
@@ -154,7 +148,7 @@ namespace OpenIris.UI
             // Update Images
             imageBox.Image = ImageEyeDrawing.DrawAllData(image, eyeCalibration, settings);
         }
-        public void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages)
+        public override void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages)
         {
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
 

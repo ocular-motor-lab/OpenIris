@@ -17,29 +17,23 @@ namespace OpenIris.UI
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.
     /// </summary>
-    public partial class EyeTrackingPipelineJOMQuickSettings : UserControl, IPipelineUI
+    public partial class EyeTrackingPipelineJOMQuickSettings : EyeTrackingPipelineUI
     {
         private EyeTrackingPipelineJOMSettings trackingSettings;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerQuickSettings class.
         /// </summary>
-        public EyeTrackingPipelineJOMQuickSettings(Eye whichEye)
+        public EyeTrackingPipelineJOMQuickSettings(Eye whichEye) 
+            : base(whichEye)
         {
             InitializeComponent();
-
-            WhichEye = whichEye;
 
             trackBarIrisRadius.Maximum = 500;
             trackBarIrisRadius.Minimum = 0;
 
             trackingSettings = new EyeTrackingPipelineJOMSettings();
         }
-
-        /// <summary>
-        /// Gets or sets left or right eye.
-        /// </summary>
-        public Eye WhichEye { get; }
 
         /// <summary>
         /// Updates the control.
@@ -195,7 +189,7 @@ namespace OpenIris.UI
         /// </summary>
         /// <param name="imageBox">image box for the eye image.</param>
         /// <param name="dataAndImages"></param>
-        public void UpdatePipelineEyeimage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
+        public override void UpdatePipelineEyeImage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
         {
             var image = dataAndImages.Images[WhichEye];
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
@@ -232,7 +226,7 @@ namespace OpenIris.UI
             imageBoxIrisRefeference.Image = imageTorsionRef;
         }
 
-        public void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages)
+        public override void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages)
         {
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
 

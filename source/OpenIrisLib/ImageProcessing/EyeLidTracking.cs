@@ -151,7 +151,7 @@ namespace OpenIris.ImageProcessing
                 scale = 1;
             }
 
-                var smallSize = new Size((int)Math.Round((double)imageEye.Image.ROI.Width * scale), (int)Math.Round((double)imageEye.Image.ROI.Height * scale));
+                var smallSize = new Size((int)Math.Round((double)imageEye.Image.ROI.Width / scale), (int)Math.Round((double)imageEye.Image.ROI.Height / scale));
             var scaleX = (float)smallSize.Width / imageEye.Image.ROI.Width;
             var scaleY = (float)smallSize.Height / imageEye.Image.ROI.Height;
 
@@ -159,8 +159,8 @@ namespace OpenIris.ImageProcessing
             // Resize the image to a fixed size. That way processing time is independent on the original
             // image size and the parameters don't need to change.
             // Approximate the iris using the eyeglobe radius
-            var irisResize = new CircleF(new PointF(pupil.Center.X / scaleX, pupil.Center.Y / scaleY), eyeGlobe.Radius / 2.0f / scaleX);
-            var eyeGlobeResize = new CircleF(new PointF(eyeGlobe.Center.X / scaleX, eyeGlobe.Center.Y / scaleY), eyeGlobe.Radius / scaleX);
+            var irisResize = new CircleF(new PointF(pupil.Center.X * scaleX, pupil.Center.Y * scaleY), eyeGlobe.Radius / 2.0f * scaleX);
+            var eyeGlobeResize = new CircleF(new PointF(eyeGlobe.Center.X * scaleX, eyeGlobe.Center.Y * scaleY), eyeGlobe.Radius * scaleX);
 
             var thresholdDark = (imageEye.WhichEye == Eye.Left) ? trackingSettings.DarkThresholdLeftEye : trackingSettings.DarkThresholdRightEye;
             var pupilMask = imageEye.ThresholdDarkResized(thresholdDark, smallSize, imageEye.Image.ROI);
@@ -285,8 +285,8 @@ namespace OpenIris.ImageProcessing
             var eyelidData = new EyelidData
             {
                 // Fix the scale of points
-                Upper = Array.ConvertAll(pointsUpper, point => new PointF(point.X * scaleX, point.Y * scaleY)),
-                Lower = Array.ConvertAll(pointsLower, point => new PointF(point.X * scaleX, point.Y * scaleY))
+                Upper = Array.ConvertAll(pointsUpper, point => new PointF(point.X * scaleX, point.Y / scaleY)),
+                Lower = Array.ConvertAll(pointsLower, point => new PointF(point.X * scaleX, point.Y / scaleY))
             };
 
 

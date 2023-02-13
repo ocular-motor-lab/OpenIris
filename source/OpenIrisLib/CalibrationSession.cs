@@ -9,7 +9,6 @@ namespace OpenIris
 
     using System;
     using System.Collections.Concurrent;
-    using System.ComponentModel;
     using System.ComponentModel.Composition;
     using System.Diagnostics;
     using System.Threading;

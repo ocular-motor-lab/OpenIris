@@ -16,7 +16,11 @@ namespace OpenIris
     using System.Xml.Serialization;
 
     /// <summary>
-    /// Class containing all the info regarding the calibration of one eye.
+    /// Class containing all the info regarding the calibration of one eye. Three main things
+    ///     1) Eye physical model. Globel model of the eye in image coordinates.
+    ///     2) Reference data. Eye data corresponding with the zero eye position. 
+    ///     3) Reference torsion image. For torsoin algorithms it has the option to also 
+    ///         save an image as reference.
     /// </summary>
     [Serializable]
     public class EyeCalibration

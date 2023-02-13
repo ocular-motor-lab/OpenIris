@@ -10,14 +10,12 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Structure;
-    using Emgu.CV.UI;
     using System;
     using System.Linq;
     using System.Drawing;
     using System.ComponentModel;
     using System.Runtime.Serialization;
     using System.Xml.Serialization;
-    using System.Windows.Forms;
 
     /// <summary>
     /// Interface for all eye tracking pipelines that process images to get data.

@@ -196,6 +196,7 @@ namespace OpenIris
                     ImageGrabber = new EyeTrackerImageGrabber(imageEyeSources, Settings.BufferSize);
                     HeadTracker = new HeadTracker(headDataSource);
 
+                    // Every time new images are grabbed
                     ImageGrabber.ImagesGrabbed += (_, grabbedImages) =>
                     {
                         // The best way to signal we are already tracking is after we get the first image.
@@ -206,9 +207,10 @@ namespace OpenIris
                         // Propagate the event
                         grabbedImages = EyeTrackingSystem.PreProcessImages(grabbedImages) ?? grabbedImages;
                         RecordingSession?.TryRecordImages(grabbedImages);
-                        ImageProcessor.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings, ImageGrabber.FrameRate));
+                        ImageProcessor.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
                     };
 
+                    // Every time new images are processed
                     ImageProcessor.ImagesProcessed += (_, processedImages) =>
                     {
                         // After an image is processed we collected additional data into a common 

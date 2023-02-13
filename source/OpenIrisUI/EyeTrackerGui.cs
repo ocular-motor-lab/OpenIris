@@ -330,6 +330,8 @@ namespace OpenIris.UI
                 {
                     var pipelineUI = eyeTracker.ImageProcessor?.PipelineUI?[eye];
 
+                    if (pipelineUI is null) continue;
+
                     if (panels[eye].Controls.Contains(pipelineUI))
                     {
                         pipelineUI.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);

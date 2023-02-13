@@ -22,26 +22,34 @@ namespace OpenIris
     public struct EyePhysicalModel: IEquatable<EyePhysicalModel>
     {
         /// <summary>
-        /// Gets or sets the center of the circle.
+        /// Gets or sets the center of the eye globe.
         /// </summary>
         [TypeConverter(typeof(StructConverter<PointF>))]
         public PointF Center { get;  set; }
         
         /// <summary>
-        /// Gets or sets the radius of the circle.
+        /// Gets or sets the radius of the eye globe.
         /// </summary>
         public float Radius { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets the ratio between the horizontal and the vertical radii 
+        /// of the globe.
+        /// </summary>
+        public float HorizontalVerticalRatio { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the CircleFSerializable structure.
         /// </summary>
         /// <param name="center">Center of the circle.</param>
         /// <param name="radius">Radius of the circle.</param>
-        public EyePhysicalModel(PointF center, float radius)
+        /// <param name="horizontalVerticalRatio">Ratio between the horizontal and the vertical radii (H/V).</param>
+        public EyePhysicalModel(PointF center, float radius, float horizontalVerticalRatio = 1)
             : this()
         {
             this.Center = center;
             this.Radius = radius;
+            this.HorizontalVerticalRatio = horizontalVerticalRatio;
         }
 
         /// <summary>

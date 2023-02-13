@@ -309,15 +309,13 @@ namespace OpenIris
             {
                 for (int i = 0; i <= 90; i = i + 10)
                 {
-                    var circle = globe.CircleF;
-                    circle = new CircleF(circle.Center, (float)((1 / (1 + (1 - Math.Cos(i / 180 * Math.PI)) / 2)) * Math.Sin(i / 90.0 * (Math.PI / 2.0)) * circle.Radius));
+                    var circle = new CircleF(globe.Center, (float)((1 / (1 + (1 - Math.Cos(i / 180 * Math.PI)) / 2)) * Math.Sin(i / 90.0 * (Math.PI / 2.0)) * globe.Radius));
                     image.Draw(circle, new Bgr(Color.White), 1);
                 }
             }
             else
             {
-                var circle = globe.CircleF;
-                circle = new CircleF(circle.Center, circle.Radius);
+                var circle = new CircleF(globe.Center, globe.Radius);
                 image.Draw(circle, new Bgr(Color.White), 1);
             }
         }

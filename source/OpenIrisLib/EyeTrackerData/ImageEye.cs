@@ -120,9 +120,7 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Corrects the orientation of the image. Useful in cases where the camera is rotated.
         /// Or when there are mirrors.
-        /// </summary>
         /// <param name="cameraOrientation">Orientation of the camera reltive to the eye.</param>
         /// <returns>The new images with the correct orientation.</returns>
         public void CorrectOrientation(CameraOrientation cameraOrientation)

@@ -43,7 +43,7 @@ namespace OpenIris
         /// Initializes an instance of HeadTracker.
         /// </summary>
         /// <param name="headDataSource"></param>
-        public HeadTracker(IHeadDataSource headDataSource)
+        public HeadTracker(IHeadDataSource? headDataSource)
         {
             this.headDataSource = headDataSource;
         }

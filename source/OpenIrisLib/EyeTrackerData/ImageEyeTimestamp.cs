@@ -19,7 +19,6 @@ namespace OpenIris
         public ImageEyeTimestamp()
         {
             DateTimeGrabbed = DateTime.Now;
-            TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
         }
 
         /// <summary>   

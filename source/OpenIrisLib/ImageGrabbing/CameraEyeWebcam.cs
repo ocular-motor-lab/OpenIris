@@ -79,6 +79,7 @@ namespace OpenIris.ImageGrabbing
 
             // Retrieve the new frame
             var tempImage = capture.QueryFrame().ToImage<Gray, byte>();
+
             var imageEye = new ImageEye(tempImage, WhichEye, timestamp, null);
 
             return imageEye;

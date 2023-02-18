@@ -210,7 +210,7 @@ namespace OpenIris
                 {
                     if (image is null) continue;
 
-                    EyeTrackerDebug.TrackTimeBeginingFrame(image.TimeStamp);
+                    EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
                     var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(item.images.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
                     var calibration = item.images.Calibration.EyeCalibrationParameters[image.WhichEye];
@@ -218,7 +218,7 @@ namespace OpenIris
 
                     (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(image, calibration, settings);
 
-                    EyeTrackerDebug.TrackTimeEndFrame();
+                    EyeTrackerDebug.TrackTimeEndPipeline();
                 }
 
                 // Add the processed images and send to the output queue
@@ -267,6 +267,7 @@ namespace OpenIris
                 {
                     outputWaitingList.Remove(outputNextExpectedNumber);
                     outputNextExpectedNumber++;
+
                     ImagesProcessed?.Invoke(this, images);
                 }
             }

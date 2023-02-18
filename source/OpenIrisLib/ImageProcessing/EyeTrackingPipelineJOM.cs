@@ -83,7 +83,7 @@ namespace OpenIris
 
             // 1 - Quick search of the pupil
             var pupilAprox = pupilTracker.FindPupil(imageEye, eyeROI, settings);
-            EyeTrackerDebug.TrackTime("FindPupil");
+            EyeTrackerDebug.TrackProcessingTime("FindPupil");
             if (pupilAprox.IsEmpty) return (new EyeData(imageEye, ProcessFrameResult.MissingPupil), null);
 
             // Provisional eye model if there is none from calibration
@@ -92,27 +92,27 @@ namespace OpenIris
             // 2 - Eyelid tracking
             var eyelids = eyeLidTracker.FindEyelids(imageEye, pupilAprox, eyeModel, settings);
             var filteredEyelids = eyeLidTracker.UpdateFilteredEyelids(eyelids, eyeModel);
-            EyeTrackerDebug.TrackTime("FindEyeLids");
+            EyeTrackerDebug.TrackProcessingTime("FindEyeLids");
 
             // 3 - Corneal reflection tracker
             var cornealReflections = cornealReflectionTracker.FindCornealReflections(imageEye, pupilAprox, referencePupil, settings);
-            EyeTrackerDebug.TrackTime("FindCRs");
+            EyeTrackerDebug.TrackProcessingTime("FindCRs");
 
             // 4 - Mask of reflections and eyelids
             var eyeMask = this.eyeTrackerMask.GetMask(imageEye, filteredEyelids, eyeModel, settings);
-            EyeTrackerDebug.TrackTime("GetMask");
+            EyeTrackerDebug.TrackProcessingTime("GetMask");
 
             // 5 - Refine the pupil position
             var pupil = positionTracker.CalculatePosition(imageEye, eyeMask, pupilAprox, referencePupil, settings);
-            EyeTrackerDebug.TrackTime("CalculatePosition");
+            EyeTrackerDebug.TrackProcessingTime("CalculatePosition");
 
             // 6 - Find the iris
             var iris = this.irisTracker.FindIris(imageEye, pupil, settings);
-            EyeTrackerDebug.TrackTime("UpdateIris");
+            EyeTrackerDebug.TrackProcessingTime("UpdateIris");
 
             // 7 - Calculate torsion angle
             var torsionAngle = torsionTracker.CalculateTorsionAngle(imageEye, eyeModel, referenceTorsionImage, eyeMask, pupil, iris, settings, out Image<Gray, byte>? imageTorsion, out double dataQuality);
-            EyeTrackerDebug.TrackTime("CalculateTorsionAngle");
+            EyeTrackerDebug.TrackProcessingTime("CalculateTorsionAngle");
 
             // Create the data structure
             var eyeData = new EyeData(imageEye, ProcessFrameResult.Good)

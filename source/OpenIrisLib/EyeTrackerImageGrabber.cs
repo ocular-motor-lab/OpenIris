@@ -148,7 +148,7 @@ namespace OpenIris
 
                 if (usingCameras)
                 {
-                    // Setup the queue and the threads for the cameras
+                    // Setup the queue and start the threads for each camera
                     cameraBuffer = new BlockingCollection<ImageEye>(bufferSize);
                     cameraQueues = new EyeCollection<Queue<ImageEye>?>(imageSources.Select(c => (c != null) ? new Queue<ImageEye>() : null));
                     cameraTasks = Task.WhenAll(imageSources.Select(s => Task.Factory.StartNew(() => 
@@ -298,8 +298,6 @@ namespace OpenIris
                     CurrentFrameNumber = grabbedImages.GetFrameNumber();
                     NumberFramesGrabbed++;
 
-                    // grabbedImages[Eye.Left].TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
-                    // grabbedImages[Eye.Right].TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
                     ImagesGrabbed?.Invoke(this, grabbedImages);
                 }
             }
@@ -375,6 +373,7 @@ namespace OpenIris
                         if (anyImageMissing) return null;
 
                         grabbedImages = new EyeCollection<ImageEye?>(images);
+
                         break;
                     default:
                         return null;

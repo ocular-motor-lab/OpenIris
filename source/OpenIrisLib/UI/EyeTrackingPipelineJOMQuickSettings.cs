@@ -228,6 +228,8 @@ namespace OpenIris.UI
 
         public override void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages)
         {
+            if (dataAndImages is null) return;
+
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
 
             UpdateValues(settings);

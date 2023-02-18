@@ -127,10 +127,11 @@ namespace OpenIris
         /// <returns></returns>
         public EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?> images)
         {
-            return (this is VideoPlayer)
+            var newimages = (this is VideoPlayer)
                 ? PreProcessImagesFromVideos(images)
                 : PreProcessImagesFromCameras(images)
                 ?? throw new OpenIrisException("images");
+            return newimages;
         }
 
         /// <summary>
@@ -248,7 +249,7 @@ namespace OpenIris
                 if (value != this.mmPerPix)
                 {
                     this.mmPerPix = value;
-                    this.OnPropertyChanged(this, "MmPerPix");
+                    this.OnPropertyChanged(this, nameof(MmPerPix));
                 }
             }
         }

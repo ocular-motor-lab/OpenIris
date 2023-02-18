@@ -9,14 +9,14 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Cvb;
-    using Emgu.CV.UI;
+    using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
+    using Emgu.CV.Features2D;
     using System;
     using System.ComponentModel;
     using System.ComponentModel.Composition;
-    using OpenIris;
-    using OpenIris.ImageProcessing;
-    using System.Windows.Forms;
+    using System.Drawing;
+    using System.Linq;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
@@ -36,7 +36,7 @@ namespace OpenIris
             detector.Dispose();
             blobs.Dispose();
         }
-        
+
         /// <summary>
         /// Process images.
         /// </summary>
@@ -48,21 +48,60 @@ namespace OpenIris
         {
             var trackingSettings = settings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong type of settings");
 
-            var maxPupRad = 10 / trackingSettings.GetMmPerPix();
-            var irisRad = (float)(12 / trackingSettings.GetMmPerPix());
-            var minPupArea = Math.PI * Math.Pow(trackingSettings.MinPupRadPix, 2);
+            // Cropping rectangle and eye ROI (minimum size 20x20 pix)
+            var eyeROI = imageEye.WhichEye == Eye.Left ? settings.CroppingLeftEye : settings.CroppingRightEye;
+            eyeROI = new Rectangle(
+                new Point(eyeROI.Left, eyeROI.Top),
+                new Size((imageEye.Size.Width - eyeROI.Left - eyeROI.Width), (imageEye.Size.Height - eyeROI.Top - eyeROI.Height)));
             var thresholdDark = (imageEye.WhichEye == Eye.Left) ? trackingSettings.DarkThresholdLeftEye : trackingSettings.DarkThresholdRightEye;
-            var imageSizeForBlobSearch = 200;// imageEye.Size.Width;
 
-            var pupilAprox = PupilTracking.FindPupilBlob(detector, blobs, imageEye, imageEye.Image.ROI, maxPupRad, minPupArea, imageSizeForBlobSearch, thresholdDark);
-            if (pupilAprox.IsEmpty) return (new EyeData(imageEye, ProcessFrameResult.MissingPupil), null);
-            EyeTrackerDebug.TrackTime("Find pupil aprox");
+            var smallSize = new Size(200, (int)Math.Round((double)eyeROI.Height / eyeROI.Width * 200));
+            var scaleDownX = (float)smallSize.Width / eyeROI.Width;
+            var scaleDownY = (float)smallSize.Height / eyeROI.Height;
 
-            var pupil = PositionTrackerEllipseFitting.CalculatePositionCentroid(imageEye, pupilAprox, 200, thresholdDark);
-            EyeTrackerDebug.TrackTime("Get pupil center");
+            var imageThreshold = imageEye.ThresholdDarkResized(
+                thresholdDark,
+                smallSize,
+                eyeROI);
 
-            var cornealReflections = CornealReflectionTracking.FindCornealReflectionsBlob(detector, blobs, imageEye, pupilAprox, trackingSettings);
-            EyeTrackerDebug.TrackTime("FindCRs");
+            EyeTrackerDebug.AddImage("pupil1", imageEye.WhichEye, imageThreshold);
+
+            var blobParams = new SimpleBlobDetectorParams()
+            {
+                FilterByArea = true,
+                MinArea = (float)(Math.PI * Math.Pow(trackingSettings.MinPupRadPix * scaleDownX, 2)),
+                MaxArea = (float)(Math.PI * Math.Pow(12 / trackingSettings.GetMmPerPix() * scaleDownX, 2)),
+                FilterByCircularity = false,
+                FilterByConvexity = false,
+                FilterByInertia = false,
+            };
+            var detector = new SimpleBlobDetector(blobParams);
+
+            var blobs = detector.Detect(imageThreshold);
+
+            var pupil = new PupilData();
+            if (blobs.Length > 0)
+            {
+                var pupilBlob = blobs.OrderByDescending(blob => blob.Response).First();
+
+                pupil = new PupilData(new PointF( pupilBlob.Point.X/ scaleDownX, pupilBlob.Point.Y/ scaleDownY), new SizeF(pupilBlob.Size/ scaleDownX, pupilBlob.Size/ scaleDownY), 0.0f);
+            }
+            else
+            {
+                int a = 1;
+            }
+
+
+            //var pupilAprox = FindPupilBlob(detector, blobs, imageEye, imageEye.Image.ROI, maxPupRad, minPupArea, imageSizeForBlobSearch, thresholdDark);
+            //if (pupilAprox.IsEmpty) return (new EyeData(imageEye, ProcessFrameResult.MissingPupil), null);
+            //EyeTrackerDebug.TrackPipelineTime("Find pupil aprox");
+
+            //var pupil = pupilAprox;
+            //var pupil = PositionTrackerEllipseFitting.CalculatePositionCentroid(imageEye, pupilAprox, 200, thresholdDark);
+            //EyeTrackerDebug.TrackPipelineTime("Get pupil center");
+
+            //var cornealReflections = CornealReflectionTracking.FindCornealReflectionsBlob(detector, blobs, imageEye, pupilAprox, trackingSettings);
+            //EyeTrackerDebug.TrackPipelineTime("FindCRs");
 
             // Create the data structure
             var eyeData = new EyeData()
@@ -70,8 +109,8 @@ namespace OpenIris
                 WhichEye = imageEye.WhichEye,
                 Timestamp = imageEye.TimeStamp,
                 Pupil = pupil,
-                Iris = new IrisData(pupil.Center, irisRad),
-                CornealReflections = cornealReflections,
+                Iris = new IrisData(pupil.Center, (float)(12 / trackingSettings.GetMmPerPix())),
+                CornealReflections = null,
                 TorsionAngle = 0.0,
                 Eyelids = new EyelidData(),
                 DataQuality = 100.0,

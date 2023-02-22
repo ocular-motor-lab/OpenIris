@@ -18,6 +18,7 @@ namespace OpenIris
     using System.ServiceModel.Description;
     using System.Threading.Tasks;
     using System.Text;
+    using System.Threading;
 
     /// <summary>
     /// Service methods to allow remote control of the eye tracker.
@@ -27,7 +28,8 @@ namespace OpenIris
         private static EyeTracker? eyeTracker;
         private static ServiceHost? eyeTrackerHost;
         private static ServiceHost? eyeTrackerHostWeb;
-        
+        private static AutoResetEvent dataWait = new AutoResetEvent(true);
+
         /// <summary>
         /// Starts the service.
         /// </summary>
@@ -336,6 +338,45 @@ namespace OpenIris
             }
 
             return imagesAndData;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public EyeCollection<EyeData?>? GetCurrentData()
+        {
+            return eyeTracker?.LastImagesAndData?.Data?.EyeDataRaw;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public EyeCollection<EyeData?>? WaitForNewData()
+        {
+            EyeCollection<EyeData?>? data = null;
+
+            if (eyeTracker is null) return null;
+
+            EventHandler<EyeTrackerImagesAndData>? eventHandler = (_, o) =>
+            {
+                data = o?.Data?.EyeDataRaw;
+                dataWait.Set();
+            };
+
+            try
+            {
+                eyeTracker.NewDataAndImagesAvailable += eventHandler;
+
+                dataWait.WaitOne(1000);
+            }
+            finally
+            {
+                eyeTracker.NewDataAndImagesAvailable -= eventHandler;
+            }
+
+            return data;
         }
 
         /// <summary>

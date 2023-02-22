@@ -44,7 +44,7 @@ namespace OpenIris
         /// will be blocking if the buffer is fulll.
         /// </param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
-        internal EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize = 100)
+        internal EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize)
         {
             // TODO: it may make sense to make this dependent on the frame rate. But not sure.
             // Code is cleaner like this. Maybe it makes more sense to make it a setting.
@@ -184,8 +184,14 @@ namespace OpenIris
                 inputBuffer.Add(dataForBuffer);
             }
 
-            if (result) NumberFramesProcessed++;
-            else NumberFramesNotProcessed++;
+            if (result)
+            {
+                NumberFramesProcessed++;
+            }
+            else
+            {
+                NumberFramesNotProcessed++;
+            }
 
             return result;
         }
@@ -213,10 +219,11 @@ namespace OpenIris
                     EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
                     var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(item.images.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
-                    var calibration = item.images.Calibration.EyeCalibrationParameters[image.WhichEye];
-                    var settings = item.images.TrackingSettings;
 
-                    (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(image, calibration, settings);
+                    (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
+                        image,
+                        eyeCalibrationParameters: item.images.Calibration.EyeCalibrationParameters[image.WhichEye],
+                        trackingSettings : item.images.TrackingSettings);
 
                     EyeTrackerDebug.TrackTimeEndPipeline();
                 }
@@ -295,7 +302,7 @@ namespace OpenIris
             {
                 currentPipeline = new EyeCollection<IEyeTrackingPipeline>(
                    EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"),
-                   EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad")); ;
+                   EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"));
 
                 PipelineUI[Eye.Left] = currentPipeline[Eye.Left].GetPipelineUI(Eye.Left);
                 PipelineUI[Eye.Right] = currentPipeline[Eye.Right].GetPipelineUI(Eye.Right);

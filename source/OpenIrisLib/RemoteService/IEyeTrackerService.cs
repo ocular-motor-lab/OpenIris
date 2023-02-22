@@ -39,6 +39,12 @@ namespace OpenIris
         ImagesAndData GetCurrentImagesAndData();
 
         [OperationContract]
+        EyeCollection<EyeData?>? GetCurrentData();
+
+        [OperationContract]
+        EyeCollection<EyeData?>? WaitForNewData();
+
+        [OperationContract]
         EyeCalibrationParamteres GetCalibrationParameters();
 
         [OperationContract]

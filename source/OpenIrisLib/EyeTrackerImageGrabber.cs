@@ -80,11 +80,6 @@ namespace OpenIris
         public int NumberFramesDropped { get; private set; }
 
         /// <summary>
-        /// Gets the number of frames in the camera buffer. 
-        /// </summary>
-        public int NumberFramesInBuffer => cameraBuffer?.Count ?? 0;
-
-        /// <summary>
         /// Gets the estimatated frame rate. It is updated every second based on frame numbers.
         /// </summary>
         public double FrameRateMeasured { get; private set; }
@@ -129,7 +124,7 @@ namespace OpenIris
         /// </summary>
         public string GrabbingStatus =>$"Grabbing " +
             $"at {FrameRateMeasured:0.0}Hz  {FrameSize.Width}x{FrameSize.Height}px " +
-            $"Frames:{NumberFramesGrabbed} Dropped:{NumberFramesDropped} Buffer:{NumberFramesInBuffer}";
+            $"Frames:{NumberFramesGrabbed} Dropped:{NumberFramesDropped} Buffer:{ cameraBuffer?.Count ?? 0}";
 
         /// <summary>
         /// Starts grabbing.
@@ -156,7 +151,7 @@ namespace OpenIris
                         TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError)).ToArray());
                 }
 
-                using var timer = new Timer(_ => CheckGrabbing(), null, 1000, 1000);
+                using var timer = new Timer(_ => CheckGrabbing(), state: null, dueTime: 1000, period: 1000);
                 using (cancellation = new CancellationTokenSource())
                 {
                     // Start the grabbing loop
@@ -341,9 +336,11 @@ namespace OpenIris
                         // First check if there is an image in all the (not null) queues. If not return and we wait
                         // for more images before we check again.
                         if (cameraQueues.Select(q => q?.Count).Min() == 0) return null;
+                        //TODO probably better but needs to test                        if (cameraQueues.Min(q => q?.Count) == 0) return null;
 
                         // The determine what is the smallest frame number present in the queues.
                         var minFrameNumberInQueues = cameraQueues.Select(q => q?.Peek().TimeStamp.FrameNumber).Min();
+                        // TODO probably better but needs to test                        var minFrameNumberInQueues = cameraQueues.Min(q => q?.Peek().TimeStamp.FrameNumber);
 
                         // Now, in a second pass, make sure all the queues have the same frame number. Collect the
                         // images with that frame number. It is very important to collect all the images even if

@@ -79,6 +79,16 @@ namespace OpenIris
            return this.proxy.RecordEvent(message);
         }
 
+        public EyeCollection<EyeData?>? GetCurrentData()
+        {
+            return this.proxy.GetCurrentData();
+        }
+        
+        public EyeCollection<EyeData?>? WaitForNewData()
+        {
+            return this.proxy.WaitForNewData();
+        }
+
         public void ChangeThreshold(bool increase, bool dark, Eye whichEye)
         {
             this.proxy.changeThreshold(increase, dark, whichEye);

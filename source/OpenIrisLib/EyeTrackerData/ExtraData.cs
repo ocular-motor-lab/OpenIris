@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="ExtraData.cs" company="Jonhs Hopkins University">
-//     Copyright (c) 2014-2020 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
+// <copyright file="ExtraData.cs">
+//     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------    
 namespace OpenIris

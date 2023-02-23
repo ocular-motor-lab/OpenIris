@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EyeTracker.cs" company="Jonhs Hopkins University">
+// <copyright file="EyeTracker.cs">
 //     Copyright (c) 2014-2019 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -185,6 +185,8 @@ namespace OpenIris
             var errorHandler = new TaskErrorHandler(StopTracking);
             try
             {
+                DataBuffer.Reset();
+
                 // Get EyeTracker System. If playing from video this is already set by PlayVideo.
                 // Then set up image grabber, processor and head tracker.
                 using (EyeTrackingSystem = VideoPlayer ?? EyeTrackingSystem.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings))

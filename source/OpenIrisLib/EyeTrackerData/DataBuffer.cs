@@ -1,10 +1,61 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="DataBuffer.cs" company="Jonhs Hopkins University">
-//     Copyright (c) 2014-2020 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
+// <copyright file="DataBuffer.cs">
+//     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 namespace OpenIris
 {
+    /// <summary>
+    /// Possible data streams to be extracted from the buffer.
+    /// </summary>
+    public enum DataStream
+    {
+        /// <summary>
+        /// Horizontal eye position.
+        /// </summary>
+        H,
+        /// <summary>
+        /// Vertical eye position.
+        /// </summary>
+        V,
+        /// <summary>
+        /// Torsional eye position.
+        /// </summary>
+        T,
+        /// <summary>
+        /// Pupil size.
+        /// </summary>
+        P,
+        /// <summary>
+        /// Eyelid.
+        /// </summary>
+        E,
+        /// <summary>
+        /// Head Roll.
+        /// </summary>
+        HR,
+        /// <summary>
+        /// Head Pitch.
+        /// </summary>
+        HP,
+        /// <summary>
+        /// Head Yaw.
+        /// </summary>
+        HY,
+        /// <summary>
+        /// Head velocity roll.
+        /// </summary>
+        HVR,
+        /// <summary>
+        /// Head velocity pitch.
+        /// </summary>
+        HVP,
+        /// <summary>
+        /// Head velocity yaw.
+        /// </summary>
+        HVY,
+    }
+
     /// <summary>
     /// Class to contain a buffer of data use, for example, for plotting of traces.
     /// </summary>
@@ -68,6 +119,21 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Empty the buffer.
+        /// </summary>
+        public void Reset()
+        {
+            for(long idx = 0; idx < bufferData.Length; idx++)
+            {
+                bufferData[idx] = null;
+            }
+
+            CurrentFrameRate = 0;
+            LastFrameUpdated = 0;
+            LastIdxUpdated = 0;
+        }
+
+        /// <summary>
         /// Gets the data for a given index of the buffer.
         /// </summary>
         /// <param name="idx">Index.</param>
@@ -81,40 +147,33 @@ namespace OpenIris
         /// <param name="whichEye">The eye, left or right.</param>
         /// <param name="signal">Which signal.</param>
         /// <returns></returns>
-        public double this[long idx, Eye whichEye, string signal]
+        public double this[long idx, Eye whichEye, DataStream signal]
         {
             get
             {
-                var data = bufferData[idx];
-
-                if (data is null) return double.NaN;
-
-                var eyeData = data.EyeDataCalibrated?[whichEye] ?? new CalibratedEyeData();
-                var headData = data.HeadDataCalibrated;
-
                 return signal switch
                 {
-                    "H" => eyeData.HorizontalPosition,
+                    DataStream.H => bufferData[idx]?.EyeDataCalibrated?[whichEye].HorizontalPosition ?? double.NaN,
 
-                    "V" => eyeData.VerticalPosition,
+                    DataStream.V => bufferData[idx]?.EyeDataCalibrated?[whichEye].VerticalPosition ?? double.NaN,
 
-                    "T" => eyeData.TorsionalPosition,
+                    DataStream.T => bufferData[idx]?.EyeDataCalibrated?[whichEye].TorsionalPosition ?? double.NaN,
 
-                    "P" => eyeData.PupilArea,
+                    DataStream.P => bufferData[idx]?.EyeDataCalibrated?[whichEye].PupilArea ?? double.NaN,
 
-                    "E" => eyeData.PercentOpening,
+                    DataStream.E => bufferData[idx]?.EyeDataCalibrated?[whichEye].PercentOpening ?? double.NaN,
 
-                    "HR" => headData.Roll,
+                    DataStream.HR => bufferData[idx]?.HeadDataCalibrated.Roll ?? double.NaN,
 
-                    "HP" => headData.Yaw,
+                    DataStream.HP => bufferData[idx]?.HeadDataCalibrated.Yaw ?? double.NaN,
 
-                    "HY" => headData.Pitch,
+                    DataStream.HY => bufferData[idx]?.HeadDataCalibrated.Pitch ?? double.NaN,
 
-                    "HVR" => headData.RollVelocity,
+                    DataStream.HVR => bufferData[idx]?.HeadDataCalibrated.RollVelocity ?? double.NaN,
 
-                    "HVP" => headData.YawVelocity,
+                    DataStream.HVP => bufferData[idx]?.HeadDataCalibrated.YawVelocity ?? double.NaN,
 
-                    "HVY" => headData.PitchVelocity,
+                    DataStream.HVY => bufferData[idx]?.HeadDataCalibrated.PitchVelocity ?? double.NaN,
 
                     _ => double.NaN,
                 };

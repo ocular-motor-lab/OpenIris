@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EyeTrackerTrace.cs" company="Jonhs Hopkins University">
-//     Copyright (c) 2014-2020 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
+// <copyright file="EyeTrackerTrace.cs">
+//     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 namespace OpenIris.UI
@@ -36,28 +36,28 @@ namespace OpenIris.UI
             Initialized = false;
             InitializeComponent();
 
-            var chartAreaHorizontal = new TraceChartArea(tracesChart, "H", "Horizontal")
+            var chartAreaHorizontal = new TraceChartArea(tracesChart, DataStream.H, "Horizontal")
             {
                 DefaultRange = new Range(-20, 20)
             };
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaHorizontal, Eye.Left));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaHorizontal, Eye.Right));
 
-            var chartAreaVertical = new TraceChartArea(tracesChart, "V", "Vertical")
+            var chartAreaVertical = new TraceChartArea(tracesChart, DataStream.V, "Vertical")
             {
                 DefaultRange = new Range(-20, 20)
             };
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaVertical, Eye.Left));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaVertical, Eye.Right));
 
-            var chartAreaTorsion = new TraceChartArea(tracesChart, "T", "Torsion")
+            var chartAreaTorsion = new TraceChartArea(tracesChart, DataStream.T, "Torsion")
             {
                 DefaultRange = new Range(-20, 20)
             };
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaTorsion, Eye.Left));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaTorsion, Eye.Right));
 
-            var chartAreaPupil = new TraceChartArea(tracesChart, "P", "Pupil")
+            var chartAreaPupil = new TraceChartArea(tracesChart, DataStream.P, "Pupil")
             {
                 DefaultRange = new Range(0, 200),
                 ShouldZoom = false
@@ -65,7 +65,7 @@ namespace OpenIris.UI
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaPupil, Eye.Left));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaPupil, Eye.Right));
 
-            var chartAreaEyelid = new TraceChartArea(tracesChart, "E", "EyeLids")
+            var chartAreaEyelid = new TraceChartArea(tracesChart, DataStream.E, "EyeLids")
             {
                 DefaultRange = new Range(-10, 110),
                 ShouldZoom = false
@@ -73,7 +73,7 @@ namespace OpenIris.UI
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaEyelid, Eye.Left));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaEyelid, Eye.Right));
 
-            var chartAreaHeadVelocity = new TraceChartArea(tracesChart, "HVR", "HeadVelocity")
+            var chartAreaHeadVelocity = new TraceChartArea(tracesChart, DataStream.HVR, "HeadVelocity")
             {
                 DefaultRange = new Range(-500, 500),
                 ShouldZoom = false
@@ -82,7 +82,7 @@ namespace OpenIris.UI
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadVelocity, Eye.Right, Color.Red));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadVelocity, Eye.Right, Color.Green));
 
-            var chartAreaHeadAcceleration = new TraceChartArea(tracesChart, "HR", "HeadAcceleration")
+            var chartAreaHeadAcceleration = new TraceChartArea(tracesChart, DataStream.HR, "HeadAcceleration")
             {
                 DefaultRange = new Range(-2, 2),
                 ShouldZoom = false
@@ -379,6 +379,7 @@ namespace OpenIris.UI
 
     class TraceChartArea : ChartArea
     {
+        public DataStream DataSource { get; private set; }
         private static int zoomLevel = 5;
         public static double lastSampleRate = 100;
 
@@ -421,9 +422,10 @@ namespace OpenIris.UI
 
         public bool ShouldZoom { get; set; }
         
-        public TraceChartArea(Chart chart, string name, string yLabel)
-            : base(name)
+        public TraceChartArea(Chart chart, DataStream signal, string yLabel)
+            : base(signal.ToString())
         {
+            DataSource = signal;
             ShouldZoom = true;
 
             chart.ChartAreas.Add(this);
@@ -460,7 +462,7 @@ namespace OpenIris.UI
     {
         public TraceChartArea traceChartArea;
         private Eye whichEye;
-        private string dataSource;
+        private DataStream dataSource;
 
         public static int numberOfPoints = 500;
 
@@ -473,7 +475,7 @@ namespace OpenIris.UI
         {
             traceChartArea = chartArea;
             this.whichEye = whichEye;
-            dataSource = chartArea.Name;
+            dataSource = chartArea.DataSource;
 
             ChartArea = chartArea.Name;
 
@@ -530,6 +532,10 @@ namespace OpenIris.UI
                 for (int i = 0; i < EyeTraceSeries.numberOfPoints; i++)
                 {
                     Points[i].XValue = i / (double)EyeTraceSeries.numberOfPoints * traceSpan;
+                    for (int j = 0; j < Points[i].YValues.Count(); j++)
+                    {
+                        Points[i].YValues[j] = 0;
+                    }
                 }
                 
                 lastSampleRate = frameRate;

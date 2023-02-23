@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="CornealReflectionTrackerBlob.cs" company="Jonhs Hopkins University">
+// <copyright file="CornealReflectionTrackerBlob.cs">
 //     Copyright (c) 2018 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------

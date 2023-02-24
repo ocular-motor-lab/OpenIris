@@ -10,7 +10,8 @@ namespace SpinnakerInterface
 {
     [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
 
-    internal class EyeTrackingSystemSpinnaker_SingleCam
+    class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystem
     {
+
     }
 }

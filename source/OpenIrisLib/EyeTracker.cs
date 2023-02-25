@@ -194,7 +194,7 @@ namespace OpenIris
                     var imageEyeSources = await Task.Run(EyeTrackingSystem.CreateImageEyeSources);
                     var headDataSource = await Task.Run(EyeTrackingSystem.CreateHeadDataSource);
 
-                    ImageProcessor = new EyeTrackerProcessor(allowDroppedFrames: !PlayingVideo, Settings.BufferSize);
+                    ImageProcessor = new EyeTrackerProcessor(allowDroppedFrames: !PlayingVideo, Settings.BufferSize, Settings.MaxNumberOfProcessingThreads);
                     ImageGrabber = new EyeTrackerImageGrabber(imageEyeSources, Settings.BufferSize);
                     HeadTracker = new HeadTracker(headDataSource);
 

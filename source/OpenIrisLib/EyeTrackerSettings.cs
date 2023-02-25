@@ -258,6 +258,21 @@ namespace OpenIris
 
         #region D) General settings
 
+        [Category("D) General settings"), Description("Maximum number of processing threads.")]
+        public int MaxNumberOfProcessingThreads
+        {
+            get { return maxNumberOfProcessingThreads; }
+            set
+            {
+                if (value != maxNumberOfProcessingThreads)
+                {
+                    maxNumberOfProcessingThreads = value;
+                    OnPropertyChanged(this, nameof(MaxNumberOfProcessingThreads));
+                }
+            }
+        }
+        private int maxNumberOfProcessingThreads = 10; // Default value
+
         [Category("D) General settings"), Description("Value indicating where debuging images should be shown")]
         public bool Debug
         {

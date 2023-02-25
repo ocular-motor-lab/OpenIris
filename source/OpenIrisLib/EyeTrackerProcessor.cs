@@ -29,6 +29,7 @@ namespace OpenIris
     public sealed class EyeTrackerProcessor
     {
         private readonly bool allowDroppedFrames;
+        private int numberOfThreads;
         private readonly int bufferSize;
         private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)> pipeline;
         private BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? inputBuffer;
@@ -44,12 +45,13 @@ namespace OpenIris
         /// will be blocking if the buffer is fulll.
         /// </param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
-        internal EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize)
+        internal EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
         {
             // TODO: it may make sense to make this dependent on the frame rate. But not sure.
             // Code is cleaner like this. Maybe it makes more sense to make it a setting.
             this.bufferSize = allowDroppedFrames ? bufferSize : 1;
             this.allowDroppedFrames = allowDroppedFrames;
+            numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, Environment.ProcessorCount - 1));
 
             pipeline = new ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)>();
             PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(null, null);
@@ -101,7 +103,6 @@ namespace OpenIris
             if (started) throw new InvalidOperationException("Cannot start the processor again. Already running.");
             started = true;
 
-            var numberOfThreads = Math.Max(1, Environment.ProcessorCount - 1);
             var processingTasks = new List<Task>();
             var errorHandler = new TaskErrorHandler(Stop);
 

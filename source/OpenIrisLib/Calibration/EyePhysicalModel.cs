@@ -10,33 +10,65 @@ namespace OpenIris
     using System.Collections;
     using System.Drawing;
     using System.Reflection;
-    using System.Runtime.Serialization;
-    using System.Xml;
-    using System.Xml.Serialization;
     using Emgu.CV.Structure;
 
     /// <summary>
-    /// Data structure containing the geometric properties of the measured iris.
+    /// Data structure containing the geometric properties of the globe.
     /// </summary>
     [Serializable, TypeConverter(typeof(StructConverter<EyePhysicalModel>))]
     public struct EyePhysicalModel: IEquatable<EyePhysicalModel>
     {
         /// <summary>
-        /// Gets or sets the center of the eye globe.
+        /// Gets or sets the center of the eye globe in pixels (camera coordinates).
         /// </summary>
         [TypeConverter(typeof(StructConverter<PointF>))]
         public PointF Center { get;  set; }
         
         /// <summary>
-        /// Gets or sets the radius of the eye globe.
+        /// Gets or sets the radius of the eye globe in pixels (camera coordinates).
         /// </summary>
         public float Radius { get; set; }
 
         /// <summary>
-        /// Gets or sets the ratio between the horizontal and the vertical radii 
+        /// Gets or sets the ratio between the horizontal and the vertical radii.
         /// of the globe.
         /// </summary>
         public float HorizontalVerticalRatio { get; set; }
+
+        /// <summary>
+        /// Gets or sets the radius of the cornea globe in pixels (camera coordinates). This would be more
+        /// natural to be expresed in mm. But for backwards compatilibity it is in pixels. So we would consider
+        /// the radius seen by the camera when the eye is pointing straight at the camera. In that situation
+        /// it is a straightforward conversion.
+        /// </summary>
+        public float CorneaRadius { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ratio between the horizontal and the vertical radii of the cornea.
+        /// </summary>
+        public float CorneaHorizontalVerticalRatio { get; set; }
+
+        /// <summary>
+        /// Gets or sets the horizontal component of the angle Kappa. Deviation between the 
+        /// visual axis and the center of the pupil.Positive being direction of visual axis
+        /// more nasal than the pupil.
+        /// </summary>
+        public float KappaAngleH { get; set; }
+
+        /// <summary>
+        /// Gets or sets the vertical component of the angle Kappa Deviation between the 
+        /// visual axis and the center of the pupil.Positive being direction of visual axis
+        /// more elevated than the pupil.
+        /// </summary>
+        public float KappaAngleV { get; set; }
+
+        /// <summary>
+        /// Gets or sets the position of the cornea in pixels (camera coordinates). This would be more
+        /// natural to be expresed in mm. But for backwards compatilibity it is in pixels. So we would consider
+        /// the distance seen by the camera if the eye was pointing 90 deg to either side. In that situation
+        /// it is a straightforward conversion from mm to pixels.
+        /// </summary>
+        public float CorneaPosition { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the CircleFSerializable structure.
@@ -56,11 +88,6 @@ namespace OpenIris
         /// Checks if the eye model is empty (radius is zero).
         /// </summary>
         public bool IsEmpty { get { return this.Radius == 0; } }
-
-        /// <summary>
-        /// Gets the circle corresponding with the eye globe.
-        /// </summary>
-        public CircleF CircleF { get { return new CircleF(this.Center, this.Radius); } }
 
         /// <summary>
         /// Compares two eye physical models.

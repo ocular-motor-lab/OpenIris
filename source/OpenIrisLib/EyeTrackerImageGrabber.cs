@@ -30,6 +30,7 @@ namespace OpenIris
         private CancellationTokenSource? cancellation;
 
         private EyeCollection<IImageEyeSource?>? imageSources;
+        private int numberOfImageSources;
         private BlockingCollection<ImageEye>? cameraBuffer;
         private EyeCollection<Queue<ImageEye>?>? cameraQueues;
         private readonly VideoPlayer? videoPlayer;
@@ -53,6 +54,9 @@ namespace OpenIris
             FrameRate = CheckFrameRate(sources);
 
             imageSources = sources;
+            numberOfImageSources = sources.Count(c => (c != null));
+
+
             this.bufferSize = bufferSize;
         }
 
@@ -117,7 +121,7 @@ namespace OpenIris
         /// <summary>
         /// Gets a value indicating weather the cameras can move the ROI.
         /// </summary>
-        public bool CamerasMovable { get => imageSources?.Where(s => s is IMovableImageEyeSource).Count() > 0; }
+        public bool CamerasMovable { get => imageSources?.Any(s => s is IMovableImageEyeSource) ?? false; }
 
         /// <summary>
         /// Gets a string with a status message regarding the grabbing of images and head data.
@@ -141,7 +145,7 @@ namespace OpenIris
                 var errorHandler = new TaskErrorHandler(Stop);
                 var usingCameras = videoPlayer is null;
 
-                if (usingCameras)
+                if (usingCameras & numberOfImageSources > 1)
                 {
                     // Setup the queue and start the threads for each camera
                     cameraBuffer = new BlockingCollection<ImageEye>(bufferSize);
@@ -274,15 +278,24 @@ namespace OpenIris
             Thread.CurrentThread.Name = "EyeTracker:GrabLoop";
             Trace.WriteLine("Grabbing loop started.");
 
+            var usingCameras = (videoPlayer is null);
+
+            // Select the image grabbing function
+            // If grabbing from video(s) Need to grab from video player instead of image eye
+            // sources because the video player controls the pause/playback/scrolling
+            Func<EyeCollection<ImageEye?>?>? GrabImages = (usingCameras, numberOfImageSources) switch
+            {
+                (true, 1) => () => new EyeCollection<ImageEye?>(imageSources.Single(c => (c != null))?.GrabImageEye()),
+                (true, 2) => () => GrabImagesFromTwoCameras(),
+                (true, _) => () => throw new InvalidOperationException("Only for 1 or 2 cameras"),
+                (false, _) => () => videoPlayer?.GrabImages(),
+            };
+
             while (!stopping)
             {
-                // If grabbing from video(s) Need to grab from video player instead of image eye
-                // sources because the video player controls the pause/playback/scrolling
-                var grabbedImages = (videoPlayer is null)
-                    ? GrabImagesFromCameras()
-                    : videoPlayer?.GrabImages();
+                var grabbedImages = GrabImages();
 
-                // Finally, if some images were grabbed add them to the output queue, for
+                // If some images were grabbed add them to the output queue, for
                 // pre-processing and for propagation to other consumers of images.
                 if (grabbedImages != null)
                 {
@@ -300,10 +313,10 @@ namespace OpenIris
             Trace.WriteLine("Grabber loop finished.");
         }
 
-        private EyeCollection<ImageEye?>? GrabImagesFromCameras()
+        private EyeCollection<ImageEye?>? GrabImagesFromTwoCameras()
         {
-            if (imageSources is null || cameraBuffer is null || cameraQueues is null || cancellation is null)
-                throw new InvalidOperationException("Sources and buffers for camera are not ready.");
+            if (cameraBuffer is null || cameraQueues is null || cancellation is null)
+                throw new InvalidOperationException("Camera buffers are not ready.");
 
             // Wait for an image from the queue
             var result = cameraBuffer.TryTake(out ImageEye? image, millisecondsTimeout: -1, cancellation.Token);
@@ -311,72 +324,52 @@ namespace OpenIris
 
             try
             {
-                EyeCollection<ImageEye?>? grabbedImages;
+                var cameraQueue = cameraQueues[image.WhichEye] ?? throw new InvalidOperationException("This queue should not be null.");
 
-                switch (imageSources.Count)
+                // When grabbing from two cameras, it is possible that a frame is dropped in one camera
+                // but not in the other. For that reason it is necessary to have a buffer to hold frames
+                // from one camera while the corresponding frame from the other camera may or may not arrive.
+
+                // Adds the image to the queue
+                cameraQueue.Enqueue(image);
+                image = null; // Necessary to dispose properly after passing ownership of image
+
+                // First check if there is an image in all the (not null) queues. If not return and we wait
+                // for more images before we check again.
+                if (cameraQueues.Min(q => q?.Count) == 0) return null;
+
+                // The determine what is the smallest frame number present in the queues.
+                var minFrameNumberInQueues = cameraQueues.Min(q => q?.Peek().TimeStamp.FrameNumber);
+
+                // Now, in a second pass, make sure all the queues have the same frame number. Collect the
+                // images with that frame number. It is very important to collect all the images even if
+                // that frame number is missing in some other queue to deal with dropped frames. If there
+                // was dropped frame this will clean the queues until a non-dropped frame arrives to all
+                // the queues.
+                var images = new ImageEye[cameraQueues.Count];
+                bool anyImageMissing = false;
+
+                for (int i = 0; i < cameraQueues.Count; i++)
                 {
-                    case 1:
-                        // If there is only one image source, return it directly
-                        grabbedImages = new EyeCollection<ImageEye?>(image);
-                        image = null; // Necessary to dispose properly after passing ownership of image
-                        break;
-                    case 2:
-                        var cameraQueue = cameraQueues[image.WhichEye] ?? throw new InvalidOperationException("This queue should not be null.");
-                        // TODO: maybe do this by timestamp. It may be more generic... but also more problematic.
-                        // Right now it requires cameras to put matching frame numbers on the image of each camera
+                    var queue = cameraQueues[i];
 
-                        // When grabbing from two cameras, it is possible that a frame is dropped in one camera
-                        // but not in the other. For that reason it is necessary to have a buffer to hold frames
-                        // from one camera while the corresponding frame from the other camera may or may not arrive.
+                    if (queue is null) continue;
 
-                        // Adds the image to the queue
-                        cameraQueue.Enqueue(image);
-                        image = null; // Necessary to dispose properly after passing ownership of image
+                    // If the queue has the frame number we are looking for dequeue de image.
+                    if (queue.Peek().TimeStamp.FrameNumber != minFrameNumberInQueues)
+                    {
+                        // Do not return in this condition because it needs to pass all the queues
+                        anyImageMissing = true;
+                        continue;
+                    }
 
-                        // First check if there is an image in all the (not null) queues. If not return and we wait
-                        // for more images before we check again.
-                        if (cameraQueues.Select(q => q?.Count).Min() == 0) return null;
-                        //TODO probably better but needs to test                        if (cameraQueues.Min(q => q?.Count) == 0) return null;
-
-                        // The determine what is the smallest frame number present in the queues.
-                        var minFrameNumberInQueues = cameraQueues.Select(q => q?.Peek().TimeStamp.FrameNumber).Min();
-                        // TODO probably better but needs to test                        var minFrameNumberInQueues = cameraQueues.Min(q => q?.Peek().TimeStamp.FrameNumber);
-
-                        // Now, in a second pass, make sure all the queues have the same frame number. Collect the
-                        // images with that frame number. It is very important to collect all the images even if
-                        // that frame number is missing in some other queue to deal with dropped frames. If there
-                        // was dropped frame this will clean the queues until a non-dropped frame arrives to all
-                        // the queues.
-                        var images = new ImageEye[cameraQueues.Count];
-                        bool anyImageMissing = false;
-
-                        for (int i = 0; i < cameraQueues.Count; i++)
-                        {
-                            var queue = cameraQueues[i];
-
-                            if (queue is null) continue;
-
-                            // If the queue has the frame number we are looking for dequeue de image.
-                            if (queue.Peek().TimeStamp.FrameNumber != minFrameNumberInQueues)
-                            {
-                                // Do not return in this condition because it needs to pass all the queues
-                                anyImageMissing = true;
-                                continue;
-                            }
-
-                            images[i] = queue.Dequeue();
-                        }
-
-                        if (anyImageMissing) return null;
-
-                        grabbedImages = new EyeCollection<ImageEye?>(images);
-
-                        break;
-                    default:
-                        return null;
+                    images[i] = queue.Dequeue();
                 }
 
-                return grabbedImages;
+                if (anyImageMissing) return null;
+
+                return new EyeCollection<ImageEye?>(images);
+
             }
             finally
             {

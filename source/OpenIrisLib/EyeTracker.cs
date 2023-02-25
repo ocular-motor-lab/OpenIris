@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="EyeTracker.cs">
-//     Copyright (c) 2014-2019 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
+//     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 namespace OpenIris

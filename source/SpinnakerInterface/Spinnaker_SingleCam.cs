@@ -41,6 +41,10 @@ namespace SpinnakerInterface
         public override void Start()
         {
             if(cam==null) { return; }
+
+            FrameRate = 100;
+            WhichEye = Eye.Both;
+
             cam.BeginAcquisition();
         }
 

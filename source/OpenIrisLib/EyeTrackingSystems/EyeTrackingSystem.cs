@@ -87,40 +87,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Creates the image sources for the image grabber.
-        /// </summary>
-        /// <returns></returns>
-        public EyeCollection<IImageEyeSource?> CreateImageEyeSources()
-        {
-            var newSources = (this is VideoPlayer)
-                ? CreateVideos(null).Select(v => v as IImageEyeSource)
-                : CreateCameras().Select(c => c as IImageEyeSource)
-                ?? throw new OpenIrisException("No image sources");
-
-            var sources = new EyeCollection<IImageEyeSource?>(newSources);
-
-            if (sources.Count == 2)
-            {
-                // Dispose the sources we don't need
-                if (Settings.Eye == Eye.Left)
-                {
-                    sources[Eye.Right]?.Stop();
-                    (sources[Eye.Right] as IDisposable)?.Dispose();
-                    sources[Eye.Right] = null;
-                }
-
-                if (Settings.Eye == Eye.Right)
-                {
-                    sources[Eye.Left]?.Stop();
-                    (sources[Eye.Left] as IDisposable)?.Dispose();
-                    sources[Eye.Left] = null;
-                }
-            }
-
-            return sources;
-        }
-
-        /// <summary>
         /// Preprocess the images just grabbed. Depending if they are videos or cameras.
         /// </summary>
         /// <param name="images"></param>
@@ -151,7 +117,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileNames">Names of the files to load.</param>
         /// <returns>List of image eye source objects.</returns>
-        public virtual EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames)
+        public virtual EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?>? fileNames)
         {
             if (fileNames is null) throw new ArgumentNullException(nameof(fileNames));
 

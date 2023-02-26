@@ -189,66 +189,71 @@ namespace OpenIris
 
                 // Get EyeTracker System. If playing from video this is already set by PlayVideo.
                 // Then set up image grabber, processor and head tracker.
-                using (EyeTrackingSystem = VideoPlayer ?? EyeTrackingSystem.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings))
+                if (VideoPlayer != null)
                 {
-                    var imageEyeSources = await Task.Run(EyeTrackingSystem.CreateImageEyeSources);
-                    var headDataSource = await Task.Run(EyeTrackingSystem.CreateHeadDataSource);
-
-                    ImageProcessor = new EyeTrackerProcessor(allowDroppedFrames: !PlayingVideo, Settings.BufferSize, Settings.MaxNumberOfProcessingThreads);
-                    ImageGrabber = new EyeTrackerImageGrabber(imageEyeSources, Settings.BufferSize);
-                    HeadTracker = new HeadTracker(headDataSource);
-
-                    // Every time new images are grabbed
-                    ImageGrabber.ImagesGrabbed += (_, grabbedImages) =>
-                    {
-                        // The best way to signal we are already tracking is after we get the first image.
-                        Tracking = true;
-
-                        // Prepare the images for processing depending on the system. For instance flipping,
-                        // cropping, splitting, increasing contrast, whatever ...
-                        // Propagate the event
-                        grabbedImages = EyeTrackingSystem.PreProcessImages(grabbedImages) ?? grabbedImages;
-                        RecordingSession?.TryRecordImages(grabbedImages);
-                        ImageProcessor.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
-                    };
-
-                    // Every time new images are processed
-                    ImageProcessor.ImagesProcessed += (_, processedImages) =>
-                    {
-                        // After an image is processed we collected additional data into a common 
-                        // structure and we save it in the data buffer. Each eye tracking system can 
-                        // also post process the entire data frame
-                        processedImages.Data = new EyeTrackerData();
-                        processedImages.Data.EyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData);
-                        processedImages.Data.HeadDataRaw = HeadTracker.GetHeadDataCorrespondingToImages(processedImages.Images);
-                        processedImages.Data.EyeDataCalibrated = Calibration?.GetCalibratedEyeData(processedImages.Data.EyeDataRaw);
-                        processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw) ?? new CalibratedHeadData();
-                        processedImages.Data.FrameRate = ImageGrabber.FrameRate;
-
-                        LastImagesAndData = EyeTrackingSystem.PostProcessImages(processedImages) ?? processedImages;
-                        DataBuffer.Add(LastImagesAndData.Data);
-
-                        // Then we try to record the data and images (usually only in postprocessing)
-                        // and we also pass it to the calibration manager.
-                        RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
-                        CalibrationSession?.ProcessNewDataAndImages(LastImagesAndData);
-
-                        // Finally we propagate the event in case there are clients.
-                        NewDataAndImagesAvailable?.Invoke(this, LastImagesAndData);
-                    };
-
-                    // Start the threads (Tasks) to grabb and process images. If there is an error in either
-                    // of them, the error handler will stop everything. 
-                    await Task.WhenAll(
-                        ImageProcessor.Start().ContinueWith(errorHandler.HandleError),
-                        ImageGrabber.Start().ContinueWith(errorHandler.HandleError),
-                        HeadTracker.Start()?.ContinueWith(errorHandler.HandleError));
-
-                    errorHandler.CheckForErrors();
-
-                    // Wait for a recording to end, just in case is still going.
-                    await (RecordingSession?.RecordingTask ?? Task.CompletedTask);
+                    EyeTrackingSystem = VideoPlayer;
+                    ImageProcessor = EyeTrackerProcessor.CreateNewForOffline(Settings.MaxNumberOfProcessingThreads);
+                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForVideos(VideoPlayer, Settings.BufferSize, Settings.TrackingMode);
                 }
+                else
+                {
+                    EyeTrackingSystem = EyeTrackingSystem.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
+                    ImageProcessor = EyeTrackerProcessor.CreateNewForRealTime(Settings.BufferSize, Settings.MaxNumberOfProcessingThreads);
+                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize, Settings.TrackingMode);
+                }
+
+                HeadTracker = await HeadTracker.CreateNew(EyeTrackingSystem);
+
+                // Every time new images are grabbed
+                ImageGrabber.ImagesGrabbed += (_, grabbedImages) =>
+                {
+                    // The best way to signal we are already tracking is after we get the first image.
+                    Tracking = true;
+
+                    // Prepare the images for processing depending on the system. For instance flipping,
+                    // cropping, splitting, increasing contrast, whatever ...
+                    // Propagate the event
+                    grabbedImages = EyeTrackingSystem.PreProcessImages(grabbedImages) ?? grabbedImages;
+                    RecordingSession?.TryRecordImages(grabbedImages);
+                    ImageProcessor.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
+                };
+
+                // Every time new images are processed
+                ImageProcessor.ImagesProcessed += (_, processedImages) =>
+                {
+                    // After an image is processed we collected additional data into a common 
+                    // structure and we save it in the data buffer. Each eye tracking system can 
+                    // also post process the entire data frame
+                    processedImages.Data = new EyeTrackerData();
+                    processedImages.Data.EyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData);
+                    processedImages.Data.HeadDataRaw = HeadTracker.GetHeadDataCorrespondingToImages(processedImages.Images);
+                    processedImages.Data.EyeDataCalibrated = Calibration?.GetCalibratedEyeData(processedImages.Data.EyeDataRaw);
+                    processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw) ?? new CalibratedHeadData();
+                    processedImages.Data.FrameRate = ImageGrabber.FrameRate;
+
+                    LastImagesAndData = EyeTrackingSystem.PostProcessImages(processedImages) ?? processedImages;
+                    DataBuffer.Add(LastImagesAndData.Data);
+
+                    // Then we try to record the data and images (usually only in postprocessing)
+                    // and we also pass it to the calibration manager.
+                    RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
+                    CalibrationSession?.ProcessNewDataAndImages(LastImagesAndData);
+
+                    // Finally we propagate the event in case there are clients.
+                    NewDataAndImagesAvailable?.Invoke(this, LastImagesAndData);
+                };
+
+                // Start the threads (Tasks) to grabb and process images. If there is an error in either
+                // of them, the error handler will stop everything. 
+                await Task.WhenAll(
+                    ImageProcessor.Start().ContinueWith(errorHandler.HandleError),
+                    ImageGrabber.Start().ContinueWith(errorHandler.HandleError),
+                    HeadTracker.Start()?.ContinueWith(errorHandler.HandleError));
+
+                errorHandler.CheckForErrors();
+
+                // Wait for a recording to end, just in case is still going.
+                await (RecordingSession?.RecordingTask ?? Task.CompletedTask);
             }
             catch
             {
@@ -260,6 +265,8 @@ namespace OpenIris
             }
             finally
             {
+                EyeTrackingSystem?.Dispose();
+
                 Tracking = false;
 
                 HeadTracker = null;

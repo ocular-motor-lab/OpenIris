@@ -39,12 +39,35 @@ namespace OpenIris
         private bool stopping;
         private int bufferSize;
 
+        internal static async Task<EyeTrackerImageGrabber> CreateNewForVideos(VideoPlayer videoPlayer, int bufferSize = 100, Eye whichEye)
+        {
+            var newSources = videoPlayer.Videos.Select(v => v as IImageEyeSource)
+                ?? throw new OpenIrisException("No image sources");
+
+            var sources = new EyeCollection<IImageEyeSource?>(newSources);
+
+            await Task.CompletedTask;
+
+            return new EyeTrackerImageGrabber(sources, bufferSize, whichEye);
+        }
+
+        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(EyeTrackingSystem eyeTrackingSystem, int bufferSize = 100, Eye whichEye = Eye.Both)
+        {
+            var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
+                ?? throw new OpenIrisException("No image sources");
+
+            var sources = new EyeCollection<IImageEyeSource?>(newSources);
+
+            return new EyeTrackerImageGrabber(sources, bufferSize, whichEye);
+        }
+
         /// <summary>
         /// Initializes an instance of the class <see cref="EyeTrackerImageGrabber"/> for grabbing from cameras.
         /// </summary>
         /// <param name="sources">Image sources, cameras or videos.</param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
-        internal EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, int bufferSize = 100)
+        /// <param name="whichEye">Which eye to grab from, left, right, or both.</param>
+        private EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, int bufferSize = 100, Eye whichEye = Eye.Both)
         {
             // Check if the sources are videos and get the video player
             videoPlayer = (sources.FirstOrDefault(s=>s is VideoEye) as VideoEye)?.VideoPlayer;
@@ -56,8 +79,30 @@ namespace OpenIris
             imageSources = sources;
             numberOfImageSources = sources.Count(c => (c != null));
 
-
             this.bufferSize = bufferSize;
+
+            if (sources.Count == 2)
+            {
+                // TODO: this may not be a good idea for systems with two cameras
+                // where one may be master and the other slave. Not sure how to deal
+                // with it
+
+
+                // Dispose the sources we don't need
+                if (whichEye == Eye.Left)
+                {
+                    sources[Eye.Right]?.Stop();
+                    (sources[Eye.Right] as IDisposable)?.Dispose();
+                    sources[Eye.Right] = null;
+                }
+
+                if (whichEye == Eye.Right)
+                {
+                    sources[Eye.Left]?.Stop();
+                    (sources[Eye.Left] as IDisposable)?.Dispose();
+                    sources[Eye.Left] = null;
+                }
+            }
         }
 
         /// <summary>

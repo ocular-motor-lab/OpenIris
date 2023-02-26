@@ -369,16 +369,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Gets the videos
-        /// </summary>
-        /// <param name="fileNames"></param>
-        /// <returns></returns>
-        public override EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames)
-        {
-            return Videos;
-        }
-
-        /// <summary>
         /// Postprocess the data and images.
         /// </summary>
         /// <param name="procesedImages"></param>

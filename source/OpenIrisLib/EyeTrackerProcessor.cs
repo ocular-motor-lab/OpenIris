@@ -30,12 +30,21 @@ namespace OpenIris
     {
         private readonly bool allowDroppedFrames;
         private int numberOfThreads;
-        private readonly int bufferSize;
+        private readonly int inputBufferSize;
         private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)> pipeline;
         private BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? inputBuffer;
-        private BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? outputBuffer;
 
         private bool started;
+
+        public static EyeTrackerProcessor CreateNewForRealTime(int bufferSize, int maxNumberOfThreads)
+        {
+            return new EyeTrackerProcessor(true, bufferSize, maxNumberOfThreads);
+            
+        }
+        public static EyeTrackerProcessor CreateNewForOffline( int maxNumberOfThreads)
+        {
+            return new EyeTrackerProcessor(true, 1, maxNumberOfThreads);
+        }
 
         /// <summary>
         /// Initializes an instance of the eyeTrackerProcessor class.
@@ -45,11 +54,10 @@ namespace OpenIris
         /// will be blocking if the buffer is fulll.
         /// </param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
-        internal EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
+        /// <param name="maxNumberOfThreads">Maximum number of threads to run.</param>
+        private EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
         {
-            // TODO: it may make sense to make this dependent on the frame rate. But not sure.
-            // Code is cleaner like this. Maybe it makes more sense to make it a setting.
-            this.bufferSize = allowDroppedFrames ? bufferSize : 1;
+            inputBufferSize = allowDroppedFrames ? bufferSize : 1;
             this.allowDroppedFrames = allowDroppedFrames;
             numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, Environment.ProcessorCount - 1));
 
@@ -108,37 +116,40 @@ namespace OpenIris
 
             try
             {
-                using (inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(bufferSize))
-                using (outputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>())
+                // Initialize buffers and threads. One to process the output queue and several to process the
+                // images.
+                inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(bufferSize);
+                using var outputBuffer = (numberOfThreads > 1) ? new BlockingCollection<(EyeTrackerImagesAndData, long)>() : null;
+                using var outputTask = (numberOfThreads > 1) ? Task.Factory.StartNew(()=>OutputLoop(outputBuffer), TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError) : Task.CompletedTask;
+
+                for (int i = 0; i < numberOfThreads; i++)
                 {
-                    // Initialize buffers and threads. One to process the output queue and several to process the
-                    // images. The number of processing threads will the number of processors minus 1.
-                    using var outputTask = Task.Factory.StartNew(OutputLoop, TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError);
+                    processingTasks.Add(Task.Factory.StartNew(
+                        
+                        () => ProcessLoop(outputBuffer),
 
-                    for (int i = 0; i < numberOfThreads; i++)
-                    {
-                        processingTasks.Add(Task.Factory.StartNew(ProcessLoop, TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError));
-                    }
-
-                    // Wait for the threads to finish.
-                    await Task.WhenAll(processingTasks);
-
-                    // Now that the processing threads are done. Do not add more items to the output queue
-                    // and wait for the output thread to finish.
-                    outputBuffer.CompleteAdding();
-
-                    // Wait for the output task to be done
-                    await outputTask;
-
-                    errorHandler.CheckForErrors();
+                        TaskCreationOptions.LongRunning)
+                        .ContinueWith(errorHandler.HandleError));
                 }
+
+                // Wait for the threads to finish.
+                await Task.WhenAll(processingTasks);
+
+                // Now that the processing threads are done. Do not add more items to the output queue
+                // and wait for the output thread to finish.
+                outputBuffer?.CompleteAdding();
+
+                // Wait for the output task to be done
+                await outputTask;
+
+                errorHandler.CheckForErrors();
             }
             finally
             {
                 processingTasks?.ForEach(t => t?.Dispose());
 
+                inputBuffer?.Dispose();
                 inputBuffer = null;
-                outputBuffer = null;
             }
         }
 
@@ -202,7 +213,8 @@ namespace OpenIris
         /// the buffer. Each image of left and right eye are processed themselves in different
         /// threads (Tasks).
         /// </summary>
-        private void ProcessLoop()
+        /// <param name="outputBuffer">Output buffer.</param>
+        private void ProcessLoop(BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? outputBuffer)
         {
             Thread.CurrentThread.Name = "EyeTracker:ProcessLoop";
 
@@ -224,13 +236,23 @@ namespace OpenIris
                     (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
                         image,
                         eyeCalibrationParameters: item.images.Calibration.EyeCalibrationParameters[image.WhichEye],
-                        trackingSettings : item.images.TrackingSettings);
+                        trackingSettings: item.images.TrackingSettings);
 
                     EyeTrackerDebug.TrackTimeEndPipeline();
                 }
 
-                // Add the processed images and send to the output queue
-                outputBuffer.Add(item);
+                if (numberOfThreads == 1)
+                {
+                    // if only one thread no need to use the output queue
+                    // because the frames are not going to be out of order
+                    ImagesProcessed?.Invoke(this, item.images);
+                }
+
+                if (numberOfThreads > 1)
+                {
+                    // Add the processed images and send to the output queue
+                    outputBuffer.Add(item);
+                }
             }
         }
 
@@ -240,7 +262,8 @@ namespace OpenIris
         /// ImageProcessed event is always raised with images in the right order even thought it was
         /// possible that during parallel processing they got mixed up.
         /// </summary>
-        private void OutputLoop()
+        /// <param name="outputBuffer">Output buffer.</param>
+        private void OutputLoop(BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? outputBuffer)
         {
             Thread.CurrentThread.Name = "EyeTracker:ProcessOutputLoop";
 

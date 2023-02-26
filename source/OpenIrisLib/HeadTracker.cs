@@ -39,11 +39,19 @@ namespace OpenIris
                 " Drops Seq:" + DroppedFramesSequence +
                 " Buffer:" + headDataBuffer?.Count ?? 0 + "]";
 
+
+        public async static Task<HeadTracker> CreateNew(EyeTrackingSystem eyeTrackingSystem)
+        {
+            var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSource);
+
+            return new HeadTracker(headDataSource);
+        }
+
         /// <summary>
         /// Initializes an instance of HeadTracker.
         /// </summary>
         /// <param name="headDataSource"></param>
-        public HeadTracker(IHeadDataSource? headDataSource)
+        private HeadTracker(IHeadDataSource? headDataSource)
         {
             this.headDataSource = headDataSource;
         }

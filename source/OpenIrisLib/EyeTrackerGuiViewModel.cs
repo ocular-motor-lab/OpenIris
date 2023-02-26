@@ -104,7 +104,7 @@ namespace OpenIris.UI
             };
 
             StartTrackingCommand = new EyeTrackerUICommand(
-                execute: async (_) =>
+                execute: async _ =>
                 {
                     // If the eye tracking system has an specific, UI open it.
                     using var eyeTrackingSystemUI = EyeTracker.EyeTrackingSystem?.OpenEyeTrackingSystemUI;
@@ -113,11 +113,11 @@ namespace OpenIris.UI
                 canExecute: () => EyeTracker.NotStarted);
 
             StopCommand = new EyeTrackerUICommand(
-                execute: async (_) => EyeTracker.StopTracking(),
+                execute: async _ => EyeTracker.StopTracking(),
                 canExecute: () => EyeTracker.Tracking && !(EyeTracker.RecordingSession?.Stopping ?? false));
 
             PlayVideoCommand = new EyeTrackerUICommand(
-                execute: async (_) =>
+                execute: async _ =>
                 {
                     var options = SelectVideoDialog.SelectVideo(EyeTracker.Settings);
                     if (options is null) return;
@@ -126,7 +126,7 @@ namespace OpenIris.UI
                 canExecute: () => EyeTracker.NotStarted);
 
             ProcessVideoCommand = new EyeTrackerUICommand(
-                execute: async (_) =>
+                execute: async _ =>
                 {
                     var options = SelectVideoDialog.SelectVideoForProcessing(EyeTracker.Settings);
                     if (options is null) return;
@@ -135,11 +135,11 @@ namespace OpenIris.UI
                 canExecute: () => EyeTracker.NotStarted);
 
             BatchProcessVideoCommand = new EyeTrackerUICommand(
-                execute: async (_) => (new BatchProcessing(EyeTracker)).Show(),
+                execute: async _ => (new BatchProcessing(EyeTracker)).Show(),
                 canExecute: () => EyeTracker.NotStarted);
 
             StartRecordingCommand = new EyeTrackerUICommand(
-                execute: async (_) =>
+                execute: async _ =>
                 {
                     var options = new RecordingOptions()
                     {
@@ -155,7 +155,7 @@ namespace OpenIris.UI
                 canExecute: () => EyeTracker.Tracking && !EyeTracker.Recording && !(EyeTracker.RecordingSession?.Stopping ?? false));
 
             StopRecordingCommand = new EyeTrackerUICommand(
-                execute: async (_) => EyeTracker.StopRecording(),
+                execute: async _ => EyeTracker.StopRecording(),
                 canExecute: () => EyeTracker.Recording && !EyeTracker.PostProcessing);
 
             StartStopRecordingCommand = new EyeTrackerUICommand(
@@ -169,11 +169,11 @@ namespace OpenIris.UI
                 canExecute: () => EyeTracker.Tracking && !EyeTracker.PostProcessing && !(EyeTracker.RecordingSession?.Stopping ?? false));
 
             StartCalibrationCommand = new EyeTrackerUICommand(
-                execute: async (_) => await EyeTracker.StartCalibration(),
+                execute: async _ => await EyeTracker.StartCalibration(),
                 canExecute: () => EyeTracker.Tracking && !EyeTracker.Calibrating);
 
             CancelCalibrationCommand = new EyeTrackerUICommand(
-                execute: async (_) => EyeTracker.CancelCalibration(),
+                execute: async _ => EyeTracker.CancelCalibration(),
                 canExecute: () => EyeTracker.Calibrating);
 
             StartCancelCalibrationCommand = new EyeTrackerUICommand(
@@ -187,15 +187,15 @@ namespace OpenIris.UI
                 canExecute: () => EyeTracker.Tracking);
 
             ResetCalibrationCommand = new EyeTrackerUICommand(
-                execute: async (_) => EyeTracker.ResetCalibration(),
+                execute: async _ => EyeTracker.ResetCalibration(),
                 canExecute: () => EyeTracker.Tracking && !EyeTracker.Calibrating);
 
             ResetReferenceCommand = new EyeTrackerUICommand(
-                execute: async (_) => await EyeTracker.ResetReference(),
+                execute: async _ => await EyeTracker.ResetReference(),
                 canExecute: () => EyeTracker.Tracking);
 
             LoadCalibrationCommand = new EyeTrackerUICommand(
-                execute: async (_) =>
+                execute: async _ =>
                 {
                     using var dialog = new OpenFileDialog
                     {
@@ -209,7 +209,7 @@ namespace OpenIris.UI
                 canExecute: () => !EyeTracker.Calibrating);
 
             SaveCalibrationCommand = new EyeTrackerUICommand(
-                execute: async (_) =>
+                execute: async _ =>
                 {
                     using var dialog = new SaveFileDialog();
                     dialog.AddExtension = true;
@@ -225,11 +225,11 @@ namespace OpenIris.UI
                 canExecute: () => !EyeTracker.Calibrating);
 
             EditSettingsCommand = new EyeTrackerUICommand(
-                execute: async (_) => EyeTrackerSettingsForm.Show(EyeTracker.Settings),
+                execute: async _ => EyeTrackerSettingsForm.Show(EyeTracker.Settings),
                 canExecute: () => true);
 
             CenterCamerasCommand = new EyeTrackerUICommand(
-                execute: async (_) => EyeTracker.CenterEyes(),
+                execute: async _ => EyeTracker.CenterEyes(),
                 canExecute: () => (EyeTracker.ImageGrabber?.CamerasMovable ?? false) && !EyeTracker.Recording);
 
             MoveCamerasCommand = new EyeTrackerUICommand(
@@ -242,7 +242,7 @@ namespace OpenIris.UI
                 canExecute: () => (EyeTracker.ImageGrabber?.CamerasMovable ?? false) && !EyeTracker.Recording);
 
             ChangeDataFolderCommand = new EyeTrackerUICommand(
-                execute: async (_) =>
+                execute: async _ =>
                 {
                     using var f = new FolderBrowserDialog
                     {
@@ -257,11 +257,18 @@ namespace OpenIris.UI
                 canExecute: () => true);
 
             TrimVideosCommand = new EyeTrackerUICommand(
-                execute: TrimVideosCommandExecute,
+                execute: async _ =>
+                {
+                    var options = SelectVideoDialog.SelectVideoForProcessing(EyeTracker.Settings);
+
+                    if (options?.VideoFileNames is null) return;
+
+                    await VideoTools.TrimVideosCommandExecute(options);
+                },
                 canExecute: () => true);
 
             ConvertVideoToRGBCommand = new EyeTrackerUICommand(
-                execute: ConvertVideoToRGBCommandExecute,
+                execute: _ => VideoTools.ConvertVideoToRGBCommandExecute(),
                 canExecute: () => true);
         }
 
@@ -271,105 +278,6 @@ namespace OpenIris.UI
         public void Dispose()
         {
             EyeTracker?.Dispose();
-        }
-        
-        private async Task TrimVideosCommandExecute(object? sender)
-        {
-            var options = SelectVideoDialog.SelectVideoForProcessing(EyeTracker.Settings);
-
-            if (options is null || options.VideoFileNames is null)
-            {
-                return;
-            }
-
-            var cancelled = false;
-
-            var videoLeft = options.VideoFileNames[Eye.Left];
-            var videoRight = options.VideoFileNames[Eye.Right];
-
-            using var progressDialog = new ProgressBarDialog();
-
-            using var videoReaderLeft = new VideoCapture(videoLeft);
-            using var videoReaderRight = new VideoCapture(videoRight);
-            using var videoWriterLeft = new VideoWriter(videoLeft + "trim.avi", 100, new Size(videoReaderLeft.Width, videoReaderLeft.Height), true);
-            using var videoWriterRight = new VideoWriter(videoRight + "trim.avi", 100, new Size(videoReaderRight.Width, videoReaderRight.Height), true);
-
-
-            progressDialog.Cancelled += (o, es) => cancelled = true;
-            progressDialog.Show();
-
-            var range = options.CustomRange;
-            if (range.IsEmpty)
-            {
-                range = new Range(0, (long)Math.Round(videoReaderLeft.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.FrameCount)));
-            }
-
-            var taskLeft = Task.Run(() =>
-            {
-                videoReaderLeft.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames, (double)options.CustomRange.Begin);
-                while (!cancelled)
-                {
-                    var img = videoReaderLeft.QueryFrame();
-                    if (img is null)
-                    {
-                        return;
-                    }
-
-                    videoWriterLeft.Write(img);
-
-                    if (videoReaderLeft.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames) > range.End)
-                        break;
-
-                    var percent = (int)Math.Round((videoReaderLeft.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames) - range.Begin) / (range.End - range.Begin) * 100);
-
-                    progressDialog.Progress = percent;
-                }
-            });
-            var taskRight = Task.Run(() =>
-            {
-                videoReaderLeft.SetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames, (double)options.CustomRange.Begin);
-                while (!cancelled)
-                {
-                    var img = videoReaderRight.QueryFrame();
-                    if (img is null)
-                    {
-                        return;
-                    }
-
-                    videoWriterRight.Write(img);
-                    if (videoReaderLeft.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.PosFrames) > range.End)
-                        break;
-                }
-            });
-
-            await Task.WhenAll(taskLeft, taskRight);
-            progressDialog.Close();
-        }
-
-        private async Task ConvertVideoToRGBCommandExecute(object? sender)
-        {
-            using (var dialog = new OpenFileDialog())
-            {
-                if (dialog.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-
-                using (var videoReader = new VideoCapture(dialog.FileName))
-                using (var videoWriter = new VideoWriter(dialog.FileName + "out2.avi", 100, new Size(videoReader.Width, videoReader.Height), true))
-                {
-                    while (true)
-                    {
-                        var img = videoReader.QueryFrame();
-                        if (img is null)
-                        {
-                            return;
-                        }
-
-                        videoWriter.Write(img);
-                    }
-                }
-            }
         }
     }
 }

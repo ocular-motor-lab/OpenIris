@@ -124,6 +124,7 @@
     <Compile Include="UI\ProgressBarDialog.Designer.cs">
       <DependentUpon>ProgressBarDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Util\VideoTools.cs" />
     <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
     <Compile Include="Util\OpenIrisException.cs" />
     <Compile Include="Util\PluginListTypeConverter.cs" />

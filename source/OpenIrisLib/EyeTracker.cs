@@ -193,7 +193,7 @@ namespace OpenIris
                 {
                     EyeTrackingSystem = VideoPlayer!;
                     ImageProcessor = EyeTrackerProcessor.CreateNewForOffline(handleImagesProcessed, Settings.MaxNumberOfProcessingThreads);
-                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForVideos(handleImagesGrabbed, VideoPlayer!, Settings.BufferSize, Settings.TrackingMode);
+                    ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(handleImagesGrabbed, VideoPlayer!, Settings.BufferSize, Settings.TrackingMode);
                     HeadTracker = await HeadTracker.CreateNewforOffLine(EyeTrackingSystem);
                 }
                 else

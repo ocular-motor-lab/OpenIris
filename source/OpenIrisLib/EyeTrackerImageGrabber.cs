@@ -42,19 +42,18 @@ namespace OpenIris
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="handleImagesGrabbed"></param>
         /// <param name="videoPlayer"></param>
         /// <param name="bufferSize"></param>
         /// <param name="whichEye"></param>
         /// <returns></returns>
         /// <exception cref="OpenIrisException"></exception>
-        internal static async Task<EyeTrackerImageGrabber> CreateNewForVideos(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, VideoPlayer videoPlayer, int bufferSize = 100, Eye whichEye = Eye.Both)
+        internal static EyeTrackerImageGrabber CreateNewForVideos(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, VideoPlayer videoPlayer, int bufferSize = 100, Eye whichEye = Eye.Both)
         {
             var newSources = videoPlayer.Videos.Select(v => v as IImageEyeSource)
-                ?? throw new OpenIrisException("No image sources");
+                ?? throw new OpenIrisException("No videos.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
-
-            await Task.CompletedTask;
 
             return new EyeTrackerImageGrabber(sources, handleImagesGrabbed, bufferSize, whichEye);
         }
@@ -70,7 +69,7 @@ namespace OpenIris
         internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, EyeTrackingSystem eyeTrackingSystem, int bufferSize = 100, Eye whichEye = Eye.Both)
         {
             var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
-                ?? throw new OpenIrisException("No image sources");
+                ?? throw new OpenIrisException("No cameras started.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
 
@@ -81,6 +80,7 @@ namespace OpenIris
         /// Initializes an instance of the class <see cref="EyeTrackerImageGrabber"/> for grabbing from cameras.
         /// </summary>
         /// <param name="sources">Image sources, cameras or videos.</param>
+        /// <param name="handleImagesGrabbed"></param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="whichEye">Which eye to grab from, left, right, or both.</param>
         private EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, Action<EyeCollection<ImageEye?>> handleImagesGrabbed, int bufferSize = 100, Eye whichEye = Eye.Both)
@@ -95,7 +95,6 @@ namespace OpenIris
             FrameRate = CheckFrameRate(sources);
 
             imageSources = sources;
-            numberOfImageSources = imageSources.Count(c => (c != null));
 
             this.bufferSize = bufferSize;
 
@@ -104,7 +103,6 @@ namespace OpenIris
                 // TODO: this may not be a good idea for systems with two cameras
                 // where one may be master and the other slave. Not sure how to deal
                 // with it
-
 
                 // Dispose the sources we don't need
                 if (whichEye == Eye.Left)
@@ -123,6 +121,8 @@ namespace OpenIris
                     imageSources = new EyeCollection<IImageEyeSource?>(null, imageSources[Eye.Right]);
                 }
             }
+
+            numberOfImageSources = imageSources.Count(c => (c != null));
         }
 
         /// <summary>

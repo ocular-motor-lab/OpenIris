@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EyeTrackerCalibrationSession.cs">
+// <copyright file="EyeTrackerCalibrationPipeline.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------

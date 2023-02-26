@@ -5,7 +5,6 @@
 //-----------------------------------------------------------------------
 namespace OpenIris
 {
-    using System;
     using System.ComponentModel;
 
     /// <summary>

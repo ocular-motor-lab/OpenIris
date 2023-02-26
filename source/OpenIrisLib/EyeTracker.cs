@@ -112,7 +112,7 @@ namespace OpenIris
         /// <summary>
         /// Current calibration manager.
         /// </summary>
-        public CalibrationPipeline? CalibrationSession { get; private set; }
+        public CalibrationPipeline? CalibrationPipeline { get; private set; }
 
         /// <summary>
         /// Gets the current calibration parameters.
@@ -157,7 +157,7 @@ namespace OpenIris
         /// <summary>
         /// True if eye tracker is calibrating.
         /// </summary>
-        public bool Calibrating => CalibrationSession != null;
+        public bool Calibrating => CalibrationPipeline != null;
 
         /// <summary>
         /// True if eye tracker is recording.
@@ -238,7 +238,7 @@ namespace OpenIris
                     // Then we try to record the data and images (usually only in postprocessing)
                     // and we also pass it to the calibration manager.
                     RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
-                    CalibrationSession?.ProcessNewDataAndImages(LastImagesAndData);
+                    CalibrationPipeline?.ProcessNewDataAndImages(LastImagesAndData);
 
                     // Finally we propagate the event in case there are clients.
                     NewDataAndImagesAvailable?.Invoke(this, LastImagesAndData);
@@ -297,7 +297,7 @@ namespace OpenIris
                 // 6. Stop the recorder to make sure all the grabbed and processed frames are recorded
                 //
 
-                CalibrationSession?.CancelCalibration();
+                CalibrationPipeline?.CancelCalibration();
 
                 VideoPlayer?.Stop();
                 HeadTracker?.Stop();
@@ -456,10 +456,10 @@ namespace OpenIris
 
             try
             {
-                CalibrationSession = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod)
+                CalibrationPipeline = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod)
                     ?? throw new InvalidOperationException("No factory");
 
-                var tempCalibrationParameters = await CalibrationSession.CalibrateEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                var tempCalibrationParameters = await CalibrationPipeline.CalibrateEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
                 if (tempCalibrationParameters is null) return;
 
                 // IMPORTANT!! Need to update calibration so the zero reference processing is done with a
@@ -467,7 +467,7 @@ namespace OpenIris
                 // TODO: think a better way of doing this.
                 Calibration = tempCalibrationParameters;
 
-                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                Calibration = await CalibrationPipeline.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
             }
             catch
             {
@@ -476,7 +476,7 @@ namespace OpenIris
             }
             finally
             {
-                CalibrationSession = null;
+                CalibrationPipeline = null;
             }
         }
 
@@ -487,7 +487,7 @@ namespace OpenIris
         {
             Trace.WriteLine("CancelCalibration");
 
-            CalibrationSession?.CancelCalibration();
+            CalibrationPipeline?.CancelCalibration();
         }
 
         /// <summary>
@@ -512,10 +512,10 @@ namespace OpenIris
 
             try
             { 
-                CalibrationSession = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod) 
+                CalibrationPipeline = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod) 
                     ?? throw new InvalidOperationException("No factory");
 
-                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                Calibration = await CalibrationPipeline.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
             }
             catch
             {
@@ -524,7 +524,7 @@ namespace OpenIris
             }
             finally
             {
-                CalibrationSession = null;
+                CalibrationPipeline = null;
             }
         }
 

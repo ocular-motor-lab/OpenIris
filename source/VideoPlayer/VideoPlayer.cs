@@ -74,7 +74,7 @@ namespace VideoPlayer
             }
 
             // Initialize the video grabbing
-            this.videoPlayer = new OpenIris.VideoPlayer(options.VideoFileNames[Eye.Left], options.VideoFileNames[Eye.Right]);
+            this.videoPlayer = new OpenIris.VideoPlayer(options?.VideoFileNames[Eye.Left], options?.VideoFileNames[Eye.Right]);
             this.videoPlayer.ImagesGrabbed += VideoPlayer_ImagesGrabbed;
 
             this.videoPlayer.Play();

@@ -50,6 +50,7 @@ namespace OpenIris
         /// <summary>
         /// Initializes an instance of the eyeTrackerProcessor class.
         /// </summary>
+        /// <param name="handleImagesProcessed"></param>
         /// <param name="allowDroppedFrames">
         /// Value indicating weather frames can be dropped. This means the call to Process images
         /// will be blocking if the buffer is fulll.

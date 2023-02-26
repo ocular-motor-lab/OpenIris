@@ -44,9 +44,9 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileNameLeft">Names of the video file for left eye.</param>
         /// <param name="fileNameRight">Names of the video file for right eye.</param>
-        public VideoPlayer(string fileNameLeft, string fileNameRight)
+        public VideoPlayer(string? fileNameLeft, string? fileNameRight)
             : this(new EyeTrackingSystemDualWebCam(),
-                  new string[] { fileNameLeft, fileNameRight },
+                  new string?[] { fileNameLeft, fileNameRight },
                   new Range(),
                   true)
         { }

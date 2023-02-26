@@ -332,9 +332,7 @@ namespace OpenIris
                     
                     foreach (var video in Videos)
                     {
-                        if (video is null) continue;
-
-                        var image = video.GrabImageEye();
+                        var image = video?.GrabImageEye();
 
                         if (image is null) continue;
 

@@ -29,21 +29,21 @@ namespace OpenIris
     public sealed class EyeTrackerProcessor
     {
         private readonly bool allowDroppedFrames;
-        private int numberOfThreads;
+        private readonly int numberOfThreads;
         private readonly int inputBufferSize;
         private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)> pipeline;
-        private BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? inputBuffer;
+        private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
 
         private bool started;
 
-        public static EyeTrackerProcessor CreateNewForRealTime(int bufferSize, int maxNumberOfThreads)
+        public static EyeTrackerProcessor CreateNewForRealTime(Action<EyeTrackerImagesAndData> handleImagesProcessed, int bufferSize, int maxNumberOfThreads)
         {
-            return new EyeTrackerProcessor(true, bufferSize, maxNumberOfThreads);
+            return new EyeTrackerProcessor(handleImagesProcessed, true, bufferSize, maxNumberOfThreads);
             
         }
-        public static EyeTrackerProcessor CreateNewForOffline( int maxNumberOfThreads)
+        public static EyeTrackerProcessor CreateNewForOffline(Action<EyeTrackerImagesAndData> handleImagesProcessed,  int maxNumberOfThreads)
         {
-            return new EyeTrackerProcessor(true, 1, maxNumberOfThreads);
+            return new EyeTrackerProcessor(handleImagesProcessed, true, 1, maxNumberOfThreads);
         }
 
         /// <summary>
@@ -55,8 +55,10 @@ namespace OpenIris
         /// </param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="maxNumberOfThreads">Maximum number of threads to run.</param>
-        private EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
+        private EyeTrackerProcessor(Action<EyeTrackerImagesAndData> handleImagesProcessed, bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
         {
+            ImagesProcessed = handleImagesProcessed;
+
             inputBufferSize = allowDroppedFrames ? bufferSize : 1;
             this.allowDroppedFrames = allowDroppedFrames;
             numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, Environment.ProcessorCount - 1));
@@ -68,7 +70,7 @@ namespace OpenIris
         /// <summary>
         /// Notifies listeners that a frame has been processed and new data is available.
         /// </summary>
-        internal event EventHandler<EyeTrackerImagesAndData>? ImagesProcessed;
+        internal Action<EyeTrackerImagesAndData> ImagesProcessed;
 
         /// <summary>
         /// User interface for the current pipeline. For each eye.
@@ -172,7 +174,7 @@ namespace OpenIris
         /// True if the images were queued for processing. False if the frames were dropped because
         /// the buffere was full
         /// </returns>
-        internal bool TryProcessImages(EyeTrackerImagesAndData imagesAndData)
+        internal bool TryProcessImages(EyeCollection<ImageEye?> images, CalibrationParameters calibration, EyeTrackingPipelineSettings trackingSettings)
         {
             if (inputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
 
@@ -185,7 +187,7 @@ namespace OpenIris
             // buffer. Otherwise the images will be dropped if the input queue is full.
 
             var result = true;
-            var dataForBuffer = (imagesAndData, NumberFramesProcessed);
+            var dataForBuffer = (new EyeTrackerImagesAndData(images, calibration, trackingSettings), NumberFramesProcessed);
 
             if (allowDroppedFrames)
             {
@@ -225,18 +227,18 @@ namespace OpenIris
 
             foreach (var item in inputBuffer.GetConsumingEnumerable(cancellation.Token))
             {
-                foreach (var image in item.images.Images)
+                foreach (var image in item.imagesAndData.Images)
                 {
                     if (image is null) continue;
 
                     EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
-                    var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(item.images.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
+                    var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(item.imagesAndData.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
 
                     (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
                         image,
-                        eyeCalibrationParameters: item.images.Calibration.EyeCalibrationParameters[image.WhichEye],
-                        trackingSettings: item.images.TrackingSettings);
+                        item.imagesAndData.Calibration.EyeCalibrationParameters[image.WhichEye],
+                        item.imagesAndData.TrackingSettings);
 
                     EyeTrackerDebug.TrackTimeEndPipeline();
                 }
@@ -245,7 +247,7 @@ namespace OpenIris
                 {
                     // if only one thread no need to use the output queue
                     // because the frames are not going to be out of order
-                    ImagesProcessed?.Invoke(this, item.images);
+                    ImagesProcessed(item.imagesAndData);
                 }
 
                 if (numberOfThreads > 1)
@@ -284,7 +286,7 @@ namespace OpenIris
                 if (orderNumber == outputNextExpectedNumber)
                 {
                     outputNextExpectedNumber++;
-                    ImagesProcessed?.Invoke(this, processedImages);
+                    ImagesProcessed(processedImages);
                 }
                 else
                 {
@@ -299,7 +301,7 @@ namespace OpenIris
                     outputWaitingList.Remove(outputNextExpectedNumber);
                     outputNextExpectedNumber++;
 
-                    ImagesProcessed?.Invoke(this, images);
+                    ImagesProcessed(images);
                 }
             }
 
@@ -328,8 +330,9 @@ namespace OpenIris
                    EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"),
                    EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"));
 
-                PipelineUI[Eye.Left] = currentPipeline[Eye.Left].GetPipelineUI(Eye.Left);
-                PipelineUI[Eye.Right] = currentPipeline[Eye.Right].GetPipelineUI(Eye.Right);
+                PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(
+                    currentPipeline[Eye.Left].GetPipelineUI(Eye.Left),
+                    currentPipeline[Eye.Right].GetPipelineUI(Eye.Right));
 
                 if (pipeline.ContainsKey(ID))
                 {

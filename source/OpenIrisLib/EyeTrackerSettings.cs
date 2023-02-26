@@ -224,7 +224,7 @@ namespace OpenIris
         #region C) Choose a calibration method
 
         [Category("C) Choose a calibration method"), Description("Calibration method")]
-        [TypeConverter(typeof(PluginListTypeConverter<CalibrationSession>))]
+        [TypeConverter(typeof(PluginListTypeConverter<CalibrationPipeline>))]
         public string CalibrationMethod
         {
             get { return calibrationMethod; }

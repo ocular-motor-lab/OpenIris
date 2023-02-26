@@ -86,10 +86,7 @@ namespace OpenIris
         [Category("General tracking settings"), Description("Part to the frame that is not processed. Right, top, left, bottom.")]
         public Rectangle CroppingLeftEye
         {
-            get
-            {
-                return this.croppingLeftEye;
-            }
+            get => this.croppingLeftEye;
 
             set
             {

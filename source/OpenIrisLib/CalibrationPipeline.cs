@@ -11,6 +11,8 @@ namespace OpenIris
     using System.Collections.Concurrent;
     using System.ComponentModel.Composition;
     using System.Diagnostics;
+    using System.Linq;
+    using System.Runtime.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -30,11 +32,10 @@ namespace OpenIris
     /// reason it is necessary to do other calibration first to properly geocmetrically correct the
     /// image of the iris.
     /// </remarks>
-    [Export(typeof(CalibrationSession)), PluginDescription("Auto", typeof(CalibrationSettings))]
-    public class CalibrationSession
+    [Export(typeof(CalibrationPipeline)), PluginDescription("Auto", typeof(CalibrationSettings))]
+    public class CalibrationPipeline
     {
         private readonly BlockingCollection<EyeTrackerImagesAndData> inputBuffer;
-        private Task? calibrationTask;
         private bool cancelled;
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace OpenIris
         /// <summary>
         /// Initializes a new instance of the EyeTrackerCalibrationManager class.
         /// </summary>
-        protected CalibrationSession()
+        protected CalibrationPipeline()
         {
             inputBuffer = new BlockingCollection<EyeTrackerImagesAndData>(100);
             TempCalibrationParameters = CalibrationParameters.Default;
@@ -76,7 +77,7 @@ namespace OpenIris
                 TempCalibrationParameters = CalibrationParameters.Default;
                 TempCalibrationParameters.TrackingSettings = settings;
 
-                using (calibrationTask = Task.Factory.StartNew(() =>
+                var calibrationTask = Task.Factory.StartNew(() =>
                  {
                      Thread.CurrentThread.Name = "EyeTracker:CalibrationThread";
 
@@ -86,9 +87,9 @@ namespace OpenIris
                          ProcessForEyeModel(data);
                          if (HasEyeModels(data)) break;
                      }
-                 }, TaskCreationOptions.LongRunning))
+                 }, TaskCreationOptions.LongRunning);
 
-                    await calibrationTask;
+                await calibrationTask;
 
                 if (!cancelled)
                 {
@@ -130,7 +131,7 @@ namespace OpenIris
                 TempCalibrationParameters.EyeCalibrationParameters[Eye.Right].SetReference(null);
                 TempCalibrationParameters.TrackingSettings = settings;
 
-                using (calibrationTask = Task.Factory.StartNew(() =>
+                var calibrationTask = Task.Factory.StartNew(() =>
                 {
                     Thread.CurrentThread.Name = "EyeTracker:CalibrationThread";
 
@@ -140,15 +141,14 @@ namespace OpenIris
                         ProcessForReference(data);
                         if (HasReferences(data)) break;
                     }
-                }, TaskCreationOptions.LongRunning))
+                }, TaskCreationOptions.LongRunning);
 
-                    await calibrationTask;
+                await calibrationTask;
 
                 if (!cancelled)
                 {
                     return TempCalibrationParameters;
                 }
-
             }
             catch (Exception ex)
             {
@@ -296,7 +296,16 @@ namespace OpenIris
     /// <summary>
     /// Settings.
     /// </summary>
+    /// 
+    [KnownType("GetDerivedTypes")] // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.knowntypeattribute?view=netframework-4.8
+
     public class CalibrationSettings : EyeTrackerSettingsBase
     {
+        /// <summary>
+        /// Gets the derived types for the serialization over wcf. This is necessary for the settings to be loaded. It's complicated. Because we are loading plugins in runtime we 
+        /// don't know a prioiry the types. 
+        /// </summary>
+        /// <returns></returns>
+        public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(CalibrationSettings))).ToArray();
     }
 }

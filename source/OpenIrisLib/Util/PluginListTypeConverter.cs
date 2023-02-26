@@ -33,7 +33,7 @@ namespace OpenIris
                 classesAvailable = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
             }
 
-            if (typeof(T) == typeof(CalibrationSession))
+            if (typeof(T) == typeof(CalibrationPipeline))
             {
                 classesAvailable = EyeTrackerPluginManager.CalibrationFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
             }

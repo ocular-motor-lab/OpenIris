@@ -112,7 +112,7 @@ namespace OpenIris
         /// <summary>
         /// Current calibration manager.
         /// </summary>
-        public CalibrationSession? CalibrationSession { get; private set; }
+        public CalibrationPipeline? CalibrationSession { get; private set; }
 
         /// <summary>
         /// Gets the current calibration parameters.

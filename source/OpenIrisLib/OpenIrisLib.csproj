@@ -129,7 +129,7 @@
     <Compile Include="Util\OpenIrisException.cs" />
     <Compile Include="Util\PluginListTypeConverter.cs" />
     <Compile Include="Util\Consumer.cs" />
-    <Compile Include="CalibrationSession.cs" />
+    <Compile Include="CalibrationPipeline.cs" />
     <Compile Include="EyeTrackerData\ExtraData.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>

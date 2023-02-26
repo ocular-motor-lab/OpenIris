@@ -14,8 +14,8 @@ namespace OpenIris.Calibration
     /// <summary>
     /// Manual calibration. Select the eyeglobe parameters by hand
     /// </summary>
-    [Export(typeof(CalibrationSession)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
-    public class EyeCalibrationManual : CalibrationSession
+    [Export(typeof(CalibrationPipeline)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
+    public class EyeCalibrationManual : CalibrationPipeline
     {
         /// <summary>
         /// Last images of the eyes

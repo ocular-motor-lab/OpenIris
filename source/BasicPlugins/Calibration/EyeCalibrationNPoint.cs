@@ -15,8 +15,8 @@ namespace OpenIris.Calibration
     using OpenIris.ImageProcessing;
 
 
-    [Export(typeof(CalibrationSession)), PluginDescription("N-Point", typeof(CalibrationSettings))]
-    public class EyeCalibrationNPoint : CalibrationSession
+    [Export(typeof(CalibrationPipeline)), PluginDescription("N-Point", typeof(CalibrationSettings))]
+    public class EyeCalibrationNPoint : CalibrationPipeline
     {
         public EyeCollection<List<PointF>> CalibrationPoints { get; set; }
         public EyeCollection<List<PointF>> PupilPositions { get; set; }

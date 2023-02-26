@@ -10,6 +10,7 @@ namespace OpenIris
     using System;
     using System.ComponentModel;
     using System.Linq;
+    using System.Runtime.Serialization;
     using System.Windows.Forms;
     using OpenIris.ImageGrabbing;
 
@@ -206,8 +207,16 @@ namespace OpenIris
     /// http://stackoverflow.com/questions/20084/xml-serialization-and-inherited-types
     /// </summary>
     [Serializable]
+    [KnownType("GetDerivedTypes")] // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.knowntypeattribute?view=netframework-4.8
     public class EyeTrackingSystemSettings : EyeTrackerSettingsBase
     {
+        /// <summary>
+        /// Gets the derived types for the serialization over wcf. This is necessary for the settings to be loaded. It's complicated. Because we are loading plugins in runtime we 
+        /// don't know a prioiry the types. 
+        /// </summary>
+        /// <returns></returns>
+        public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingSystemSettings))).ToArray();
+
         /// <summary>
         /// Gets or sets the resolution of the camera in mm per pixel. This should be set up automatically
         /// after a camera system is selected.

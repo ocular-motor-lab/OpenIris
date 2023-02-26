@@ -61,6 +61,7 @@ namespace OpenIris
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="handleImagesGrabbed"></param>
         /// <param name="eyeTrackingSystem"></param>
         /// <param name="bufferSize"></param>
         /// <param name="whichEye"></param>
@@ -363,7 +364,6 @@ namespace OpenIris
                     break;
                 case (true, _):
                     throw new InvalidOperationException("Only for 1 or 2 cameras");
-                    break;
                 case (false, _):
                     GrabImages = videoPlayer!.GrabImages;
                     break;

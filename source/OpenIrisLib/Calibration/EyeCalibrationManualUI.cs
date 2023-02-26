@@ -117,16 +117,16 @@ namespace OpenIris.Calibration
 
             if (lastImageLeftEye != null)
             {
-                sliderTextControlLeftEyeGlobeH.Value = (int)Math.Round(lastImageLeftEye.EyeData.Pupil.Center.X);
-                sliderTextControlLeftEyeGlobeV.Value = (int)Math.Round(lastImageLeftEye.EyeData.Pupil.Center.Y);
-                sliderTextControlLeftEyeGlobeR.Value = (int)Math.Round(lastImageLeftEye.EyeData.Iris.Radius * 2.0);
+                sliderTextControlLeftEyeGlobeH.Value = (int)Math.Round(lastImageLeftEye.EyeData?.Pupil.Center.X ?? 0);
+                sliderTextControlLeftEyeGlobeV.Value = (int)Math.Round(lastImageLeftEye.EyeData?.Pupil.Center.Y ?? 0);
+                sliderTextControlLeftEyeGlobeR.Value = (int)Math.Round(lastImageLeftEye.EyeData?.Iris.Radius * 2.0 ?? 0);
             }
 
             if (lastImageRightEye != null)
             {
-                sliderTextControlRightEyeGlobeH.Value = (int)Math.Round(lastImageRightEye.EyeData.Pupil.Center.X);
-                sliderTextControlRightEyeGlobeV.Value = (int)Math.Round(lastImageRightEye.EyeData.Pupil.Center.Y);
-                sliderTextControlRightEyeGlobeR.Value = (int)Math.Round(lastImageRightEye.EyeData.Iris.Radius * 2.0);
+                sliderTextControlRightEyeGlobeH.Value = (int)Math.Round(lastImageRightEye.EyeData?.Pupil.Center.X ?? 0);
+                sliderTextControlRightEyeGlobeV.Value = (int)Math.Round(lastImageRightEye.EyeData?.Pupil.Center.Y ?? 0);
+                sliderTextControlRightEyeGlobeR.Value = (int)Math.Round(lastImageRightEye.EyeData?.Iris.Radius * 2.0 ?? 0);
             }
         }
         

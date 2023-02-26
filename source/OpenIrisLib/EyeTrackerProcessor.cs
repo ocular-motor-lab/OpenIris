@@ -118,7 +118,7 @@ namespace OpenIris
             {
                 // Initialize buffers and threads. One to process the output queue and several to process the
                 // images.
-                inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(bufferSize);
+                inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(inputBufferSize);
                 using var outputBuffer = (numberOfThreads > 1) ? new BlockingCollection<(EyeTrackerImagesAndData, long)>() : null;
                 using var outputTask = (numberOfThreads > 1) ? Task.Factory.StartNew(()=>OutputLoop(outputBuffer), TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError) : Task.CompletedTask;
 

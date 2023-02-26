@@ -68,7 +68,7 @@ namespace OpenIris
         /// <summary>
         /// Gets or sets the calibrated head data.
         /// </summary>
-        public CalibratedHeadData HeadDataCalibrated { get; set; }
+        public CalibratedHeadData? HeadDataCalibrated { get; set; }
 
         /// <summary>
         /// Extra generic data for different systems to use as they please.

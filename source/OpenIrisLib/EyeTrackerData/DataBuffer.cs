@@ -163,17 +163,17 @@ namespace OpenIris
 
                     DataStream.E => bufferData[idx]?.EyeDataCalibrated?[whichEye].PercentOpening ?? double.NaN,
 
-                    DataStream.HR => bufferData[idx]?.HeadDataCalibrated.Roll ?? double.NaN,
+                    DataStream.HR => bufferData[idx]?.HeadDataCalibrated?.Roll ?? double.NaN,
 
-                    DataStream.HP => bufferData[idx]?.HeadDataCalibrated.Yaw ?? double.NaN,
+                    DataStream.HP => bufferData[idx]?.HeadDataCalibrated?.Yaw ?? double.NaN,
 
-                    DataStream.HY => bufferData[idx]?.HeadDataCalibrated.Pitch ?? double.NaN,
+                    DataStream.HY => bufferData[idx]?.HeadDataCalibrated?.Pitch ?? double.NaN,
 
-                    DataStream.HVR => bufferData[idx]?.HeadDataCalibrated.RollVelocity ?? double.NaN,
+                    DataStream.HVR => bufferData[idx]?.HeadDataCalibrated?.RollVelocity ?? double.NaN,
 
-                    DataStream.HVP => bufferData[idx]?.HeadDataCalibrated.YawVelocity ?? double.NaN,
+                    DataStream.HVP => bufferData[idx]?.HeadDataCalibrated?.YawVelocity ?? double.NaN,
 
-                    DataStream.HVY => bufferData[idx]?.HeadDataCalibrated.PitchVelocity ?? double.NaN,
+                    DataStream.HVY => bufferData[idx]?.HeadDataCalibrated?.PitchVelocity ?? double.NaN,
 
                     _ => double.NaN,
                 };

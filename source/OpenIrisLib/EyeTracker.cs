@@ -228,7 +228,7 @@ namespace OpenIris
                     processedImages.Data.EyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData);
                     processedImages.Data.HeadDataRaw = HeadTracker.GetHeadDataCorrespondingToImages(processedImages.Images);
                     processedImages.Data.EyeDataCalibrated = Calibration?.GetCalibratedEyeData(processedImages.Data.EyeDataRaw);
-                    processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw) ?? new CalibratedHeadData();
+                    processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw);
                     processedImages.Data.FrameRate = ImageGrabber.FrameRate;
 
                     LastImagesAndData = EyeTrackingSystem.PostProcessImages(processedImages) ?? processedImages;

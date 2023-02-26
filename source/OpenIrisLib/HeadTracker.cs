@@ -99,7 +99,7 @@ namespace OpenIris
             if (headDataSource is null) return new HeadData();
 
             // Get one current timestamp
-            var imageFrameNumber = procesedImages[Eye.Right].EyeData.Timestamp.FrameNumberRaw;
+            var imageFrameNumber = procesedImages[Eye.Right]?.EyeData?.Timestamp.FrameNumberRaw;
 
             while (headDataBuffer.Count > 0)
             {

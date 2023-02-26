@@ -153,7 +153,7 @@ namespace OpenIris
         /// 
         /// </summary>
         /// <returns></returns>
-        public override IHeadDataSource CreateHeadDataSource() => headSensor;
+        public override IHeadDataSource CreateHeadDataSourceWithCameras() => headSensor;
 
         /// <summary>
         /// 

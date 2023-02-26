@@ -110,7 +110,13 @@ namespace OpenIris
         /// Gets the head tracking sensor. 
         /// </summary>
         /// <returns>The head tracking sensor.</returns>
-        public virtual IHeadDataSource? CreateHeadDataSource() => null;
+        public virtual IHeadDataSource? CreateHeadDataSourceWithCameras() => null;
+
+        /// <summary>
+        /// Gets the head tracking sensor. 
+        /// </summary>
+        /// <returns>The head tracking sensor.</returns>
+        public virtual IHeadDataSource? CreateHeadDataSourceWithVideos() => null;
 
         /// <summary>
         /// Gets the image sources.

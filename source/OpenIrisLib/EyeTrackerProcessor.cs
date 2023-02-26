@@ -33,6 +33,7 @@ namespace OpenIris
         private readonly int inputBufferSize;
         private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)> pipeline;
         private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
+        private int outputNextExpectedNumber = 0;
 
         private bool started;
 
@@ -243,16 +244,17 @@ namespace OpenIris
                     EyeTrackerDebug.TrackTimeEndPipeline();
                 }
 
-                if (numberOfThreads == 1)
+                if (numberOfThreads == 1 | item.orderNumber == outputNextExpectedNumber)
                 {
                     // if only one thread no need to use the output queue
                     // because the frames are not going to be out of order
+                    // Same is this is the next frame we were expecting.
                     ImagesProcessed(item.imagesAndData);
+                    outputNextExpectedNumber++;
                 }
-
-                if (numberOfThreads > 1)
+                else
                 {
-                    // Add the processed images and send to the output queue
+                    // Add the processed images and send to the output queue for reordering
                     outputBuffer.Add(item);
                 }
             }
@@ -272,9 +274,8 @@ namespace OpenIris
             if (outputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
 
             // List of frames that have been processed out of order.
-            var outputWaitingList = new Dictionary<long, EyeTrackerImagesAndData>();
-            var outputNextExpectedNumber = 0;
-
+            var outputWaitingList = new SortedDictionary<long, EyeTrackerImagesAndData>();
+            
             // Keep processing images until the buffer is marked as complete and empty
             using var cancellation = new CancellationTokenSource();
 
@@ -285,8 +286,8 @@ namespace OpenIris
                 // one waiting for add it to the waiting list.
                 if (orderNumber == outputNextExpectedNumber)
                 {
-                    outputNextExpectedNumber++;
                     ImagesProcessed(processedImages);
+                    outputNextExpectedNumber++;
                 }
                 else
                 {
@@ -299,9 +300,9 @@ namespace OpenIris
                 while (outputWaitingList.TryGetValue(outputNextExpectedNumber, out EyeTrackerImagesAndData images))
                 {
                     outputWaitingList.Remove(outputNextExpectedNumber);
-                    outputNextExpectedNumber++;
 
                     ImagesProcessed(images);
+                    outputNextExpectedNumber++;
                 }
             }
 

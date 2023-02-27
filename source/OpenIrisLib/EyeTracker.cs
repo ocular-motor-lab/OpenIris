@@ -258,7 +258,7 @@ namespace OpenIris
                     else
                     {
 
-                        AverageFrameProcessingTime = AverageFrameProcessingTime * 0.9 + 0.1 * (deltaLeftTime + deltaRightTime) / 2.0;
+                        AverageFrameProcessingTime = AverageFrameProcessingTime * 0.95 + 0.05 * (deltaLeftTime + deltaRightTime) / 2.0;
                     }
 
                     // Finally we propagate the event in case there are clients.

@@ -31,7 +31,6 @@ namespace OpenIris
         private readonly bool allowDroppedFrames;
         private readonly int numberOfThreads;
         private readonly int inputBufferSize;
-        private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)> pipeline;
         private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
         private ConcurrentDictionary<long, EyeTrackerImagesAndData>? outputWaitingList;
         private int outputNextExpectedNumber = 0;
@@ -66,7 +65,6 @@ namespace OpenIris
             this.allowDroppedFrames = allowDroppedFrames;
             numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, Environment.ProcessorCount - 1));
 
-            pipeline = new ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)>();
             PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(null, null);
         }
 
@@ -125,12 +123,21 @@ namespace OpenIris
                 // images.
                 inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(inputBufferSize);
                 outputWaitingList = new ConcurrentDictionary<long, EyeTrackerImagesAndData>();
+                var lr = new LeftRightProcessor();
 
                 for (int i = 0; i < numberOfThreads; i++)
                 {
                     processingTasks.Add(Task.Factory.StartNew(
+                        async () =>
+                        {
+                            var lrTask = lr.Start();
 
-                        ProcessLoop,
+                            ProcessLoop(lr);
+
+                            lr.Stop();
+
+                            await lrTask;
+                        },
 
                         TaskCreationOptions.LongRunning)
                         .ContinueWith(errorHandler.HandleError));
@@ -203,7 +210,7 @@ namespace OpenIris
         /// the buffer. Each image of left and right eye are processed themselves in different
         /// threads (Tasks).
         /// </summary>
-        private void ProcessLoop()
+        private void ProcessLoop(LeftRightProcessor leftRightProcessor)
         {
             Thread.CurrentThread.Name = "EyeTracker:ProcessLoop";
 
@@ -214,6 +221,8 @@ namespace OpenIris
             using var cancellation = new CancellationTokenSource();
             foreach (var (imagesAndData, orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
             {
+                leftRightProcessor.ProcessImages(imagesAndData);
+
                 //Parallel.ForEach(imagesAndData.Images, image =>
                 //{
                 //    if (image != null)
@@ -231,21 +240,21 @@ namespace OpenIris
                 //    }
                 //});
 
-                foreach (var image in imagesAndData.Images)
-                {
-                    if (image is null) continue;
+                //foreach (var image in imagesAndData.Images)
+                //{
+                //    if (image is null) continue;
 
-                    EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
+                //    EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
-                    var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
+                //    var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
 
-                    (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
-                        image,
-                        imagesAndData.Calibration.EyeCalibrationParameters[image.WhichEye],
-                        imagesAndData.TrackingSettings);
+                //    (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
+                //        image,
+                //        imagesAndData.Calibration.EyeCalibrationParameters[image.WhichEye],
+                //        imagesAndData.TrackingSettings);
 
-                    EyeTrackerDebug.TrackTimeEndPipeline();
-                }
+                //    EyeTrackerDebug.TrackTimeEndPipeline();
+                //}
 
                 /*
                   var leftImage = imagesAndData.Images[Eye.Left];
@@ -313,9 +322,165 @@ namespace OpenIris
                         outputNextExpectedNumber++;
                     }
                 }
+
+                if (imagesAndData.TrackingSettings.EyeTrackingPipelineName != leftRightProcessor.pipeline[Eye.Left].Item1 | PipelineUI[Eye.Left] is null)
+                {
+                    PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(
+                        leftRightProcessor.pipeline[Eye.Left].Item2.GetPipelineUI(Eye.Left),
+                        leftRightProcessor.pipeline[Eye.Right].Item2.GetPipelineUI(Eye.Right));
+                }
             }
         }
 
+        ///// <summary>
+        ///// Method to create the pipeline object to process the images. For each frame it has to check if the settings
+        ///// have changed and it needs to update to a new pipeline. It creates an pipeline object for each thread and 
+        ///// each eye to avoid conflicts in multithreading. Otherwise the pipeline classes would need to be thread safe
+        ///// which is quite hard.
+        ///// </summary>
+        ///// <param name="newPipelineName">New pipeline name.</param>
+        ///// <param name="whichEye">Which eye we are working with.</param>
+        ///// <returns>The new pipeline object.</returns>
+        //private IEyeTrackingPipeline GetCurrentEyeTrackingPipeline(string newPipelineName, Eye whichEye)
+        //{
+        //    var ID = Thread.CurrentThread.ManagedThreadId;
+
+        //    (var currentName, var currentPipeline) = pipeline.ContainsKey(ID) ? pipeline[ID] : ("", null);
+
+        //    // if this thread does not have an pipeline 
+        //    if (currentName != newPipelineName || currentPipeline is null)
+        //    {
+        //        currentPipeline = new EyeCollection<IEyeTrackingPipeline>(
+        //           EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"),
+        //           EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"));
+
+        //        PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(
+        //            currentPipeline[Eye.Left].GetPipelineUI(Eye.Left),
+        //            currentPipeline[Eye.Right].GetPipelineUI(Eye.Right));
+
+        //        if (pipeline.ContainsKey(ID))
+        //        {
+        //            pipeline[ID] = (newPipelineName, currentPipeline);
+        //        }
+        //        else
+        //        {
+        //            var result = pipeline.TryAdd(ID, (newPipelineName, currentPipeline));
+        //            if (!result) throw new InvalidOperationException("bad dictionary.");
+        //        }
+        //    }
+
+        //    return currentPipeline[whichEye];
+        //}
+    }
+
+
+    class LeftRightProcessor
+    {
+        private EyeTrackerImagesAndData imagesAndData;
+        private readonly AutoResetEvent newImagesLeftEvent;
+        private readonly AutoResetEvent newImagesRightEvent;
+        private readonly AutoResetEvent oneEyeDoneEvent;
+        private readonly AutoResetEvent oneEyeDoneEvent2;
+        private bool stopped;
+        public EyeCollection<(string, IEyeTrackingPipeline?)> pipeline = new EyeCollection<(string, IEyeTrackingPipeline?)>(("",null), ("",null));
+
+        public LeftRightProcessor()
+        {
+            newImagesLeftEvent = new AutoResetEvent(false);
+            newImagesRightEvent = new AutoResetEvent(false);
+            oneEyeDoneEvent = new AutoResetEvent(false);
+            oneEyeDoneEvent2 = new AutoResetEvent(false);
+        }
+
+        public async Task Start()
+        {
+            try
+            {
+                var errorHandler = new TaskErrorHandler(Stop);
+
+
+                using var leftTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Left, newImagesLeftEvent, oneEyeDoneEvent),
+                    TaskCreationOptions.LongRunning)
+                    .ContinueWith(errorHandler.HandleError);
+
+                using var rightTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Right, newImagesRightEvent, oneEyeDoneEvent2),
+                    TaskCreationOptions.LongRunning)
+                    .ContinueWith(errorHandler.HandleError);
+
+                await Task.WhenAll(leftTask, rightTask);
+            }
+            finally
+            {
+                newImagesLeftEvent.Dispose();
+                newImagesRightEvent.Dispose();
+                oneEyeDoneEvent.Dispose();
+            }
+        }
+
+        public void Stop()
+        {
+            stopped = true;
+            newImagesLeftEvent.Set();
+            newImagesRightEvent.Set();
+            oneEyeDoneEvent.Set();
+            oneEyeDoneEvent.Set();
+        }
+
+        public void ProcessImages(EyeTrackerImagesAndData images)
+        {
+            imagesAndData = images;
+
+            newImagesLeftEvent.Set();
+
+            newImagesRightEvent.Set();
+
+            oneEyeDoneEvent.WaitOne(); // Wait for one of the eyes whichever finishes first
+            if (stopped) return;
+            oneEyeDoneEvent2.WaitOne(); // Wait for the other one
+            if (stopped) return;
+        }
+
+
+        private void ProcessOneEye(Eye whichEye, AutoResetEvent myEvent, AutoResetEvent myEvent2)
+        {
+            Thread.CurrentThread.Name = "EyeTracker:RightProcessLoop";
+
+            while (true)
+            {
+                // wait for new sample
+                myEvent.WaitOne();
+                if (stopped) break;
+
+                // process 
+
+                try
+                {
+                    var image = imagesAndData.Images[whichEye];
+
+                    if (image != null)
+                    {
+                        EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
+
+                        var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, whichEye);
+
+                        (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
+                            image,
+                            imagesAndData.Calibration.EyeCalibrationParameters[whichEye],
+                            imagesAndData.TrackingSettings);
+
+                        EyeTrackerDebug.TrackTimeEndPipeline();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    int a = 1;
+                }
+                finally
+                {
+                    myEvent2.Set();
+                }
+            }
+        }
         /// <summary>
         /// Method to create the pipeline object to process the images. For each frame it has to check if the settings
         /// have changed and it needs to update to a new pipeline. It creates an pipeline object for each thread and 
@@ -327,33 +492,19 @@ namespace OpenIris
         /// <returns>The new pipeline object.</returns>
         private IEyeTrackingPipeline GetCurrentEyeTrackingPipeline(string newPipelineName, Eye whichEye)
         {
-            var ID = Thread.CurrentThread.ManagedThreadId;
-
-            (var currentName, var currentPipeline) = pipeline.ContainsKey(ID) ? pipeline[ID] : ("", null);
+            (var currentName, var currentPipeline) = pipeline[whichEye];
 
             // if this thread does not have an pipeline 
             if (currentName != newPipelineName || currentPipeline is null)
             {
-                currentPipeline = new EyeCollection<IEyeTrackingPipeline>(
-                   EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"),
-                   EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) ?? throw new InvalidOperationException("bad"));
+                currentPipeline = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName) 
+                    ?? throw new InvalidOperationException("bad");
 
-                PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(
-                    currentPipeline[Eye.Left].GetPipelineUI(Eye.Left),
-                    currentPipeline[Eye.Right].GetPipelineUI(Eye.Right));
-
-                if (pipeline.ContainsKey(ID))
-                {
-                    pipeline[ID] = (newPipelineName, currentPipeline);
-                }
-                else
-                {
-                    var result = pipeline.TryAdd(ID, (newPipelineName, currentPipeline));
-                    if (!result) throw new InvalidOperationException("bad dictionary.");
-                }
+                pipeline[whichEye] = (newPipelineName, currentPipeline);
             }
 
-            return currentPipeline[whichEye];
+            return currentPipeline;
         }
     }
+
 }

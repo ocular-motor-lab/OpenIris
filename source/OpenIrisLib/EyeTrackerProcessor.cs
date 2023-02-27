@@ -62,6 +62,7 @@ namespace OpenIris
 
             inputBufferSize = allowDroppedFrames ? bufferSize : 1;
             this.allowDroppedFrames = allowDroppedFrames;
+
             numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, Environment.ProcessorCount - 1));
 
             PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(null, null);
@@ -125,22 +126,8 @@ namespace OpenIris
 
                 for (int i = 0; i < numberOfThreads; i++)
                 {
-                    processingTasks.Add(Task.Factory.StartNew(
-                        async () =>
-                        {
-                            var lr = new LeftRightProcessor();
-
-                            var lrTask = lr.Start();
-
-                            ProcessLoop(lr);
-
-                            lr.Stop();
-
-                            await lrTask;
-                        },
-
-                        TaskCreationOptions.LongRunning)
-                        .ContinueWith(errorHandler.HandleError));
+                    var lr = new LeftRightProcessor();
+                    processingTasks.Add(lr.Start(ProcessLoop, inputBuffer).ContinueWith(errorHandler.HandleError));
                 }
 
                 // Wait for the threads to finish.
@@ -260,92 +247,110 @@ namespace OpenIris
     class LeftRightProcessor
     {
         private EyeTrackerImagesAndData? imagesAndData;
-        private readonly AutoResetEvent newImagesLeftEvent;
-        private readonly AutoResetEvent newImagesRightEvent;
-        private readonly AutoResetEvent oneEyeDoneEvent;
-        private readonly AutoResetEvent oneEyeDoneEvent2;
+        private AutoResetEvent? newImagesLeftEvent;
+        private AutoResetEvent? newImagesRightEvent;
+        private AutoResetEvent? leftEyeDoneEvent;
+        private AutoResetEvent? rightEyeDoneEvent;
         private bool stopped;
+        private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
         public EyeCollection<(string name, IEyeTrackingPipeline? pipeline)> pipeline = new EyeCollection<(string, IEyeTrackingPipeline?)>(("", null), ("", null));
 
-        public LeftRightProcessor()
+        public async Task Start(Action<LeftRightProcessor> ProcessLoop, BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer)
         {
-            newImagesLeftEvent = new AutoResetEvent(false);
-            newImagesRightEvent = new AutoResetEvent(false);
-            oneEyeDoneEvent = new AutoResetEvent(false);
-            oneEyeDoneEvent2 = new AutoResetEvent(false);
-        }
+            this.inputBuffer = inputBuffer;
+            var errorHandler = new TaskErrorHandler(Stop);
 
-        public async Task Start()
-        {
             try
             {
-                var errorHandler = new TaskErrorHandler(Stop);
+                using (newImagesLeftEvent = new AutoResetEvent(false))
+                using (newImagesRightEvent = new AutoResetEvent(false))
+                using (leftEyeDoneEvent = new AutoResetEvent(false))
+                using (rightEyeDoneEvent = new AutoResetEvent(false))
+                {
+                    using var leftTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Left, newImagesLeftEvent, leftEyeDoneEvent),
+                        TaskCreationOptions.LongRunning)
+                        .ContinueWith(errorHandler.HandleError);
 
+                    using var rightTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Right, newImagesRightEvent, rightEyeDoneEvent),
+                        TaskCreationOptions.LongRunning)
+                        .ContinueWith(errorHandler.HandleError);
 
-                using var leftTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Left, newImagesLeftEvent, oneEyeDoneEvent),
-                    TaskCreationOptions.LongRunning)
-                    .ContinueWith(errorHandler.HandleError);
+                    using var inputTask = Task.Factory.StartNew(() => ProcessLoop(this),
+                        TaskCreationOptions.LongRunning)
+                        .ContinueWith(errorHandler.HandleError);
 
-                using var rightTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Right, newImagesRightEvent, oneEyeDoneEvent2),
-                    TaskCreationOptions.LongRunning)
-                    .ContinueWith(errorHandler.HandleError);
+                    // wait for the input task first. It will finish when 
+                    // the buffer is marked as complete.
+                    await inputTask;
 
-                await Task.WhenAll(leftTask, rightTask);
+                    errorHandler.CheckForErrors();
+
+                    // Stop the left and right tasks
+                    Stop();
+
+                    await Task.WhenAll(leftTask, rightTask);
+
+                    errorHandler.CheckForErrors();
+                }
             }
             finally
             {
-                newImagesLeftEvent.Dispose();
-                newImagesRightEvent.Dispose();
-                oneEyeDoneEvent.Dispose();
+                newImagesLeftEvent = null;
+                newImagesRightEvent = null;
+                leftEyeDoneEvent = null;
+                rightEyeDoneEvent = null;
+                inputBuffer = null;
             }
         }
 
         public void Stop()
         {
             stopped = true;
-            newImagesLeftEvent.Set();
-            newImagesRightEvent.Set();
-            oneEyeDoneEvent.Set();
-            oneEyeDoneEvent.Set();
+            leftEyeDoneEvent?.Close();
+            rightEyeDoneEvent?.Close();
+            newImagesLeftEvent?.Close();
+            newImagesRightEvent?.Close();
+            inputBuffer?.CompleteAdding();
         }
 
         public void ProcessImages(EyeTrackerImagesAndData images)
         {
+            if (newImagesLeftEvent is null | newImagesRightEvent is null | leftEyeDoneEvent is null | rightEyeDoneEvent is null) return;
+
+            if (stopped) return;
+
             imagesAndData = images;
 
             newImagesLeftEvent.Set();
 
             newImagesRightEvent.Set();
 
-            oneEyeDoneEvent.WaitOne(); // Wait for one of the eyes whichever finishes first
+            leftEyeDoneEvent.WaitOne(); // Wait for one of the eyes whichever finishes first
             if (stopped) return;
-            oneEyeDoneEvent2.WaitOne(); // Wait for the other one
-            if (stopped) return;
+            rightEyeDoneEvent.WaitOne(); // Wait for the other one
         }
 
 
-        private void ProcessOneEye(Eye whichEye, AutoResetEvent myEvent, AutoResetEvent myEvent2)
+        private void ProcessOneEye(Eye whichEye, AutoResetEvent newImageEvent, AutoResetEvent doneWithProcessingEvent)
         {
             Thread.CurrentThread.Name = "EyeTracker:RightProcessLoop";
 
             while (true)
             {
-                // wait for new sample
-                myEvent.WaitOne();
+                // wait for new frame
+                newImageEvent.WaitOne();
                 if (stopped) break;
-
-                // process 
 
                 try
                 {
-                    var image = imagesAndData.Images[whichEye];
+                    var image = imagesAndData?.Images[whichEye];
 
                     if (image != null)
                     {
                         EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
-                        var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, whichEye);
-
+                        var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData!.TrackingSettings.EyeTrackingPipelineName, whichEye);
+                        
                         (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
                             image,
                             imagesAndData.Calibration.EyeCalibrationParameters[whichEye],
@@ -354,16 +359,13 @@ namespace OpenIris
                         EyeTrackerDebug.TrackTimeEndPipeline();
                     }
                 }
-                catch (Exception ex)
-                {
-                    int a = 1;
-                }
                 finally
                 {
-                    myEvent2.Set();
+                    doneWithProcessingEvent.Set();
                 }
             }
         }
+
         /// <summary>
         /// Method to create the pipeline object to process the images. For each frame it has to check if the settings
         /// have changed and it needs to update to a new pipeline. It creates an pipeline object for each thread and 

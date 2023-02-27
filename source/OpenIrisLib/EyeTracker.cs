@@ -192,7 +192,8 @@ namespace OpenIris
             var errorHandler = new TaskErrorHandler(StopTracking);
             try
             {
-                AverageFrameProcessingTime = double.NaN;
+                // Initialize a few things
+                ResetStats();
                 DataBuffer.Reset();
 
                 // Get EyeTracker System. If playing from video this is already set by PlayVideo.
@@ -248,27 +249,7 @@ namespace OpenIris
                     RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
                     CalibrationPipeline?.ProcessNewDataAndImages(LastImagesAndData);
 
-                    var t = EyeTrackerDebug.TimeElapsed.TotalSeconds;
-                    var deltaLeftTime = t - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
-                    var deltaRightTime = t - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
-
-                    var newTime = (deltaLeftTime, deltaRightTime) switch
-                    {
-                        (double.NaN, double.NaN) => double.NaN,
-                        (double.NaN, _) => deltaRightTime,
-                        (_, double.NaN) => deltaLeftTime,
-                        (_, _) => (deltaLeftTime + deltaRightTime) / 2.0,
-
-                    };
-
-                    if (double.IsNaN(AverageFrameProcessingTime))
-                    {
-                        AverageFrameProcessingTime = newTime;
-                    }
-                    else
-                    {
-                        AverageFrameProcessingTime = AverageFrameProcessingTime * 0.95 + 0.05 * newTime;
-                    }
+                    UpdateStats(processedImages);
 
                     // Finally we propagate the event in case there are clients.
                     NewDataAndImagesAvailable?.Invoke(this, LastImagesAndData);
@@ -305,6 +286,32 @@ namespace OpenIris
                 ImageProcessor = null;
                 EyeTrackingSystem = null;
             }
+        }
+
+        private void ResetStats()
+        {
+            AverageFrameProcessingTime = double.NaN;
+        }
+
+        private void UpdateStats(EyeTrackerImagesAndData processedImages)
+        {
+            var t = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+            var deltaLeftTime = t - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
+            var deltaRightTime = t - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
+
+            var newTime = (deltaLeftTime, deltaRightTime) switch
+            {
+                (double.NaN, double.NaN) => double.NaN,
+                (double.NaN, _) => deltaRightTime,
+                (_, double.NaN) => deltaLeftTime,
+                (_, _) => (deltaLeftTime + deltaRightTime) / 2.0,
+
+            };
+            AverageFrameProcessingTime = AverageFrameProcessingTime switch
+            {
+                double.NaN => newTime,
+                _ => AverageFrameProcessingTime * 0.95 + 0.05 * newTime
+            };
         }
 
         /// <summary>

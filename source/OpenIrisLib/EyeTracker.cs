@@ -29,6 +29,8 @@ namespace OpenIris
         {
             try
             {
+                var t1 = EyeTrackerDebug.TimeElapsed;
+
                 var logpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"EyeTrackerLog-{DateTime.Now.ToString("yyyyMMMdd-HHmmss")}.Log");
                 EyeTrackerLog.Create(logpath);
 
@@ -47,7 +49,7 @@ namespace OpenIris
                 // cannot be done in a separate thread.
                 EyeTrackerRemoteService.Start(this);
 
-                Trace.WriteLine("Eye tracker initializing complete.");
+                Trace.WriteLine($"Eye tracker initializing complete in {(EyeTrackerDebug.TimeElapsed-t1).TotalSeconds} seconds.");
             }
             catch (Exception ex)
             {
@@ -175,6 +177,11 @@ namespace OpenIris
         public bool PostProcessing { get; private set; }
 
         /// <summary>
+        /// Average time processing;
+        /// </summary>
+        public double AverageFrameProcessingTime { get; private set; }
+
+        /// <summary>
         /// Starts tracking from cameras, using the eye tracking system selected in the configuration settings.
         /// </summary>
         public async Task StartTracking()
@@ -185,6 +192,7 @@ namespace OpenIris
             var errorHandler = new TaskErrorHandler(StopTracking);
             try
             {
+                AverageFrameProcessingTime = double.NaN;
                 DataBuffer.Reset();
 
                 // Get EyeTracker System. If playing from video this is already set by PlayVideo.
@@ -215,7 +223,7 @@ namespace OpenIris
                     grabbedImages = EyeTrackingSystem!.PreProcessImages(grabbedImages);
                     RecordingSession?.TryRecordImages(grabbedImages);
 
-                    ImageProcessor?.TryProcessImages(grabbedImages, Calibration, Settings.TrackingpipelineSettings);
+                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
                 }
 
                 // Action for every time new images are processed
@@ -239,6 +247,19 @@ namespace OpenIris
                     // and we also pass it to the calibration manager.
                     RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
                     CalibrationPipeline?.ProcessNewDataAndImages(LastImagesAndData);
+
+                    var t = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+                    var deltaLeftTime = t - processedImages.Images[Eye.Left].TimeStamp.TimeGrabbed;
+                    var deltaRightTime = t - processedImages.Images[Eye.Right].TimeStamp.TimeGrabbed;
+                    if (double.IsNaN(AverageFrameProcessingTime))
+                    {
+                        AverageFrameProcessingTime = (deltaLeftTime + deltaRightTime) / 2.0;
+                    }
+                    else
+                    {
+
+                        AverageFrameProcessingTime = AverageFrameProcessingTime * 0.9 + 0.1 * (deltaLeftTime + deltaRightTime) / 2.0;
+                    }
 
                     // Finally we propagate the event in case there are clients.
                     NewDataAndImagesAvailable?.Invoke(this, LastImagesAndData);

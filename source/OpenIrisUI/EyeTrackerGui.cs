@@ -451,7 +451,7 @@ namespace OpenIris.UI
             else
                 toolStripStatusLabelImageGrabbingStatus.BackColor = Color.Red;
 
-            toolStripStatusLabelProcessingTimeLeftEye.Text = eyeTracker.ImageProcessor?.ProcessingStatus ?? "Not tracking";
+            toolStripStatusLabelProcessingTimeLeftEye.Text = eyeTracker.ImageProcessor?.ProcessingStatus + string.Format(" {0:0.0}", eyeTracker.AverageFrameProcessingTime*1000) ?? "Not tracking";
             var processingBuffersize = eyeTracker.ImageProcessor?.NumberFramesInBuffer ?? 0;
             if (processingBuffersize < 10)
                 toolStripStatusLabelProcessingTimeLeftEye.BackColor = SystemColors.Control;

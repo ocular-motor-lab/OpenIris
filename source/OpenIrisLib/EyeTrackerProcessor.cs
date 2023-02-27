@@ -41,9 +41,9 @@ namespace OpenIris
         public static EyeTrackerProcessor CreateNewForRealTime(Action<EyeTrackerImagesAndData> handleImagesProcessed, int bufferSize, int maxNumberOfThreads)
         {
             return new EyeTrackerProcessor(handleImagesProcessed, true, bufferSize, maxNumberOfThreads);
-            
+
         }
-        public static EyeTrackerProcessor CreateNewForOffline(Action<EyeTrackerImagesAndData> handleImagesProcessed,  int maxNumberOfThreads)
+        public static EyeTrackerProcessor CreateNewForOffline(Action<EyeTrackerImagesAndData> handleImagesProcessed, int maxNumberOfThreads)
         {
             return new EyeTrackerProcessor(handleImagesProcessed, true, 1, maxNumberOfThreads);
         }
@@ -129,7 +129,7 @@ namespace OpenIris
                 for (int i = 0; i < numberOfThreads; i++)
                 {
                     processingTasks.Add(Task.Factory.StartNew(
-                        
+
                         ProcessLoop,
 
                         TaskCreationOptions.LongRunning)
@@ -170,7 +170,7 @@ namespace OpenIris
         /// True if the images were queued for processing. False if the frames were dropped because
         /// the buffere was full
         /// </returns>
-        internal bool TryProcessImages(EyeCollection<ImageEye?> images, CalibrationParameters calibration, EyeTrackingPipelineSettings trackingSettings)
+        internal bool TryProcessImages(EyeTrackerImagesAndData imagesAndData)
         {
             if (inputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
 
@@ -183,22 +183,17 @@ namespace OpenIris
             // buffer.
 
             var result = true;
-            var dataForBuffer = (new EyeTrackerImagesAndData(images, calibration, trackingSettings), NumberFramesProcessed);
 
             if (allowDroppedFrames)
             {
-                result = inputBuffer.TryAdd(dataForBuffer);
-
-                if (result)
-                {
-                    NumberFramesProcessed++;
-                }
+                result = inputBuffer.TryAdd((imagesAndData, NumberFramesProcessed));
             }
             else
             {
-                inputBuffer.Add(dataForBuffer);
-                NumberFramesProcessed++;
+                inputBuffer.Add((imagesAndData, NumberFramesProcessed));
             }
+
+            if (result) NumberFramesProcessed++;
 
             return result;
         }
@@ -217,36 +212,97 @@ namespace OpenIris
 
             // Keep processing images until the buffer is marked as complete and empty
             using var cancellation = new CancellationTokenSource();
-            foreach (var item in inputBuffer.GetConsumingEnumerable(cancellation.Token))
+            foreach (var (imagesAndData, orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
             {
-                foreach (var image in item.imagesAndData.Images)
+                //Parallel.ForEach(imagesAndData.Images, image =>
+                //{
+                //    if (image != null)
+                //    {
+                //        EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
+
+                //        var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
+
+                //        (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
+                //            image,
+                //            imagesAndData.Calibration.EyeCalibrationParameters[image.WhichEye],
+                //            imagesAndData.TrackingSettings);
+
+                //        EyeTrackerDebug.TrackTimeEndPipeline();
+                //    }
+                //});
+
+                foreach (var image in imagesAndData.Images)
                 {
                     if (image is null) continue;
 
                     EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
-                    var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(item.imagesAndData.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
+                    var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, image.WhichEye);
 
                     (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
                         image,
-                        item.imagesAndData.Calibration.EyeCalibrationParameters[image.WhichEye],
-                        item.imagesAndData.TrackingSettings);
+                        imagesAndData.Calibration.EyeCalibrationParameters[image.WhichEye],
+                        imagesAndData.TrackingSettings);
 
                     EyeTrackerDebug.TrackTimeEndPipeline();
                 }
 
-                if (numberOfThreads == 1 | item.orderNumber == outputNextExpectedNumber)
+                /*
+                  var leftImage = imagesAndData.Images[Eye.Left];
+
+                var leftTask = Task.Run(() =>
+               {
+                   if (leftImage != null)
+                   {
+
+                       EyeTrackerDebug.TrackTimeBeginPipeline(leftImage.WhichEye, leftImage.TimeStamp);
+
+                       var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, leftImage.WhichEye);
+
+                       (leftImage.EyeData, leftImage.ImageTorsion) = eyeTrackingPipeline.Process(
+                           leftImage,
+                           imagesAndData.Calibration.EyeCalibrationParameters[Eye.Left],
+                           imagesAndData.TrackingSettings);
+
+                       EyeTrackerDebug.TrackTimeEndPipeline();
+                   }
+               });
+
+                var rightImage = imagesAndData.Images[Eye.Right];
+
+                var rightTask = Task.Run(() =>
+                {
+                    if (rightImage != null)
+                    {
+
+                        EyeTrackerDebug.TrackTimeBeginPipeline(rightImage.WhichEye, rightImage.TimeStamp);
+
+                        var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData.TrackingSettings.EyeTrackingPipelineName, rightImage.WhichEye);
+
+                        (rightImage.EyeData, rightImage.ImageTorsion) = eyeTrackingPipeline.Process(
+                            rightImage,
+                            imagesAndData.Calibration.EyeCalibrationParameters[Eye.Right],
+                            imagesAndData.TrackingSettings);
+
+                        EyeTrackerDebug.TrackTimeEndPipeline();
+                    }
+                });
+
+                Task.WaitAll(leftTask, rightTask);
+                 */
+
+                if (numberOfThreads == 1 | orderNumber == outputNextExpectedNumber)
                 {
                     // if only one thread no need to use the output queue
                     // because the frames are not going to be out of order
                     // Same is this is the next frame we were expecting.
-                    ImagesProcessed(item.imagesAndData);
+                    ImagesProcessed(imagesAndData);
                     outputNextExpectedNumber++;
                 }
                 else
                 {
                     // Add the processed images and send to the output queue for reordering
-                    outputWaitingList.TryAdd(item.orderNumber, item.imagesAndData);
+                    outputWaitingList.TryAdd(orderNumber, imagesAndData);
 
                     // Go thru the waiting list to look for next expected order number. If the image we
                     // are waiting for is in the waiting list. Remove the item and raise an event

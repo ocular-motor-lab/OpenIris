@@ -56,11 +56,6 @@
       <Project>{9d013e2e-13cc-4df6-8ccd-663659689f3d}</Project>
       <Name>FlyCaptureInterface</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
-      <Project>{ed3ad445-a2fd-41c2-a77c-ce0c22b08192}</Project>
-      <Name>OpenIrisLib</Name>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

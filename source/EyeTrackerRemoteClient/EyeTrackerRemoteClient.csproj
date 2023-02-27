@@ -52,12 +52,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
-      <Project>{ed3ad445-a2fd-41c2-a77c-ce0c22b08192}</Project>
-      <Name>OpenIrisLib</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="OpenIrisMatlabClient.m" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

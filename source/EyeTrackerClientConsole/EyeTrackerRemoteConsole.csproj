@@ -56,10 +56,6 @@
       <Project>{cca5e468-60bc-45aa-bf20-aaac7b2abd27}</Project>
       <Name>EyeTrackerRemoteClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
-      <Project>{ed3ad445-a2fd-41c2-a77c-ce0c22b08192}</Project>
-      <Name>OpenIrisLib</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

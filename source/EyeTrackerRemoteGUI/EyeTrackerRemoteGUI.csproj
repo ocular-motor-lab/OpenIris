@@ -104,6 +104,11 @@
       <Name>EyeTrackerRemoteClient</Name>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
+    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
+      <Project>{ed3ad445-a2fd-41c2-a77c-ce0c22b08192}</Project>
+      <Name>OpenIrisLib</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

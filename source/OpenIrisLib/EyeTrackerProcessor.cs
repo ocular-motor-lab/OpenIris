@@ -123,13 +123,14 @@ namespace OpenIris
                 // images.
                 inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(inputBufferSize);
                 outputWaitingList = new ConcurrentDictionary<long, EyeTrackerImagesAndData>();
-                var lr = new LeftRightProcessor();
 
                 for (int i = 0; i < numberOfThreads; i++)
                 {
                     processingTasks.Add(Task.Factory.StartNew(
                         async () =>
                         {
+                            var lr = new LeftRightProcessor();
+
                             var lrTask = lr.Start();
 
                             ProcessLoop(lr);

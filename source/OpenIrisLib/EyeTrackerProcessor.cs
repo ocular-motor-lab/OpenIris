@@ -18,7 +18,7 @@ namespace OpenIris
     /// Class in charge of the background threads that processes images. It implements a multiplexed
     /// producer consumer. The processor is at the same time a producer and a consumer of images. It
     /// puts then in a concurrent queue and then several processing threads process the images and
-    /// place them in another concurrent queue. Then, the output thread will go through that queue
+    /// place them in another concurrent queue. Then, the output waiting list will go through 
     /// reorder the frames properly (they may have been finished processed out of order) and
     /// propagates the new data so other entities can use it.
     /// </summary>
@@ -33,6 +33,7 @@ namespace OpenIris
         private readonly int inputBufferSize;
         private readonly ConcurrentDictionary<int, (string? name, EyeCollection<IEyeTrackingPipeline>?)> pipeline;
         private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
+        private ConcurrentDictionary<long, EyeTrackerImagesAndData>? outputWaitingList;
         private int outputNextExpectedNumber = 0;
 
         private bool started;
@@ -92,12 +93,12 @@ namespace OpenIris
         /// <summary>
         /// Gets the total number of frames dropped.
         /// </summary>
-        public int NumberFramesNotProcessed { get; private set; }
+        public int NumberFramesNotProcessed { get => NumberFramesReceived - NumberFramesProcessed; }
 
         /// <summary>
         /// Gets the total number of frames  currently in the buffer.
         /// </summary>
-        public int NumberFramesInBuffer => inputBuffer?.Count ?? 0;
+        public int NumberFramesInBuffer => inputBuffer?.Count + outputWaitingList?.Count ?? 0;
 
         /// <summary>
         /// Gets a string with a status message regarding the processing.
@@ -123,14 +124,13 @@ namespace OpenIris
                 // Initialize buffers and threads. One to process the output queue and several to process the
                 // images.
                 inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(inputBufferSize);
-                using var outputBuffer = (numberOfThreads > 1) ? new BlockingCollection<(EyeTrackerImagesAndData, long)>() : null;
-                using var outputTask = (numberOfThreads > 1) ? Task.Factory.StartNew(()=>OutputLoop(outputBuffer), TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError) : Task.CompletedTask;
+                outputWaitingList = new ConcurrentDictionary<long, EyeTrackerImagesAndData>();
 
                 for (int i = 0; i < numberOfThreads; i++)
                 {
                     processingTasks.Add(Task.Factory.StartNew(
                         
-                        () => ProcessLoop(outputBuffer),
+                        ProcessLoop,
 
                         TaskCreationOptions.LongRunning)
                         .ContinueWith(errorHandler.HandleError));
@@ -138,13 +138,6 @@ namespace OpenIris
 
                 // Wait for the threads to finish.
                 await Task.WhenAll(processingTasks);
-
-                // Now that the processing threads are done. Do not add more items to the output queue
-                // and wait for the output thread to finish.
-                outputBuffer?.CompleteAdding();
-
-                // Wait for the output task to be done
-                await outputTask;
 
                 errorHandler.CheckForErrors();
             }
@@ -154,6 +147,7 @@ namespace OpenIris
 
                 inputBuffer?.Dispose();
                 inputBuffer = null;
+                outputWaitingList = null;
             }
         }
 
@@ -184,9 +178,9 @@ namespace OpenIris
 
             if (inputBuffer.IsAddingCompleted) return false;
 
-            // Add the images to the input queue. The option AvoidDropFrames is used for offline
-            // (not-realtime) processing the thread will get blocked here until there is room in the
-            // buffer. Otherwise the images will be dropped if the input queue is full.
+            // Add the images to the input queue. The option allowDroppedFrames is used for realTime
+            // processing. The thread will get not blocked here if there is no room in the
+            // buffer.
 
             var result = true;
             var dataForBuffer = (new EyeTrackerImagesAndData(images, calibration, trackingSettings), NumberFramesProcessed);
@@ -194,19 +188,16 @@ namespace OpenIris
             if (allowDroppedFrames)
             {
                 result = inputBuffer.TryAdd(dataForBuffer);
+
+                if (result)
+                {
+                    NumberFramesProcessed++;
+                }
             }
             else
             {
                 inputBuffer.Add(dataForBuffer);
-            }
-
-            if (result)
-            {
                 NumberFramesProcessed++;
-            }
-            else
-            {
-                NumberFramesNotProcessed++;
             }
 
             return result;
@@ -217,16 +208,15 @@ namespace OpenIris
         /// the buffer. Each image of left and right eye are processed themselves in different
         /// threads (Tasks).
         /// </summary>
-        /// <param name="outputBuffer">Output buffer.</param>
-        private void ProcessLoop(BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? outputBuffer)
+        private void ProcessLoop()
         {
             Thread.CurrentThread.Name = "EyeTracker:ProcessLoop";
 
-            if (inputBuffer is null || outputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
+            if (inputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
+            if (outputWaitingList is null) throw new InvalidOperationException("Buffer not ready.");
 
             // Keep processing images until the buffer is marked as complete and empty
             using var cancellation = new CancellationTokenSource();
-
             foreach (var item in inputBuffer.GetConsumingEnumerable(cancellation.Token))
             {
                 foreach (var image in item.imagesAndData.Images)
@@ -256,58 +246,18 @@ namespace OpenIris
                 else
                 {
                     // Add the processed images and send to the output queue for reordering
-                    outputBuffer.Add(item);
+                    outputWaitingList.TryAdd(item.orderNumber, item.imagesAndData);
+
+                    // Go thru the waiting list to look for next expected order number. If the image we
+                    // are waiting for is in the waiting list. Remove the item and raise an event
+                    // notifying that a new image was processed
+                    while (outputWaitingList.TryRemove(outputNextExpectedNumber, out EyeTrackerImagesAndData images))
+                    {
+                        ImagesProcessed(images);
+                        outputNextExpectedNumber++;
+                    }
                 }
             }
-        }
-
-        /// <summary>
-        /// Consumer loop. Gets images from the output queue and reorders them before raising the
-        /// events to notify listeners that new data is available. That way we ensure the
-        /// ImageProcessed event is always raised with images in the right order even thought it was
-        /// possible that during parallel processing they got mixed up.
-        /// </summary>
-        /// <param name="outputBuffer">Output buffer.</param>
-        private void OutputLoop(BlockingCollection<(EyeTrackerImagesAndData images, long orderNumber)>? outputBuffer)
-        {
-            Thread.CurrentThread.Name = "EyeTracker:ProcessOutputLoop";
-
-            if (outputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
-
-            // List of frames that have been processed out of order.
-            var outputWaitingList = new SortedDictionary<long, EyeTrackerImagesAndData>();
-            
-            // Keep processing images until the buffer is marked as complete and empty
-            using var cancellation = new CancellationTokenSource();
-
-            foreach ((var processedImages, var orderNumber) in outputBuffer.GetConsumingEnumerable(cancellation.Token))
-            {
-                // If the image is the one I am waiting for raise an event notifying that a new image
-                // was processed and increament the current expected frame number. If it is not the
-                // one waiting for add it to the waiting list.
-                if (orderNumber == outputNextExpectedNumber)
-                {
-                    ImagesProcessed(processedImages);
-                    outputNextExpectedNumber++;
-                }
-                else
-                {
-                    outputWaitingList.Add(orderNumber, processedImages);
-                }
-
-                // Go thru the waiting list to look for next expected order number. If the image we
-                // are waiting for is in the waiting list. Remove the item and raise an event
-                // notifying that a new image was processed
-                while (outputWaitingList.TryGetValue(outputNextExpectedNumber, out EyeTrackerImagesAndData images))
-                {
-                    outputWaitingList.Remove(outputNextExpectedNumber);
-
-                    ImagesProcessed(images);
-                    outputNextExpectedNumber++;
-                }
-            }
-
-            Trace.WriteLine("Processing output loop finished.");
         }
 
         /// <summary>

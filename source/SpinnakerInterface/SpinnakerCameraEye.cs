@@ -384,7 +384,7 @@ namespace SpinnakerInterface
                     // Images can be converted between pixel formats by using the appropriate
                     // enumeration value. Unlike the original image, the converted one does not need
                     // to be released as it does not affect the camera buffer.
-                    using (IManagedImage convertedImage = rawImage.Convert(PixelFormatEnums.Mono8))
+                    using (IManagedImage convertedImage = rawImage)
                     {
                         ++NumFramesGrabbed;
 

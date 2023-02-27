@@ -145,6 +145,31 @@ namespace OpenIris
         public static bool DEBUG => eyeTracker?.Settings.Debug ?? false;
 
         /// <summary>
+        /// Average time processing;
+        /// </summary>
+        public double AverageFrameProcessingTime { get; private set; }
+        private void UpdateStats(EyeTrackerImagesAndData processedImages)
+        {
+            var t = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+            var deltaLeftTime = t - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
+            var deltaRightTime = t - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
+
+            var newTime = (deltaLeftTime, deltaRightTime) switch
+            {
+                (double.NaN, double.NaN) => double.NaN,
+                (double.NaN, _) => deltaRightTime,
+                (_, double.NaN) => deltaLeftTime,
+                (_, _) => (deltaLeftTime + deltaRightTime) / 2.0,
+
+            };
+            AverageFrameProcessingTime = AverageFrameProcessingTime switch
+            {
+                double.NaN => newTime,
+                _ => AverageFrameProcessingTime * 0.95 + 0.05 * newTime
+            };
+        }
+
+        /// <summary>
         /// True if eye tracker is not started yet.
         /// </summary>
         public bool NotStarted => EyeTrackingSystem is null;
@@ -185,6 +210,8 @@ namespace OpenIris
             var errorHandler = new TaskErrorHandler(StopTracking);
             try
             {
+                AverageFrameProcessingTime = double.NaN;
+
                 // Get EyeTracker System. If playing from video this is already set by PlayVideo.
                 // Then set up image grabber, processor and head tracker.
                 using (EyeTrackingSystem = VideoPlayer ?? EyeTrackingSystem.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings))
@@ -230,6 +257,8 @@ namespace OpenIris
                         // and we also pass it to the calibration manager.
                         RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
                         CalibrationSession?.ProcessNewDataAndImages(LastImagesAndData);
+
+                        UpdateStats(processedImages);
 
                         // Finally we propagate the event in case there are clients.
                         NewDataAndImagesAvailable?.Invoke(this, LastImagesAndData);

@@ -70,7 +70,7 @@ namespace OpenIris.ImageGrabbing
             // Grab the image from the particular camera implementation
             var image = GrabImageFromCamera();
 
-            if (EyeTracker.DEBUG) image.TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+            image.TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
 
             if (image is null) return null;
 

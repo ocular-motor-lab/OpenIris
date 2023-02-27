@@ -91,10 +91,6 @@ namespace OpenIris
             // Check if the sources are videos and get the video player
             videoPlayer = (sources.FirstOrDefault(s=>s is VideoEye) as VideoEye)?.VideoPlayer;
 
-            // Check same frame rate and frame size
-            FrameSize = CheckFrameSize(sources);
-            FrameRate = CheckFrameRate(sources);
-
             imageSources = sources;
 
             this.bufferSize = bufferSize;
@@ -124,6 +120,13 @@ namespace OpenIris
             }
 
             numberOfImageSources = imageSources.Count(c => (c != null));
+
+            if (numberOfImageSources > 1)
+            {
+                // Check same frame rate and frame size
+                FrameSize = CheckFrameSize(imageSources);
+                FrameRate = CheckFrameRate(imageSources);
+            }
         }
 
         /// <summary>
@@ -352,12 +355,17 @@ namespace OpenIris
             // If grabbing from video(s) Need to grab from video player instead of image eye
             // sources because the video player controls the pause/playback/scrolling
             Func<EyeCollection<ImageEye?>?>? GrabImages = null;
-                
+
             switch (usingCameras, numberOfImageSources)
             {
                 case (true, 1):
                     var singleCamera = imageSources.Single(c => (c != null));
-                    GrabImages = () => new EyeCollection<ImageEye?>(singleCamera?.GrabImageEye());
+                    GrabImages = singleCamera!.WhichEye switch
+                    {
+                        Eye.Both => () => new EyeCollection<ImageEye?>(singleCamera?.GrabImageEye()),
+                        Eye.Left => () => new EyeCollection<ImageEye?>(singleCamera?.GrabImageEye(), null),
+                        Eye.Right => () => new EyeCollection<ImageEye?>(null, singleCamera?.GrabImageEye()),
+                    };
                     break;
                 case (true, 2):
                     GrabImages = GrabImagesFromTwoCameras;

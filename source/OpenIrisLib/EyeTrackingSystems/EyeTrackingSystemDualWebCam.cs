@@ -26,11 +26,29 @@ namespace OpenIris
         {
             var cameraSettings = Settings as EyeTrackingSystemSettingsDualWebcam ?? throw new InvalidOperationException("null settings.");
 
-            var cameraLefteye = new CameraEyeWebCam(Eye.Left, 0);
-            var cameraRightEye = new CameraEyeWebCam(Eye.Right, 1);
+            var cameraLefteye = cameraSettings.Eye switch
+            {
+                Eye.Both => new CameraEyeWebCam(Eye.Left, 0),
+                Eye.Left => new CameraEyeWebCam(Eye.Left, 0),
+                _ => null,
+            };
 
-            cameraLefteye.CameraOrientation = cameraSettings.LeftCameraOrientation;
-            cameraRightEye.CameraOrientation = cameraSettings.RightCameraOrientation;
+            var cameraRightEye = cameraSettings.Eye switch
+            {
+                Eye.Both  => new CameraEyeWebCam(Eye.Left, 1),
+                Eye.Right => new CameraEyeWebCam(Eye.Left, 0),
+                _ => null,
+            };
+
+            if (cameraLefteye != null)
+            {
+                cameraLefteye.CameraOrientation = cameraSettings.LeftCameraOrientation;
+            }
+
+            if (cameraRightEye != null)
+            {
+                cameraRightEye.CameraOrientation = cameraSettings.RightCameraOrientation;
+            }
 
             return new EyeCollection<CameraEye?>(cameraLefteye, cameraRightEye);
         }

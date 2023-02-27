@@ -326,8 +326,8 @@ namespace OpenIris
                 if (imagesAndData.TrackingSettings.EyeTrackingPipelineName != leftRightProcessor.pipeline[Eye.Left].Item1 | PipelineUI[Eye.Left] is null)
                 {
                     PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(
-                        leftRightProcessor.pipeline[Eye.Left].Item2.GetPipelineUI(Eye.Left),
-                        leftRightProcessor.pipeline[Eye.Right].Item2.GetPipelineUI(Eye.Right));
+                        leftRightProcessor.pipeline[Eye.Left].Item2?.GetPipelineUI(Eye.Left),
+                        leftRightProcessor.pipeline[Eye.Right].Item2?.GetPipelineUI(Eye.Right));
                 }
             }
         }

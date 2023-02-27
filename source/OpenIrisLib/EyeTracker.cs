@@ -249,16 +249,25 @@ namespace OpenIris
                     CalibrationPipeline?.ProcessNewDataAndImages(LastImagesAndData);
 
                     var t = EyeTrackerDebug.TimeElapsed.TotalSeconds;
-                    var deltaLeftTime = t - processedImages.Images[Eye.Left].TimeStamp.TimeGrabbed;
-                    var deltaRightTime = t - processedImages.Images[Eye.Right].TimeStamp.TimeGrabbed;
+                    var deltaLeftTime = t - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
+                    var deltaRightTime = t - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
+
+                    var newTime = (deltaLeftTime, deltaRightTime) switch
+                    {
+                        (double.NaN, double.NaN) => double.NaN,
+                        (double.NaN, _) => deltaRightTime,
+                        (_, double.NaN) => deltaLeftTime,
+                        (_, _) => (deltaLeftTime + deltaRightTime) / 2.0,
+
+                    };
+
                     if (double.IsNaN(AverageFrameProcessingTime))
                     {
-                        AverageFrameProcessingTime = (deltaLeftTime + deltaRightTime) / 2.0;
+                        AverageFrameProcessingTime = newTime;
                     }
                     else
                     {
-
-                        AverageFrameProcessingTime = AverageFrameProcessingTime * 0.95 + 0.05 * (deltaLeftTime + deltaRightTime) / 2.0;
+                        AverageFrameProcessingTime = AverageFrameProcessingTime * 0.95 + 0.05 * newTime;
                     }
 
                     // Finally we propagate the event in case there are clients.

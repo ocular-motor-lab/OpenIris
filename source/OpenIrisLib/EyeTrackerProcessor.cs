@@ -286,7 +286,9 @@ namespace OpenIris
                     errorHandler.CheckForErrors();
 
                     // Stop the left and right tasks
-                    Stop();
+                    stopped = true;
+                    newImagesLeftEvent.Set();
+                    newImagesRightEvent.Set();
 
                     await Task.WhenAll(leftTask, rightTask);
 
@@ -295,6 +297,7 @@ namespace OpenIris
             }
             finally
             {
+                stopped = true;
                 newImagesLeftEvent = null;
                 newImagesRightEvent = null;
                 leftEyeDoneEvent = null;
@@ -306,10 +309,6 @@ namespace OpenIris
         public void Stop()
         {
             stopped = true;
-            leftEyeDoneEvent?.Close();
-            rightEyeDoneEvent?.Close();
-            newImagesLeftEvent?.Close();
-            newImagesRightEvent?.Close();
             inputBuffer?.CompleteAdding();
         }
 

@@ -295,9 +295,8 @@ namespace OpenIris
 
         private void UpdateStats(EyeTrackerImagesAndData processedImages)
         {
-            var t = EyeTrackerDebug.TimeElapsed.TotalSeconds;
-            var deltaLeftTime = t - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
-            var deltaRightTime = t - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
+            var deltaLeftTime = processedImages.Data.TimeProcessed - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
+            var deltaRightTime = processedImages.Data.TimeProcessed - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
 
             var newTime = (deltaLeftTime, deltaRightTime) switch
             {

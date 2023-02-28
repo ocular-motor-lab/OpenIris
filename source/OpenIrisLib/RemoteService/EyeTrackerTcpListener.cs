@@ -2,7 +2,6 @@
 namespace OpenIris
 {
     using System;
-    using System.IO;
     using System.Net;
     using System.Net.Sockets;
     using System.Text;
@@ -12,7 +11,6 @@ namespace OpenIris
     internal class EyeTrackerTcpListener : IDisposable 
     {
         private Int32 port;
-        private IPAddress localAddr;
         private TcpListener server = null;
         private Task task;
         private bool disposedValue;
@@ -184,7 +182,7 @@ namespace OpenIris
         /// <returns></returns>
         public EyeCollection<EyeData?>? GetCurrentData()
         {
-            return eyeTracker?.LastImagesAndData?.Data?.EyeDataRaw;
+            return eyeTracker?.LastRawEyeData;
         }
     }
 }

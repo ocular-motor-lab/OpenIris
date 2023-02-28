@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="OpenIrisMatlabClient.m" />
+    <Content Include="OpenIrisTCP.m" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">

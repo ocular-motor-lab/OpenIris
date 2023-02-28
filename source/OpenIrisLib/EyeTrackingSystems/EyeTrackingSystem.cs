@@ -181,7 +181,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="procesedImages"></param>
         /// <returns></returns>
-        public virtual EyeTrackerImagesAndData PostProcessImages(EyeTrackerImagesAndData procesedImages) => procesedImages;
+        public virtual EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages) => procesedImages;
 
         /// <summary>
         /// Opens a custom UI for this eye tracking system.

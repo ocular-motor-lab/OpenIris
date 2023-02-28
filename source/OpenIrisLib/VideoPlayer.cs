@@ -371,9 +371,9 @@ namespace OpenIris
         /// </summary>
         /// <param name="procesedImages"></param>
         /// <returns></returns>
-        public override EyeTrackerImagesAndData PostProcessImages(EyeTrackerImagesAndData procesedImages)
+        public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
         {
-            return eyeTrackingSystem?.PostProcessImages(procesedImages) ?? procesedImages;
+            return eyeTrackingSystem?.PostProcessImagesAndData(procesedImages) ?? procesedImages;
         }
 
         /// <summary>

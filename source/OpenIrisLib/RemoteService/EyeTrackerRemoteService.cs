@@ -30,6 +30,7 @@ namespace OpenIris
         private static ServiceHost? eyeTrackerHostLinux;
         private static ServiceHost? eyeTrackerHostWeb;
         private static AutoResetEvent dataWait = new AutoResetEvent(true);
+        private static EyeTrackerTcpListener? tcpServer = null;
 
         /// <summary>
         /// Starts the service.
@@ -99,23 +100,16 @@ namespace OpenIris
                 eyeTrackerHost = null;
             }
 
-            // TCP SERVICE CORE
+            // TCP SERVICE socket
             try
             {
-                eyeTrackerHostLinux = new ServiceHost(typeof(EyeTrackerRemoteService));
-                var binding = new NetTcpBinding();
-                binding.MaxReceivedMessageSize = 2147483647;
-                binding.Security.Mode = SecurityMode.None;
-
-                var address = "net.tcp://localhost:" + eyeTracker.Settings.ServiceListeningPort+1 + "/EyeTrackerEndpoint";
-                var e = eyeTrackerHostLinux.AddServiceEndpoint(typeof(IEyeTrackerServiceCore), binding, address);
-
-                eyeTrackerHostLinux.Open();
+                tcpServer = new EyeTrackerTcpListener(eyeTracker, eyeTracker.Settings.ServiceListeningPort + 2);
+                tcpServer.Start();
             }
             catch (Exception ex)
             {
                 Trace.WriteLine("Error starting TCP service: " + ex.Message);
-                eyeTrackerHostLinux = null;
+                tcpServer = null;
             }
 
             // HTTP SERVICE FROM CLEVELAND DO NOT CHANGE
@@ -141,6 +135,7 @@ namespace OpenIris
             {
                 eyeTrackerHost?.Close();
                 eyeTrackerHostWeb?.Close();
+                tcpServer?.Stop();
             }
             catch (Exception ex)
             {

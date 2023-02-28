@@ -127,6 +127,11 @@ namespace OpenIris
         public EyeTrackerImagesAndData? LastImagesAndData { get; private set; }
 
         /// <summary>
+        /// Gets the current processed raw data. Alternative to listen to the event (new data available).
+        /// </summary>
+        public EyeCollection<EyeData?>? LastRawEyeData { get; private set; }
+
+        /// <summary>
         /// Buffer with data used for plots.
         /// </summary>
         public EyeTrackerDataBuffer DataBuffer { get; private set; }
@@ -138,6 +143,11 @@ namespace OpenIris
 
         /// <summary>
         /// Event raised when there is new processed data available.
+        /// </summary>
+        public event EventHandler<EyeCollection<EyeData?>> NewRawEyeDataAvailable;
+
+        /// <summary>
+        /// Event raised when there is new processed data available including calibrated and head.
         /// </summary>
         public event EventHandler<EyeTrackerImagesAndData>? NewDataAndImagesAvailable;
 
@@ -202,14 +212,14 @@ namespace OpenIris
                 {
                     EyeTrackingSystem = VideoPlayer!;
                     ImageProcessor = EyeTrackerProcessor.CreateNewForOffline(handleImagesProcessed, Settings.MaxNumberOfProcessingThreads);
-                    ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(handleImagesGrabbed, VideoPlayer!, Settings.BufferSize, Settings.TrackingMode);
+                    ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(handleImagesGrabbed, VideoPlayer!, Settings.BufferSize, Settings.EyeTrackingSystemSettings.Eye);
                     HeadTracker = await HeadTracker.CreateNewforOffLine(EyeTrackingSystem);
                 }
                 else
                 {
                     EyeTrackingSystem = EyeTrackingSystem.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
                     ImageProcessor = EyeTrackerProcessor.CreateNewForRealTime(handleImagesProcessed, Settings.BufferSize, Settings.MaxNumberOfProcessingThreads);
-                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(handleImagesGrabbed, EyeTrackingSystem, Settings.BufferSize, Settings.TrackingMode);
+                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(handleImagesGrabbed, EyeTrackingSystem, Settings.BufferSize, Settings.EyeTrackingSystemSettings.Eye);
                     HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
                 }
 
@@ -227,9 +237,13 @@ namespace OpenIris
                     ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
                 }
 
+
                 // Action for every time new images are processed
                 void handleImagesProcessed(EyeTrackerImagesAndData processedImages)
                 {
+                    LastRawEyeData = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData);
+                    NewRawEyeDataAvailable?.Invoke(this, LastRawEyeData);
+
                     // After an image is processed we collected additional data into a common 
                     // structure and we save it in the data buffer. Each eye tracking system can 
                     // also post process the entire data frame
@@ -240,7 +254,7 @@ namespace OpenIris
                     processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw);
                     processedImages.Data.FrameRate = ImageGrabber!.FrameRate;
 
-                    LastImagesAndData = EyeTrackingSystem!.PostProcessImages(processedImages);
+                    LastImagesAndData = EyeTrackingSystem!.PostProcessImagesAndData(processedImages);
 
                     DataBuffer.Add(LastImagesAndData.Data);
 

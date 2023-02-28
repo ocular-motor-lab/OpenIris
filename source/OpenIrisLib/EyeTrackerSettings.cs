@@ -288,22 +288,6 @@ namespace OpenIris
         }
         private bool debug = false; // Default value
 
-        [Category("D) General settings"), Description("Gets or sets the tracking mode")]
-        [NeedsRestarting]
-        public Eye TrackingMode
-        {
-            get { return trackingMode; }
-            set
-            {
-                if (value != trackingMode)
-                {
-                    trackingMode = value;
-                    OnPropertyChanged(this, nameof(TrackingMode));
-                }
-            }
-        }
-        private Eye trackingMode = Eye.Both; // Default value
-
 
         [Category("D) General settings"), Description("Gets the size of the buffer.")]
         [NeedsRestarting]

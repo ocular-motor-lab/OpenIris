@@ -88,6 +88,7 @@
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimplePupilCRBlobs.cs" />
     <Compile Include="EyeTrackerGuiViewModel.cs" />
+    <Compile Include="RemoteService\EyeTrackerTcpListener.cs" />
     <Compile Include="RemoteService\IEyeTrackerServiceCore.cs" />
     <Compile Include="UI\DebugImagesPanel.cs">
       <SubType>UserControl</SubType>

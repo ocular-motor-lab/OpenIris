@@ -160,9 +160,9 @@ namespace OpenIris
         /// </summary>
         /// <param name="procesedImages"></param>
         /// <returns></returns>
-        public override EyeTrackerImagesAndData PostProcessImages(EyeTrackerImagesAndData procesedImages)
+        public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
         {
-            return base.PostProcessImages(procesedImages);
+            return base.PostProcessImagesAndData(procesedImages);
         }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member

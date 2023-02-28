@@ -48,14 +48,14 @@ namespace OpenIris
         /// <param name="whichEye"></param>
         /// <returns></returns>
         /// <exception cref="OpenIrisException"></exception>
-        internal static EyeTrackerImageGrabber CreateNewForVideos(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, VideoPlayer videoPlayer, int bufferSize = 100, Eye whichEye = Eye.Both)
+        internal static EyeTrackerImageGrabber CreateNewForVideos(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, VideoPlayer videoPlayer, int bufferSize = 100)
         {
             var newSources = videoPlayer.Videos.Select(v => v as IImageEyeSource)
                 ?? throw new OpenIrisException("No videos.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
 
-            return new EyeTrackerImageGrabber(sources, handleImagesGrabbed, bufferSize, whichEye);
+            return new EyeTrackerImageGrabber(sources, handleImagesGrabbed, bufferSize, ((EyeTrackingSystem)videoPlayer).Settings.Eye);
         }
 
         /// <summary>
@@ -67,14 +67,14 @@ namespace OpenIris
         /// <param name="whichEye"></param>
         /// <returns></returns>
         /// <exception cref="OpenIrisException"></exception>
-        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, EyeTrackingSystem eyeTrackingSystem, int bufferSize = 100, Eye whichEye = Eye.Both)
+        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, EyeTrackingSystem eyeTrackingSystem, int bufferSize = 100)
         {
-            var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
+               var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
                 ?? throw new OpenIrisException("No cameras started.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
 
-            return new EyeTrackerImageGrabber(sources, handleImagesGrabbed, bufferSize, whichEye);
+            return new EyeTrackerImageGrabber(sources, handleImagesGrabbed, bufferSize, eyeTrackingSystem.Settings.Eye);
         }
 
         /// <summary>

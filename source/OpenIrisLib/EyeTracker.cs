@@ -29,7 +29,7 @@ namespace OpenIris
         {
             try
             {
-                var t1 = EyeTrackerDebug.TimeElapsed;
+                var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
 
                 var logpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"EyeTrackerLog-{DateTime.Now.ToString("yyyyMMMdd-HHmmss")}.Log");
                 EyeTrackerLog.Create(logpath);
@@ -212,14 +212,14 @@ namespace OpenIris
                 {
                     EyeTrackingSystem = VideoPlayer!;
                     ImageProcessor = EyeTrackerProcessor.CreateNewForOffline(handleImagesProcessed, Settings.MaxNumberOfProcessingThreads);
-                    ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(handleImagesGrabbed, VideoPlayer!, Settings.BufferSize, Settings.EyeTrackingSystemSettings.Eye);
+                    ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(handleImagesGrabbed, VideoPlayer!, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewforOffLine(EyeTrackingSystem);
                 }
                 else
                 {
                     EyeTrackingSystem = EyeTrackingSystem.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
                     ImageProcessor = EyeTrackerProcessor.CreateNewForRealTime(handleImagesProcessed, Settings.BufferSize, Settings.MaxNumberOfProcessingThreads);
-                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(handleImagesGrabbed, EyeTrackingSystem, Settings.BufferSize, Settings.EyeTrackingSystemSettings.Eye);
+                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(handleImagesGrabbed, EyeTrackingSystem, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
                 }
 
@@ -248,7 +248,7 @@ namespace OpenIris
                     // structure and we save it in the data buffer. Each eye tracking system can 
                     // also post process the entire data frame
                     processedImages.Data = new EyeTrackerData();
-                    processedImages.Data.EyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData);
+                    processedImages.Data.EyeDataRaw = LastRawEyeData;
                     processedImages.Data.HeadDataRaw = HeadTracker?.GetHeadDataCorrespondingToImages(processedImages.Images) ?? new HeadData();
                     processedImages.Data.EyeDataCalibrated = Calibration?.GetCalibratedEyeData(processedImages.Data.EyeDataRaw);
                     processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw);

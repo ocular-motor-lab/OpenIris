@@ -182,7 +182,7 @@ namespace OpenIris
         /// <returns></returns>
         public EyeCollection<EyeData?>? GetCurrentData()
         {
-            return eyeTracker?.LastRawEyeData;
+            return eyeTracker?.LastImagesAndData?.Data?.EyeDataRaw;
         }
     }
 }

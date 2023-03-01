@@ -259,6 +259,7 @@ namespace OpenIris
         #region D) General settings
 
         [Category("D) General settings"), Description("Maximum number of processing threads.")]
+        [NeedsRestarting(true)]
         public int MaxNumberOfProcessingThreads
         {
             get { return maxNumberOfProcessingThreads; }

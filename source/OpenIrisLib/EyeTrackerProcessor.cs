@@ -36,30 +36,27 @@ namespace OpenIris
 
         private bool started;
 
-        public static EyeTrackerProcessor CreateNewForRealTime(Action<EyeTrackerImagesAndData> handleImagesProcessed, int bufferSize, int maxNumberOfThreads)
+        public static EyeTrackerProcessor CreateNewForRealTime(int bufferSize, int maxNumberOfThreads)
         {
-            return new EyeTrackerProcessor(handleImagesProcessed, true, bufferSize, maxNumberOfThreads);
+            return new EyeTrackerProcessor(true, bufferSize, maxNumberOfThreads);
 
         }
-        public static EyeTrackerProcessor CreateNewForOffline(Action<EyeTrackerImagesAndData> handleImagesProcessed, int maxNumberOfThreads)
+        public static EyeTrackerProcessor CreateNewForOffline(int maxNumberOfThreads)
         {
-            return new EyeTrackerProcessor(handleImagesProcessed, true, 1, maxNumberOfThreads);
+            return new EyeTrackerProcessor(true, 1, maxNumberOfThreads);
         }
 
         /// <summary>
         /// Initializes an instance of the eyeTrackerProcessor class.
         /// </summary>
-        /// <param name="handleImagesProcessed"></param>
         /// <param name="allowDroppedFrames">
         /// Value indicating weather frames can be dropped. This means the call to Process images
         /// will be blocking if the buffer is fulll.
         /// </param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="maxNumberOfThreads">Maximum number of threads to run.</param>
-        private EyeTrackerProcessor(Action<EyeTrackerImagesAndData> handleImagesProcessed, bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
+        private EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
         {
-            ImagesProcessed = handleImagesProcessed;
-
             inputBufferSize = allowDroppedFrames ? bufferSize : 1;
             this.allowDroppedFrames = allowDroppedFrames;
 
@@ -71,7 +68,7 @@ namespace OpenIris
         /// <summary>
         /// Notifies listeners that a frame has been processed and new data is available.
         /// </summary>
-        internal Action<EyeTrackerImagesAndData> ImagesProcessed;
+        internal event EventHandler<EyeTrackerImagesAndData> ImagesProcessed;
 
         /// <summary>
         /// User interface for the current pipeline. For each eye.
@@ -336,13 +333,13 @@ namespace OpenIris
 
             imagesAndData = images;
 
-            newImagesLeftEvent.Set();
+            newImagesLeftEvent?.Set();
 
-            newImagesRightEvent.Set();
+            newImagesRightEvent?.Set();
 
-            leftEyeDoneEvent.WaitOne(); // Wait for one of the eyes whichever finishes first
+            leftEyeDoneEvent?.WaitOne(); // Wait for the left eye
             if (stopped) return;
-            rightEyeDoneEvent.WaitOne(); // Wait for the other one
+            rightEyeDoneEvent?.WaitOne(); // Wait for the right eye
         }
 
 

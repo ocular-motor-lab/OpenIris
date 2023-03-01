@@ -42,52 +42,45 @@ namespace OpenIris
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="handleImagesGrabbed"></param>
         /// <param name="videoPlayer"></param>
         /// <param name="bufferSize"></param>
-        /// <param name="whichEye"></param>
         /// <returns></returns>
         /// <exception cref="OpenIrisException"></exception>
-        internal static EyeTrackerImageGrabber CreateNewForVideos(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, VideoPlayer videoPlayer, int bufferSize = 100)
+        internal static EyeTrackerImageGrabber CreateNewForVideos(VideoPlayer videoPlayer, int bufferSize = 100)
         {
             var newSources = videoPlayer.Videos.Select(v => v as IImageEyeSource)
                 ?? throw new OpenIrisException("No videos.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
 
-            return new EyeTrackerImageGrabber(sources, handleImagesGrabbed, bufferSize, ((EyeTrackingSystem)videoPlayer).Settings.Eye);
+            return new EyeTrackerImageGrabber(sources, bufferSize, ((EyeTrackingSystem)videoPlayer).Settings.Eye);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="handleImagesGrabbed"></param>
         /// <param name="eyeTrackingSystem"></param>
         /// <param name="bufferSize"></param>
-        /// <param name="whichEye"></param>
         /// <returns></returns>
         /// <exception cref="OpenIrisException"></exception>
-        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(Action<EyeCollection<ImageEye?>> handleImagesGrabbed, EyeTrackingSystem eyeTrackingSystem, int bufferSize = 100)
+        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(EyeTrackingSystem eyeTrackingSystem, int bufferSize = 100)
         {
                var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
                 ?? throw new OpenIrisException("No cameras started.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
 
-            return new EyeTrackerImageGrabber(sources, handleImagesGrabbed, bufferSize, eyeTrackingSystem.Settings.Eye);
+            return new EyeTrackerImageGrabber(sources, bufferSize, eyeTrackingSystem.Settings.Eye);
         }
 
         /// <summary>
         /// Initializes an instance of the class <see cref="EyeTrackerImageGrabber"/> for grabbing from cameras.
         /// </summary>
         /// <param name="sources">Image sources, cameras or videos.</param>
-        /// <param name="handleImagesGrabbed"></param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="whichEye">Which eye to grab from, left, right, or both.</param>
-        private EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, Action<EyeCollection<ImageEye?>> handleImagesGrabbed, int bufferSize = 100, Eye whichEye = Eye.Both)
+        private EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, int bufferSize = 100, Eye whichEye = Eye.Both)
         {
-            ImagesGrabbed = handleImagesGrabbed;
-
             // Check if the sources are videos and get the video player
             videoPlayer = (sources.FirstOrDefault(s=>s is VideoEye) as VideoEye)?.VideoPlayer;
 
@@ -133,7 +126,7 @@ namespace OpenIris
         /// Notifies listeners about a new frame available. This event runs in the grabber thread. Any
         /// event handler should be quick.
         /// </summary>
-        internal Action<EyeCollection<ImageEye?>> ImagesGrabbed;
+        public event ventHandler<EyeCollection<ImageEye?>> ImagesGrabbed;
 
         /// <summary>
         /// Gets the frame number of the last image grabbed.

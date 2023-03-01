@@ -43,6 +43,7 @@ namespace OpenIris
         private EyeTrackerLog? log;
 
         private Range RangeToRecord;
+        private Task? recordingTask;
         private bool started;
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace OpenIris
 
             // Prepare file names
             TimeRecordingStarted = DateTime.Now;
-            var session = $"{options.SessionName}-{TimeRecordingStarted.ToString("yyyyMMMdd-HHmmss")}";
+            var session = $"{options.SessionName}-{TimeRecordingStarted:yyyyMMMdd-HHmmss}";
             DataFileName = Path.Combine(options.DataFolder, session, session + ".txt");
 
             // Initialize consumers early so items can be added to the queue as soon as possible
@@ -63,8 +64,6 @@ namespace OpenIris
             processedFramesRecorder = new Consumer<EyeTrackerImagesAndData>(RecordDataAndProcessedImages, 1000);
             eventRecorder = new Consumer<EyeTrackerEvent>(RecordEvent, 1000);
         }
-
-        internal Task? RecordingTask { get; private set; }
 
         /// <summary>
         /// Filename of the datafile.
@@ -161,12 +160,12 @@ namespace OpenIris
                 });
 
                 // Start the consumers. 
-                RecordingTask = Task.WhenAll(
+                recordingTask = Task.WhenAll(
                         rawFramesRecorder.Start().ContinueWith(errorHandler.HandleError),
                         processedFramesRecorder.Start().ContinueWith(errorHandler.HandleError),
                         eventRecorder.Start().ContinueWith(errorHandler.HandleError));
 
-                await RecordingTask;
+                await recordingTask;
 
                 errorHandler.CheckForErrors();
 
@@ -203,6 +202,15 @@ namespace OpenIris
 
                 Stopping = false;
             }
+        }
+
+        /// <summary>
+        /// Waits for the recording to finish.
+        /// </summary>
+        /// <returns></returns>
+        internal async Task Wait()
+        {
+            await (recordingTask ?? Task.CompletedTask);
         }
 
         /// <summary>

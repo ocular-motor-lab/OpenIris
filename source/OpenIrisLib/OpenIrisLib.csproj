@@ -82,7 +82,7 @@
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
     <Compile Include="HeadTracker.cs" />
-    <Compile Include="IEyeTrackingPipeline.cs" />
+    <Compile Include="ImageProcessing\IEyeTrackingPipeline.cs" />
     <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />

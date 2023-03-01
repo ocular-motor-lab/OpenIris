@@ -69,9 +69,10 @@
             // 
             // fileLeftButton
             // 
-            this.fileLeftButton.Location = new System.Drawing.Point(590, 1);
+            this.fileLeftButton.Location = new System.Drawing.Point(885, 2);
+            this.fileLeftButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.fileLeftButton.Name = "fileLeftButton";
-            this.fileLeftButton.Size = new System.Drawing.Size(33, 23);
+            this.fileLeftButton.Size = new System.Drawing.Size(50, 35);
             this.fileLeftButton.TabIndex = 1;
             this.fileLeftButton.Tag = "Left";
             this.fileLeftButton.Text = "...";
@@ -81,49 +82,55 @@
             // systemComboBox
             // 
             this.systemComboBox.FormattingEnabled = true;
-            this.systemComboBox.Location = new System.Drawing.Point(117, 3);
+            this.systemComboBox.Location = new System.Drawing.Point(176, 5);
+            this.systemComboBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.systemComboBox.Name = "systemComboBox";
-            this.systemComboBox.Size = new System.Drawing.Size(251, 21);
+            this.systemComboBox.Size = new System.Drawing.Size(374, 28);
             this.systemComboBox.TabIndex = 0;
             this.systemComboBox.SelectedIndexChanged += new System.EventHandler(this.systemComboBox_SelectedIndexChanged);
             // 
             // labelVideo1
             // 
             this.labelVideo1.AutoSize = true;
-            this.labelVideo1.Location = new System.Drawing.Point(21, 6);
+            this.labelVideo1.Location = new System.Drawing.Point(32, 9);
+            this.labelVideo1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelVideo1.Name = "labelVideo1";
-            this.labelVideo1.Size = new System.Drawing.Size(90, 13);
+            this.labelVideo1.Size = new System.Drawing.Size(131, 20);
             this.labelVideo1.TabIndex = 0;
             this.labelVideo1.Text = "Left eye video file";
             // 
             // file1TextBox
             // 
-            this.file1TextBox.Location = new System.Drawing.Point(117, 3);
+            this.file1TextBox.Location = new System.Drawing.Point(176, 5);
+            this.file1TextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.file1TextBox.Name = "file1TextBox";
-            this.file1TextBox.Size = new System.Drawing.Size(467, 20);
+            this.file1TextBox.Size = new System.Drawing.Size(698, 26);
             this.file1TextBox.TabIndex = 0;
             // 
             // file2TextBox
             // 
-            this.file2TextBox.Location = new System.Drawing.Point(117, 3);
+            this.file2TextBox.Location = new System.Drawing.Point(176, 5);
+            this.file2TextBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.file2TextBox.Name = "file2TextBox";
-            this.file2TextBox.Size = new System.Drawing.Size(467, 20);
+            this.file2TextBox.Size = new System.Drawing.Size(698, 26);
             this.file2TextBox.TabIndex = 0;
             // 
             // labelVideo2
             // 
             this.labelVideo2.AutoSize = true;
-            this.labelVideo2.Location = new System.Drawing.Point(14, 6);
+            this.labelVideo2.Location = new System.Drawing.Point(21, 9);
+            this.labelVideo2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelVideo2.Name = "labelVideo2";
-            this.labelVideo2.Size = new System.Drawing.Size(97, 13);
+            this.labelVideo2.Size = new System.Drawing.Size(141, 20);
             this.labelVideo2.TabIndex = 2;
             this.labelVideo2.Text = "Right eye video file";
             // 
             // fileRightButton
             // 
-            this.fileRightButton.Location = new System.Drawing.Point(590, 0);
+            this.fileRightButton.Location = new System.Drawing.Point(885, 0);
+            this.fileRightButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.fileRightButton.Name = "fileRightButton";
-            this.fileRightButton.Size = new System.Drawing.Size(33, 23);
+            this.fileRightButton.Size = new System.Drawing.Size(50, 35);
             this.fileRightButton.TabIndex = 1;
             this.fileRightButton.Tag = "Right";
             this.fileRightButton.Text = "...";
@@ -133,17 +140,19 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 6);
+            this.label3.Location = new System.Drawing.Point(15, 9);
+            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(101, 13);
+            this.label3.Size = new System.Drawing.Size(150, 20);
             this.label3.TabIndex = 7;
             this.label3.Text = "Eye tracking system";
             // 
             // acceptButton
             // 
-            this.acceptButton.Location = new System.Drawing.Point(467, 3);
+            this.acceptButton.Location = new System.Drawing.Point(700, 5);
+            this.acceptButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.acceptButton.Name = "acceptButton";
-            this.acceptButton.Size = new System.Drawing.Size(75, 23);
+            this.acceptButton.Size = new System.Drawing.Size(112, 35);
             this.acceptButton.TabIndex = 0;
             this.acceptButton.Text = "Accept";
             this.acceptButton.UseVisualStyleBackColor = true;
@@ -152,9 +161,10 @@
             // cancelButton
             // 
             this.cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelButton.Location = new System.Drawing.Point(548, 3);
+            this.cancelButton.Location = new System.Drawing.Point(822, 5);
+            this.cancelButton.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
+            this.cancelButton.Size = new System.Drawing.Size(112, 35);
             this.cancelButton.TabIndex = 1;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
@@ -162,25 +172,28 @@
             // 
             // textBoxCalibration
             // 
-            this.textBoxCalibration.Location = new System.Drawing.Point(117, 4);
+            this.textBoxCalibration.Location = new System.Drawing.Point(176, 6);
+            this.textBoxCalibration.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.textBoxCalibration.Name = "textBoxCalibration";
-            this.textBoxCalibration.Size = new System.Drawing.Size(467, 20);
+            this.textBoxCalibration.Size = new System.Drawing.Size(698, 26);
             this.textBoxCalibration.TabIndex = 0;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(39, 7);
+            this.label5.Location = new System.Drawing.Point(58, 11);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(72, 13);
+            this.label5.Size = new System.Drawing.Size(108, 20);
             this.label5.TabIndex = 11;
             this.label5.Text = "Calibration file";
             // 
             // buttonCalibrationLeftEye
             // 
-            this.buttonCalibrationLeftEye.Location = new System.Drawing.Point(590, 2);
+            this.buttonCalibrationLeftEye.Location = new System.Drawing.Point(885, 3);
+            this.buttonCalibrationLeftEye.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.buttonCalibrationLeftEye.Name = "buttonCalibrationLeftEye";
-            this.buttonCalibrationLeftEye.Size = new System.Drawing.Size(33, 23);
+            this.buttonCalibrationLeftEye.Size = new System.Drawing.Size(50, 35);
             this.buttonCalibrationLeftEye.TabIndex = 1;
             this.buttonCalibrationLeftEye.Text = "...";
             this.buttonCalibrationLeftEye.UseVisualStyleBackColor = true;
@@ -189,42 +202,47 @@
             // checkBoxSaveProcessedVideo
             // 
             this.checkBoxSaveProcessedVideo.AutoSize = true;
-            this.checkBoxSaveProcessedVideo.Location = new System.Drawing.Point(7, 3);
+            this.checkBoxSaveProcessedVideo.Location = new System.Drawing.Point(10, 5);
+            this.checkBoxSaveProcessedVideo.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBoxSaveProcessedVideo.Name = "checkBoxSaveProcessedVideo";
-            this.checkBoxSaveProcessedVideo.Size = new System.Drawing.Size(132, 17);
+            this.checkBoxSaveProcessedVideo.Size = new System.Drawing.Size(190, 24);
             this.checkBoxSaveProcessedVideo.TabIndex = 0;
             this.checkBoxSaveProcessedVideo.Text = "Save processed video";
             this.checkBoxSaveProcessedVideo.UseVisualStyleBackColor = true;
             // 
             // textBoxToFrame
             // 
-            this.textBoxToFrame.Location = new System.Drawing.Point(251, 4);
+            this.textBoxToFrame.Location = new System.Drawing.Point(376, 6);
+            this.textBoxToFrame.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.textBoxToFrame.Name = "textBoxToFrame";
-            this.textBoxToFrame.Size = new System.Drawing.Size(101, 20);
+            this.textBoxToFrame.Size = new System.Drawing.Size(150, 26);
             this.textBoxToFrame.TabIndex = 1;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(226, 7);
+            this.label6.Location = new System.Drawing.Point(339, 11);
+            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(19, 13);
+            this.label6.Size = new System.Drawing.Size(27, 20);
             this.label6.TabIndex = 19;
             this.label6.Text = "to:";
             // 
             // textBoxFromFrame
             // 
-            this.textBoxFromFrame.Location = new System.Drawing.Point(126, 4);
+            this.textBoxFromFrame.Location = new System.Drawing.Point(189, 6);
+            this.textBoxFromFrame.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.textBoxFromFrame.Name = "textBoxFromFrame";
-            this.textBoxFromFrame.Size = new System.Drawing.Size(94, 20);
+            this.textBoxFromFrame.Size = new System.Drawing.Size(139, 26);
             this.textBoxFromFrame.TabIndex = 0;
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(8, 7);
+            this.label7.Location = new System.Drawing.Point(12, 11);
+            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(112, 13);
+            this.label7.Size = new System.Drawing.Size(167, 20);
             this.label7.TabIndex = 17;
             this.label7.Text = "Play only frames from: ";
             // 
@@ -233,9 +251,10 @@
             this.checkBoxCustomRange.AutoSize = true;
             this.checkBoxCustomRange.Checked = true;
             this.checkBoxCustomRange.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxCustomRange.Location = new System.Drawing.Point(7, 5);
+            this.checkBoxCustomRange.Location = new System.Drawing.Point(10, 8);
+            this.checkBoxCustomRange.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkBoxCustomRange.Name = "checkBoxCustomRange";
-            this.checkBoxCustomRange.Size = new System.Drawing.Size(91, 17);
+            this.checkBoxCustomRange.Size = new System.Drawing.Size(129, 24);
             this.checkBoxCustomRange.TabIndex = 9;
             this.checkBoxCustomRange.Text = "Play full video";
             this.checkBoxCustomRange.UseVisualStyleBackColor = true;
@@ -248,9 +267,10 @@
             this.panelVideo1.Controls.Add(this.file1TextBox);
             this.panelVideo1.Controls.Add(this.fileLeftButton);
             this.panelVideo1.Controls.Add(this.labelVideo1);
-            this.panelVideo1.Location = new System.Drawing.Point(13, 51);
+            this.panelVideo1.Location = new System.Drawing.Point(19, 79);
+            this.panelVideo1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelVideo1.Name = "panelVideo1";
-            this.panelVideo1.Size = new System.Drawing.Size(626, 32);
+            this.panelVideo1.Size = new System.Drawing.Size(939, 49);
             this.panelVideo1.TabIndex = 0;
             // 
             // panelSystem
@@ -259,9 +279,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelSystem.Controls.Add(this.systemComboBox);
             this.panelSystem.Controls.Add(this.label3);
-            this.panelSystem.Location = new System.Drawing.Point(13, 13);
+            this.panelSystem.Location = new System.Drawing.Point(19, 20);
+            this.panelSystem.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelSystem.Name = "panelSystem";
-            this.panelSystem.Size = new System.Drawing.Size(626, 32);
+            this.panelSystem.Size = new System.Drawing.Size(939, 49);
             this.panelSystem.TabIndex = 2;
             // 
             // panelCalibration
@@ -271,9 +292,10 @@
             this.panelCalibration.Controls.Add(this.textBoxCalibration);
             this.panelCalibration.Controls.Add(this.buttonCalibrationLeftEye);
             this.panelCalibration.Controls.Add(this.label5);
-            this.panelCalibration.Location = new System.Drawing.Point(13, 124);
+            this.panelCalibration.Location = new System.Drawing.Point(19, 193);
+            this.panelCalibration.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelCalibration.Name = "panelCalibration";
-            this.panelCalibration.Size = new System.Drawing.Size(626, 32);
+            this.panelCalibration.Size = new System.Drawing.Size(939, 49);
             this.panelCalibration.TabIndex = 3;
             // 
             // panelCustomRange
@@ -282,9 +304,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelCustomRange.Controls.Add(this.panelRange);
             this.panelCustomRange.Controls.Add(this.checkBoxCustomRange);
-            this.panelCustomRange.Location = new System.Drawing.Point(13, 194);
+            this.panelCustomRange.Location = new System.Drawing.Point(19, 302);
+            this.panelCustomRange.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelCustomRange.Name = "panelCustomRange";
-            this.panelCustomRange.Size = new System.Drawing.Size(626, 30);
+            this.panelCustomRange.Size = new System.Drawing.Size(939, 46);
             this.panelCustomRange.TabIndex = 4;
             // 
             // panelRange
@@ -293,9 +316,10 @@
             this.panelRange.Controls.Add(this.textBoxToFrame);
             this.panelRange.Controls.Add(this.label6);
             this.panelRange.Controls.Add(this.label7);
-            this.panelRange.Location = new System.Drawing.Point(185, 1);
+            this.panelRange.Location = new System.Drawing.Point(278, 2);
+            this.panelRange.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelRange.Name = "panelRange";
-            this.panelRange.Size = new System.Drawing.Size(438, 26);
+            this.panelRange.Size = new System.Drawing.Size(657, 40);
             this.panelRange.TabIndex = 10;
             // 
             // panelSaveProcessedVideo
@@ -303,9 +327,10 @@
             this.panelSaveProcessedVideo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelSaveProcessedVideo.Controls.Add(this.checkBoxSaveProcessedVideo);
-            this.panelSaveProcessedVideo.Location = new System.Drawing.Point(13, 162);
+            this.panelSaveProcessedVideo.Location = new System.Drawing.Point(19, 252);
+            this.panelSaveProcessedVideo.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelSaveProcessedVideo.Name = "panelSaveProcessedVideo";
-            this.panelSaveProcessedVideo.Size = new System.Drawing.Size(626, 26);
+            this.panelSaveProcessedVideo.Size = new System.Drawing.Size(939, 40);
             this.panelSaveProcessedVideo.TabIndex = 3;
             // 
             // panelAcceptCancel
@@ -314,9 +339,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panelAcceptCancel.Controls.Add(this.cancelButton);
             this.panelAcceptCancel.Controls.Add(this.acceptButton);
-            this.panelAcceptCancel.Location = new System.Drawing.Point(13, 230);
+            this.panelAcceptCancel.Location = new System.Drawing.Point(19, 358);
+            this.panelAcceptCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelAcceptCancel.Name = "panelAcceptCancel";
-            this.panelAcceptCancel.Size = new System.Drawing.Size(626, 33);
+            this.panelAcceptCancel.Size = new System.Drawing.Size(939, 51);
             this.panelAcceptCancel.TabIndex = 5;
             // 
             // flowLayoutPanel1
@@ -330,9 +356,10 @@
             this.flowLayoutPanel1.Controls.Add(this.panelAcceptCancel);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(10);
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(655, 275);
+            this.flowLayoutPanel1.Padding = new System.Windows.Forms.Padding(15, 15, 15, 15);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(982, 423);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
             // panelVideo2
@@ -342,20 +369,22 @@
             this.panelVideo2.Controls.Add(this.file2TextBox);
             this.panelVideo2.Controls.Add(this.labelVideo2);
             this.panelVideo2.Controls.Add(this.fileRightButton);
-            this.panelVideo2.Location = new System.Drawing.Point(13, 89);
+            this.panelVideo2.Location = new System.Drawing.Point(19, 138);
+            this.panelVideo2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelVideo2.Name = "panelVideo2";
-            this.panelVideo2.Size = new System.Drawing.Size(626, 29);
+            this.panelVideo2.Size = new System.Drawing.Size(939, 45);
             this.panelVideo2.TabIndex = 1;
             // 
             // SelectVideoDialog
             // 
             this.AcceptButton = this.acceptButton;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cancelButton;
-            this.ClientSize = new System.Drawing.Size(655, 275);
+            this.ClientSize = new System.Drawing.Size(982, 423);
             this.Controls.Add(this.flowLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "SelectVideoDialog";
             this.Text = "Select video";
             this.Load += new System.EventHandler(this.SelectVideoDialog_Load);

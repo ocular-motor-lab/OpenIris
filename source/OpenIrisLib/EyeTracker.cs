@@ -31,8 +31,7 @@ namespace OpenIris
             {
                 var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
 
-                var logpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"EyeTrackerLog-{DateTime.Now.ToString("yyyyMMMdd-HHmmss")}.Log");
-                EyeTrackerLog.Create(logpath);
+                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"EyeTrackerLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
 
                 DataBuffer = new EyeTrackerDataBuffer();
                 Calibration = CalibrationParameters.Default;
@@ -144,7 +143,7 @@ namespace OpenIris
         /// <summary>
         /// Event raised when there is new processed data available.
         /// </summary>
-        public event EventHandler<EyeCollection<EyeData?>> NewRawEyeDataAvailable;
+        public event EventHandler<EyeCollection<EyeData?>>? NewRawEyeDataAvailable;
 
         /// <summary>
         /// Event raised when there is new processed data available including calibrated and head.
@@ -274,7 +273,7 @@ namespace OpenIris
                 await Task.WhenAll(
                     ImageProcessor.Start().ContinueWith(errorHandler.HandleError),
                     ImageGrabber.Start().ContinueWith(errorHandler.HandleError),
-                    HeadTracker.Start()?.ContinueWith(errorHandler.HandleError));
+                    HeadTracker?.Start()?.ContinueWith(errorHandler.HandleError) ?? Task.CompletedTask);
 
                 errorHandler.CheckForErrors();
 

@@ -35,22 +35,25 @@ namespace OpenIris
         /// <summary>
         /// Gets the status of the HeadTracker.
         /// </summary>
-        public string Status => "[HEAD: Drops Camera:" + DroppedFramesAtCamera +
+        public string Status => (headDataSource is null) ? 
+            "" 
+            : 
+            "[HEAD: Drops Camera:" + DroppedFramesAtCamera +
                 " Drops Seq:" + DroppedFramesSequence +
                 " Buffer:" + headDataBuffer?.Count ?? 0 + "]";
 
 
-        public async static Task<HeadTracker> CreateNewforOffLine(EyeTrackingSystem eyeTrackingSystem)
+        public async static Task<HeadTracker?> CreateNewforOffLine(EyeTrackingSystem eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithVideos);
 
-            return new HeadTracker(headDataSource);
+            return (headDataSource is null) ? null : new HeadTracker(headDataSource);
         }
-        public async static Task<HeadTracker> CreateNewForRealTime(EyeTrackingSystem eyeTrackingSystem)
+        public async static Task<HeadTracker?> CreateNewForRealTime(EyeTrackingSystem eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithCameras);
 
-            return new HeadTracker(headDataSource);
+            return (headDataSource is null) ? null : new HeadTracker(headDataSource);
         }
 
         /// <summary>

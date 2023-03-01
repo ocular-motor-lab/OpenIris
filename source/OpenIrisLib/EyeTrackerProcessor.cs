@@ -233,12 +233,28 @@ namespace OpenIris
                     }
                 }
 
-                if (imagesAndData.TrackingSettings.EyeTrackingPipelineName != leftRightProcessor.pipeline[Eye.Left].name | PipelineUI[Eye.Left] is null)
-                {
-                    PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(
-                        leftRightProcessor.pipeline[Eye.Left].pipeline?.GetPipelineUI(Eye.Left),
-                        leftRightProcessor.pipeline[Eye.Right].pipeline?.GetPipelineUI(Eye.Right));
-                }
+                UpdatePipelineUI(leftRightProcessor);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="leftRightProcessor"></param>
+        private void UpdatePipelineUI(LeftRightProcessor leftRightProcessor)
+        {
+            if (PipelineUI[Eye.Left]?.PipelineName != leftRightProcessor.pipeline[Eye.Left].name |
+                PipelineUI[Eye.Right]?.PipelineName != leftRightProcessor.pipeline[Eye.Right].name)
+            {
+                var pipelineUILeft = leftRightProcessor.pipeline[Eye.Left].pipeline?.GetPipelineUI(Eye.Left);
+                var pipelineUIRight = leftRightProcessor.pipeline[Eye.Right].pipeline?.GetPipelineUI(Eye.Right);
+
+                if (pipelineUILeft != null)
+                    pipelineUILeft.PipelineName = leftRightProcessor.pipeline[Eye.Left].name;
+                if (pipelineUIRight != null)
+                    pipelineUIRight.PipelineName = leftRightProcessor.pipeline[Eye.Right].name;
+
+                PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(pipelineUILeft, pipelineUIRight);
             }
         }
     }

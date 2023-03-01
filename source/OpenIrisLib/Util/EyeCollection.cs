@@ -31,8 +31,27 @@ namespace OpenIris
         /// <summary>
         /// Initializes a new instance of the EyeCollection class
         /// </summary>
+        /// <param name="singleObject">The object.</param>
+        public EyeCollection(T singleObject)
+        {
+            items = new T[] { singleObject };
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the EyeCollection class
+        /// </summary>
+        /// <param name="object1">The objects</param>
+        /// <param name="object2">The objects</param>
+        public EyeCollection(T object1, T object2)
+        {
+            items = new T[] { object1, object2 };
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the EyeCollection class
+        /// </summary>
         /// <param name="objects">The objects</param>
-        public EyeCollection(params T[] objects)
+        private EyeCollection(T[] objects)
         {
             if (objects is null) throw new ArgumentNullException(nameof(objects));
             if (objects.Count() < 1 || objects.Count() > 2) throw new InvalidOperationException("Only one or two items;");
@@ -102,7 +121,7 @@ namespace OpenIris
             var s = new System.Text.StringBuilder();
             foreach (var item in items)
             {
-                if (!(s.Length > 0)) s.Append(";");
+                if (!(s.Length > 0)) s.Append("; ");
                 s.Append((item != null) ? item.ToString() : "null");
             }
 

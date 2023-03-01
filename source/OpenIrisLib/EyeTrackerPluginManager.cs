@@ -79,6 +79,10 @@ namespace OpenIris
         /// Factory for eye tracking pipelines.
         /// </summary>
         public static EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>? EyeTrackingPipelineFactory { get; private set; }
+        public static string GetPluginName(Type t)
+        {
+            return ((PluginDescriptionAttribute)Attribute.GetCustomAttribute(t, typeof(PluginDescriptionAttribute))).Name;
+        }
     }
 
     /// <summary>

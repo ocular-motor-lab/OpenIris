@@ -38,7 +38,7 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Last frame number captured.
         /// </summary>
-        public long LastFrameNumber { get; protected set; }
+        public ulong LastFrameNumber { get; protected set; }
 
         /// <summary>
         /// Gets the diagnostics info.
@@ -75,11 +75,11 @@ namespace OpenIris.ImageGrabbing
             if (image is null) return null;
 
             // Check if the timestamp is correct
-            if (LastFrameNumber > (long)image.TimeStamp.FrameNumber)
+            if (LastFrameNumber > image.TimeStamp.FrameNumber)
                 throw new InvalidOperationException("Frame numbers should keep growing.");
 
             // Keep track of the last frame number
-            LastFrameNumber = (long)image.TimeStamp.FrameNumber;
+            LastFrameNumber = image.TimeStamp.FrameNumber;
 
             image.CorrectOrientation(CameraOrientation);
 

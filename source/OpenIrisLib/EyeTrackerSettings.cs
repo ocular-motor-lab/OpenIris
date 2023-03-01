@@ -467,7 +467,6 @@ namespace OpenIris
         /// </summary>
         [Browsable(false)]
         public string LastVideoEyeTrackerSystem { get; set; }
-
         /// <summary>
         /// Folder of the last video selected to play or process.
         /// </summary>

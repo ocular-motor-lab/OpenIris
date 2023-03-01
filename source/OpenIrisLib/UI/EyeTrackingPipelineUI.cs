@@ -19,6 +19,11 @@ namespace OpenIris
         public Eye WhichEye { get; }
 
         /// <summary>
+        /// Name of the pipeline.
+        /// </summary>
+        public string PipelineName { get; set; }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="imageBox"></param>

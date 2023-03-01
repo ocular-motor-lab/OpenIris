@@ -22,7 +22,9 @@ namespace OpenIris
     public class ImageEye : IDisposable
     {
         /// <summary>
-        /// Initializes an empty instance of the class ImageEye. 
+        /// Initializes an empty instance of the class ImageEye.
+        /// This constructor is used when an image from the camera is split into
+        /// two images, one for each eye.
         /// </summary>
         public ImageEye(Image<Gray,byte> image, Eye whichEye, ImageEyeTimestamp timeStamp, object? extraData)
         {
@@ -46,7 +48,8 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Initializes an image directly with a pointer to the data.
+        /// Initializes an image directly with a pointer to the data. This is the fastest and recommended constructor.
+        /// For images captured with a camera. 
         /// </summary>
         /// <param name="width">Width of the image in pixels.</param>
         /// <param name="height">Height of the image in pixels.</param>

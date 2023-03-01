@@ -8,11 +8,8 @@ namespace OpenIris.UI
 #nullable enable
 
     using System;
-    using System.Windows.Forms;
     using OpenIris;
-    using Emgu.CV;
     using Emgu.CV.UI;
-    using Emgu.CV.Structure;
 
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.

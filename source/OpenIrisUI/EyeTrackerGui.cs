@@ -101,7 +101,6 @@ namespace OpenIris.UI
                 eyeTrackerViewModel.StartTrackingCommand.Bind(buttonStartTracking);
 
                 eyeTrackerViewModel.EditSettingsCommand.Bind(configurationToolStripMenuItem);
-                eyeTrackerViewModel.EditSettingsCommand.Bind(buttonEditSettings);
 
                 eyeTrackerViewModel.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
                 eyeTrackerViewModel.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
@@ -123,7 +122,6 @@ namespace OpenIris.UI
                 //
                 // Data Bindings with settings
                 //
-                labelEyeTrackingSystem.DataBindings.Add(nameof(labelEyeTrackingSystem.Text), eyeTrackerViewModel.Settings, nameof(eyeTrackerViewModel.Settings.EyeTrackerSystem));
                 textBoxSession.DataBindings.Add(nameof(textBoxSession.Text), eyeTrackerViewModel.Settings, nameof(eyeTrackerViewModel.Settings.SessionName));
                 linkLabelDataFolder.DataBindings.Add(nameof(linkLabelDataFolder.Text), eyeTrackerViewModel.Settings, nameof(eyeTrackerViewModel.Settings.DataFolder));
                 linkLabelDataFolder2.DataBindings.Add(nameof(linkLabelDataFolder2.Text), eyeTrackerViewModel.Settings, nameof(eyeTrackerViewModel.Settings.DataFolder));
@@ -142,6 +140,18 @@ namespace OpenIris.UI
 
                 KeyPreview = true;
                 KeyPress += (o, e) => eyeTracker.RecordEvent("KEYPRESS", e.KeyChar);
+
+                //
+                // Update system combo box
+                //
+                var availableSystems = EyeTrackerPluginManager.EyeTrackingsyStemFactory.ClassesAvaiable.Select(x => x.Name).ToArray();
+                Array.Sort(availableSystems);
+
+                systemComboBox.DataSource = availableSystems;
+                systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
+                settings.PropertyChanged += (o, e) => { if (e.PropertyName == nameof(settings.EyeTrackerSystem)) systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem); };
+                systemComboBox.SelectedIndexChanged += (o, e) => { settings.EyeTrackerSystem = availableSystems[systemComboBox.SelectedIndex]; };
+
 
                 // Enable UI timer for updates
                 timerRefreshUI.Enabled = true;
@@ -402,19 +412,15 @@ namespace OpenIris.UI
             {
                 var headData = eyeTrackerViewModel.LastDataAndImages?.Data?.HeadDataCalibrated ?? new CalibratedHeadData();
                 var headDataRaw = eyeTrackerViewModel.LastDataAndImages?.Data?.HeadDataRaw ?? new HeadData();
-                labelHeadData.Text =
+                var headText =
                       $"Roll:  {headData.Roll,-6:F1}\n" +
                       $"Pitch: {headData.Pitch,-6:F1}\n" +
                       $"Yaw:   {headData.Yaw,-6:F1}\n" +
                       $"MagX:  {headDataRaw.MagnetometerX:F2}\n" +
                       $"MagY:  {headDataRaw.MagnetometerY:F2}\n" +
                       $"MagZ:  {headDataRaw.MagnetometerZ:F2}\n";
-                //$"X ACC: {headData.XAcceleration}\n" +
-                //$"Y ACC: {headData.YAcceleration}\n" +
-                //$"Z ACC: {headData.ZAcceleration}\n" +
-                //$"Vel yaw: {headData.YawVelocity}\n" +
-                //$"Vel pitchL: {headData.PitchVelocity}\n" +
-                //$"Vel roll: {headData.RollVelocity}\n";
+
+                labelHeadData.Text = (eyeTracker.HeadTracker is null) ? "" : headText;
             }
 
             // Update Traces
@@ -451,7 +457,7 @@ namespace OpenIris.UI
             else
                 toolStripStatusLabelImageGrabbingStatus.BackColor = Color.Red;
 
-            toolStripStatusLabelProcessingTimeLeftEye.Text = eyeTracker.ImageProcessor?.ProcessingStatus + string.Format(" {0:0.0}", eyeTracker.AverageFrameProcessingTime*1000) ?? "Not tracking";
+            toolStripStatusLabelProcessingTimeLeftEye.Text = eyeTracker.ImageProcessor?.ProcessingStatus + string.Format(" {0:0.0}ms", eyeTracker.AverageFrameProcessingTime*1000) ?? "Not tracking";
             var processingBuffersize = eyeTracker.ImageProcessor?.NumberFramesInBuffer ?? 0;
             if (processingBuffersize < 10)
                 toolStripStatusLabelProcessingTimeLeftEye.BackColor = SystemColors.Control;

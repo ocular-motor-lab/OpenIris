@@ -66,11 +66,14 @@ namespace OpenIris.ImageGrabbing
         /// <returns></returns>
         public static bool IsMirrored(this CameraOrientation cameraOrientation)
         {
-            return (
-                cameraOrientation == CameraOrientation.UprightMirrored ||
-                cameraOrientation == CameraOrientation.Rotated90Mirrored ||
-                cameraOrientation == CameraOrientation.Rotated180Mirrored ||
-                cameraOrientation == CameraOrientation.Rotated270Mirrored);
+            return cameraOrientation switch
+            {
+                CameraOrientation.UprightMirrored => true,
+                CameraOrientation.Rotated90Mirrored => true,
+                CameraOrientation.Rotated180Mirrored => true,
+                CameraOrientation.Rotated270Mirrored => true,
+                _ => false,
+            };
         }
 
         /// <summary>
@@ -80,11 +83,14 @@ namespace OpenIris.ImageGrabbing
         /// <returns></returns>
         public static bool IsUpsideDown(this CameraOrientation cameraOrientation)
         {
-            return (
-                cameraOrientation == CameraOrientation.Rotated180 ||
-                cameraOrientation == CameraOrientation.Rotated270 ||
-                cameraOrientation == CameraOrientation.Rotated180Mirrored ||
-                cameraOrientation == CameraOrientation.Rotated270Mirrored);
+            return cameraOrientation switch
+            {
+                CameraOrientation.Rotated180 => true,
+                CameraOrientation.Rotated270 => true,
+                CameraOrientation.Rotated180Mirrored => true,
+                CameraOrientation.Rotated270Mirrored => true,
+                _ => false,
+            };
         }
 
         /// <summary>
@@ -94,11 +100,14 @@ namespace OpenIris.ImageGrabbing
         /// <returns></returns>
         public static bool IsRotated(this CameraOrientation cameraOrientation)
         {
-            return (
-                cameraOrientation == CameraOrientation.Rotated90 ||
-                cameraOrientation == CameraOrientation.Rotated90Mirrored ||
-                cameraOrientation == CameraOrientation.Rotated270 ||
-                cameraOrientation == CameraOrientation.Rotated270Mirrored);
+            return cameraOrientation switch
+            {
+                CameraOrientation.Rotated90 => true,
+                CameraOrientation.Rotated90Mirrored => true,
+                CameraOrientation.Rotated270 => true,
+                CameraOrientation.Rotated270Mirrored => true,
+                _ => false,
+            };
         }
     }
 

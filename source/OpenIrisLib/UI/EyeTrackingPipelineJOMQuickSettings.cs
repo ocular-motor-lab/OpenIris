@@ -8,7 +8,6 @@ namespace OpenIris.UI
 #nullable enable
 
     using System;
-    using System.Windows.Forms;
     using OpenIris;
     using Emgu.CV;
     using Emgu.CV.UI;

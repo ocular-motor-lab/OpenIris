@@ -114,7 +114,6 @@ namespace OpenIris.UI
                 eyeTrackerViewModel.CenterCamerasCommand.Bind(buttonCenterEyes);
 
                 eyeTrackerViewModel.ChangeDataFolderCommand.Bind(buttonSelectFolder);
-                eyeTrackerViewModel.ChangeDataFolderCommand.Bind(buttonSelectFolder2);
 
                 eyeTrackerViewModel.TrimVideosCommand.Bind(trimVideosToolStripMenuItem);
                 eyeTrackerViewModel.ConvertVideoToRGBCommand.Bind(convertVideoToRGBToolStripMenuItem);
@@ -340,20 +339,22 @@ namespace OpenIris.UI
                 {
                     var pipelineUI = eyeTracker.ImageProcessor?.PipelineUI?[eye];
 
-                    if (pipelineUI is null) continue;
-
                     if (panels[eye].Controls.Contains(pipelineUI))
                     {
                         pipelineUI.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);
-                        continue;
                     }
+                    else
+                    {
+                        if ( panels[eye].Controls.Count > 0)
+                            panels[eye].Controls.Clear();
 
-                    panels[eye].Controls.Clear();
+                        if (pipelineUI is null) continue;
 
-                    pipelineUI.Dock = DockStyle.Fill;
-                    pipelineUI.Location = new Point(0, 0);
-                    pipelineUI.Size = panels[eye].ClientSize;
-                    panels[eye].Controls.Add(pipelineUI);
+                        pipelineUI.Dock = DockStyle.Fill;
+                        pipelineUI.Location = new Point(0, 0);
+                        pipelineUI.Size = panels[eye].ClientSize;
+                        panels[eye].Controls.Add(pipelineUI);
+                    }
                 }
 
                 // Update Eye Images

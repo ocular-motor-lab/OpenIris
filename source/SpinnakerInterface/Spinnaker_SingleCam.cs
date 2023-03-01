@@ -31,11 +31,13 @@ namespace SpinnakerInterface
 
         public static Spinnaker_SingleCam camera = null;
 
-        public Spinnaker_SingleCam(IManagedCamera CAM)
+        public Spinnaker_SingleCam(Eye whichEye, IManagedCamera CAM)
         {
             this.cam = CAM;
             cam.Init();
             CamModelName = cam.DeviceModelName.Value;
+            WhichEye = whichEye;
+
         }
 
         public override void Start()
@@ -43,7 +45,6 @@ namespace SpinnakerInterface
             if(cam==null) { return; }
 
             FrameRate = 100;
-            WhichEye = Eye.Both;
 
             cam.BeginAcquisition();
         }

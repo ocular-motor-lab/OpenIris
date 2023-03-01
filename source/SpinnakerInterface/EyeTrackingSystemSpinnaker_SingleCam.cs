@@ -8,16 +8,19 @@ using System.Drawing;
 using System;
 using Spinnaker;
 using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SpinnakerInterface
 {
+#nullable enable
+
     [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystem
     {
         protected Spinnaker_SingleCam camera = null;
 
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye?>? CreateCameras()
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
@@ -33,7 +36,23 @@ namespace SpinnakerInterface
             }
 
             Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
-            camera = new Spinnaker_SingleCam(cam_list[0]);
+
+
+            switch (settings.Eye)
+            {
+                case Eye.Left:
+                    camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0], Settings.FrameRate);
+                    return new EyeCollection<CameraEye?>(camera, null);
+                case Eye.Right:
+                    camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
+                    return new EyeCollection<CameraEye?>(null, camera);
+                case Eye.Both:
+                    camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
+                    return new EyeCollection<CameraEye?>(camera);
+                default:
+                    return images;
+            }
+
 
             //camera.CameraOrientation = CameraOrientation.Rotated180;
 
@@ -64,22 +83,14 @@ namespace SpinnakerInterface
 
             switch (settings.Eye)
             {
-                case Eye.Left:
+                case Eye.Both:
                     var imageLeft = images[Eye.Both].Copy(roiLeft);
                     imageLeft.WhichEye = Eye.Left;
-                    return new EyeCollection<ImageEye?>(imageLeft, null);
-                case Eye.Right:
                     var imageRight = images[Eye.Both].Copy(roiRight);
-                    imageRight.WhichEye = Eye.Right;
-                    return new EyeCollection<ImageEye?>(null, imageRight);
-                case Eye.Both:
-                    imageLeft = images[Eye.Both].Copy(roiLeft);
-                    imageLeft.WhichEye = Eye.Left;
-                    imageRight = images[Eye.Both].Copy(roiRight);
                     imageRight.WhichEye = Eye.Right;
                     return new EyeCollection<ImageEye?>(imageLeft, imageRight);
                 default:
-                    return null;
+                    return images;
             }
         }
 

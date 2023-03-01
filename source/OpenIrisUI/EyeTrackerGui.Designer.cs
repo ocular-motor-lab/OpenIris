@@ -226,7 +226,7 @@ namespace OpenIris.UI
             this.systemToolStripMenuItem});
             this.menuStripMainMenu.Location = new System.Drawing.Point(0, 0);
             this.menuStripMainMenu.Name = "menuStripMainMenu";
-            this.menuStripMainMenu.Size = new System.Drawing.Size(1476, 28);
+            this.menuStripMainMenu.Size = new System.Drawing.Size(1476, 30);
             this.menuStripMainMenu.TabIndex = 2;
             this.menuStripMainMenu.Text = "menuStripMainMenu";
             // 
@@ -458,7 +458,7 @@ namespace OpenIris.UI
             this.tabPages.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPages.Name = "tabPages";
             this.tabPages.SelectedIndex = 0;
-            this.tabPages.Size = new System.Drawing.Size(1476, 768);
+            this.tabPages.Size = new System.Drawing.Size(1476, 766);
             this.tabPages.TabIndex = 28;
             // 
             // tabPageStart
@@ -469,7 +469,7 @@ namespace OpenIris.UI
             this.tabPageStart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPageStart.Name = "tabPageStart";
             this.tabPageStart.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabPageStart.Size = new System.Drawing.Size(1468, 737);
+            this.tabPageStart.Size = new System.Drawing.Size(1468, 735);
             this.tabPageStart.TabIndex = 6;
             this.tabPageStart.Text = "Start";
             this.tabPageStart.UseVisualStyleBackColor = true;
@@ -478,7 +478,7 @@ namespace OpenIris.UI
             // 
             this.groupBox3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.groupBox3.Controls.Add(this.linkLabelDataFolder2);
-            this.groupBox3.Location = new System.Drawing.Point(569, 572);
+            this.groupBox3.Location = new System.Drawing.Point(569, 571);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
@@ -507,7 +507,7 @@ namespace OpenIris.UI
             this.panel5.Controls.Add(this.label5);
             this.panel5.Controls.Add(this.buttonPlayVideo);
             this.panel5.Controls.Add(this.buttonProcessVideo);
-            this.panel5.Location = new System.Drawing.Point(569, 177);
+            this.panel5.Location = new System.Drawing.Point(569, 176);
             this.panel5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(373, 289);
@@ -1160,7 +1160,7 @@ namespace OpenIris.UI
             // 
             this.panelPlayer.Controls.Add(this.videoPlayerUI);
             this.panelPlayer.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelPlayer.Location = new System.Drawing.Point(0, 768);
+            this.panelPlayer.Location = new System.Drawing.Point(0, 766);
             this.panelPlayer.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelPlayer.Name = "panelPlayer";
             this.panelPlayer.Size = new System.Drawing.Size(1476, 38);
@@ -1181,10 +1181,10 @@ namespace OpenIris.UI
             this.panel4.Controls.Add(this.tabPages);
             this.panel4.Controls.Add(this.panelPlayer);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(0, 28);
+            this.panel4.Location = new System.Drawing.Point(0, 30);
             this.panel4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(1476, 806);
+            this.panel4.Size = new System.Drawing.Size(1476, 804);
             this.panel4.TabIndex = 29;
             // 
             // EyeTrackerGui

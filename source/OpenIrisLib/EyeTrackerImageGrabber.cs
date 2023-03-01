@@ -126,7 +126,7 @@ namespace OpenIris
         /// Notifies listeners about a new frame available. This event runs in the grabber thread. Any
         /// event handler should be quick.
         /// </summary>
-        public event ventHandler<EyeCollection<ImageEye?>> ImagesGrabbed;
+        public event EventHandler<EyeCollection<ImageEye?>> ImagesGrabbed;
 
         /// <summary>
         /// Gets the frame number of the last image grabbed.
@@ -358,6 +358,7 @@ namespace OpenIris
                         Eye.Both => () => new EyeCollection<ImageEye?>(singleCamera?.GrabImageEye()),
                         Eye.Left => () => new EyeCollection<ImageEye?>(singleCamera?.GrabImageEye(), null),
                         Eye.Right => () => new EyeCollection<ImageEye?>(null, singleCamera?.GrabImageEye()),
+                        _ => throw new NotImplementedException(),
                     };
                     break;
                 case (true, 2):
@@ -385,7 +386,7 @@ namespace OpenIris
                     CurrentFrameNumber = grabbedImages.GetFrameNumber();
                     NumberFramesGrabbed++;
 
-                    ImagesGrabbed(grabbedImages);
+                    ImagesGrabbed?.Invoke(this, grabbedImages);
                 }
             }
 

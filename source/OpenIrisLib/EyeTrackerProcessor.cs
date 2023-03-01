@@ -68,7 +68,7 @@ namespace OpenIris
         /// <summary>
         /// Notifies listeners that a frame has been processed and new data is available.
         /// </summary>
-        internal event EventHandler<EyeTrackerImagesAndData> ImagesProcessed;
+        internal event EventHandler<EyeTrackerImagesAndData>? ImagesProcessed;
 
         /// <summary>
         /// User interface for the current pipeline. For each eye.
@@ -212,7 +212,7 @@ namespace OpenIris
                     // if only one thread no need to use the output queue
                     // because the frames are not going to be out of order
                     // Same is this is the next frame we were expecting.
-                    ImagesProcessed(imagesAndData);
+                    ImagesProcessed?.Invoke(this,imagesAndData);
                     outputNextExpectedNumber++;
                 }
                 else
@@ -225,7 +225,7 @@ namespace OpenIris
                     // notifying that a new image was processed
                     while (outputWaitingList.TryRemove(outputNextExpectedNumber, out EyeTrackerImagesAndData images))
                     {
-                        ImagesProcessed(images);
+                        ImagesProcessed?.Invoke(this,images);
                         outputNextExpectedNumber++;
                     }
                 }

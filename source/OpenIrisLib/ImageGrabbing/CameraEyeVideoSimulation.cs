@@ -79,13 +79,14 @@ namespace OpenIris.ImageGrabbing
             ImageEye image = videoEye.GrabImageEyeFromVideo();
             numberFramesGrabbed++;
 
+            // Sleep to keep the frame rate up to reported frame rate, never higher.
+            System.Threading.Thread.Sleep((int)Math.Floor( 1000.0 / (FrameRate)));
+
             // Change the frame number so it doesn't loop
             var newTimeStamp = image.TimeStamp;
             newTimeStamp.FrameNumber = (ulong)numberFramesGrabbed;
             image.TimeStamp = newTimeStamp;
 
-            // Sleep to keep the frame rate up to reported frame rate, never higher.
-            System.Threading.Thread.Sleep((int)Math.Floor( 1000.0 / (FrameRate)));
 
             return image;
         }

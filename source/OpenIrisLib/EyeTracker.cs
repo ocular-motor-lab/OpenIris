@@ -222,7 +222,6 @@ namespace OpenIris
                     // cropping, splitting, increasing contrast, whatever ...
                     grabbedImages = EyeTrackingSystem!.PreProcessImages(grabbedImages);
                     RecordingSession?.TryRecordImages(grabbedImages);
-
                     ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
                 };
 

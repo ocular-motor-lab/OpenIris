@@ -37,7 +37,27 @@ namespace SpinnakerInterface
             cam.Init();
             CamModelName = cam.DeviceModelName.Value;
             WhichEye = whichEye;
+            
+            //to check if the cam feature changed:
+            //var nodemap = cam.GetNodeMap();
+            //IEnum iGainAuto = nodemap.GetNode<IEnum>("GainAuto");
+            
+            cam.AcquisitionMode.FromString("Continuous");
+            cam.AcquisitionFrameRateEnable.FromString("True");
+            cam.GainAuto.FromString("Off");
+            cam.ExposureAuto.FromString("Off");
+            cam.OffsetX.FromString("0");
+            cam.OffsetY.FromString("0");
 
+            //cam.Height
+            //cam.Width
+            //    cam.OffsetX
+            //    cam.OffsetY
+
+            //    cam.GainAuto
+            //    cam.Gain
+            //    cam.ExposureAuto
+            //    cam.ExposureTime
         }
 
         public override void Start()

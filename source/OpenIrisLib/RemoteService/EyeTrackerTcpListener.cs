@@ -64,7 +64,7 @@ namespace OpenIris
                         while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                         {
                             // Translate data bytes to a ASCII string.
-                            bytes = Array.slic bytes.s
+                            
                             var bytesToSend = eyeTracker.ParseAndExecuteStringMessage(bytes);
                             if (bytesToSend.Length > 0)
                             {

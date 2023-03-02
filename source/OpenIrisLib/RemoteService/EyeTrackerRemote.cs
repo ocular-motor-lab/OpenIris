@@ -419,7 +419,8 @@ namespace OpenIris
         public byte[] ParseAndExecuteStringMessage(byte[] bytes)
         {
             byte[] bytesToSend = new byte[0];
-            var stringMessage = Encoding.ASCII.GetString(bytes, 0, i);
+            var stringMessage = Encoding.ASCII.GetString(bytes);
+            // var stringMessage = Encoding.ASCII.GetString(bytes, 0, i); TODO think how to optimize TCP
 
             var msg = stringMessage.Split('|');
             switch (msg[0].ToUpper())

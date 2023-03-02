@@ -46,7 +46,7 @@ namespace OpenIris
 
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
-                EyeTrackerRemoteService.Start(this);
+                EyeTrackerRemoteServices.Start(this);
 
                 Trace.WriteLine($"Eye tracker initializing complete in {(EyeTrackerDebug.TimeElapsed-t1).TotalSeconds} seconds.");
             }
@@ -75,7 +75,7 @@ namespace OpenIris
         {
             // Stop everything just in case
             StopTracking();
-            EyeTrackerRemoteService.StopService();
+            EyeTrackerRemoteServices.StopService();
             Settings?.Save();
             eyeTracker = null;
         }

@@ -7,21 +7,16 @@ namespace OpenIris
     using System.Text;
     using System.Threading.Tasks;
     using System.Diagnostics;
-    using System.Drawing;
-    using System.IO;
-    using System.Net.NetworkInformation;
-    using System.Threading;
-    using System.ServiceModel;
 
-    internal class EyeTrackerTcpListener : IDisposable
+    internal class EyeTrackerUdpListener : IDisposable
     {
         private EyeTrackerRemote eyeTracker;
         private Int32 port;
-        private TcpListener server = null;
+        private UdpClient server = null;
         private Task task;
         private bool disposedValue;
 
-        public EyeTrackerTcpListener(EyeTracker eyeTracker, int port)
+        public EyeTrackerUdpListener(EyeTracker eyeTracker, int port)
         {
             this.port = port;
             this.eyeTracker = new EyeTrackerRemote(eyeTracker);
@@ -33,44 +28,29 @@ namespace OpenIris
             {
                 try
                 {
-                    // TcpListener server = new TcpListener(port);
-                    server = new TcpListener(IPAddress.Any, port);
-
-                    // Start listening for client requests.
-                    server.Start();
+                    // https://stackoverflow.com/questions/20038943/simple-udp-example-to-send-and-receive-data-from-same-socket
+                    server = new UdpClient(port);
 
                     // Buffer for reading data
-                    Byte[] bytes = new Byte[256];
+                    Byte[] bytes;
                     String data = null;
+
+                    Trace.WriteLine($"UDP server Waiting for requests in port {port}.");
 
                     // Enter the listening loop.
                     while (true)
                     {
-                        Trace.WriteLine($"TCP server Waiting for a connection in port {port} ...");
 
-                        // Perform a blocking call to accept requests.
-                        // You could also use server.AcceptSocket() here.
-                        using TcpClient client = server.AcceptTcpClient();
-                        Trace.WriteLine("TCP server Connected!");
+                        var remoteEP = new IPEndPoint(IPAddress.Any, port);
 
-                        data = null;
+                        bytes = server.Receive(ref remoteEP);
+                        //Console.Write("receive data from " + remoteEP.ToString());
 
-                        // Get a stream object for reading and writing
-                        NetworkStream stream = client.GetStream();
-
-                        int i;
-
-                        // Loop to receive all the data sent by the client.
-                        while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
+                        var bytesToSend = eyeTracker.ParseAndExecuteStringMessage(bytes);
+                        if (bytesToSend.Length > 0)
                         {
-                            // Translate data bytes to a ASCII string.
-
-                            var bytesToSend = eyeTracker.ParseAndExecuteStringMessage(bytes);
-                            if (bytesToSend.Length > 0)
-                            {
-                                // Send back a response.
-                                stream.Write(bytesToSend, 0, bytesToSend.Length);
-                            }
+                            // Send back a response.
+                            server.Send(bytesToSend, bytesToSend.Length, remoteEP); 
                         }
                     }
                 }
@@ -80,14 +60,14 @@ namespace OpenIris
                 }
                 finally
                 {
-                    server.Stop();
+                    server.Close();
                 }
             });
         }
 
         public void Stop()
         {
-            server.Stop();
+            server.Close();
             //Task.WaitAll(task);
             task.Dispose();
             task = null;

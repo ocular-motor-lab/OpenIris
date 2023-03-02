@@ -88,8 +88,9 @@
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimplePupilCRBlobs.cs" />
     <Compile Include="EyeTrackerGuiViewModel.cs" />
+    <Compile Include="RemoteService\EyeTrackerRemote.cs" />
+    <Compile Include="RemoteService\EyeTrackerUdpListener.cs" />
     <Compile Include="RemoteService\EyeTrackerTcpListener.cs" />
-    <Compile Include="RemoteService\IEyeTrackerServiceCore.cs" />
     <Compile Include="UI\DebugImagesPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -126,6 +127,9 @@
     </Compile>
     <Compile Include="UI\ProgressBarDialog.Designer.cs">
       <DependentUpon>ProgressBarDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\QuickSettingsScroll.cs">
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Util\VideoTools.cs" />
     <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
@@ -214,7 +218,7 @@
     <Compile Include="EyeTrackerData\ImageEye.cs" />
     <Compile Include="ImageProcessing\EyeTrackerMask.cs" />
     <Compile Include="RemoteService\IEyeTrackerService.cs" />
-    <Compile Include="RemoteService\EyeTrackerRemoteService.cs" />
+    <Compile Include="RemoteService\EyeTrackerRemoteServices.cs" />
     <Compile Include="EyeTrackerSettings.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>

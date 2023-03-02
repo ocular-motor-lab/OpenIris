@@ -11,9 +11,7 @@ namespace OpenIris
     using Emgu.CV.Structure;
     using System;
     using System.Drawing;
-    using System.ComponentModel;
     using System.ComponentModel.Composition;
-    using OpenIris.ImageProcessing;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
@@ -103,7 +101,7 @@ namespace OpenIris
         /// <returns></returns>
         public EyeTrackingPipelineUI? GetPipelineUI(Eye whichEye)
         {
-            return new UI.EyeTrackingPipelineJOMQuickSettings(whichEye);
+            return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye);
         }
     }
 

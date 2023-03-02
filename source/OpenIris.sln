@@ -61,8 +61,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{9B8DEAF6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interacoustics", "Interacoustics\Interacoustics.csproj", "{7422C969-410D-4106-BBAD-745C12B231A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisRemoteLinux", "OpenIrisRemoteLinux\OpenIrisRemoteLinux.csproj", "{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -207,14 +205,6 @@ Global
 		{7422C969-410D-4106-BBAD-745C12B231A2}.Release|Any CPU.Build.0 = Release|x64
 		{7422C969-410D-4106-BBAD-745C12B231A2}.Release|x64.ActiveCfg = Release|x64
 		{7422C969-410D-4106-BBAD-745C12B231A2}.Release|x64.Build.0 = Release|x64
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Debug|x64.Build.0 = Debug|Any CPU
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Release|x64.ActiveCfg = Release|Any CPU
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -235,7 +225,6 @@ Global
 		{9D013E2E-13CC-4DF6-8CCD-663659689F3D} = {1FBAB657-BE66-48DE-A923-A5E21585AC60}
 		{7A4405D3-969F-4001-8D06-0C93C7CB3394} = {1FBAB657-BE66-48DE-A923-A5E21585AC60}
 		{7422C969-410D-4106-BBAD-745C12B231A2} = {1FBAB657-BE66-48DE-A923-A5E21585AC60}
-		{8078F6DF-A90F-411C-BF75-AA7871ADFE0C} = {7B3E3672-4E68-4ABE-B99A-80D5C0954007}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7C44A803-9D51-49D2-BF95-9A436AE6FEC6}

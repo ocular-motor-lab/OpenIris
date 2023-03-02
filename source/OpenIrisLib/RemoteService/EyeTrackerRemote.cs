@@ -1,146 +1,36 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EyeTrackerService.cs">
+// <copyright file="EyeTrackerRemote.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 namespace OpenIris
 {
-#nullable enable
-
     using System;
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
-    using System.Net;
-    using System.Net.NetworkInformation;
-    using System.Net.Sockets;
     using System.ServiceModel;
-    using System.ServiceModel.Description;
-    using System.Threading.Tasks;
     using System.Text;
     using System.Threading;
+    using System.Threading.Tasks;
+    using static Emgu.CV.ML.KNearest;
 
     /// <summary>
-    /// Service methods to allow remote control of the eye tracker.
+    /// In order to use one of the ServiceHost constructors that takes a service instance,
+    /// the InstanceContextMode of the service must be set to InstanceContextMode.Single.
+    /// This can be configured via the ServiceBehaviorAttribute.  Otherwise, please
+    /// consider using the ServiceHost constructors that take a Type argument.
+    /// https://learn.microsoft.com/en-us/dotnet/api/system.servicemodel.instancecontextmode?view=netframework-4.8.1
     /// </summary>
-    public class EyeTrackerRemoteService : IEyeTrackerService, IEyeTrackerWebService
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
+    public class EyeTrackerRemote : IEyeTrackerService, IEyeTrackerWebService
     {
-        private static EyeTracker? eyeTracker;
-        private static ServiceHost? eyeTrackerHost;
-        private static ServiceHost? eyeTrackerHostLinux;
-        private static ServiceHost? eyeTrackerHostWeb;
+        protected EyeTracker eyeTracker;
         private static AutoResetEvent dataWait = new AutoResetEvent(true);
-        private static EyeTrackerTcpListener? tcpServer = null;
 
-        /// <summary>
-        /// Starts the service.
-        /// </summary>
-        /// <param name="newEyeTracker">Eye tracker object.</param>
-        /// <returns>The service host object.</returns>
-        public static void Start(EyeTracker newEyeTracker)
+        public EyeTrackerRemote(EyeTracker eyeTracker)
         {
-            if (eyeTracker != null) return;
-
-            eyeTracker = newEyeTracker;
-
-            // HTTP SERVICE
-            try
-            {
-                eyeTrackerHostWeb = new ServiceHost(typeof(EyeTrackerRemoteService), new Uri[] { new Uri("http://localhost:" + (eyeTracker.Settings.ServiceListeningPort + 1) + "/EyeTrackerEndpoint") });
-                eyeTrackerHostWeb.AddServiceEndpoint(typeof(IEyeTrackerWebService), new BasicHttpBinding(), "Soap");
-                var endpoint = eyeTrackerHostWeb.AddServiceEndpoint(typeof(IEyeTrackerWebService), new WebHttpBinding(), "Web");
-                endpoint.EndpointBehaviors.Add(new WebHttpBehavior());
-                eyeTrackerHostWeb.Open();
-                Trace.WriteLine(eyeTrackerHostWeb.State);
-                Trace.WriteLine(eyeTrackerHostWeb.Description);
-                Trace.WriteLine(eyeTrackerHostWeb.Credentials);
-                if (eyeTrackerHostWeb.BaseAddresses.Count > 0)
-                    Trace.WriteLine(eyeTrackerHostWeb.BaseAddresses[0].ToString());
-
-                Trace.WriteLine(endpoint.Address);
-                Trace.WriteLine(endpoint.ListenUri);
-                Trace.WriteLine(endpoint.ListenUriMode);
-                Trace.WriteLine(endpoint.EndpointBehaviors[0]);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error starting WEB service: " + ex.Message);
-
-
-                Trace.WriteLine("==== INSTRUCTIONS ==========================================================");
-                Trace.WriteLine("After running the server for the first time you should open the command line");
-                Trace.WriteLine("in administrator mode and run the following command to enable the service.");
-                Trace.WriteLine($"netsh http add urlacl url = http://+:{eyeTracker.Settings.ServiceListeningPort + 1}/EyeTrackerEndpoint/ user=username");
-                Trace.WriteLine("After running the command and starting the eye tracker you can open the browser ");
-                Trace.WriteLine($"http://localhost:{eyeTracker.Settings.ServiceListeningPort + 1}/EyeTrackerEndpoint/Web/StartRecording");
-                Trace.WriteLine($"Or from a different computer using the correct IP address");
-                Trace.WriteLine("==== END INSTRUCTIONS ==========================================================");
-
-
-                eyeTrackerHostWeb = null;
-            }
-
-
-            // TCP SERVICE
-            try
-            {
-                eyeTrackerHost = new ServiceHost(typeof(EyeTrackerRemoteService));
-                var binding = new NetTcpBinding();
-                binding.MaxReceivedMessageSize = 2147483647;
-                binding.Security.Mode = SecurityMode.None;
-
-                var address = "net.tcp://localhost:" + eyeTracker.Settings.ServiceListeningPort + "/EyeTrackerEndpoint";
-                var e = eyeTrackerHost.AddServiceEndpoint(typeof(IEyeTrackerService), binding, address);
-
-                eyeTrackerHost.Open();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error starting TCP service: " + ex.Message);
-                eyeTrackerHost = null;
-            }
-
-            // TCP SERVICE socket
-            try
-            {
-                tcpServer = new EyeTrackerTcpListener(eyeTracker, eyeTracker.Settings.ServiceListeningPort + 2);
-                tcpServer.Start();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error starting TCP service: " + ex.Message);
-                tcpServer = null;
-            }
-
-            // HTTP SERVICE FROM CLEVELAND DO NOT CHANGE
-            //Need to run something like this in the command line. 
-            //netsh http add urlacl url = http://+:9001/EyeTrackerEndpoint/ user=jorge
-            // https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-create-a-basic-wcf-web-http-service
-            //
-            //var host = new ServiceHost(typeof(EyeTrackerRemoteService), new Uri[] { new Uri("http://10.77.17.88:" + EyeTrackerRemoteService.EyeTracker.Settings.ServiceListeningPort + "/EyeTrackerEndpoint") });
-            //host.AddServiceEndpoint(typeof(IEyeTrackerService), new BasicHttpBinding(), "Soap");
-            //var endpoint = host.AddServiceEndpoint(typeof(IEyeTrackerService), new WebHttpBinding(), "Web");
-            //endpoint.EndpointBehaviors.Add(new WebHttpBehavior());
-            //host.Open();
-
-            // END HTTP SERVICE FROM CLEVELAND DO NOT CHANGE
-        }
-
-        /// <summary>
-        /// Stops the service.
-        /// </summary>
-        public static void StopService()
-        {
-            try
-            {
-                eyeTrackerHost?.Close();
-                eyeTrackerHostWeb?.Close();
-                tcpServer?.Stop();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error closing the service: " + ex.Message);
-            }
+            this.eyeTracker = eyeTracker;
         }
 
         /// <summary>
@@ -175,7 +65,7 @@ namespace OpenIris
         /// <summary>
         /// Gets the settings of the current pipeline.
         /// </summary>
-        public EyeTrackingPipelineSettings? Settings => eyeTracker?.Settings.TrackingpipelineSettings; 
+        public EyeTrackingPipelineSettings? Settings => eyeTracker?.Settings.TrackingpipelineSettings;
 
         /// <summary>
         /// Starts the recording.
@@ -325,7 +215,7 @@ namespace OpenIris
         public ImagesAndData GetCurrentImagesAndData()
         {
             var imagesAndData = new ImagesAndData();
-            
+
             if (eyeTracker is null) throw new InvalidOperationException("Eye tracker is null.");
 
             if (eyeTracker.LastImagesAndData != null)
@@ -437,40 +327,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Gets the IP addresses
-        /// </summary>
-        /// <returns></returns>
-        public static string GetIPAddresses()
-        {
-            StringBuilder sb = new StringBuilder();
-
-            // Get a list of all network interfaces (usually one per network card, dialup, and VPN connection) 
-            NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-
-            foreach (NetworkInterface network in networkInterfaces)
-            {
-                // Read the IP configuration for each network 
-                IPInterfaceProperties properties = network.GetIPProperties();
-
-                // Each network interface may have multiple IP addresses 
-                foreach (IPAddressInformation address in properties.UnicastAddresses)
-                {
-                    // We're only interested in IPv4 addresses for now 
-                    if (address.Address.AddressFamily != AddressFamily.InterNetwork)
-                        continue;
-
-                    // Ignore loopback addresses (e.g., 127.0.0.1) 
-                    if (IPAddress.IsLoopback(address.Address))
-                        continue;
-
-                    sb.AppendLine(address.Address.ToString() + " (" + network.Name + ")");
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
@@ -552,6 +408,42 @@ namespace OpenIris
                 Trace.WriteLine(ex);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Escute a command based on a string message.
+        /// </summary>
+        /// <param name="bytes">String message.</param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public byte[] ParseAndExecuteStringMessage(byte[] bytes)
+        {
+            byte[] bytesToSend = new byte[0];
+            var stringMessage = Encoding.ASCII.GetString(bytes, 0, i);
+
+            var msg = stringMessage.Split('|');
+            switch (msg[0].ToUpper())
+            {
+                case "STARTRECORDING":
+                    StartRecording();
+                    return bytesToSend;
+                case "STOPRECORDING":
+                    StopRecording();
+                    return bytesToSend;
+                case "GETDATA":
+                    var eyedata = GetCurrentData();
+                    var eyedatamsg =
+                    $"{eyedata[Eye.Left].Timestamp.FrameNumberRaw};{eyedata[Eye.Left].Timestamp.Seconds};{eyedata[Eye.Left].Pupil.Center.X};{eyedata[Eye.Left].Pupil.Center.Y};" +
+                    $"{eyedata[Eye.Right].Timestamp.FrameNumberRaw};{eyedata[Eye.Right].Timestamp.Seconds};{eyedata[Eye.Right].Pupil.Center.X};{eyedata[Eye.Right].Pupil.Center.Y};";
+                    return Encoding.ASCII.GetBytes(eyedatamsg);
+                case "RECORDEVENT":
+                    var frameNumber = RecordEvent(msg[1]);
+                    return Encoding.ASCII.GetBytes(frameNumber.ToString());
+                case "TESEMPTY":
+                    return new byte[1] { 68 };
+                default:
+                    throw new NotImplementedException("This command does not exist");
+            }
         }
     }
 }

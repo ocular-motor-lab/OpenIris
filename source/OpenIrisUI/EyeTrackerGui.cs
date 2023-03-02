@@ -134,7 +134,7 @@ namespace OpenIris.UI
 
                 openSoundRecorderToolStripMenuItem.Click += (o, e) => Process.Start("SoundRecorder.exe");
                 openLogFolderToolStripMenuItem.Click += (o, e) => Process.Start("explorer.exe", System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location));
-                showIPNetworkInfoToolStripMenuItem.Click += (o, e) => MessageBox.Show(EyeTrackerRemoteService.GetIPAddresses());
+                showIPNetworkInfoToolStripMenuItem.Click += (o, e) => MessageBox.Show(EyeTrackerRemoteServices.GetIPAddresses());
                 aboutToolStripMenuItem.Click += (o, e) => new EyeTrackerAboutBox().ShowDialog();
 
                 KeyPreview = true;

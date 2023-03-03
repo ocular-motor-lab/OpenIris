@@ -36,56 +36,29 @@ namespace SpinnakerInterface
             }
 
             Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
+            
+            camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
+            try
+            {
+                this.camera.Start();
+            }
+            catch (Exception ex)
+            {
+                if (this.camera != null)
+                {
+                    this.camera.Stop();
+                }
+
+                throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
+            }
 
             switch (settings.Eye)
             {
-                case Eye.Left:
-                    camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
-                    try
-                    {
-                        this.camera.Start();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (this.camera != null)
-                        {
-                            this.camera.Stop();
-                        }
-
-                        throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
-                    }
-                    return new EyeCollection<CameraEye?>(camera, null);
+                case Eye.Left:                    
+                    return new EyeCollection<CameraEye?>(this.camera,null);
                 case Eye.Right:
-                    camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
-                    try
-                    {
-                        this.camera.Start();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (this.camera != null)
-                        {
-                            this.camera.Stop();
-                        }
-
-                        throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
-                    }
                     return new EyeCollection<CameraEye?>(null, camera);
                 case Eye.Both:
-                    camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
-                    try
-                    {
-                        this.camera.Start();
-                    }
-                    catch (Exception ex)
-                    {
-                        if (this.camera != null)
-                        {
-                            this.camera.Stop();
-                        }
-
-                        throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
-                    }
                     return new EyeCollection<CameraEye?>(camera);
                 default:
                     return new EyeCollection<CameraEye?>(this.camera);
@@ -98,12 +71,12 @@ namespace SpinnakerInterface
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
-            var roiLeft = new Rectangle(images[Eye.Both].Size.Width/2, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-            var roiRight = new Rectangle(0, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-
             switch (settings.Eye)
             {
                 case Eye.Both:
+                    var roiLeft = new Rectangle(images[Eye.Both].Size.Width/2, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
+                    var roiRight = new Rectangle(0, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
+
                     var imageLeft = images[Eye.Both].Copy(roiLeft);
                     imageLeft.WhichEye = Eye.Left;
                     var imageRight = images[Eye.Both].Copy(roiRight);

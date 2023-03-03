@@ -81,14 +81,14 @@
       <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
-    <Compile Include="HeadTracker.cs" />
+    <Compile Include="HeadTracking\HeadTracker.cs" />
     <Compile Include="Calibration\ICalibrationPipeline.cs" />
     <Compile Include="ImageProcessing\IEyeTrackingPipeline.cs" />
     <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimplePupilCRBlobs.cs" />
-    <Compile Include="EyeTrackerGuiViewModel.cs" />
+    <Compile Include="UI\EyeTrackerGuiViewModel.cs" />
     <Compile Include="RemoteService\EyeTrackerRemote.cs" />
     <Compile Include="RemoteService\EyeTrackerUdpListener.cs" />
     <Compile Include="RemoteService\EyeTrackerTcpListener.cs" />
@@ -144,7 +144,7 @@
     <Compile Include="Calibration\EyePhysicalModel.cs" />
     <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
     <Compile Include="ImageGrabbing\EyeTrackerImageGrabber.cs" />
-    <Compile Include="EyeTrackerProcessor.cs" />
+    <Compile Include="ImageProcessing\EyeTrackerProcessor.cs" />
     <Compile Include="RecordingSession.cs" />
     <Compile Include="EyeTrackerPluginManager.cs" />
     <Compile Include="EyeTrackerData\CalibratedEyeData.cs" />

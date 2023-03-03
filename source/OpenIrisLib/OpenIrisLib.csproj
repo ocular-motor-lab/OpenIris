@@ -143,7 +143,7 @@
     </Compile>
     <Compile Include="Calibration\EyePhysicalModel.cs" />
     <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
-    <Compile Include="UI\EyeTrackerImageGrabber.cs" />
+    <Compile Include="ImageGrabbing\EyeTrackerImageGrabber.cs" />
     <Compile Include="EyeTrackerProcessor.cs" />
     <Compile Include="RecordingSession.cs" />
     <Compile Include="EyeTrackerPluginManager.cs" />

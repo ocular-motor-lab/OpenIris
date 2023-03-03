@@ -8,16 +8,19 @@ using System.Drawing;
 using System;
 using Spinnaker;
 using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SpinnakerInterface
 {
+#nullable enable
+
     [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystem
     {
         protected Spinnaker_SingleCam camera = null;
 
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye?>? CreateCameras()
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
@@ -33,11 +36,8 @@ namespace SpinnakerInterface
             }
 
             Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
-            camera = new Spinnaker_SingleCam(cam_list[0]);
-
-            //camera.CameraOrientation = CameraOrientation.Rotated180;
-
-            // Initialize left camera if necessary
+            
+            camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
             try
             {
                 this.camera.Start();
@@ -52,34 +52,38 @@ namespace SpinnakerInterface
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
             }
 
-            return new EyeCollection<CameraEye>(this.camera);
+            switch (settings.Eye)
+            {
+                case Eye.Left:                    
+                    return new EyeCollection<CameraEye?>(this.camera,null);
+                case Eye.Right:
+                    return new EyeCollection<CameraEye?>(null, camera);
+                case Eye.Both:
+                    return new EyeCollection<CameraEye?>(camera);
+                default:
+                    return new EyeCollection<CameraEye?>(this.camera);
+            }
+
+           
         }
 
         public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
-            var roiLeft = new Rectangle(images[Eye.Both].Size.Width/2, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-            var roiRight = new Rectangle(0, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-
             switch (settings.Eye)
             {
-                case Eye.Left:
+                case Eye.Both:
+                    var roiLeft = new Rectangle(images[Eye.Both].Size.Width/2, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
+                    var roiRight = new Rectangle(0, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
+
                     var imageLeft = images[Eye.Both].Copy(roiLeft);
                     imageLeft.WhichEye = Eye.Left;
-                    return new EyeCollection<ImageEye?>(imageLeft, null);
-                case Eye.Right:
                     var imageRight = images[Eye.Both].Copy(roiRight);
                     imageRight.WhichEye = Eye.Right;
-                    return new EyeCollection<ImageEye?>(null, imageRight);
-                case Eye.Both:
-                    imageLeft = images[Eye.Both].Copy(roiLeft);
-                    imageLeft.WhichEye = Eye.Left;
-                    imageRight = images[Eye.Both].Copy(roiRight);
-                    imageRight.WhichEye = Eye.Right;
-                    return new EyeCollection<ImageEye?>(imageLeft, imageRight);
+                    return new EyeCollection<ImageEye>(imageLeft, imageRight);
                 default:
-                    return null;
+                    return images;
             }
         }
 

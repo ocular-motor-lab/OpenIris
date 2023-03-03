@@ -35,7 +35,7 @@ namespace OpenIris
         /// <returns></returns>
         public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings settings)
         {
-            return (new EyeData(), null);
+            return (new EyeData(imageEye, ProcessFrameResult.Good), null);
         }
 
         /// <summary>

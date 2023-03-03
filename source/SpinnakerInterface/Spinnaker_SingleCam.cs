@@ -47,8 +47,18 @@ namespace SpinnakerInterface
             
             cam.OffsetX.FromString("0");
             cam.OffsetY.FromString("0");
-            cam.Width.FromString("720");//max is 720
-            cam.Height.FromString("450");//max is 450
+
+            switch (whichEye)
+            {
+                case (Eye.Both):
+                    cam.Width.FromString("720");//max is 720
+                    cam.Height.FromString("450");//max is 450
+                    break;
+                case (Eye.Left | Eye.Right):
+                    cam.Width.FromString("360");//max is 720
+                    cam.Height.FromString("450");//max is 450
+                    break;
+            }
 
             //To allow high frame rates
             cam.GainAuto.FromString("Off");

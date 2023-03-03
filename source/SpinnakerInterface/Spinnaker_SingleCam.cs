@@ -31,11 +31,41 @@ namespace SpinnakerInterface
 
         public static Spinnaker_SingleCam camera = null;
 
-        public Spinnaker_SingleCam(IManagedCamera CAM)
+        public Spinnaker_SingleCam(Eye whichEye, IManagedCamera CAM)
         {
             this.cam = CAM;
             cam.Init();
             CamModelName = cam.DeviceModelName.Value;
+
+            //to check if the cam feature changed:
+            //var nodemap = cam.GetNodeMap();
+            //IEnum iGainAuto = nodemap.GetNode<IEnum>("GainAuto");
+
+            cam.AcquisitionMode.FromString("Continuous");
+            cam.AcquisitionFrameRateEnable.FromString("True");
+
+            cam.OffsetX.FromString("0");
+            cam.OffsetY.FromString("0");
+
+            switch (whichEye)
+            {
+                case (Eye.Both):
+                    cam.Width.FromString("720");//max is 720
+                    cam.Height.FromString("450");//max is 450
+                    break;
+                case (Eye.Left | Eye.Right):
+                    cam.Width.FromString("360");//max is 720
+                    cam.Height.FromString("450");//max is 450
+                    break;
+            }
+
+            //To allow high frame rates
+            cam.GainAuto.FromString("Off");
+            cam.ExposureAuto.FromString("Off");
+
+            cam.ExposureTime.FromString("1676");
+            cam.Gain.FromString("9");
+            cam.AcquisitionFrameRate.FromString("500");
         }
 
         public override void Start()
@@ -43,8 +73,6 @@ namespace SpinnakerInterface
             if(cam==null) { return; }
 
             FrameRate = 100;
-            WhichEye = Eye.Both;
-
             cam.BeginAcquisition();
         }
 

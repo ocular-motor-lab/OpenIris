@@ -87,7 +87,7 @@ namespace OpenIris
                 ?? throw new InvalidOperationException("No EyeTrackingsyStemFactory");
 
             eyeTrackingSystem = system;
-            Init(eyeTrackingSystem.Name + " Videos", eyeTrackingSystemSettings);
+            Init(eyeTrackingSystem.Name, eyeTrackingSystemSettings);
 
             // Check that all the video files exist
             foreach (var file in fileNames.Where(f => f != null && !File.Exists(f)))

@@ -89,9 +89,9 @@
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimplePupilCRBlobs.cs" />
     <Compile Include="UI\EyeTrackerGuiViewModel.cs" />
-    <Compile Include="RemoteService\EyeTrackerRemote.cs" />
-    <Compile Include="RemoteService\EyeTrackerUdpListener.cs" />
-    <Compile Include="RemoteService\EyeTrackerTcpListener.cs" />
+    <Compile Include="RemoteServices\EyeTrackerRemote.cs" />
+    <Compile Include="RemoteServices\EyeTrackerUdpListener.cs" />
+    <Compile Include="RemoteServices\EyeTrackerTcpListener.cs" />
     <Compile Include="UI\DebugImagesPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -117,7 +117,7 @@
     <Compile Include="ImageProcessing\PositionTrackerEllipseFitting.cs" />
     <Compile Include="ImageProcessing\PupilTracking.cs" />
     <Compile Include="ImageProcessing\TorsionTracking.cs" />
-    <Compile Include="RemoteService\IEyeTrackerWebService.cs" />
+    <Compile Include="RemoteServices\IEyeTrackerWebService.cs" />
     <Compile Include="UI\EyeTrackerUICommand.cs" />
     <Compile Include="UI\ImageEyeDrawing.cs" />
     <Compile Include="UI\EyeTrackingPipelineUI.cs">
@@ -218,8 +218,8 @@
     <Compile Include="Util\Range.cs" />
     <Compile Include="EyeTrackerData\ImageEye.cs" />
     <Compile Include="ImageProcessing\EyeTrackerMask.cs" />
-    <Compile Include="RemoteService\IEyeTrackerService.cs" />
-    <Compile Include="RemoteService\EyeTrackerRemoteServices.cs" />
+    <Compile Include="RemoteServices\IEyeTrackerService.cs" />
+    <Compile Include="RemoteServices\EyeTrackerRemoteServices.cs" />
     <Compile Include="EyeTrackerSettings.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>

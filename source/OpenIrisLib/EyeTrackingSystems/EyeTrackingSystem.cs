@@ -19,7 +19,7 @@ namespace OpenIris
     /// The eye tracking system should not hold to any resources. It will not be diposed appropriately. 
     /// It must just create cameras, videos and/or head trackers and pass ownership of the objects. 
     /// </summary>
-    public abstract class EyeTrackingSystem : IDisposable
+    public abstract class EyeTrackingSystem : IDisposable, IEyeTrackingSystem
     {
         /// <summary>
         /// Initializes an instance.

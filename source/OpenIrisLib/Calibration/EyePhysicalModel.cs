@@ -153,6 +153,8 @@ namespace OpenIris
         {
             return Center.GetHashCode();
         }
+
+        public static EyePhysicalModel EmptyModel = new EyePhysicalModel();
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 ﻿namespace OpenIris.Calibration
 {
-    partial class EyeCalibrationManualUI
+    partial class CalibrationPipelineManual
     {
         /// <summary> 
         /// Required designer variable.

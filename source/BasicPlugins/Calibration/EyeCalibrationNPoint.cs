@@ -15,8 +15,8 @@ namespace OpenIris.Calibration
     using OpenIris.ImageProcessing;
 
 
-    [Export(typeof(CalibrationPipeline)), PluginDescription("N-Point", typeof(CalibrationSettings))]
-    public class EyeCalibrationNPoint : CalibrationPipeline
+    [Export(typeof(ICalibrationPipeline)), PluginDescription("N-Point", typeof(CalibrationSettings))]
+    public class EyeCalibrationNPoint : ICalibrationPipeline
     {
         public EyeCollection<List<PointF>> CalibrationPoints { get; set; }
         public EyeCollection<List<PointF>> PupilPositions { get; set; }
@@ -24,11 +24,18 @@ namespace OpenIris.Calibration
         public ImageEye LastImageLeftEye { get; set; }
         public ImageEye LastImageRightEye { get; set; }
 
+        private EyeCollection<EyePhysicalModel> eyeModels;
+
+        public bool Cancelled { get; }
+
+        public ICalibrationUI CalibrationUI { get; private set; }
+
         public EyeCalibrationNPoint()
         {
             PupilPositions = new EyeCollection<List<PointF>>( new List<PointF>(), new List<PointF>());
 
-            CalibrationPoints = new EyeCollection<List<PointF>>( new List<PointF>(), new List<PointF>());
+            CalibrationPoints = new EyeCollection<List<PointF>>(new List<PointF>(), new List<PointF>());
+            CalibrationUI = new EyeCalibrationNPointUI(this);
         }
 
 
@@ -39,45 +46,43 @@ namespace OpenIris.Calibration
         /// <param name="rightEye"></param>
         public void SetPhysicalModelsFromUI(EyePhysicalModel leftEye, EyePhysicalModel rightEye)
         {
-            SetPhysicalModels(leftEye, rightEye);
+            eyeModels = new EyeCollection<EyePhysicalModel> { leftEye, rightEye };
         }
 
-        protected override void ProcessForEyeModel(EyeTrackerImagesAndData data)
+        public (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
         {
-            if (data is null) return;
+            PupilPositions[imageEye.WhichEye].Add(imageEye.EyeData.Pupil.Center);
 
-            if (CalibrationUI == null) CalibrationUI = new EyeCalibrationNPointUI(this);
-
-            foreach (var imageEye in data.Images)
+            if (ScatterImages is null)
             {
-                PupilPositions[imageEye.WhichEye].Add(imageEye.EyeData.Pupil.Center);
-
-                if (ScatterImages is null)
-                {
-                    ScatterImages = new EyeCollection<Image<Gray, byte>>(
-                        new Image<Gray, byte>(imageEye.Size),
-                        new Image<Gray, byte>(imageEye.Size));
-                }
-
-                var x = (int)imageEye.EyeData.Pupil.Center.X;
-                var y = (int)imageEye.EyeData.Pupil.Center.Y;
-                this.ScatterImages[imageEye.WhichEye].Data[y, x, 0] = 1;
-
-                if (imageEye != null)
-                {
-                    if (imageEye.WhichEye == Eye.Left) LastImageLeftEye = imageEye;
-                    if (imageEye.WhichEye == Eye.Right) LastImageRightEye = imageEye;
-                }
+                ScatterImages = new EyeCollection<Image<Gray, byte>>(
+                    new Image<Gray, byte>(imageEye.Size),
+                    new Image<Gray, byte>(imageEye.Size));
             }
+
+            var x = (int)imageEye.EyeData.Pupil.Center.X;
+            var y = (int)imageEye.EyeData.Pupil.Center.Y;
+            this.ScatterImages[imageEye.WhichEye].Data[y, x, 0] = 1;
+
+            if (imageEye != null)
+            {
+                if (imageEye.WhichEye == Eye.Left) LastImageLeftEye = imageEye;
+                if (imageEye.WhichEye == Eye.Right) LastImageRightEye = imageEye;
+            }
+
+            return (true, EyePhysicalModel.EmptyModel);
         }
 
-        protected override void ProcessForReference(EyeTrackerImagesAndData data)
+        public (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
-            foreach (var image in data.Images)
-            {
-                TempCalibrationParameters.EyeCalibrationParameters[image.WhichEye].SetReference(image);
-            }
-        }
+            CalibrationUI = null;
 
+            if (image == null) return (false, null);
+
+            return (true, image);
+        }
+        public void Dispose()
+        {
+        }
     }
 }

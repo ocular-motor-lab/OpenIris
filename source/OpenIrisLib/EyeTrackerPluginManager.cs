@@ -46,13 +46,13 @@ namespace OpenIris
                 }
 
                 EyeTrackingsyStemFactory = new EyeTrackerPluginLoader<EyeTrackingSystem, IEyeTrackingSystemMetadata>(catalog);
-                CalibrationFactory = new EyeTrackerPluginLoader<CalibrationPipeline, IEyeTrackerPluginMetadata>(catalog);
+                CalibrationPipelineFactory = new EyeTrackerPluginLoader<ICalibrationPipeline, IEyeTrackerPluginMetadata>(catalog);
                 EyeTrackingPipelineFactory = new EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>(catalog);
 
                 ExtraSettingsTypesForXML = new List<Type>();
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingsyStemFactory.ClassesAvaiable.Select(t => t.SettingsType));
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
-                ExtraSettingsTypesForXML.AddRange(CalibrationFactory.ClassesAvaiable.Select(t => t.SettingsType));
+                ExtraSettingsTypesForXML.AddRange(CalibrationPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
             }
             catch(Exception ex)
             {
@@ -73,12 +73,18 @@ namespace OpenIris
         /// <summary>
         /// Factory for eye tracking calibration methods.
         /// </summary>
-        public static EyeTrackerPluginLoader<CalibrationPipeline, IEyeTrackerPluginMetadata>? CalibrationFactory { get; private set; }
+        public static EyeTrackerPluginLoader<ICalibrationPipeline, IEyeTrackerPluginMetadata>? CalibrationPipelineFactory { get; private set; }
 
         /// <summary>
         /// Factory for eye tracking pipelines.
         /// </summary>
         public static EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>? EyeTrackingPipelineFactory { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the plugin.
+        /// </summary>
+        /// <param name="t">Type of the plugin.</param>
+        /// <returns>Name of the plugin.</returns>
         public static string GetPluginName(Type t)
         {
             return ((PluginDescriptionAttribute)Attribute.GetCustomAttribute(t, typeof(PluginDescriptionAttribute))).Name;

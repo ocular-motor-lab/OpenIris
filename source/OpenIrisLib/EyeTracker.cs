@@ -111,9 +111,9 @@ namespace OpenIris
         public RecordingSession? RecordingSession { get; private set; }
 
         /// <summary>
-        /// Current calibration manager.
+        /// Current calibration session.
         /// </summary>
-        public CalibrationPipeline? CalibrationPipeline { get; private set; }
+        public CalibrationSession? CalibrationSession { get; private set; }
 
         /// <summary>
         /// Gets the current calibration parameters.
@@ -158,7 +158,7 @@ namespace OpenIris
         /// <summary>
         /// True if eye tracker is calibrating.
         /// </summary>
-        public bool Calibrating => CalibrationPipeline != null;
+        public bool Calibrating => CalibrationSession != null;
 
         /// <summary>
         /// True if eye tracker is recording.
@@ -245,7 +245,7 @@ namespace OpenIris
                     // Then we try to record the data and images (usually only in postprocessing)
                     // and we also pass it to the calibration manager.
                     RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
-                    CalibrationPipeline?.ProcessNewDataAndImages(LastImagesAndData);
+                    CalibrationSession?.ProcessNewDataAndImages(LastImagesAndData);
 
                     UpdateStats(processedImages);
 
@@ -332,7 +332,7 @@ namespace OpenIris
                 // 6. Stop the recorder to make sure all the grabbed and processed frames are recorded
                 //
 
-                CalibrationPipeline?.CancelCalibration();
+                CalibrationSession?.CancelCalibration();
 
                 VideoPlayer?.Stop();
                 HeadTracker?.Stop();
@@ -421,7 +421,7 @@ namespace OpenIris
 
                 // Start recording (important to initialize before the playing, so all frames are recorded).
                 // Play video and wait until it finishes. This will also start the tracking
-                using var recordingTask = StartRecording(optionsProcessedVideo);
+                using var recordingTask = StartRecording();
                 using var playingVideoTask = PlayVideo(options);
 
                 if (VideoPlayer is null) throw new InvalidOperationException("Video Player failed");
@@ -498,27 +498,25 @@ namespace OpenIris
 
             try
             {
-                CalibrationPipeline = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod)
-                    ?? throw new InvalidOperationException("No factory");
+                CalibrationSession = CalibrationSession.Start(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod);
 
-                var tempCalibrationParameters = await CalibrationPipeline.CalibrateEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                var tempCalibrationParameters = await CalibrationSession.CalibrateEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
                 if (tempCalibrationParameters is null) return;
 
                 // IMPORTANT!! Need to update calibration so the zero reference processing is done with a
-                // proper eye model. 
-                // TODO: think a better way of doing this.
+                // proper eye model.
                 Calibration = tempCalibrationParameters;
 
-                Calibration = await CalibrationPipeline.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
             }
             catch
             {
-                CancelCalibration();
                 throw;
             }
             finally
             {
-                CalibrationPipeline = null;
+                CalibrationSession?.Dispose();
+                CalibrationSession = null;
             }
         }
 
@@ -529,7 +527,7 @@ namespace OpenIris
         {
             Trace.WriteLine("CancelCalibration");
 
-            CalibrationPipeline?.CancelCalibration();
+            CalibrationSession?.CancelCalibration();
         }
 
         /// <summary>
@@ -553,20 +551,19 @@ namespace OpenIris
             if (Calibrating) return;
 
             try
-            { 
-                CalibrationPipeline = EyeTrackerPluginManager.CalibrationFactory?.Create(Settings.CalibrationMethod) 
-                    ?? throw new InvalidOperationException("No factory");
+            {
+                CalibrationSession = CalibrationSession.Start(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod);
 
-                Calibration = await CalibrationPipeline.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
             }
             catch
             {
-                CancelCalibration();
                 throw;
             }
             finally
             {
-                CalibrationPipeline = null;
+                CalibrationSession?.Dispose();
+                CalibrationSession = null;
             }
         }
 

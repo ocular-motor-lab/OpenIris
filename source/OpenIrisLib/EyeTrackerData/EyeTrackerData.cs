@@ -317,11 +317,6 @@ namespace OpenIris
         public long FrameNumber { get; private set; }
 
         /// <summary>
-        /// Frame rate the data was recorded at.
-        /// </summary>
-       // public double FrameRate { get; set; }
-
-        /// <summary>
         /// Gets the calibration parameters at the time the images were processed.
         /// </summary>
         public CalibrationParameters Calibration { get; set; }

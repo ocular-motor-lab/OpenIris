@@ -276,13 +276,13 @@ namespace OpenIris.UI
             // Update calibration UI
             if (eyeTracker.Calibrating && !tabPages.Contains(tabCalibration))
             {
-                if (eyeTracker.CalibrationPipeline?.CalibrationUI is UserControl calibrationControl)
+                if (eyeTracker.CalibrationSession?.CalibrationUI is UserControl calibrationControl)
                 {
                     calibrationControl.Dock = DockStyle.Fill;
                     calibrationControl.Location = new Point(0, 0);
                     calibrationControl.Size = tabCalibration.ClientSize;
                     tabCalibration.Controls.Add(calibrationControl);
-                    calibrationUI = eyeTracker.CalibrationPipeline?.CalibrationUI;
+                    calibrationUI = eyeTracker.CalibrationSession?.CalibrationUI;
 
                     tabPages.TabPages.Add(tabCalibration);
                     tabPages.SelectTab(tabCalibration);

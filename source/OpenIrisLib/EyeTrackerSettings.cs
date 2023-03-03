@@ -224,7 +224,7 @@ namespace OpenIris
         #region C) Choose a calibration method
 
         [Category("C) Choose a calibration method"), Description("Calibration method")]
-        [TypeConverter(typeof(PluginListTypeConverter<CalibrationPipeline>))]
+        [TypeConverter(typeof(PluginListTypeConverter<CalibrationSession>))]
         public string CalibrationMethod
         {
             get { return calibrationMethod; }
@@ -234,7 +234,7 @@ namespace OpenIris
                 // system, get the defaults and add them.
                 if (!AllCalibrationImplementations.ContainsKey(value))
                 {
-                    var calibrationSettings = (CalibrationSettings?)EyeTrackerPluginManager.CalibrationFactory?.GetDefaultSettings(value)
+                    var calibrationSettings = (CalibrationSettings?)EyeTrackerPluginManager.CalibrationPipelineFactory?.GetDefaultSettings(value)
                         ?? throw new InvalidOperationException("Bad CalibrationFactory");
 
                     AllCalibrationImplementations.Add(value, calibrationSettings);

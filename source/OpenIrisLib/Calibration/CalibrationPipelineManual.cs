@@ -11,23 +11,35 @@ namespace OpenIris.Calibration
     using Emgu.CV.Structure;
     using OpenIris.ImageProcessing;
     using System;
+    using System.ComponentModel.Composition;
     using System.Drawing;
     using System.Windows.Forms;
 
     /// <summary>
     /// Manual calibration where a UI can be used to set the eye model and the reference position.
     /// </summary>
-    public partial class EyeCalibrationManualUI : UserControl, ICalibrationUI
+    [Export(typeof(ICalibrationPipeline)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
+    public partial class CalibrationPipelineManual : UserControl, ICalibrationPipeline, ICalibrationUI
     {
-        EyeCalibrationManual calibration;
+        private EyeCollection<ImageEye?> LastImages { get; set; }
+        private EyeCollection<EyePhysicalModel> eyeModels;
         private EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
+
+        public ICalibrationUI? CalibrationUI => this;
+
+        /// <summary>
+        /// Indicates weather the calibration was cancelled.
+        /// </summary>
+        public bool Cancelled { get; set; }
+
 
         /// <summary>
         /// 
         /// </summary>
-        public EyeCalibrationManualUI(EyeCalibrationManual calibration)
+        public CalibrationPipelineManual()
         {
-            this.calibration = calibration;
+            LastImages = new EyeCollection<ImageEye?>(null, null);
+
             InitializeComponent();
 
             imageBoxes = new EyeCollection<Emgu.CV.UI.ImageBox>(imageBoxLeftEye, imageBoxRightEye);
@@ -90,7 +102,7 @@ namespace OpenIris.Calibration
         /// </summary>
         public void UpdateUI()
         {
-            foreach (var image in calibration.LastImages)
+            foreach (var image in LastImages)
             {
                 if ( image != null )
                 {
@@ -105,15 +117,34 @@ namespace OpenIris.Calibration
 
         #endregion ICalibrationUI Members
 
+
+        public (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        {
+            LastImages[image.WhichEye] = image;
+
+            if (eyeModels is null) return (false, EyePhysicalModel.EmptyModel);
+
+            return (true, eyeModels[image.WhichEye]);
+        }
+
+        public (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        {
+            if (image == null) return (false, null);
+
+            LastImages[image.WhichEye] = image;
+
+            return (true, image);
+        }
+
         private void buttonAccept_Click(object sender, EventArgs e)
         {
-            calibration.SetPhysicalModelsFromUI(GetEyeGlobe(Eye.Left), GetEyeGlobe(Eye.Right));
+            eyeModels = new EyeCollection<EyePhysicalModel>(GetEyeGlobe(Eye.Left), GetEyeGlobe(Eye.Right));
         }
 
         private void buttonAuto_Click(object sender, EventArgs e)
         {
-            var lastImageLeftEye = calibration.LastImages[Eye.Left];
-            var lastImageRightEye = calibration.LastImages[Eye.Right];
+            var lastImageLeftEye = LastImages[Eye.Left];
+            var lastImageRightEye = LastImages[Eye.Right];
 
             if (lastImageLeftEye != null)
             {
@@ -176,12 +207,7 @@ namespace OpenIris.Calibration
 
         private void butCancel_Click(object sender, EventArgs e)
         {
-            calibration.CancelCalibration();
+            Cancelled = true;
         }
     }
-
-
-
-
-
 }

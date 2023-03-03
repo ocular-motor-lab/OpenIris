@@ -71,17 +71,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Calibration\EyeCalibrationManual.cs" />
+    <Compile Include="Calibration\CalibrationPipelineAuto.cs" />
     <Compile Include="Calibration\EyeCalibration.cs" />
     <Compile Include="Calibration\CalibrationParameters.cs" />
-    <Compile Include="Calibration\EyeCalibrationManualUI.cs">
+    <Compile Include="Calibration\CalibrationPipelineManual.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Calibration\EyeCalibrationManualUI.Designer.cs">
-      <DependentUpon>EyeCalibrationManualUI.cs</DependentUpon>
+    <Compile Include="Calibration\CalibrationPipelineManual.Designer.cs">
+      <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
     <Compile Include="HeadTracker.cs" />
+    <Compile Include="Calibration\ICalibrationPipeline.cs" />
     <Compile Include="ImageProcessing\IEyeTrackingPipeline.cs" />
     <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
@@ -136,13 +137,13 @@
     <Compile Include="Util\OpenIrisException.cs" />
     <Compile Include="Util\PluginListTypeConverter.cs" />
     <Compile Include="Util\Consumer.cs" />
-    <Compile Include="CalibrationPipeline.cs" />
+    <Compile Include="Calibration\CalibrationSession.cs" />
     <Compile Include="EyeTrackerData\ExtraData.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Calibration\EyePhysicalModel.cs" />
     <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
-    <Compile Include="EyeTrackerImageGrabber.cs" />
+    <Compile Include="UI\EyeTrackerImageGrabber.cs" />
     <Compile Include="EyeTrackerProcessor.cs" />
     <Compile Include="RecordingSession.cs" />
     <Compile Include="EyeTrackerPluginManager.cs" />
@@ -242,8 +243,8 @@
     <Compile Include="VideoPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Calibration\EyeCalibrationManualUI.resx">
-      <DependentUpon>EyeCalibrationManualUI.cs</DependentUpon>
+    <EmbeddedResource Include="Calibration\CalibrationPipelineManual.resx">
+      <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\DebugImagesPanel.resx">
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>

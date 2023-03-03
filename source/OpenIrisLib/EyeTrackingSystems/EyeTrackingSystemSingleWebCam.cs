@@ -17,7 +17,7 @@ namespace OpenIris
     /// Generic system with any one camera.
     /// </summary>
     [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Single webcam", typeof(EyeTrackingSystemSettingsWebCam), VideoEyeConfiguration.SingleVideoOneEye)]
-    public class EyeTrackingSystemWebCam : EyeTrackingSystem
+    public class EyeTrackingSystemSingleWebCam : EyeTrackingSystem
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 
@@ -28,11 +28,17 @@ namespace OpenIris
             var cameraSettings = Settings as EyeTrackingSystemSettingsWebCam
                 ?? throw new InvalidOperationException("Wrong type of settings;");
 
-            var camera = new CameraEyeWebCam(Eye.Both, 0)
+            var camera = new CameraEyeWebCam(Settings.Eye, 0)
             {
                 CameraOrientation = cameraSettings.CameraOrientation
             };
-            return new EyeCollection<CameraEye?>(camera);
+
+            return Settings.Eye switch
+            {
+                Eye.Both => new EyeCollection<CameraEye?>(camera),
+                Eye.Left => new EyeCollection<CameraEye?>(camera, null),
+                Eye.Right => new EyeCollection<CameraEye?>(null, camera),
+            };
         }
 
         /// <summary>
@@ -58,10 +64,10 @@ namespace OpenIris
         /// <returns>Images prepared for processing.</returns>
         public override EyeCollection<ImageEye?> PreProcessImagesFromCameras(EyeCollection<ImageEye?>  images)
         {
-            var image = images[0] ?? throw new NullReferenceException("Image is null.");
-
-            if (images.Count == 1 && image.WhichEye == Eye.Both)
+            if (images.Count == 1 && images[0]?.WhichEye == Eye.Both)
             {
+                var image = images[0];
+
                 var width = image.Size.Width;
                 var height = image.Size.Height;
 

@@ -5,6 +5,8 @@
 //-----------------------------------------------------------------------
 namespace OpenIris
 {
+#nullable enable
+
     using System;
     using System.Diagnostics;
     using System.Drawing;
@@ -13,9 +15,10 @@ namespace OpenIris
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using static Emgu.CV.ML.KNearest;
 
     /// <summary>
+    /// This class functions as a wrapper on top of the EyeTracker class to expose only 
+    /// the methods that are exposable remotely.
     /// In order to use one of the ServiceHost constructors that takes a service instance,
     /// the InstanceContextMode of the service must be set to InstanceContextMode.Single.
     /// This can be configured via the ServiceBehaviorAttribute.  Otherwise, please
@@ -26,7 +29,6 @@ namespace OpenIris
     public class EyeTrackerRemote : IEyeTrackerService, IEyeTrackerWebService
     {
         protected EyeTracker eyeTracker;
-        private static AutoResetEvent dataWait = new AutoResetEvent(true);
 
         public EyeTrackerRemote(EyeTracker eyeTracker)
         {
@@ -36,7 +38,7 @@ namespace OpenIris
         /// <summary>
         /// Summary status
         /// </summary>
-        public EyeTrackerStatusSummary Status
+        public EyeTrackerStatusSummary StatusSummary
         {
             get
             {
@@ -65,31 +67,14 @@ namespace OpenIris
         /// <summary>
         /// Gets the settings of the current pipeline.
         /// </summary>
-        public EyeTrackingPipelineSettings? Settings => eyeTracker?.Settings.TrackingpipelineSettings;
+        public EyeTrackingPipelineSettings? PipelineSettings => eyeTracker?.Settings.TrackingpipelineSettings;
 
         /// <summary>
         /// Starts the recording.
         /// </summary>
         public void StartRecording()
         {
-            try
-            {
-                if (eyeTracker is null) throw new InvalidOperationException("Eye tracker is null.");
-
-                var conf = new RecordingOptions()
-                {
-                    SessionName = eyeTracker.Settings.SessionName,
-                    DataFolder = eyeTracker.Settings.DataFolder,
-                    SaveRawVideo = eyeTracker.Settings.RecordVideo,
-                    FrameRate = eyeTracker.ImageGrabber?.FrameRate ?? 0.0,
-                };
-
-                _ = eyeTracker.StartRecording(conf);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error processing remote start recording: " + ex.Message);
-            }
+            _ = eyeTracker.StartRecording();
         }
 
         /// <summary>
@@ -97,16 +82,7 @@ namespace OpenIris
         /// </summary>
         public void StopRecording()
         {
-            try
-            {
-                if (eyeTracker is null) throw new InvalidOperationException("Eye tracker is null.");
-
-                eyeTracker.StopRecording();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error processing remote start recording: " + ex.Message);
-            }
+            eyeTracker.StopRecording();
         }
 
         /// <summary>
@@ -114,16 +90,7 @@ namespace OpenIris
         /// </summary>
         public void ResetReference()
         {
-            try
-            {
-                if (eyeTracker is null) throw new InvalidOperationException("Eye tracker is null.");
-
-                _ = eyeTracker.ResetReference();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error processing remote start recording: " + ex.Message);
-            }
+            _ = eyeTracker.ResetReference();
         }
 
         /// <summary>
@@ -260,6 +227,7 @@ namespace OpenIris
         /// <returns></returns>
         public EyeCollection<EyeData?>? WaitForNewData()
         {
+            var dataWait = new AutoResetEvent(true);
             EyeCollection<EyeData?>? data = null;
 
             if (eyeTracker is null) return null;

@@ -33,7 +33,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileName">Names of the video files.</param>
         public VideoPlayer(string fileName)
-            : this(new EyeTrackingSystemWebCam(),
+            : this(new EyeTrackingSystemSingleWebCam(),
                   new EyeCollection<string?>(fileName),
                   new Range(),
                   true)

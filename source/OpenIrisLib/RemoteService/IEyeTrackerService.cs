@@ -20,13 +20,13 @@ namespace OpenIris
     [ServiceContract(Namespace = "http://OpenIris.org/torsion")]
     public interface IEyeTrackerService
     {
-        EyeTrackerStatusSummary Status
+        EyeTrackerStatusSummary StatusSummary
         {
             [OperationContract]
             get;
         }
 
-        EyeTrackingPipelineSettings? Settings
+        EyeTrackingPipelineSettings? PipelineSettings
         {
             [OperationContract]
             get;

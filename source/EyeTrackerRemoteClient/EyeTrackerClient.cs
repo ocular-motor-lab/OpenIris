@@ -36,12 +36,12 @@ namespace OpenIris
 
         public EyeTrackerStatusSummary Status
         {
-            get { return this.proxy.Status; }
+            get { return this.proxy.StatusSummary; }
         }
 
         public EyeTrackingPipelineSettings Settings
         {
-            get { return this.proxy.Settings; }
+            get { return this.proxy.PipelineSettings; }
         }
 
         public bool ChangeSetting(string settingName, object value)

@@ -25,11 +25,11 @@ namespace OpenIris.UI
     /// 2019
     /// Modified a lot to use delegates instead of a single class per command
     /// </remarks>
-    public sealed class EyeTrackerGuiViewModel : IDisposable
+    public sealed class EyeTrackerGuiViewModel
     {
-        public EyeTracker EyeTracker { get; }
+        private EyeTracker eyeTracker;
 
-        public EyeTrackerSettings Settings => EyeTracker.Settings;
+        public EyeTrackerSettings Settings => eyeTracker.Settings;
 
         public EyeTrackerUICommand StartTrackingCommand { get; }
         public EyeTrackerUICommand PlayVideoCommand { get; }
@@ -66,20 +66,11 @@ namespace OpenIris.UI
         /// <summary>
         /// Initializes an instance of the EyeTrackerUIViewModel class.
         /// </summary>
-        public EyeTrackerGuiViewModel()
+        public EyeTrackerGuiViewModel(EyeTracker eyeTracker)
         {
-            try
-            {
-                EyeTracker = EyeTracker.Start();
-            }
-            catch (PluginManagerException ex)
-            {
-                MessageBox.Show("Error initializing, trying safe mode (no plugins). " + ex.Message);
-                EyeTracker = EyeTracker.Start(safeMode: true);
-            }
-
-            EyeTracker.NewDataAndImagesAvailable += (o, dataAndimages) => LastDataAndImages = dataAndimages;
-            EyeTracker.Settings.PropertyChanged += (o, e) =>
+            this.eyeTracker = eyeTracker;
+            this.eyeTracker.NewDataAndImagesAvailable += (o, dataAndimages) => LastDataAndImages = dataAndimages;
+            this.eyeTracker.Settings.PropertyChanged += (o, e) =>
             {
                 var needsRestartingAttributes = typeof(EyeTrackerSettings).GetProperty(e.PropertyName)?.
                     GetCustomAttributes(typeof(NeedsRestartingAttribute), false) as NeedsRestartingAttribute[];
@@ -88,7 +79,7 @@ namespace OpenIris.UI
                                     ? needsRestartingAttributes[0].Value
                                     : false;
 
-                if (needsRestarting && !EyeTracker.NotStarted)
+                if (needsRestarting && !this.eyeTracker.NotStarted)
                 {
                     var result = MessageBox.Show(
                           "Changing the setting " + e.PropertyName + " requires to stop the tracking. Do you want to stop?",
@@ -97,7 +88,7 @@ namespace OpenIris.UI
 
                     if (result == DialogResult.Yes)
                     {
-                        EyeTracker.StopTracking();
+                        this.eyeTracker.StopTracking();
                         return;
                     }
                 }
@@ -107,92 +98,83 @@ namespace OpenIris.UI
                 execute: async _ =>
                 {
                     // If the eye tracking system has an specific, UI open it.
-                    using var eyeTrackingSystemUI = EyeTracker.EyeTrackingSystem?.OpenEyeTrackingSystemUI;
-                    await EyeTracker.StartTracking();
+                    using var eyeTrackingSystemUI = this.eyeTracker.EyeTrackingSystem?.OpenEyeTrackingSystemUI;
+                    await this.eyeTracker.StartTracking();
                 },
-                canExecute: () => EyeTracker.NotStarted);
+                canExecute: () => this.eyeTracker.NotStarted);
 
             StopCommand = new EyeTrackerUICommand(
-                execute: async _ => EyeTracker.StopTracking(),
-                canExecute: () => EyeTracker.Tracking && !(EyeTracker.RecordingSession?.Stopping ?? false));
+                execute: async _ => this.eyeTracker.StopTracking(),
+                canExecute: () => this.eyeTracker.Tracking && !(this.eyeTracker.RecordingSession?.Stopping ?? false));
 
             PlayVideoCommand = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
-                    var options = SelectVideoDialog.SelectVideo(EyeTracker.Settings);
+                    var options = SelectVideoDialog.SelectVideo(this.eyeTracker.Settings);
                     if (options is null) return;
-                    await EyeTracker.PlayVideo(options);
+                    await this.eyeTracker.PlayVideo(options);
                 },
-                canExecute: () => EyeTracker.NotStarted);
+                canExecute: () => this.eyeTracker.NotStarted);
 
             ProcessVideoCommand = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
-                    var options = SelectVideoDialog.SelectVideoForProcessing(EyeTracker.Settings);
+                    var options = SelectVideoDialog.SelectVideoForProcessing(this.eyeTracker.Settings);
                     if (options is null) return;
-                    await EyeTracker.ProcessVideo(options);
+                    await this.eyeTracker.ProcessVideo(options);
                 },
-                canExecute: () => EyeTracker.NotStarted);
+                canExecute: () => this.eyeTracker.NotStarted);
 
             BatchProcessVideoCommand = new EyeTrackerUICommand(
-                execute: async _ => (new BatchProcessing(EyeTracker)).Show(),
-                canExecute: () => EyeTracker.NotStarted);
+                execute: async _ => (new BatchProcessing(this.eyeTracker)).Show(),
+                canExecute: () => this.eyeTracker.NotStarted);
 
             StartRecordingCommand = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
-                    var options = new RecordingOptions()
-                    {
-                        SessionName = EyeTracker.Settings.SessionName,
-                        SaveRawVideo = EyeTracker.Settings.RecordVideo,
-                        DecimateRatioRawVideo = EyeTracker.Settings.DecimateVideoRatio,
-                        DataFolder = Settings?.DataFolder ?? "",
-                        FrameRate = EyeTracker.ImageGrabber?.FrameRate ?? 0.0,
-                    };
-
-                    await EyeTracker.StartRecording(options);
+                    await this.eyeTracker.StartRecording();
                 },
-                canExecute: () => EyeTracker.Tracking && !EyeTracker.Recording && !(EyeTracker.RecordingSession?.Stopping ?? false));
+                canExecute: () => this.eyeTracker.Tracking && !this.eyeTracker.Recording && !(this.eyeTracker.RecordingSession?.Stopping ?? false));
 
             StopRecordingCommand = new EyeTrackerUICommand(
-                execute: async _ => EyeTracker.StopRecording(),
-                canExecute: () => EyeTracker.Recording && !EyeTracker.PostProcessing);
+                execute: async _ => this.eyeTracker.StopRecording(),
+                canExecute: () => this.eyeTracker.Recording && !this.eyeTracker.PostProcessing);
 
             StartStopRecordingCommand = new EyeTrackerUICommand(
                 execute: async (object? sender) =>
                 {
-                    if (EyeTracker.Recording)
+                    if (this.eyeTracker.Recording)
                         StopRecordingCommand.Execute(sender);
                     else
                         StartRecordingCommand.Execute(sender);
                 },
-                canExecute: () => EyeTracker.Tracking && !EyeTracker.PostProcessing && !(EyeTracker.RecordingSession?.Stopping ?? false));
+                canExecute: () => this.eyeTracker.Tracking && !this.eyeTracker.PostProcessing && !(this.eyeTracker.RecordingSession?.Stopping ?? false));
 
             StartCalibrationCommand = new EyeTrackerUICommand(
-                execute: async _ => await EyeTracker.StartCalibration(),
-                canExecute: () => EyeTracker.Tracking && !EyeTracker.Calibrating);
+                execute: async _ => await this.eyeTracker.StartCalibration(),
+                canExecute: () => this.eyeTracker.Tracking && !this.eyeTracker.Calibrating);
 
             CancelCalibrationCommand = new EyeTrackerUICommand(
-                execute: async _ => EyeTracker.CancelCalibration(),
-                canExecute: () => EyeTracker.Calibrating);
+                execute: async _ => this.eyeTracker.CancelCalibration(),
+                canExecute: () => this.eyeTracker.Calibrating);
 
             StartCancelCalibrationCommand = new EyeTrackerUICommand(
                 execute: async (object? sender) =>
                 {
-                    if (EyeTracker.Calibrating)
+                    if (this.eyeTracker.Calibrating)
                         CancelCalibrationCommand.Execute(sender);
                     else
                         StartCalibrationCommand.Execute(sender);
                 },
-                canExecute: () => EyeTracker.Tracking);
+                canExecute: () => this.eyeTracker.Tracking);
 
             ResetCalibrationCommand = new EyeTrackerUICommand(
-                execute: async _ => EyeTracker.ResetCalibration(),
-                canExecute: () => EyeTracker.Tracking && !EyeTracker.Calibrating);
+                execute: async _ => this.eyeTracker.ResetCalibration(),
+                canExecute: () => this.eyeTracker.Tracking && !this.eyeTracker.Calibrating);
 
             ResetReferenceCommand = new EyeTrackerUICommand(
-                execute: async _ => await EyeTracker.ResetReference(),
-                canExecute: () => EyeTracker.Tracking);
+                execute: async _ => await this.eyeTracker.ResetReference(),
+                canExecute: () => this.eyeTracker.Tracking);
 
             LoadCalibrationCommand = new EyeTrackerUICommand(
                 execute: async _ =>
@@ -204,9 +186,9 @@ namespace OpenIris.UI
                     };
                     if (dialog.ShowDialog() != DialogResult.OK) return;
 
-                    EyeTracker.LoadCalibration(dialog.FileName);
+                    this.eyeTracker.LoadCalibration(dialog.FileName);
                 },
-                canExecute: () => !EyeTracker.Calibrating);
+                canExecute: () => !this.eyeTracker.Calibrating);
 
             SaveCalibrationCommand = new EyeTrackerUICommand(
                 execute: async _ =>
@@ -220,38 +202,38 @@ namespace OpenIris.UI
                         return;
                     }
 
-                    await Task.Run(() => EyeTracker.Calibration.Save(dialog.FileName));
+                    await Task.Run(() => this.eyeTracker.Calibration.Save(dialog.FileName));
                 },
-                canExecute: () => !EyeTracker.Calibrating);
+                canExecute: () => !this.eyeTracker.Calibrating);
 
             EditSettingsCommand = new EyeTrackerUICommand(
-                execute: async _ => EyeTrackerSettingsForm.Show(EyeTracker.Settings),
+                execute: async _ => EyeTrackerSettingsForm.Show(this.eyeTracker.Settings),
                 canExecute: () => true);
 
             CenterCamerasCommand = new EyeTrackerUICommand(
-                execute: async _ => EyeTracker.CenterEyes(),
-                canExecute: () => (EyeTracker.ImageGrabber?.CamerasMovable ?? false) && !EyeTracker.Recording);
+                execute: async _ => this.eyeTracker.CenterEyes(),
+                canExecute: () => (this.eyeTracker.ImageGrabber?.CamerasMovable ?? false) && !this.eyeTracker.Recording);
 
             MoveCamerasCommand = new EyeTrackerUICommand(
                 execute: async (object? sender) =>
                 {
                     if (!(sender is Button button)) return;
                     (var eye, var direction) = ((Eye, MovementDirection))button.Tag;
-                    EyeTracker.MoveCamera(eye, direction);
+                    this.eyeTracker.MoveCamera(eye, direction);
                 },
-                canExecute: () => (EyeTracker.ImageGrabber?.CamerasMovable ?? false) && !EyeTracker.Recording);
+                canExecute: () => (this.eyeTracker.ImageGrabber?.CamerasMovable ?? false) && !this.eyeTracker.Recording);
 
             ChangeDataFolderCommand = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
                     using var f = new FolderBrowserDialog
                     {
-                        SelectedPath = EyeTracker.Settings.DataFolder,
+                        SelectedPath = this.eyeTracker.Settings.DataFolder,
                         ShowNewFolderButton = false
                     };
                     if (f.ShowDialog() == DialogResult.OK)
                     {
-                        EyeTracker.Settings.DataFolder = f.SelectedPath;
+                        this.eyeTracker.Settings.DataFolder = f.SelectedPath;
                     }
                 },
                 canExecute: () => true);
@@ -259,7 +241,7 @@ namespace OpenIris.UI
             TrimVideosCommand = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
-                    var options = SelectVideoDialog.SelectVideoForProcessing(EyeTracker.Settings);
+                    var options = SelectVideoDialog.SelectVideoForProcessing(this.eyeTracker.Settings);
 
                     if (options?.VideoFileNames is null) return;
 
@@ -270,14 +252,6 @@ namespace OpenIris.UI
             ConvertVideoToRGBCommand = new EyeTrackerUICommand(
                 execute: _ => VideoTools.ConvertVideoToRGBCommandExecute(),
                 canExecute: () => true);
-        }
-
-        /// <summary>
-        /// Disposes reserouces.
-        /// </summary>
-        public void Dispose()
-        {
-            EyeTracker?.Dispose();
         }
     }
 }

@@ -38,8 +38,18 @@ namespace OpenIris.UI
             InitializeComponent();
 
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
-            eyeTrackerViewModel = new EyeTrackerGuiViewModel();
-            eyeTracker = eyeTrackerViewModel.EyeTracker;
+
+            try
+            {
+                eyeTracker = EyeTracker.Start();
+            }
+            catch (PluginManagerException ex)
+            {
+                MessageBox.Show("Error initializing, trying safe mode (no plugins). " + ex.Message);
+                eyeTracker = EyeTracker.Start(safeMode: true);
+            }
+
+            eyeTrackerViewModel = new EyeTrackerGuiViewModel(eyeTracker);
 
             timerRefreshUI = new Timer(components)
             {

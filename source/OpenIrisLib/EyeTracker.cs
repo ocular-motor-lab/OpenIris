@@ -444,16 +444,23 @@ namespace OpenIris
         /// <summary>
         /// Start recording.
         /// </summary>
-        /// <param name="recordingOptions">Options for the recording.</param>
-        public async Task StartRecording(RecordingOptions recordingOptions)
+        public async Task StartRecording()
         {
-            if (recordingOptions is null) throw new ArgumentNullException(nameof(recordingOptions));
             Trace.WriteLine("StartRecordingAsync");
 
             if (Recording) return;
 
             try
             {
+                var recordingOptions = new RecordingOptions()
+                {
+                    SessionName = Settings.SessionName,
+                    SaveRawVideo = Settings.RecordVideo,
+                    DecimateRatioRawVideo = Settings.DecimateVideoRatio,
+                    DataFolder = Settings?.DataFolder ?? "",
+                    FrameRate = ImageGrabber?.FrameRate ?? 0.0,
+                };
+
                 RecordingSession = new RecordingSession(recordingOptions);
                 Settings.LastRecordedFile = RecordingSession.DataFileName;
 

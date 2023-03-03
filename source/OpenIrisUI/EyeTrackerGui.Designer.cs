@@ -26,7 +26,7 @@ namespace OpenIris.UI
 
                 log?.Dispose();
 
-                eyeTrackerViewModel?.Dispose();
+                eyeTracker?.Dispose();
             }
 
             base.Dispose(disposing);

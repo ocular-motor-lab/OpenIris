@@ -44,11 +44,18 @@ namespace SpinnakerInterface
             
             cam.AcquisitionMode.FromString("Continuous");
             cam.AcquisitionFrameRateEnable.FromString("True");
-            cam.GainAuto.FromString("Off");
-            cam.ExposureAuto.FromString("Off");
+            
             cam.OffsetX.FromString("0");
             cam.OffsetY.FromString("0");
+            cam.Width.FromString("720");//max is 720
+            cam.Height.FromString("450");//max is 450
+            //To allow high frame rates
+            cam.GainAuto.FromString("Off");
+            cam.ExposureAuto.FromString("Off");
 
+            cam.ExposureTime.FromString("1676");
+            cam.Gain.FromString("9");
+            cam.AcquisitionFrameRate.FromString("500");
             //cam.Height
             //cam.Width
             //    cam.OffsetX

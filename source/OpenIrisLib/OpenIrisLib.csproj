@@ -146,7 +146,7 @@
     <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
     <Compile Include="ImageGrabbing\EyeTrackerImageGrabber.cs" />
     <Compile Include="ImageProcessing\EyeTrackerProcessor.cs" />
-    <Compile Include="RecordingSession.cs" />
+    <Compile Include="Util\RecordingSession.cs" />
     <Compile Include="Util\EyeTrackerPluginManager.cs" />
     <Compile Include="EyeTrackerData\CalibratedEyeData.cs" />
     <Compile Include="EyeTrackerData\EyeTrackerData.cs" />
@@ -241,7 +241,7 @@
     </Compile>
     <Compile Include="Util\SerializableDictionary.cs" />
     <Compile Include="Util\TaskErrorHandler.cs" />
-    <Compile Include="VideoPlayer.cs" />
+    <Compile Include="Util\VideoPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Calibration\CalibrationPipelineManual.resx">

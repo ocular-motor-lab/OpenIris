@@ -84,38 +84,15 @@ namespace OpenIris
         /// Gets or sets the left part to the frame that is not processed. Right, top, left, bottom.
         /// </summary>
         [Category("General tracking settings"), Description("Part to the frame that is not processed. Right, top, left, bottom.")]
-        public Rectangle CroppingLeftEye
-        {
-            get => this.croppingLeftEye;
-
-            set
-            {
-                if (value != this.croppingLeftEye)
-                {
-                    this.croppingLeftEye = value;
-                    this.OnPropertyChanged(this, nameof(CroppingLeftEye));
-                }
-            }
-        }
-        private Rectangle croppingLeftEye = new Rectangle(0, 0, 0, 0);
+        public Rectangle CroppingLeftEye { get => croppingLeftEye; set => SetProperty(ref croppingLeftEye, value, nameof(CroppingLeftEye)); }
+        private Rectangle croppingLeftEye = new Rectangle(0, 0, 0, 0); // Default value
 
         /// <summary>
         /// Gets or sets the left part to the frame that is not processed. Right, top, left, bottom.
         /// </summary>
         [Category("General tracking settings"), Description("Part to the frame that is not processed. Right, top, left, bottom.")]
-        public Rectangle CroppingRightEye
-        {
-            get { return this.croppingRightEye; }
-            set
-            {
-                if (value != this.croppingRightEye)
-                {
-                    this.croppingRightEye = value;
-                    this.OnPropertyChanged(this, nameof(CroppingRightEye));
-                }
-            }
-        }
-        private Rectangle croppingRightEye = new Rectangle(0, 0, 0, 0);
+        public Rectangle CroppingRightEye { get => croppingRightEye; set => SetProperty(ref croppingRightEye, value, nameof(CroppingRightEye)); }
+        private Rectangle croppingRightEye = new Rectangle(0, 0, 0, 0); // Default value
     }
 
 }

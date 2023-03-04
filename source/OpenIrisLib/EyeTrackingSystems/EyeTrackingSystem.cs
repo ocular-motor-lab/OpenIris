@@ -8,9 +8,6 @@ namespace OpenIris
 #nullable enable
 
     using System;
-    using System.ComponentModel;
-    using System.Linq;
-    using System.Runtime.Serialization;
     using System.Windows.Forms;
     using OpenIris.ImageGrabbing;
 
@@ -200,94 +197,4 @@ namespace OpenIris
 
     }
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-    /// <summary>
-    /// Base class for the settigns of the eye tracking system. With the minimum settings that all 
-    /// video or camera systems should have.
-    /// http://stackoverflow.com/questions/20084/xml-serialization-and-inherited-types
-    /// </summary>
-    [Serializable]
-    [KnownType("GetDerivedTypes")] // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.knowntypeattribute?view=netframework-4.8
-    public class EyeTrackingSystemSettings : EyeTrackerSettingsBase
-    {
-        /// <summary>
-        /// Gets the derived types for the serialization over wcf. This is necessary for the settings to be loaded. It's complicated. Because we are loading plugins in runtime we 
-        /// don't know a prioiry the types. 
-        /// </summary>
-        /// <returns></returns>
-        public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingSystemSettings))).ToArray();
-
-        /// <summary>
-        /// Gets or sets the resolution of the camera in mm per pixel. This should be set up automatically
-        /// after a camera system is selected.
-        /// </summary>       
-        [Category("Camera properties"), Description("Camera resolution ( mm per pixels)")]
-        public double MmPerPix
-        {
-            get { return this.mmPerPix; }
-            set
-            {
-                if (value != this.mmPerPix)
-                {
-                    this.mmPerPix = value;
-                    this.OnPropertyChanged(this, nameof(MmPerPix));
-                }
-            }
-        }
-        private double mmPerPix = 0.15;
-
-        [Category("Camera properties"), Description("Camera from the camera to the eyes ( mm)")]
-        public double DistanceCameraToEyeMm
-        {
-            get { return this.distanceCameraToEyeMm; }
-            set
-            {
-                if (value != this.distanceCameraToEyeMm)
-                {
-                    this.distanceCameraToEyeMm = value;
-                    this.OnPropertyChanged(this, nameof(DistanceCameraToEyeMm));
-                }
-            }
-        }
-        private double distanceCameraToEyeMm = 50; // default value
-
-        /// <summary>
-        /// Gets or sets the frame rate of the cameras
-        /// </summary>       
-        [Category("Camera properties"), Description("Camera frame rate")]
-        [NeedsRestarting]
-        public float FrameRate
-        {
-            get { return this.frameRate; }
-            set
-            {
-                if (value != this.frameRate)
-                {
-                    this.frameRate = value;
-                    this.OnPropertyChanged(this, nameof(FrameRate));
-                }
-            }
-        }
-        private float frameRate = 100.0f; // default value
-
-        [Category("Camera properties"), Description("Which eye to use.")]
-        [NeedsRestarting]
-        public Eye Eye
-        {
-            get
-            {
-                return this.eye;
-            }
-            set
-            {
-                if (value != this.eye)
-                {
-                    this.eye = value;
-                    this.OnPropertyChanged(this, nameof(Eye));
-                }
-            }
-        }
-        private Eye eye = Eye.Both;
-
-    }
 }

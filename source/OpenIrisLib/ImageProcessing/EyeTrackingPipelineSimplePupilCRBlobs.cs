@@ -145,151 +145,40 @@ namespace OpenIris
         /// Gets or sets threshold to find the dark pixels that should belong to the pupil (left eye)
         /// </summary>
         [Category("Pupil tracking settings"), Description("Threshold to find the dark pixels that should belong to the pupil (left eye).")]
-        public int DarkThresholdLeftEye
-        {
-            get { return this.thresholdDarkLeftEye; }
-            set
-            {
-                if (value != this.thresholdDarkLeftEye)
-                {
-                    this.thresholdDarkLeftEye = value;
-                    this.OnPropertyChanged(this, nameof(DarkThresholdLeftEye));
-                }
-            }
-        }
+        public int DarkThresholdLeftEye { get => thresholdDarkLeftEye; set => SetProperty(ref thresholdDarkLeftEye, value, nameof(DarkThresholdLeftEye)); }
         private int thresholdDarkLeftEye = 60;
 
-        /// <summary>
-        /// Gets or sets threshold to find the dark pixels that should belong to the pupil (right eye)
-        /// </summary>
         [Category("Pupil tracking settings"), Description("Threshold to find the dark pixels that should belong to the pupil (right eye).")]
-        public int DarkThresholdRightEye
-        {
-            get { return this.thresholdDarkRightEye; }
-            set
-            {
-                if (value != this.thresholdDarkRightEye)
-                {
-                    this.thresholdDarkRightEye = value;
-                    this.OnPropertyChanged(this, nameof(DarkThresholdRightEye));
-                }
-            }
-        }
+        public int DarkThresholdRightEye { get => thresholdDarkRightEye; set => SetProperty(ref thresholdDarkRightEye, value, nameof(DarkThresholdRightEye)); }
         private int thresholdDarkRightEye = 60;
 
-        /// <summary>
-        /// Gets or sets threshold to find the bright pixels that should belong to the reflexions
-        /// (left eye)
-        /// </summary>
         [Category("Corneal Reflection tracking settings"), Description("Threshold to find the bright pixels that should belong to the reflexions (left eye).")]
-        public int BrightThresholdLeftEye
-        {
-            get { return this.thresholdBrightLeftEye; }
-            set
-            {
-                if (value != this.thresholdBrightLeftEye)
-                {
-                    this.thresholdBrightLeftEye = value;
-                    this.OnPropertyChanged(this, nameof(BrightThresholdLeftEye));
-                }
-            }
-        }
+        public int BrightThresholdLeftEye { get => thresholdBrightLeftEye; set => SetProperty(ref thresholdBrightLeftEye, value, nameof(BrightThresholdLeftEye)); }
         private int thresholdBrightLeftEye = 250;
 
-        /// <summary>
-        /// Gets or sets threshold to find the bright pixels that should belong to the reflexions
-        /// (right eye)
-        /// </summary>
         [Category("Corneal Reflection tracking settings"), Description("Threshold to find the bright pixels that should belong to the reflexions (right eye).")]
-        public int BrightThresholdRightEye
-        {
-            get { return this.thresholdBrightRightEye; }
-            set
-            {
-                if (value != this.thresholdBrightRightEye)
-                {
-                    this.thresholdBrightRightEye = value;
-                    this.OnPropertyChanged(this, nameof(BrightThresholdRightEye));
-                }
-            }
-        }
+        public int BrightThresholdRightEye { get => thresholdBrightRightEye; set => SetProperty(ref thresholdBrightRightEye, value, nameof(BrightThresholdRightEye)); }
         private int thresholdBrightRightEye = 250;
 
-        /// <summary>
-        /// Gets the minimum radius of the pupil in pixels
-        /// </summary>
         [Browsable(false)]
         public double MinPupRadPix { get { return this.minPupRadmm / this.GetMmPerPix(); } }
 
-        /// <summary>
-        /// Gets or sets the minimum radius of the pupil in mm
-        /// </summary>
         [Category("Pupil tracking settings"), Description("Minimum radius of the pupil in mms.")]
-        public double MinPupRadmm
-        {
-            get { return this.minPupRadmm; }
-            set
-            {
-                if (value != this.minPupRadmm)
-                {
-                    this.minPupRadmm = value;
-                    this.OnPropertyChanged(this, nameof(MinPupRadmm));
-                }
-            }
-        }
+        public double MinPupRadmm { get => minPupRadmm; set => SetProperty(ref minPupRadmm, value, nameof(MinPupRadmm)); }
         private double minPupRadmm = 1;
 
-        /// <summary>
-        /// Gets or sets the minimum radius of the pupil
-        /// </summary>
         [Browsable(false)]
         public double MinCRRadPix { get { return this.minCRRadmm / this.GetMmPerPix(); } }
 
-        /// <summary>
-        /// Gets or sets the maximum radius of the CRs (glints)
-        /// </summary>
         [Browsable(false)]
         public double MaxCRRadPix { get { return this.maxCRRadmm / this.GetMmPerPix(); } }
 
-        /// <summary>
-        /// Gets or sets the minimum radius of the CR  in mm
-        /// </summary>
         [Category("Corneal Reflection tracking settings"), Description("Minimum radius of the CR in mmms.")]
-        public double MinCRRadmm
-        {
-            get
-            {
-                return this.minCRRadmm;
-            }
-
-            set
-            {
-                if (value != this.minCRRadmm)
-                {
-                    this.minCRRadmm = value;
-                    this.OnPropertyChanged(this, nameof(MinCRRadmm));
-                }
-            }
-        }
-
+        public double MinCRRadmm { get => minCRRadmm; set => SetProperty(ref minCRRadmm, value, nameof(MinCRRadmm)); }
         private double minCRRadmm = 0.3;
 
-        /// <summary>
-        /// Gets or sets the maximum radius of the CRs (glints)
-        /// </summary>
         [Category("Corneal Reflection tracking settings"), Description("Maximum radius of the CR in mms.")]
-        public double MaxCRRadmm
-        {
-            get { return maxCRRadmm; }
-            set
-            {
-                if (value != this.maxCRRadmm)
-                {
-                    this.maxCRRadmm = value;
-                    this.OnPropertyChanged(this, nameof(MaxCRRadmm));
-                }
-            }
-        }
+        public double MaxCRRadmm { get => maxCRRadmm; set => SetProperty(ref maxCRRadmm, value, nameof(MaxCRRadmm)); }
         private double maxCRRadmm = 5;
     }
 }

@@ -28,13 +28,13 @@ namespace OpenIris
     /// stop with the same frame. There can be frames dropped in the data that were not dropped in
     /// the video.
     /// </summary>
-    public sealed class RecordingSession
+    public sealed class RecordingSession : IDisposable
     {
         private readonly RecordingOptions options;
 
-        private Consumer<EyeCollection<(Eye, Image<Gray, byte>?)>> rawFramesRecorder;
-        private Consumer<EyeTrackerImagesAndData> processedFramesRecorder;
-        private Consumer<EyeTrackerEvent> eventRecorder;
+        private readonly Consumer<EyeCollection<(Eye, Image<Gray, byte>?)>> rawFramesRecorder;
+        private readonly Consumer<EyeTrackerImagesAndData> processedFramesRecorder;
+        private readonly Consumer<EyeTrackerEvent> eventRecorder;
 
         private EyeCollection<VideoWriter?>? rawVideoWriters;
         private VideoWriter? processedVideoWriter;
@@ -49,10 +49,10 @@ namespace OpenIris
         /// <summary>
         /// Initializes a recording.
         /// </summary>
-        /// <param name="options">Options of the recording.</param>
-        internal RecordingSession(RecordingOptions options)
+        /// <param name="recordingOptions">Options of the recording.</param>
+        internal RecordingSession(RecordingOptions recordingOptions)
         {
-            this.options = options;
+            options = recordingOptions;
 
             // Prepare file names
             TimeRecordingStarted = DateTime.Now;
@@ -93,32 +93,32 @@ namespace OpenIris
         /// <summary>
         /// Gets the total number of frames recorded.
         /// </summary>
-        public int NumberFramesRecordedInVideo => rawFramesRecorder?.TryAddedCount??0;
+        public int NumberFramesRecordedInVideo => rawFramesRecorder.TryAddedCount;
 
         /// <summary>
         /// Gets the total number of frames dropped.
         /// </summary>
-        public int NumberFramesDroppedInVideo => rawFramesRecorder?.DroppedCount??0;
+        public int NumberFramesDroppedInVideo => rawFramesRecorder.DroppedCount;
 
         /// <summary>
         /// Gets the total number of frames recorded in data file.
         /// </summary>
-        public int NumberFramesRecordedInDataFile => processedFramesRecorder?.TryAddedCount ?? 0;
+        public int NumberFramesRecordedInDataFile => processedFramesRecorder.TryAddedCount;
 
         /// <summary>
         /// Gets the total number of frames dropped in data file.
         /// </summary>
-        public int NumberFramesDroppedInDataFile => processedFramesRecorder?.DroppedCount ?? 0;
+        public int NumberFramesDroppedInDataFile => processedFramesRecorder.DroppedCount;
 
         /// <summary>
         /// Gets the number of the last frame recorded in the video.
         /// </summary>
-        public int NumberFrameLastInVideo => (int)(rawFramesRecorder?.LastItemAdded ?? 0);
+        public int NumberFrameLastInVideo => (int)(rawFramesRecorder.LastItemAdded);
 
         /// <summary>
         /// Gets the number of the last frame recorded in the data file.
         /// </summary>
-        public int NumberFrameLastInDataFile => (int)(processedFramesRecorder?.LastItemAdded ?? 0);
+        public int NumberFrameLastInDataFile => (int)(processedFramesRecorder.LastItemAdded);
 
         /// <summary>
         /// Gets a string with a status message regarding the recording.
@@ -455,6 +455,25 @@ namespace OpenIris
             imgBoth.ROI = new Rectangle();
 
             return imgBoth;
+        }
+
+        public void Dispose()
+        {
+            rawFramesRecorder.Dispose();
+            processedFramesRecorder.Dispose();
+            eventRecorder.Dispose();
+            rawVideoWriters?.ForEach(v => v?.Dispose());
+            processedVideoWriter?.Dispose();
+            eventFile?.Dispose();
+            dataFile?.Dispose();
+            log?.Dispose();
+
+            rawVideoWriters = null;
+            processedVideoWriter = null;
+            processedVideoWriter = null;
+            eventFile = null;
+            dataFile = null;
+            log = null;
         }
     }
 

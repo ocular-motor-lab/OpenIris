@@ -16,7 +16,7 @@ namespace OpenIris
     /// Class to create a background task that consumes items with an associated order number.
     /// This is used to make sure several consumers finish consuming the same item number.
     /// </summary>
-    public class Consumer<T>
+    public class Consumer<T> : IDisposable
     {
         private readonly Func<T, bool> consumeItem;
         private BlockingCollection<T>? buffer;
@@ -67,6 +67,7 @@ namespace OpenIris
         /// Gets the number of the last item added to the consumer.
         /// </summary>
         public long LastItemAdded { get; private set; }
+
 
         /// <summary>
         /// Starts the consumer.
@@ -176,6 +177,15 @@ namespace OpenIris
             }
 
             return itemAdded;
+        }
+
+        /// <summary>
+        /// Disposes the consumer.
+        /// </summary>
+        public void Dispose()
+        {
+            buffer?.Dispose();
+            buffer = null;
         }
     }
 }

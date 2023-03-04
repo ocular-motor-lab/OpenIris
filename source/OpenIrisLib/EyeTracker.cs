@@ -498,16 +498,18 @@ namespace OpenIris
 
             try
             {
-                CalibrationSession = CalibrationSession.Start(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod);
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
+                {
 
-                var tempCalibrationParameters = await CalibrationSession.CalibrateEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
-                if (tempCalibrationParameters is null) return;
+                    var tempCalibration = await CalibrationSession.StartCalibratingEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                    if (tempCalibration is null) return;
 
-                // IMPORTANT!! Need to update calibration so the zero reference processing is done with a
-                // proper eye model.
-                Calibration = tempCalibrationParameters;
+                    // IMPORTANT!! Need to update calibration so the zero reference processing is done with a
+                    // proper eye model.
+                    Calibration = tempCalibration;
 
-                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                }
             }
             catch
             {
@@ -515,7 +517,6 @@ namespace OpenIris
             }
             finally
             {
-                CalibrationSession?.Dispose();
                 CalibrationSession = null;
             }
         }
@@ -552,9 +553,10 @@ namespace OpenIris
 
             try
             {
-                CalibrationSession = CalibrationSession.Start(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod);
-
-                Calibration = await CalibrationSession.CalibrateZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
+                {
+                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                }
             }
             catch
             {
@@ -562,7 +564,6 @@ namespace OpenIris
             }
             finally
             {
-                CalibrationSession?.Dispose();
                 CalibrationSession = null;
             }
         }
@@ -612,13 +613,13 @@ namespace OpenIris
                 var dataLeftEye = LastImagesAndData.Data.EyeDataRaw[Eye.Left];
                 var dataRightEye = LastImagesAndData.Data.EyeDataRaw[Eye.Right];
 
-                ImageGrabber?.CenterEyes(
-                    (dataLeftEye?.ProcessFrameResult == ProcessFrameResult.Good)
-                        ? dataLeftEye.Pupil.Center
-                        : PointF.Empty,
-                    (dataRightEye?.ProcessFrameResult == ProcessFrameResult.Good)
-                        ? dataRightEye.Pupil.Center
-                        : PointF.Empty);
+                var centerLeft = (dataLeftEye?.ProcessFrameResult == ProcessFrameResult.Good) ?
+                    dataLeftEye.Pupil.Center : PointF.Empty;
+
+                var centerRight = (dataRightEye?.ProcessFrameResult == ProcessFrameResult.Good) ?
+                    dataRightEye.Pupil.Center : PointF.Empty;
+
+                ImageGrabber?.CenterEyes(centerLeft, centerRight);
             }
         }
 

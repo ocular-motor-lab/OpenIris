@@ -7,8 +7,8 @@ namespace OpenIris
 {
     using System;
     using System.IO;
+    using System.Collections.Generic;
     using System.ComponentModel;
-    using System.Threading.Tasks;
     using System.Xml;
     using System.Xml.Serialization;
 
@@ -26,9 +26,6 @@ namespace OpenIris
     [Serializable]
     public sealed class EyeTrackerSettings : EyeTrackerSettingsXml
     {
-        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;
-        private EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> allEyeTrackingPipelinesSettings;
-        private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerSettings class.
@@ -46,99 +43,7 @@ namespace OpenIris
             LastVideoFolder = "";
         }
 
-        /// <summary>
-        /// This collection holds the settings for all the eye tracking systems and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> AllEyeTrackerSystemSettings 
-        {
-            get => allEyeTrackerSystemsSettings;
-            set
-            {
-                if (value is null) return;
-
-                foreach (var v in value.Values)
-                {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingSystemSettings));
-                }
-
-                allEyeTrackerSystemsSettings = value;
-            }
-        }
-
-        /// <summary>
-        /// This collection holds the settings for all the eye tracking pipelines and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> AllTrackingPipelinesSettings
-        {
-            get => allEyeTrackingPipelinesSettings;
-            set
-            {
-                if (value is null) return;
-
-                foreach (var v in value.Values)
-                {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingPipelineSettings));
-                }
-
-                allEyeTrackingPipelinesSettings = value;
-            }
-        }
-
-        /// <summary>
-        /// This collection holds the settings for all the calibrations and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<CalibrationSettings> AllCalibrationImplementations
-        {
-            get => allCalibrationImplementations;
-            set
-            {
-                if (value is null) return;
-
-                foreach (var v in value.Values)
-                {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(CalibrationSettings));
-                }
-
-                allCalibrationImplementations = value;
-            }
-        }
-
-        /// <summary>
-        /// This property will return the settings for the current eye tracking system. It will show in the UI but it
-        /// will not be serialized.
-        /// </summary>
-        [XmlIgnore]
-        [Browsable(false)]
-        [NeedsRestarting(true)]
-        public EyeTrackingSystemSettings EyeTrackingSystemSettings { get { return AllEyeTrackerSystemSettings[eyeTrackerSystem]; } }
-
-        /// <summary>
-        /// This property will return the settings for the current pipeline. It will show in the UI but it
-        /// will not be serialized.
-        /// </summary>
-        [XmlIgnore]
-        [Browsable(false)]
-        public EyeTrackingPipelineSettings TrackingpipelineSettings { get { return AllTrackingPipelinesSettings[eyeTrackingPipeline]; } }
-
-        /// <summary>
-        /// This property will return the settings for the current calibration. It will show in the UI but it
-        /// will not be serialized.
-        /// </summary>
-        [XmlIgnore]
-        [Browsable(false)]
-        public CalibrationSettings CalibrationSettings { get { return AllCalibrationImplementations[calibrationMethod]; } }
-
-
-        #region A) Choose an eye tracking system"
+        #region A) Choose an eye tracking system plugin"
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
         [NeedsRestarting]
@@ -181,9 +86,41 @@ namespace OpenIris
 
         private string eyeTrackerSystem = "Simulation";
 
+        /// <summary>
+        /// This property will return the settings for the current eye tracking system. It will show in the UI but it
+        /// will not be serialized.
+        /// </summary>
+        [XmlIgnore]
+        [Browsable(false)]
+        [NeedsRestarting(true)]
+        public EyeTrackingSystemSettings EyeTrackingSystemSettings => AllEyeTrackerSystemSettings[eyeTrackerSystem];
+
+        /// <summary>
+        /// This collection holds the settings for all the eye tracking pipelines and will be serialized
+        /// into the XML file.
+        /// </summary>
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> AllTrackingPipelinesSettings
+        {
+            get => allEyeTrackingPipelinesSettings;
+            set
+            {
+                if (value is null) return;
+
+                foreach (var v in value.Values)
+                {
+                    // make sure the property changes propagate
+                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingPipelineSettings));
+                }
+
+                allEyeTrackingPipelinesSettings = value;
+            }
+        }
+        private EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> allEyeTrackingPipelinesSettings;
+
         #endregion A) Choose an eye tracking system"
 
-        #region B) Choose a tracking pipeline
+        #region B) Choose a tracking pipeline plugin
 
         [Category("B) Choose a tracking pipeline"), Description("Tracking pipeline. What pipeline for tracking position, torsion etc you want to use?")]
         [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingPipeline>))]
@@ -219,9 +156,39 @@ namespace OpenIris
         }
         private string eyeTrackingPipeline = "JOM";
 
+        /// <summary>
+        /// This collection holds the settings for all the eye tracking systems and will be serialized
+        /// into the XML file.
+        /// </summary>
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> AllEyeTrackerSystemSettings 
+        {
+            get => allEyeTrackerSystemsSettings;
+            set
+            {
+                if (value is null) return;
+
+                foreach (var v in value.Values)
+                {
+                    // make sure the property changes propagate
+                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingSystemSettings));
+                }
+
+                allEyeTrackerSystemsSettings = value;
+            }
+        }
+        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;
+        /// <summary>
+        /// This property will return the settings for the current pipeline. It will show in the UI but it
+        /// will not be serialized.
+        /// </summary>
+        [XmlIgnore]
+        [Browsable(false)]
+        public EyeTrackingPipelineSettings TrackingpipelineSettings => AllTrackingPipelinesSettings[eyeTrackingPipeline];
+
         #endregion B) Choose a tracking pipeline
 
-        #region C) Choose a calibration method
+        #region C) Choose a calibration method plugin
 
         [Category("C) Choose a calibration method"), Description("Calibration method")]
         [TypeConverter(typeof(PluginListTypeConverter<CalibrationSession>))]
@@ -254,56 +221,55 @@ namespace OpenIris
         }
         private string calibrationMethod = "Auto"; // Default value
 
+        /// <summary>
+        /// This collection holds the settings for all the calibrations and will be serialized
+        /// into the XML file.
+        /// </summary>
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<CalibrationSettings> AllCalibrationImplementations
+        {
+            get => allCalibrationImplementations;
+            set
+            {
+                if (value is null) return;
+
+                foreach (var v in value.Values)
+                {
+                    // make sure the property changes propagate
+                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(CalibrationSettings));
+                }
+
+                allCalibrationImplementations = value;
+            }
+        }
+        private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
+
+
+        /// <summary>
+        /// This property will return the settings for the current calibration. It will show in the UI but it
+        /// will not be serialized.
+        /// </summary>
+        [XmlIgnore]
+        [Browsable(false)]
+        public CalibrationSettings CalibrationSettings => AllCalibrationImplementations[calibrationMethod];
+
         #endregion C) Choose a calibration method
 
         #region D) General settings
 
         [Category("D) General settings"), Description("Maximum number of processing threads.")]
         [NeedsRestarting(true)]
-        public int MaxNumberOfProcessingThreads
-        {
-            get { return maxNumberOfProcessingThreads; }
-            set
-            {
-                if (value != maxNumberOfProcessingThreads)
-                {
-                    maxNumberOfProcessingThreads = value;
-                    OnPropertyChanged(this, nameof(MaxNumberOfProcessingThreads));
-                }
-            }
-        }
+        public int MaxNumberOfProcessingThreads { get => maxNumberOfProcessingThreads; set => SetProperty(ref maxNumberOfProcessingThreads, value, nameof(MaxNumberOfProcessingThreads)); }
         private int maxNumberOfProcessingThreads = 10; // Default value
 
         [Category("D) General settings"), Description("Value indicating where debuging images should be shown")]
-        public bool Debug
-        {
-            get { return debug; }
-            set
-            {
-                if (value != debug)
-                {
-                    debug = value;
-                    OnPropertyChanged(this, nameof(Debug));
-                }
-            }
-        }
+        public bool Debug { get => debug; set => SetProperty(ref debug, value, nameof(Debug)); }
         private bool debug = false; // Default value
 
 
         [Category("D) General settings"), Description("Gets the size of the buffer.")]
         [NeedsRestarting]
-        public int BufferSize
-        {
-            get { return bufferSize; }
-            set
-            {
-                if (value != bufferSize)
-                {
-                    bufferSize = value;
-                    OnPropertyChanged(this, nameof(BufferSize));
-                }
-            }
-        }
+        public int BufferSize { get => bufferSize; set => SetProperty(ref bufferSize, value, nameof(BufferSize)); }
         private int bufferSize = 100; // Default value
 
         #endregion D) General settings
@@ -311,104 +277,24 @@ namespace OpenIris
         #region E) Recording settings
 
         [Category("E) Recording settings"), Description("Name of the data files")]
-        public string SessionName
-        {
-            get
-            {
-                return sessionName;
-            }
-
-            set
-            {
-                if (value != sessionName)
-                {
-                    sessionName = value;
-                    OnPropertyChanged(this, nameof(SessionName));
-                }
-            }
-        }
-
+        public string SessionName { get => sessionName; set => SetProperty(ref sessionName, value, nameof(SessionName)); }
         private string sessionName = "SESSION_NAME"; // Default value
 
         [Category("E) Recording settings"), Description("Folder where data is saved")]
-        public string DataFolder
-        {
-            get
-            {
-                return dataFolder;
-            }
-
-            set
-            {
-                if (value != dataFolder)
-                {
-                    dataFolder = value;
-                    OnPropertyChanged(this, nameof(DataFolder));
-                }
-            }
-        }
-
+        public string DataFolder { get => dataFolder; set => SetProperty(ref dataFolder, value, nameof(DataFolder)); }
         private string dataFolder = @"C:\secure\Data\Raw\Torsion\DataTest"; // Default value
 
         [Browsable(false)]
         [Category("E) Recording settings"), Description("Last file saved.")]
-        public string LastRecordedFile
-        {
-            get
-            {
-                return lastRecordedFile;
-            }
-
-            set
-            {
-                if (value != lastRecordedFile)
-                {
-                    lastRecordedFile = value;
-                    OnPropertyChanged(this, nameof(LastRecordedFile));
-                }
-            }
-        }
-
+        public string LastRecordedFile { get => lastRecordedFile; set => SetProperty(ref lastRecordedFile, value, nameof(LastRecordedFile)); }
         private string lastRecordedFile = string.Empty; // Default value
 
         [Category("E) Recording settings"), Description("Indicates if video should be recorded.")]
-        public bool RecordVideo
-        {
-            get
-            {
-                return recordVideo;
-            }
-
-            set
-            {
-                if (value != recordVideo)
-                {
-                    recordVideo = value;
-                    OnPropertyChanged(this, nameof(RecordVideo));
-                }
-            }
-        }
-
+        public bool RecordVideo { get => recordVideo; set => SetProperty(ref recordVideo, value, nameof(RecordVideo)); }
         private bool recordVideo = true; // Default value
 
         [Category("E) Recording settings"), Description("Proportion of frames that should be recorded (1 every x).")]
-        public int DecimateVideoRatio
-        {
-            get
-            {
-                return decimateVideoRatio;
-            }
-
-            set
-            {
-                if (value != decimateVideoRatio)
-                {
-                    decimateVideoRatio = value;
-                    OnPropertyChanged(this, nameof(DecimateVideoRatio));
-                }
-            }
-        }
-
+        public int DecimateVideoRatio { get => decimateVideoRatio; set => SetProperty(ref decimateVideoRatio, value, nameof(DecimateVideoRatio)); }
         private int decimateVideoRatio = 1; // Default value
 
         #endregion E) Recording settings
@@ -416,22 +302,7 @@ namespace OpenIris
         #region F) Display settings
 
         [Category("F) Display settings"), Description("Number of seconds in trace plots.")]
-        public double TraceSpan
-        {
-            get
-            {
-                return traceSpan;
-            }
-
-            set
-            {
-                if (value != traceSpan)
-                {
-                    traceSpan = value;
-                    OnPropertyChanged(this, nameof(TraceSpan));
-                }
-            }
-        }
+        public double TraceSpan { get => traceSpan; set => SetProperty(ref traceSpan, value, nameof(TraceSpan)); }
         private double traceSpan = 5; // Default value
 
         #endregion F) Display settings
@@ -440,23 +311,7 @@ namespace OpenIris
 
         [Category("F) Network "), Description("TCP port where the host is listening")]
         [NeedsRestarting]
-        public int ServiceListeningPort
-        {
-            get
-            {
-                return serviceListeningPort;
-            }
-
-            set
-            {
-                if (value != serviceListeningPort)
-                {
-                    serviceListeningPort = value;
-                    OnPropertyChanged(this, nameof(ServiceListeningPort));
-                }
-            }
-        }
-
+        public int ServiceListeningPort { get => serviceListeningPort; set => SetProperty(ref serviceListeningPort, value, nameof(ServiceListeningPort)); }
         private int serviceListeningPort = 9000; // Default value
 
         #endregion  Network settings
@@ -468,6 +323,7 @@ namespace OpenIris
         /// </summary>
         [Browsable(false)]
         public string LastVideoEyeTrackerSystem { get; set; }
+
         /// <summary>
         /// Folder of the last video selected to play or process.
         /// </summary>
@@ -588,12 +444,27 @@ namespace OpenIris
         }
     }
 
-
     [Serializable]
     public class EyeTrackerSettingsBase : INotifyPropertyChanged
     {
         [field: NonSerialized]
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// https://www.danrigby.com/2012/01/08/inotifypropertychanged-the-anders-hejlsberg-way/
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <param name="name"></param>
+        protected void SetProperty<T>(ref T field, T value, string name)
+        {
+            if (!EqualityComparer<T>.Default.Equals(field, value))
+            {
+                field = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            }
+        }
 
         /// <summary>
         /// Raises the PropertyChange event
@@ -605,5 +476,6 @@ namespace OpenIris
             // Save thesettings everytime something changes
             PropertyChanged?.Invoke(o, new PropertyChangedEventArgs(name));
         }
+
     }
 }

@@ -146,27 +146,8 @@ namespace OpenIris
     {
         #region General tracking settings
 
-        /// <summary>
-        /// Gets or sets a value indicating whether to use Geometric transformation or not
-        /// </summary>
         [Category("General tracking settings"), Description("Value indicating whether to use Geometric transformation or not.")]
-        public bool UseGeometricTransformation
-        {
-            get
-            {
-                return this.useGeometricTransformation;
-            }
-
-            set
-            {
-                if (value != this.useGeometricTransformation)
-                {
-                    this.useGeometricTransformation = value;
-                    this.OnPropertyChanged(this, nameof(UseGeometricTransformation));
-                }
-            }
-        }
-
+        public bool UseGeometricTransformation { get => useGeometricTransformation; set => SetProperty(ref useGeometricTransformation, value, nameof(UseGeometricTransformation)); }
         private bool useGeometricTransformation = false;
 
 
@@ -174,186 +155,51 @@ namespace OpenIris
 
         #region Pupil tracking settings
 
-        /// <summary>
-        /// Gets or sets the method to track the pupil
-        /// </summary>
         [Category("Pupil tracking settings"), Description("Method to track the pupil.")]
-        public PupilTracking.PupilTrackingMethod PupilTrackingMethod
-        {
-            get { return this.pupilTrackingMethod; }
-            set
-            {
-                if (value != this.pupilTrackingMethod)
-                {
-                    this.pupilTrackingMethod = value;
-                    this.OnPropertyChanged(this, nameof(PupilTrackingMethod));
-                }
-            }
-        }
+        public PupilTracking.PupilTrackingMethod PupilTrackingMethod { get => pupilTrackingMethod; set => SetProperty(ref pupilTrackingMethod, value, nameof(PupilTrackingMethod)); }
         private PupilTracking.PupilTrackingMethod pupilTrackingMethod = PupilTracking.PupilTrackingMethod.Blob;
         
-        /// <summary>
-        /// Gets or sets the method to track the position
-        /// </summary>
         [Category("Pupil tracking settings"), Description("Method to track the position.")]
-        public PositionTrackerEllipseFitting.PositionTrackingMethod PositionTrackingMethod
-        {
-            get { return this.positionTrackingMethod; }
-            set
-            {
-                if (value != this.positionTrackingMethod)
-                {
-                    this.positionTrackingMethod = value;
-                    this.OnPropertyChanged(this, nameof(PupilTrackingMethod));
-                }
-            }
-        }
+        public PositionTrackerEllipseFitting.PositionTrackingMethod PositionTrackingMethod { get => positionTrackingMethod; set => SetProperty(ref positionTrackingMethod, value, nameof(PositionTrackingMethod)); }
         private PositionTrackerEllipseFitting.PositionTrackingMethod positionTrackingMethod = PositionTrackerEllipseFitting.PositionTrackingMethod.EllipseFitting;
 
         #endregion Pupil tracking settings
 
         #region Corneal reflection tracking settings
 
-        /// <summary>
-        /// Gets or sets the method to track the CR
-        /// </summary>
         [Category("Corneal Reflection tracking settings"), Description("Method to track the CR.")]
-        public CornealReflectionTracking.CornealReflectionTrackingMethod CornealReflectionTrackingMethod
-        {
-            get { return this.cornealReflectionTrackingMethod; }
-            set
-            {
-                if (value != this.cornealReflectionTrackingMethod)
-                {
-                    this.cornealReflectionTrackingMethod = value;
-                    this.OnPropertyChanged(this, nameof(CornealReflectionTrackingMethod));
-                }
-            }
-        }
+        public CornealReflectionTracking.CornealReflectionTrackingMethod CornealReflectionTrackingMethod { get => cornealReflectionTrackingMethod; set => SetProperty(ref cornealReflectionTrackingMethod, value, nameof(CornealReflectionTrackingMethod)); }
         private CornealReflectionTracking.CornealReflectionTrackingMethod cornealReflectionTrackingMethod = CornealReflectionTracking.CornealReflectionTrackingMethod.Blob;
 
         #endregion corneal reflection tracking settings
 
         #region EyeLid tracking settings
 
-        /// <summary>
-        /// Gets or sets the method to track the eyelid
-        /// </summary>
         [Category("EyeLid tracking settings"), Description("Method to track the EyeLid.")]
-        public EyeLidTracking.EyeLidTrackingMethod EyelidTrackingMethod
-        {
-            get { return this.eyelidTrackingMethod; }
-            set
-            {
-                if (value != this.eyelidTrackingMethod)
-                {
-                    this.eyelidTrackingMethod = value;
-                    this.OnPropertyChanged(this, nameof(EyelidTrackingMethod));
-                }
-            }
-        }
+        public EyeLidTracking.EyeLidTrackingMethod EyelidTrackingMethod { get => eyelidTrackingMethod; set => SetProperty(ref eyelidTrackingMethod, value, nameof(EyelidTrackingMethod)); }
         private EyeLidTracking.EyeLidTrackingMethod eyelidTrackingMethod = EyeLidTracking.EyeLidTrackingMethod.HoughLines;
 
         #endregion EyeLid tracking settings
 
         #region Torsion tracking settings
 
-        /// <summary>
-        /// Gets or sets the method to measure torsion
-        /// </summary>
         [Category("Torsion settings"), Description("Should we calculate torsion.")]
-        public bool CalculateTorsion
-        {
-            get
-            {
-                return this.calculateTorsion;
-            }
-
-            set
-            {
-                if (value != this.calculateTorsion)
-                {
-                    this.calculateTorsion = value;
-                    this.OnPropertyChanged(this, nameof(CalculateTorsion));
-                }
-            }
-        }
-
+        public bool CalculateTorsion { get => calculateTorsion; set => SetProperty(ref calculateTorsion, value, nameof(CalculateTorsion)); }
         private bool calculateTorsion = true;
         
-        /// <summary>
-        /// Gets or sets the current radius of the left iris
-        /// </summary>
         [Category("Torsion settings"), Description("Current radius of the left iris.")]
-        public double IrisRadiusPixLeft
-        {
-            get
-            {
-                return this.irisRadiusPixLeft;
-            }
-
-            set
-            {
-                if (value != this.irisRadiusPixLeft & value <= this.MaxIrisRadPixd)
-                {
-                    this.irisRadiusPixLeft = value;
-                    this.OnPropertyChanged(this, nameof(IrisRadiusPixLeft));
-                }
-            }
-        }
-
+        public double IrisRadiusPixLeft { get => irisRadiusPixLeft; set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, this.MaxIrisRadPixd), nameof(IrisRadiusPixLeft)); }
         private double irisRadiusPixLeft = 80;
 
-        /// <summary>
-        /// Gets or sets the current radius of the right iris
-        /// </summary>
         [Category("Torsion settings"), Description("Current radius of the right iris.")]
-        public double IrisRadiusPixRight
-        {
-            get
-            {
-                return this.irisRadiusPixRight;
-            }
-
-            set
-            {
-                if (value != this.irisRadiusPixRight & value <= this.MaxIrisRadPixd)
-                {
-                    this.irisRadiusPixRight = value;
-                    this.OnPropertyChanged(this, nameof(IrisRadiusPixRight));
-                }
-            }
-        }
-
+        public double IrisRadiusPixRight { get => irisRadiusPixRight; set => SetProperty(ref irisRadiusPixRight, Math.Min(value, this.MaxIrisRadPixd), nameof(IrisRadiusPixRight)); }
         private double irisRadiusPixRight = 80;
 
-        /// <summary>
-        /// Gets or sets the maximum radius of the iris
-        /// </summary>
         [Browsable(false)]
         public int MaxIrisRadPixd { get { return (int)Math.Ceiling(this.maxIrisRadmm / this.GetMmPerPix()); } }
 
-        /// <summary>
-        /// Gets or sets the maximum radius of the iris
-        /// </summary>
         [Category("Torsion settings"), Description("Maximum radius of the iris in milimiters.")]
-        public double MaxIrisRadmm
-        {
-            get
-            {
-                return this.maxIrisRadmm;
-            }
-
-            set
-            {
-                if (value != this.maxIrisRadmm)
-                {
-                    this.maxIrisRadmm = value;
-                    this.OnPropertyChanged(this, nameof(this.MaxIrisRadmm));
-                }
-            }
-        }
-
+        public double MaxIrisRadmm { get => maxIrisRadmm; set => SetProperty(ref maxIrisRadmm, value, nameof(MaxIrisRadmm)); }
         private double maxIrisRadmm = 15;
 
         /// <summary>
@@ -363,19 +209,8 @@ namespace OpenIris
         /// Better make it a multiple of 4. A typical value is 40. 60 or 80 will give better results
         /// but may be too computationally costly.
         /// </summary>
-        [Category("Torsion settings"), Description("Number of pixels of the height (radial) of the iris image used for torsion calculations.")]
-        public int TorsionImageIrisWidth
-        {
-            get { return this.torsionImageIrisWidth; }
-            set
-            {
-                if (value != this.torsionImageIrisWidth)
-                {
-                    this.torsionImageIrisWidth = value;
-                    this.OnPropertyChanged(this, nameof(this.TorsionImageIrisWidth));
-                }
-            }
-        }
+        [Category("Torsion settings"), Description("Number of pixels of the height (radial) of the iris image used for torsion calculations. ")]
+        public int TorsionImageIrisWidth { get => torsionImageIrisWidth; set => SetProperty(ref torsionImageIrisWidth, value, nameof(TorsionImageIrisWidth)); }
         private int torsionImageIrisWidth = 80;
 
         /// <summary>
@@ -383,18 +218,7 @@ namespace OpenIris
         /// torsion resolution but also more time to process. Default is 1 pixel per degree.
         /// </summary>
         [Category("Torsion settings"), Description("Number of pixels of the width (angular) of the iris image used for torsion calculations.")]
-        public double TorsionAngularResolution
-        {
-            get { return this.torsionAngularResolution; }
-            set
-            {
-                if (value != this.torsionAngularResolution)
-                {
-                    this.torsionAngularResolution = value;
-                    this.OnPropertyChanged(this, nameof(this.TorsionAngularResolution));
-                }
-            }
-        }
+        public double TorsionAngularResolution { get => torsionAngularResolution; set => SetProperty(ref torsionAngularResolution, value, nameof(TorsionAngularResolution)); }
         private double torsionAngularResolution = 1;
 
         /// <summary>
@@ -403,18 +227,7 @@ namespace OpenIris
         /// A value of 50 seems to work well and gives a subpixel resolution will be 0.02 degrees.
         /// </summary>
         [Category("Torsion settings"), Description("Interpolation rate for the calculation of the torsion angle from the crosscorrelation peak.")]
-        public int TorsionInterpolation
-        {
-            get { return this.torsionInterpolation; }
-            set
-            {
-                if (value != this.torsionInterpolation)
-                {
-                    this.torsionInterpolation = value;
-                    this.OnPropertyChanged(this, nameof(this.TorsionInterpolation));
-                }
-            }
-        }
+        public int TorsionInterpolation { get => torsionInterpolation; set => SetProperty(ref torsionInterpolation, value, nameof(TorsionInterpolation)); }
         private int torsionInterpolation = 50;
 
 
@@ -422,19 +235,7 @@ namespace OpenIris
         /// Size of the highpass filter for the iris pattern in degrees.
         /// </summary>
         [Category("Torsion settings"), Description("Size of the highpass filter for the iris pattern in degrees. Has to be evn and less than 30.")]
-        public int TorsionSobelFilterSize
-        {
-            get { return this.torsionSobelFilterSize; }
-            set
-            {
-                var newValue = (int)Math.Min(2 * Math.Round(value / 2.0), 30);
-                if (newValue != this.torsionSobelFilterSize)
-                {
-                    this.torsionSobelFilterSize = newValue;
-                    this.OnPropertyChanged(this, nameof(this.TorsionSobelFilterSize));
-                }
-            }
-        }
+        public int TorsionSobelFilterSize { get => torsionSobelFilterSize; set => SetProperty(ref torsionSobelFilterSize, value, nameof(TorsionSobelFilterSize)); }
         private int torsionSobelFilterSize = 4;
 
 
@@ -442,23 +243,7 @@ namespace OpenIris
         /// Gets or sets the maximum torsion in one direction (degrees)
         /// </summary>
         [Category("Torsion settings"), Description("Maximum torsion in one direction (degrees).")]
-        public double MaxTorsion
-        {
-            get
-            {
-                return this.maxTorsion;
-            }
-
-            set
-            {
-                if (value != this.maxTorsion)
-                {
-                    this.maxTorsion = value;
-                    this.OnPropertyChanged(this, nameof(this.MaxTorsion));
-                }
-            }
-        }
-
+        public double MaxTorsion { get => maxTorsion; set => SetProperty(ref maxTorsion, value, nameof(MaxTorsion)); }
         private double maxTorsion = 25;
 
         #endregion Torsion tracking settings

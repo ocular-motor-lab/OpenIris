@@ -34,8 +34,8 @@ namespace OpenIris
     public class CalibrationSession : IDisposable
     {
         private Eye whichEyeToCalibrate;
+        private ICalibrationPipeline calibrationPipeline;
         private BlockingCollection<EyeTrackerImagesAndData>? inputBuffer;
-        private ICalibrationPipeline? calibrationPipeline;
 
         /// <summary>
         /// User interface of the calibration.
@@ -49,25 +49,20 @@ namespace OpenIris
         /// <param name="calibrationPipelineName">Name of the pipeline to use for calibration.</param>
         /// <returns>The calibration parameters.</returns>
         /// <exception cref="InvalidOperationException">If the pipeline name does not exist.</exception>
-        internal static CalibrationSession Start(Eye whichEyeToCalibrate, string calibrationPipelineName)
+        internal CalibrationSession(Eye whichEyeToCalibrate, string calibrationPipelineName)
         {
-            return new CalibrationSession
-            {
-                calibrationPipeline = EyeTrackerPluginManager.CalibrationPipelineFactory?.Create(calibrationPipelineName)
-                    ?? throw new InvalidOperationException("No factory"),
+            calibrationPipeline = EyeTrackerPluginManager.CalibrationPipelineFactory?.Create(calibrationPipelineName)
+                    ?? throw new InvalidOperationException("No factory");
 
-                whichEyeToCalibrate = whichEyeToCalibrate
-            };
+            this.whichEyeToCalibrate = whichEyeToCalibrate;
         }
 
         /// <summary>
         /// Calibrates the physical model of the eyeball and its relationship to the camera.
         /// </summary>
         /// <returns>The new calibration parametrers. Null if calibration was cancelled.</returns>
-        internal async Task<CalibrationParameters?> CalibrateEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings)
+        internal async Task<CalibrationParameters?> StartCalibratingEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings)
         {
-            if (calibrationPipeline is null) throw new InvalidOperationException("No calibration pipeline ready.");
-
             var eyeModels = new EyeCollection<EyePhysicalModel>(EyePhysicalModel.EmptyModel, EyePhysicalModel.EmptyModel);
             var hasModel = new EyeCollection<bool>(whichEyeToCalibrate == Eye.Right, whichEyeToCalibrate == Eye.Left);
 
@@ -134,17 +129,14 @@ namespace OpenIris
         /// Calibrates the zero eye position and gets a reference image for torsion.
         /// </summary>
         /// <returns>The new calibration parametrers. Null if calibration was cancelled.</returns>
-        internal async Task<CalibrationParameters> CalibrateZeroReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings settings)
+        internal async Task<CalibrationParameters> StartCalibratingZeroReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings settings)
         {
-            if (calibrationPipeline is null) throw new InvalidOperationException("No calibration pipeline ready.");
-            if (currentCalibration is null) currentCalibration = CalibrationParameters.Default;
-
-            var eyeReferences = new EyeCollection<ImageEye>(null, null);
+            var eyeReferences = new EyeCollection<ImageEye?>(null, null);
             var hasReference = new EyeCollection<bool>(whichEyeToCalibrate == Eye.Right, whichEyeToCalibrate == Eye.Left);
 
-            var tempCalibration = currentCalibration.Copy();
             // Start with the current calibration and clear the References
             // Make a copy so we don't mess with the processing pipelines
+            var tempCalibration = currentCalibration.Copy();
             tempCalibration.EyeCalibrationParameters[Eye.Left].SetReference(null);
             tempCalibration.EyeCalibrationParameters[Eye.Right].SetReference(null);
             tempCalibration.TrackingSettings = settings;

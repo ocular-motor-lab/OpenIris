@@ -147,7 +147,7 @@
     <Compile Include="ImageGrabbing\EyeTrackerImageGrabber.cs" />
     <Compile Include="ImageProcessing\EyeTrackerProcessor.cs" />
     <Compile Include="RecordingSession.cs" />
-    <Compile Include="EyeTrackerPluginManager.cs" />
+    <Compile Include="Util\EyeTrackerPluginManager.cs" />
     <Compile Include="EyeTrackerData\CalibratedEyeData.cs" />
     <Compile Include="EyeTrackerData\EyeTrackerData.cs" />
     <Compile Include="EyeTrackerData\HeadData.cs" />

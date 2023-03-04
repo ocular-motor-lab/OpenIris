@@ -110,7 +110,7 @@
     <Compile Include="EyeTrackerData\CornealReflectionData.cs" />
     <Compile Include="EyeTrackingSystems\EyeTrackingSystemDualWebCam.cs" />
     <Compile Include="EyeTrackingSystems\EyeTrackingSystemSingleWebCam.cs" />
-    <Compile Include="EyeTrackingSystems\EyeTrackingSystem.cs" />
+    <Compile Include="EyeTrackingSystems\EyeTrackingSystemBase.cs" />
     <Compile Include="ImageGrabbing\CameraEye.cs" />
     <Compile Include="ImageProcessing\CornealReflectionTracking.cs" />
     <Compile Include="ImageProcessing\EyeLidTracking.cs" />

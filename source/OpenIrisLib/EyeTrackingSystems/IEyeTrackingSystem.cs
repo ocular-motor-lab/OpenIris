@@ -14,22 +14,28 @@ namespace OpenIris
     using System.Runtime.Serialization;
     using System.Windows.Forms;
 
-    public interface IEyeTrackingSystem
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IEyeTrackingSystem: IDisposable
     {
         string Name { get; }
-        Form OpenEyeTrackingSystemUI { get; }
         EyeTrackingSystemSettings Settings { get; }
 
         EyeCollection<CameraEye> CreateCameras();
+        EyeCollection<VideoEye> CreateVideos(EyeCollection<string> fileNames);
+
         IHeadDataSource CreateHeadDataSourceWithCameras();
         IHeadDataSource CreateHeadDataSourceWithVideos();
-        EyeCollection<VideoEye> CreateVideos(EyeCollection<string> fileNames);
-        void Dispose();
-        ToolStripMenuItem[] GetToolStripMenuItems();
-        EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages);
-        EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images);
+
         EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images);
         EyeCollection<ImageEye> PreProcessImagesFromVideos(EyeCollection<ImageEye> images);
+
+        EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages);
+
+
+        Form OpenEyeTrackingSystemUI { get; }
+        ToolStripMenuItem[] GetToolStripMenuItems();
     }
 
 

@@ -13,8 +13,8 @@ namespace OpenIris
     /// <summary>
     /// Micromedical system.
     /// </summary>
-    [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("EyeSeeCam")]
-    public class EyeTrackingSystemEyeSeeCam : EyeTrackingSystem
+    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("EyeSeeCam")]
+    public class EyeTrackingSystemEyeSeeCam : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 

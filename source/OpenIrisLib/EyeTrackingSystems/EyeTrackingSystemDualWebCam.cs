@@ -15,8 +15,8 @@ namespace OpenIris
     /// <summary>
     /// Generic system with any two cameras.
     /// </summary>
-    [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Dual webcam", typeof(EyeTrackingSystemSettingsDualWebcam))]
-    public class EyeTrackingSystemDualWebCam : EyeTrackingSystem
+    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Dual webcam", typeof(EyeTrackingSystemSettingsDualWebcam))]
+    public class EyeTrackingSystemDualWebCam : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 

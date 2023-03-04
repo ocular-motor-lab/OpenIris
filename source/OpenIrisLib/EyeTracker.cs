@@ -83,7 +83,7 @@ namespace OpenIris
         /// <summary>
         /// Gets the Eye tracker system corresponding with the current hardware set up.
         /// </summary>
-        public EyeTrackingSystem? EyeTrackingSystem { get; private set; }
+        public IEyeTrackingSystem? EyeTrackingSystem { get; private set; }
 
         /// <summary>
         /// Gets the image grabber. In charge of getting images from cameras or videos.
@@ -206,7 +206,7 @@ namespace OpenIris
                 }
                 else
                 {
-                    EyeTrackingSystem = EyeTrackingSystem.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
+                    EyeTrackingSystem = EyeTrackingSystemBase.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
                     ImageProcessor = EyeTrackerProcessor.CreateNewForRealTime(Settings.BufferSize, Settings.MaxNumberOfProcessingThreads);
                     ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
@@ -220,7 +220,10 @@ namespace OpenIris
 
                     // Prepare the images for processing depending on the system. For instance flipping,
                     // cropping, splitting, increasing contrast, whatever ...
-                    grabbedImages = EyeTrackingSystem!.PreProcessImages(grabbedImages);
+                    grabbedImages = (EyeTrackingSystem is VideoPlayer)
+                        ? EyeTrackingSystem!.PreProcessImagesFromVideos(grabbedImages)
+                        : EyeTrackingSystem!.PreProcessImagesFromCameras(grabbedImages);
+
                     RecordingSession?.TryRecordImages(grabbedImages);
                     ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
                 };

@@ -136,8 +136,6 @@ namespace SpinnakerInterface
                 rawImage?.Release();
                 rawImage?.Dispose();
             }
-
-
         }
     }
 }

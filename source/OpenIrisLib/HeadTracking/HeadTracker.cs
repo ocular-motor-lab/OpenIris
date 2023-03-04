@@ -43,13 +43,13 @@ namespace OpenIris
                 " Buffer:" + headDataBuffer?.Count ?? 0 + "]";
 
 
-        public async static Task<HeadTracker?> CreateNewforOffLine(EyeTrackingSystem eyeTrackingSystem)
+        public async static Task<HeadTracker?> CreateNewforOffLine(IEyeTrackingSystem eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithVideos);
 
             return (headDataSource is null) ? null : new HeadTracker(headDataSource);
         }
-        public async static Task<HeadTracker?> CreateNewForRealTime(EyeTrackingSystem eyeTrackingSystem)
+        public async static Task<HeadTracker?> CreateNewForRealTime(IEyeTrackingSystem eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithCameras);
 

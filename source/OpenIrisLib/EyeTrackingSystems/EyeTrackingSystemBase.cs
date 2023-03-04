@@ -12,16 +12,16 @@ namespace OpenIris
     using OpenIris.ImageGrabbing;
 
     /// <summary>
-    /// Interface for all eye tracking systems.
+    /// Base class for all eye tracking systems.
     /// The eye tracking system should not hold to any resources. It will not be diposed appropriately. 
     /// It must just create cameras, videos and/or head trackers and pass ownership of the objects. 
     /// </summary>
-    public abstract class EyeTrackingSystem : IDisposable, IEyeTrackingSystem
+    public abstract class EyeTrackingSystemBase : IDisposable, IEyeTrackingSystem
     {
         /// <summary>
         /// Initializes an instance.
         /// </summary>
-        public EyeTrackingSystem()
+        public EyeTrackingSystemBase()
         {
             Name = "";
             Settings = new EyeTrackingSystemSettings();
@@ -33,7 +33,7 @@ namespace OpenIris
         /// <param name="settings"></param>
         /// <param name="name">Name of the system.</param>
         /// <returns>The system.</returns>
-        public static EyeTrackingSystem Create(string name, EyeTrackingSystemSettings? settings)
+        public static EyeTrackingSystemBase Create(string name, EyeTrackingSystemSettings? settings)
         {
             var system = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.Create(name)
                 ?? throw new OpenIrisException("Bad system");
@@ -82,20 +82,6 @@ namespace OpenIris
         {
             Name = name;
             Settings = settings;
-        }
-
-        /// <summary>
-        /// Preprocess the images just grabbed. Depending if they are videos or cameras.
-        /// </summary>
-        /// <param name="images"></param>
-        /// <returns></returns>
-        public EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?> images)
-        {
-            var newimages = (this is VideoPlayer)
-                ? PreProcessImagesFromVideos(images)
-                : PreProcessImagesFromCameras(images)
-                ?? throw new OpenIrisException("images");
-            return newimages;
         }
 
         /// <summary>

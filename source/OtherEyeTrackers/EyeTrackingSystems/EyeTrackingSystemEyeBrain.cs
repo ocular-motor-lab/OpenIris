@@ -13,8 +13,8 @@ namespace OpenIris
     /// <summary>
     /// EyeBrain system.
     /// </summary>
-    [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("EyeBrain")]
-    public class EyeTrackingSystemEyeBrain : EyeTrackingSystem
+    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("EyeBrain")]
+    public class EyeTrackingSystemEyeBrain : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case just one single camera.

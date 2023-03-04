@@ -17,12 +17,12 @@ namespace OpenIris
     /// <summary>
     /// Class that handles reading frames from a video file.
     /// </summary>
-    public sealed class VideoPlayer : EyeTrackingSystem
+    public sealed class VideoPlayer : EyeTrackingSystemBase
     {
         private enum VideoPlayerState { Idle, Playing, Paused, Finished, Stopping }
         private VideoPlayerState state;
 
-        private readonly EyeTrackingSystem eyeTrackingSystem;
+        private readonly EyeTrackingSystemBase eyeTrackingSystem;
         private readonly EyeTrackingSystemSettings eyeTrackingSystemSettings;
         private Timer? frameRateTimer;
         private ulong lastFrameNumber;
@@ -60,7 +60,7 @@ namespace OpenIris
             if (options is null) throw new ArgumentNullException(nameof(options));
 
             var videoPlayer = new VideoPlayer(
-                EyeTrackingSystem.Create(options.EyeTrackingSystem, null),
+                EyeTrackingSystemBase.Create(options.EyeTrackingSystem, null),
                 options.VideoFileNames,
                 (options as ProcessVideoOptions)?.CustomRange ?? new Range(),
                 false);
@@ -81,7 +81,7 @@ namespace OpenIris
         /// controlled by the imagegrabber.
         /// </param>
         /// <returns>New ImageGrabberVideoFile object.</returns>
-        private VideoPlayer(EyeTrackingSystem system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
+        private VideoPlayer(EyeTrackingSystemBase system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
         {
             eyeTrackingSystemSettings = (EyeTrackingSystemSettings?)EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(system.Name)
                 ?? throw new InvalidOperationException("No EyeTrackingsyStemFactory");

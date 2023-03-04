@@ -53,7 +53,7 @@ namespace OpenIris
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
 
-            return new EyeTrackerImageGrabber(sources, bufferSize, ((EyeTrackingSystem)videoPlayer).Settings.Eye);
+            return new EyeTrackerImageGrabber(sources, bufferSize, ((EyeTrackingSystemBase)videoPlayer).Settings.Eye);
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace OpenIris
         /// <param name="bufferSize"></param>
         /// <returns></returns>
         /// <exception cref="OpenIrisException"></exception>
-        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(EyeTrackingSystem eyeTrackingSystem, int bufferSize = 100)
+        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(IEyeTrackingSystem eyeTrackingSystem, int bufferSize = 100)
         {
                var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
                 ?? throw new OpenIrisException("No cameras started.");

@@ -14,8 +14,8 @@ namespace OpenIris
     /// <summary>
     /// Simulator of eye tracker from virtual eyeball.
     /// </summary>
-    [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("SimulationFakeEye")]
-    public class EyeTrackingSystemSimulationFakeEye : EyeTrackingSystem
+    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("SimulationFakeEye")]
+    public class EyeTrackingSystemSimulationFakeEye : EyeTrackingSystemBase
     {
         private OpenIris.EyeTrackingSystems.FakeEyeControlUI UIform = new OpenIris.EyeTrackingSystems.FakeEyeControlUI();
 

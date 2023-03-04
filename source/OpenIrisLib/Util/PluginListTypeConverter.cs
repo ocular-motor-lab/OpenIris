@@ -28,7 +28,7 @@ namespace OpenIris
         {
             string[]? classesAvailable = null;
 
-            if (typeof(T) == typeof(EyeTrackingSystem))
+            if (typeof(T) == typeof(EyeTrackingSystemBase))
             {
                 classesAvailable = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
             }

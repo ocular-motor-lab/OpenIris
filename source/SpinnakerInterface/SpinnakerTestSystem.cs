@@ -12,9 +12,9 @@ using System.Windows.Forms;
 
 namespace SpinnakerInterface
 {
-    [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Test", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Test", typeof(EyeTrackingSystemSettings))]
 
-    class SpinnakerTestSystem : EyeTrackingSystem
+    class SpinnakerTestSystem : EyeTrackingSystemBase
     {
         public override EyeCollection<CameraEye> CreateCameras()
         {

@@ -47,7 +47,7 @@ namespace OpenIris
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
         [NeedsRestarting]
-        [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingSystem>))]
+        [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingSystemBase>))]
         public string EyeTrackerSystem
         {
             get { return eyeTrackerSystem; }

@@ -45,7 +45,7 @@ namespace OpenIris
                     catalog.Catalogs.Add(pluginCatalog);
                 }
 
-                EyeTrackingsyStemFactory = new EyeTrackerPluginLoader<EyeTrackingSystem, IEyeTrackingSystemMetadata>(catalog);
+                EyeTrackingsyStemFactory = new EyeTrackerPluginLoader<IEyeTrackingSystem, IEyeTrackingSystemMetadata>(catalog);
                 CalibrationPipelineFactory = new EyeTrackerPluginLoader<ICalibrationPipeline, IEyeTrackerPluginMetadata>(catalog);
                 EyeTrackingPipelineFactory = new EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>(catalog);
 
@@ -68,7 +68,7 @@ namespace OpenIris
         /// <summary>
         /// Factory for eye tracking systems.
         /// </summary>
-        public static EyeTrackerPluginLoader<EyeTrackingSystem, IEyeTrackingSystemMetadata>? EyeTrackingsyStemFactory { get; private set; }
+        public static EyeTrackerPluginLoader<IEyeTrackingSystem, IEyeTrackingSystemMetadata>? EyeTrackingsyStemFactory { get; private set; }
 
         /// <summary>
         /// Factory for eye tracking calibration methods.

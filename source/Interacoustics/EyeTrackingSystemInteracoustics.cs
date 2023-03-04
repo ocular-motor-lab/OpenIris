@@ -25,8 +25,8 @@ namespace OpenIris
     /// <summary>
     /// Micromedical eye tracking system system.
     /// </summary>
-    [Export(typeof(EyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Interacoustics", typeof(EyeTrackingSystemSettingsInteracoustics))]
-    public class EyeTrackingSystemInteracoustics : EyeTrackingSystem
+    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Interacoustics", typeof(EyeTrackingSystemSettingsInteracoustics))]
+    public class EyeTrackingSystemInteracoustics : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 

@@ -22,7 +22,7 @@ namespace OpenIris
         private enum VideoPlayerState { Idle, Playing, Paused, Finished, Stopping }
         private VideoPlayerState state;
 
-        private readonly EyeTrackingSystemBase eyeTrackingSystem;
+        private readonly IEyeTrackingSystem eyeTrackingSystem;
         private readonly EyeTrackingSystemSettings eyeTrackingSystemSettings;
         private Timer? frameRateTimer;
         private ulong lastFrameNumber;
@@ -81,13 +81,14 @@ namespace OpenIris
         /// controlled by the imagegrabber.
         /// </param>
         /// <returns>New ImageGrabberVideoFile object.</returns>
-        private VideoPlayer(EyeTrackingSystemBase system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
+        private VideoPlayer(IEyeTrackingSystem system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
         {
             eyeTrackingSystemSettings = (EyeTrackingSystemSettings?)EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(system.Name)
                 ?? throw new InvalidOperationException("No EyeTrackingsyStemFactory");
 
             eyeTrackingSystem = system;
-            Init(eyeTrackingSystem.Name, eyeTrackingSystemSettings);
+            Name = eyeTrackingSystem.Name;
+            Settings = eyeTrackingSystemSettings;
 
             // Check that all the video files exist
             foreach (var file in fileNames.Where(f => f != null && !File.Exists(f)))

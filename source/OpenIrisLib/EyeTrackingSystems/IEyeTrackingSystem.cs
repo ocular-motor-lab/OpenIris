@@ -19,8 +19,8 @@ namespace OpenIris
     /// </summary>
     public interface IEyeTrackingSystem: IDisposable
     {
-        string Name { get; }
-        EyeTrackingSystemSettings Settings { get; }
+        string Name { get; set; }
+        EyeTrackingSystemSettings Settings { get; set; }
 
         EyeCollection<CameraEye> CreateCameras();
         EyeCollection<VideoEye> CreateVideos(EyeCollection<string> fileNames);

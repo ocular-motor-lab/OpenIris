@@ -33,13 +33,16 @@ namespace OpenIris
         /// <param name="settings"></param>
         /// <param name="name">Name of the system.</param>
         /// <returns>The system.</returns>
-        public static EyeTrackingSystemBase Create(string name, EyeTrackingSystemSettings? settings)
+        public static IEyeTrackingSystem Create(string name, EyeTrackingSystemSettings? settings)
         {
             var system = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.Create(name)
                 ?? throw new OpenIrisException("Bad system");
             settings ??= EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(name) as EyeTrackingSystemSettings
                 ?? throw new OpenIrisException("Bad settings");
-            system.Init(name, settings);
+
+            system.Name = name;
+            system.Settings = settings;
+
             return system;
         }
 
@@ -66,23 +69,12 @@ namespace OpenIris
         /// <summary>
         /// Gets the name of the eye tracker.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Settings of the system.
         /// </summary>
-        public EyeTrackingSystemSettings Settings { get; private set; }
-
-        /// <summary>
-        /// Initializes the object.
-        /// </summary>
-        /// <param name="settings"></param>
-        /// <param name="name"></param>
-        protected void Init(string name, EyeTrackingSystemSettings settings)
-        {
-            Name = name;
-            Settings = settings;
-        }
+        public EyeTrackingSystemSettings Settings { get; set; }
 
         /// <summary>
         /// Gets the cameras.

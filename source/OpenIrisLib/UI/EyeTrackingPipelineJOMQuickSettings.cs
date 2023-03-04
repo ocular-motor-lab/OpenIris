@@ -190,6 +190,8 @@ namespace OpenIris.UI
         /// <param name="dataAndImages"></param>
         public override void UpdatePipelineEyeImage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
         {
+            if (dataAndImages is null) return;
+
             var image = dataAndImages.Images[WhichEye];
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
             var eyeCalibration = dataAndImages.Calibration.EyeCalibrationParameters[WhichEye];

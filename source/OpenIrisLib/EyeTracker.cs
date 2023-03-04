@@ -200,14 +200,14 @@ namespace OpenIris
                 if (PlayingVideo)
                 {
                     EyeTrackingSystem = VideoPlayer!;
-                    ImageProcessor = EyeTrackerProcessor.CreateNewForOffline(Settings.MaxNumberOfProcessingThreads);
+                    ImageProcessor = new EyeTrackerProcessor( EyeTrackerProcessor.Mode.Offline, Settings.MaxNumberOfProcessingThreads);
                     ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(VideoPlayer!, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewforOffLine(EyeTrackingSystem);
                 }
                 else
                 {
                     EyeTrackingSystem = EyeTrackingSystemBase.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
-                    ImageProcessor = EyeTrackerProcessor.CreateNewForRealTime(Settings.BufferSize, Settings.MaxNumberOfProcessingThreads);
+                    ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
                     ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
                 }
@@ -297,8 +297,8 @@ namespace OpenIris
 
         private void UpdateStats(EyeTrackerImagesAndData processedImages)
         {
-            var deltaLeftTime = processedImages.Data.TimeProcessed - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
-            var deltaRightTime = processedImages.Data.TimeProcessed - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
+            var deltaLeftTime = processedImages.Data?.TimeProcessed - processedImages.Images[Eye.Left]?.TimeStamp.TimeGrabbed ?? double.NaN;
+            var deltaRightTime = processedImages.Data?.TimeProcessed - processedImages.Images[Eye.Right]?.TimeStamp.TimeGrabbed ?? double.NaN;
 
             var newTime = (deltaLeftTime, deltaRightTime) switch
             {

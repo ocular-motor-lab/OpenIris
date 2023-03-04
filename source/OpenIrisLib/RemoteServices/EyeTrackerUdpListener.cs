@@ -26,6 +26,8 @@ namespace OpenIris
         {
             task = Task.Run(() =>
             {
+                System.Threading.Thread.CurrentThread.Name = "EyeTracker:UDP server";
+
                 try
                 {
                     // https://stackoverflow.com/questions/20038943/simple-udp-example-to-send-and-receive-data-from-same-socket

@@ -178,9 +178,9 @@ namespace OpenIris
             // The two frames must also have been captured within a small time period to make sure we are not looking past
             // one strobe cycle.
             //
-            HeadDataPacket syncPacket = null;
+            HeadDataPacket? syncPacket = null;
             uint strobePattern = 1;
-            ImageEye syncImage = null;
+            ImageEye? syncImage = null;
             bool cancel = false;
             double timePacket = double.MaxValue;
             double timeImage = 0;

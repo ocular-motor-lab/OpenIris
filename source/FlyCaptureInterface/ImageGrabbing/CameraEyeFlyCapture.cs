@@ -5,7 +5,6 @@
 //-----------------------------------------------------------------------
 namespace OpenIris.ImageGrabbing
 {
-
     using FlyCapture2Managed;
     using System;
     using System.Collections.Generic;

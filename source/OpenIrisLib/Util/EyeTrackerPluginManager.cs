@@ -22,7 +22,7 @@ namespace OpenIris
     /// http://stackoverflow.com/questions/11488297/how-do-you-use-exportfactoryt
     /// </summary>
     public static class EyeTrackerPluginManager
-    {        
+    {
         /// <summary>
         /// Init the singleton plugin manager.
         /// </summary>
@@ -54,7 +54,7 @@ namespace OpenIris
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
                 ExtraSettingsTypesForXML.AddRange(CalibrationPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new PluginManagerException("ERROR loading plugins", ex);
             }
@@ -383,6 +383,45 @@ namespace OpenIris
             : base(serializationInfo, streamingContext)
         {
         }
+#pragma warning disable CA1812 // Class never instantiated. Because it is used in reflection
 
+    }
+
+    /// <summary>
+    /// Class that will appear in a property grid as a drop down list with all the classes that
+    /// implemenent a given interface. Useful for plugins. So all the plugins available will show up
+    /// and the user can select. http://stackoverflow.com/questions/14593364/propertygrid-control-and-drop-down-lists
+    /// </summary>
+    /// <typeparam name="T">Interface that the list elements must implement.</typeparam>
+    internal class PluginListTypeConverter<T> : TypeConverter
+        where T : class
+    {
+        public override bool GetStandardValuesSupported(ITypeDescriptorContext context) => true;
+
+        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+        {
+            string[]? classesAvailable = null;
+
+            if (typeof(T) == typeof(EyeTrackingSystemBase))
+            {
+                classesAvailable = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
+            }
+
+            if (typeof(T) == typeof(CalibrationSession))
+            {
+                classesAvailable = EyeTrackerPluginManager.CalibrationPipelineFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
+            }
+
+            if (typeof(T) == typeof(IEyeTrackingPipeline))
+            {
+                classesAvailable = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
+            }
+
+            if (classesAvailable is null) throw new InvalidOperationException("Wrong type");
+
+            Array.Sort(classesAvailable);
+
+            return new StandardValuesCollection(classesAvailable);
+        }
     }
 }

@@ -10,7 +10,6 @@ namespace OpenIris
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -28,7 +27,23 @@ namespace OpenIris
     /// </remarks>
     public sealed class EyeTrackerProcessor
     {
-        private readonly bool allowDroppedFrames;
+        /// <summary>
+        /// Possile modes of the processor.
+        /// </summary>
+        public enum Mode
+        {
+            /// <summary>
+            /// Process in real time. May need to drop frames.
+            /// </summary>
+            RealTime,
+
+            /// <summary>
+            /// Process offline. Never drop frames.
+            /// </summary>
+            Offline,
+        }
+
+        private readonly Mode mode;
         private readonly int numberOfThreads;
         private readonly int inputBufferSize;
         private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
@@ -36,32 +51,23 @@ namespace OpenIris
         private int outputNextExpectedNumber = 0;
 
         private bool started;
-
-        public static EyeTrackerProcessor CreateNewForRealTime(int bufferSize, int maxNumberOfThreads)
-        {
-            return new EyeTrackerProcessor(true, bufferSize, maxNumberOfThreads);
-
-        }
-        public static EyeTrackerProcessor CreateNewForOffline(int maxNumberOfThreads)
-        {
-            return new EyeTrackerProcessor(true, 1, maxNumberOfThreads);
-        }
+        private bool stopped;
 
         /// <summary>
         /// Initializes an instance of the eyeTrackerProcessor class.
         /// </summary>
-        /// <param name="allowDroppedFrames">
+        /// <param name="processingMode">
         /// Value indicating weather frames can be dropped. This means the call to Process images
         /// will be blocking if the buffer is fulll.
         /// </param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="maxNumberOfThreads">Maximum number of threads to run.</param>
-        private EyeTrackerProcessor(bool allowDroppedFrames, int bufferSize, int maxNumberOfThreads)
+        public EyeTrackerProcessor(Mode processingMode, int maxNumberOfThreads = 1, int bufferSize = 1)
         {
-            inputBufferSize = allowDroppedFrames ? bufferSize : 1;
-            this.allowDroppedFrames = allowDroppedFrames;
+            inputBufferSize = bufferSize;
+            mode = processingMode;
 
-            numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, Environment.ProcessorCount - 1));
+            numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, (int)Math.Round(Environment.ProcessorCount / 2.0 - 1)));
 
             PipelineUI = new EyeCollection<EyeTrackingPipelineUIControl?>(null, null);
         }
@@ -119,25 +125,27 @@ namespace OpenIris
             {
                 // Initialize buffers and threads. One to process the output queue and several to process the
                 // images.
-                inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(inputBufferSize);
-                outputWaitingList = new ConcurrentDictionary<long, EyeTrackerImagesAndData>();
-
-                for (int i = 0; i < numberOfThreads; i++)
+                using (inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(inputBufferSize))
                 {
-                    var lr = new LeftRightProcessor();
-                    processingTasks.Add(lr.Start(ProcessLoop, inputBuffer).ContinueWith(errorHandler.HandleError));
+                    outputWaitingList = new ConcurrentDictionary<long, EyeTrackerImagesAndData>();
+
+                    for (int i = 0; i < numberOfThreads; i++)
+                    {
+                        processingTasks.Add(Task.Factory.StartNew(ProcessLoop,
+                            TaskCreationOptions.LongRunning)
+                            .ContinueWith(errorHandler.HandleError));
+                    }
+
+                    // Wait for the threads to finish.
+                    await Task.WhenAll(processingTasks);
+
+                    errorHandler.CheckForErrors();
                 }
-
-                // Wait for the threads to finish.
-                await Task.WhenAll(processingTasks);
-
-                errorHandler.CheckForErrors();
             }
             finally
             {
                 processingTasks?.ForEach(t => t?.Dispose());
 
-                inputBuffer?.Dispose();
                 inputBuffer = null;
                 outputWaitingList = null;
             }
@@ -148,6 +156,7 @@ namespace OpenIris
         /// </summary>
         public void Stop()
         {
+            stopped = true;
             // Do not add more items to the input queue. Marking the queue with complete adding will
             // cause that the processingThreads threads to finish when the input queue is empty.
             inputBuffer?.CompleteAdding();
@@ -176,13 +185,14 @@ namespace OpenIris
 
             var result = true;
 
-            if (allowDroppedFrames)
+            switch (mode)
             {
-                result = inputBuffer.TryAdd((imagesAndData, NumberFramesProcessed));
-            }
-            else
-            {
-                inputBuffer.Add((imagesAndData, NumberFramesProcessed));
+                case Mode.RealTime:
+                    result = inputBuffer.TryAdd((imagesAndData, NumberFramesProcessed));
+                    break;
+                case Mode.Offline:
+                    inputBuffer.Add((imagesAndData, NumberFramesProcessed));
+                    break;
             }
 
             if (result) NumberFramesProcessed++;
@@ -195,156 +205,122 @@ namespace OpenIris
         /// the buffer. Each image of left and right eye are processed themselves in different
         /// threads (Tasks).
         /// </summary>
-        private void ProcessLoop(LeftRightProcessor leftRightProcessor)
+        private async Task ProcessLoop()
         {
             Thread.CurrentThread.Name = "EyeTracker:ProcessLoop";
 
             if (inputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
             if (outputWaitingList is null) throw new InvalidOperationException("Buffer not ready.");
 
-            // Keep processing images until the buffer is marked as complete and empty
-            using var cancellation = new CancellationTokenSource();
-            foreach (var (imagesAndData, orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
-            {
-                leftRightProcessor.ProcessImages(imagesAndData);
-
-                if (numberOfThreads == 1 | orderNumber == outputNextExpectedNumber)
-                {
-                    // if only one thread no need to use the output queue
-                    // because the frames are not going to be out of order
-                    // Same is this is the next frame we were expecting.
-                    ImagesProcessed?.Invoke(this,imagesAndData);
-                    outputNextExpectedNumber++;
-                }
-                else
-                {
-                    // Add the processed images and send to the output queue for reordering
-                    outputWaitingList.TryAdd(orderNumber, imagesAndData);
-
-                    // Go thru the waiting list to look for next expected order number. If the image we
-                    // are waiting for is in the waiting list. Remove the item and raise an event
-                    // notifying that a new image was processed
-                    while (outputWaitingList.TryRemove(outputNextExpectedNumber, out EyeTrackerImagesAndData images))
-                    {
-                        ImagesProcessed?.Invoke(this,images);
-                        outputNextExpectedNumber++;
-                    }
-                }
-
-                UpdatePipelineUI(leftRightProcessor.pipeline);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="pipeline"></param>
-        private void UpdatePipelineUI(EyeCollection<IEyeTrackingPipeline?> pipeline)
-        {
-            if (PipelineUI[Eye.Left]?.PipelineName != pipeline[Eye.Left]?.Name |
-                PipelineUI[Eye.Right]?.PipelineName != pipeline[Eye.Right]?.Name)
-            {
-                var pipelineUILeft = pipeline[Eye.Left]?.GetPipelineUI(Eye.Left);
-                var pipelineUIRight = pipeline[Eye.Right]?.GetPipelineUI(Eye.Right);
-
-                if (pipelineUILeft != null) pipelineUILeft.PipelineName = pipeline[Eye.Left]?.Name;
-                if (pipelineUIRight != null) pipelineUIRight.PipelineName = pipeline[Eye.Right]?.Name;
-
-                PipelineUI = new EyeCollection<EyeTrackingPipelineUIControl?>(pipelineUILeft, pipelineUIRight);
-            }
-        }
-    }
-
-
-    class LeftRightProcessor
-    {
-        private EyeTrackerImagesAndData? imagesAndData;
-        private AutoResetEvent? newImagesLeftEvent;
-        private AutoResetEvent? newImagesRightEvent;
-        private AutoResetEvent? leftEyeDoneEvent;
-        private AutoResetEvent? rightEyeDoneEvent;
-        private bool stopped;
-        private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
-        public EyeCollection<IEyeTrackingPipeline?> pipeline = new EyeCollection<IEyeTrackingPipeline?>(null, null);
-
-        public async Task Start(Action<LeftRightProcessor> ProcessLoop, BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer)
-        {
-            this.inputBuffer = inputBuffer;
-            var errorHandler = new TaskErrorHandler(Stop);
 
             try
             {
-                using (newImagesLeftEvent = new AutoResetEvent(false))
-                using (newImagesRightEvent = new AutoResetEvent(false))
-                using (leftEyeDoneEvent = new AutoResetEvent(false))
-                using (rightEyeDoneEvent = new AutoResetEvent(false))
+                using var newImagesLeftEvent = new AutoResetEvent(false);
+                using var newImagesRightEvent = new AutoResetEvent(false);
+                using var leftEyeDoneEvent = new AutoResetEvent(false);
+                using var rightEyeDoneEvent = new AutoResetEvent(false);
+
+                var errorHandler = new TaskErrorHandler(Stop);
+                EyeTrackerImagesAndData? currentImagesAndData = null;
+                IEyeTrackingPipeline pipelineLeft = new EyeTrackingPipelineNothing();
+                IEyeTrackingPipeline pipelineRight = new EyeTrackingPipelineNothing();
+
+                using var leftTask = Task.Factory.StartNew(() => ProcessOneEyeLoop(ref pipelineLeft, ref currentImagesAndData, Eye.Left, newImagesLeftEvent, leftEyeDoneEvent),
+                    TaskCreationOptions.LongRunning)
+                    .ContinueWith(errorHandler.HandleError);
+
+                using var rightTask = Task.Factory.StartNew(() => ProcessOneEyeLoop(ref pipelineRight, ref currentImagesAndData, Eye.Right, newImagesRightEvent, rightEyeDoneEvent),
+                    TaskCreationOptions.LongRunning)
+                    .ContinueWith(errorHandler.HandleError);
+
+                // Keep processing images until the buffer is marked as complete and empty
+                using var cancellation = new CancellationTokenSource();
+                foreach (var (imagesAndData, orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                 {
-                    using var leftTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Left, newImagesLeftEvent, leftEyeDoneEvent),
-                        TaskCreationOptions.LongRunning)
-                        .ContinueWith(errorHandler.HandleError);
+                    //
+                    // Check if it is necessary to change the pipeline and the corresponding UI
+                    //
+                    if (pipelineLeft?.Name != imagesAndData!.TrackingSettings.EyeTrackingPipelineName |
+                        pipelineRight?.Name != imagesAndData!.TrackingSettings.EyeTrackingPipelineName)
+                    {
+                        pipelineLeft = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(imagesAndData!.TrackingSettings.EyeTrackingPipelineName) ?? new EyeTrackingPipelineNothing();
+                        pipelineRight = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(imagesAndData!.TrackingSettings.EyeTrackingPipelineName) ?? new EyeTrackingPipelineNothing();
 
-                    using var rightTask = Task.Factory.StartNew(() => ProcessOneEye(Eye.Right, newImagesRightEvent, rightEyeDoneEvent),
-                        TaskCreationOptions.LongRunning)
-                        .ContinueWith(errorHandler.HandleError);
+                        if (PipelineUI[Eye.Left]?.PipelineName != pipelineLeft?.Name |
+                            PipelineUI[Eye.Right]?.PipelineName != pipelineRight?.Name)
+                        {
+                            var pipelineUILeft = pipelineLeft?.GetPipelineUI(Eye.Left);
+                            var pipelineUIRight = pipelineRight?.GetPipelineUI(Eye.Right);
 
-                    using var inputTask = Task.Factory.StartNew(() => ProcessLoop(this),
-                        TaskCreationOptions.LongRunning)
-                        .ContinueWith(errorHandler.HandleError);
+                            if (pipelineUILeft != null) pipelineUILeft.PipelineName = pipelineLeft?.Name;
+                            if (pipelineUIRight != null) pipelineUIRight.PipelineName = pipelineRight?.Name;
+                            PipelineUI = new EyeCollection<EyeTrackingPipelineUIControl?>(pipelineUILeft, pipelineUIRight);
+                        }
+                    }
 
-                    // wait for the input task first. It will finish when 
-                    // the buffer is marked as complete.
-                    await inputTask;
+                    if (stopped) continue;
 
-                    errorHandler.CheckForErrors();
+                    //
+                    // Wait for left and right eye to process
+                    //
+                    // save the reference to the current images for the left and right processing loops.
+                    currentImagesAndData = imagesAndData;
 
-                    // Stop the left and right tasks
-                    stopped = true;
-                    newImagesLeftEvent.Set();
-                    newImagesRightEvent.Set();
+                    newImagesLeftEvent?.Set();
+                    newImagesRightEvent?.Set();
 
-                    await Task.WhenAll(leftTask, rightTask);
+                    leftEyeDoneEvent?.WaitOne(); // Wait for the left eye
+                    if (stopped) continue;
+                    rightEyeDoneEvent?.WaitOne(); // Wait for the right eye
+                    if (stopped) continue;
 
-                    errorHandler.CheckForErrors();
+                    //
+                    // Propagate the processed images
+                    //
+                    if (numberOfThreads == 1 | orderNumber == outputNextExpectedNumber)
+                    {
+                        // if only one thread no need to use the output queue
+                        // because the frames are not going to be out of order
+                        // Same is this is the next frame we were expecting.
+                        ImagesProcessed?.Invoke(this, currentImagesAndData);
+                        outputNextExpectedNumber++;
+                    }
+                    else
+                    {
+                        // Add the processed images and send to the output queue for reordering
+                        outputWaitingList.TryAdd(orderNumber, currentImagesAndData);
+
+                        // Go thru the waiting list to look for next expected order number. If the image we
+                        // are waiting for is in the waiting list. Remove the item and raise an event
+                        // notifying that a new image was processed
+                        while (outputWaitingList.TryRemove(outputNextExpectedNumber, out EyeTrackerImagesAndData images))
+                        {
+                            ImagesProcessed?.Invoke(this, images);
+                            outputNextExpectedNumber++;
+                        }
+                    }
                 }
+
+                // Stop the left and right tasks
+                stopped = true;
+
+                newImagesLeftEvent.Set();
+                newImagesRightEvent.Set();
+
+                await Task.WhenAll(leftTask, rightTask);
+
+                errorHandler.CheckForErrors();
             }
             finally
             {
                 stopped = true;
-                newImagesLeftEvent = null;
-                newImagesRightEvent = null;
-                leftEyeDoneEvent = null;
-                rightEyeDoneEvent = null;
                 inputBuffer = null;
             }
         }
 
-        public void Stop()
+        private void ProcessOneEyeLoop(ref IEyeTrackingPipeline pipeline, ref EyeTrackerImagesAndData imagesAndData, Eye whichEye, AutoResetEvent newImageEvent, AutoResetEvent doneWithProcessingEvent)
         {
-            stopped = true;
-            inputBuffer?.CompleteAdding();
-        }
-
-        public void ProcessImages(EyeTrackerImagesAndData images)
-        {
-            if (newImagesLeftEvent is null | newImagesRightEvent is null | leftEyeDoneEvent is null | rightEyeDoneEvent is null) return;
-
-            if (stopped) return;
-
-            imagesAndData = images;
-
-            newImagesLeftEvent?.Set();
-
-            newImagesRightEvent?.Set();
-
-            leftEyeDoneEvent?.WaitOne(); // Wait for the left eye
-            if (stopped) return;
-            rightEyeDoneEvent?.WaitOne(); // Wait for the right eye
-        }
-
-
-        private void ProcessOneEye(Eye whichEye, AutoResetEvent newImageEvent, AutoResetEvent doneWithProcessingEvent)
-        {
-            Thread.CurrentThread.Name = "EyeTracker:RightProcessLoop";
+            Thread.CurrentThread.Name = "EyeTracker:EyeProcessLoop";
 
             while (true)
             {
@@ -360,12 +336,7 @@ namespace OpenIris
                     {
                         EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
-                        if (pipeline[whichEye]?.Name != imagesAndData!.TrackingSettings.EyeTrackingPipelineName )
-                        {
-                            pipeline[whichEye] = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(imagesAndData!.TrackingSettings.EyeTrackingPipelineName);
-                        }
-
-                        (image.EyeData, image.ImageTorsion) = pipeline[whichEye]!.Process(
+                        (image.EyeData, image.ImageTorsion) = pipeline.Process(
                             image,
                             imagesAndData.Calibration.EyeCalibrationParameters[whichEye],
                             imagesAndData.TrackingSettings);
@@ -380,5 +351,4 @@ namespace OpenIris
             }
         }
     }
-
 }

@@ -4,9 +4,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-
 namespace OpenIris
 {
+
+#nullable enable
+
     using OpenIris.ImageGrabbing;
     using System;
     using System.ComponentModel;
@@ -21,14 +23,14 @@ namespace OpenIris
     {
         EyeTrackingSystemSettings Settings { get; set; }
 
-        EyeCollection<CameraEye> CreateCameras();
-        EyeCollection<VideoEye> CreateVideos(EyeCollection<string> fileNames);
+        EyeCollection<CameraEye?> CreateCameras();
+        EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames);
 
         IHeadDataSource CreateHeadDataSourceWithCameras();
         IHeadDataSource CreateHeadDataSourceWithVideos();
 
-        EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images);
-        EyeCollection<ImageEye> PreProcessImagesFromVideos(EyeCollection<ImageEye> images);
+        EyeCollection<ImageEye?> PreProcessImagesFromCameras(EyeCollection<ImageEye?> images);
+        EyeCollection<ImageEye?> PreProcessImagesFromVideos(EyeCollection<ImageEye?> images);
 
         EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages);
 

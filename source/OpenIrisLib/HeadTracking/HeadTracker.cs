@@ -42,13 +42,23 @@ namespace OpenIris
                 " Drops Seq:" + DroppedFramesSequence +
                 " Buffer:" + headDataBuffer?.Count ?? 0 + "]";
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eyeTrackingSystem"></param>
+        /// <returns></returns>
         public async static Task<HeadTracker?> CreateNewforOffLine(IEyeTrackingSystem eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithVideos);
 
             return (headDataSource is null) ? null : new HeadTracker(headDataSource);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="eyeTrackingSystem"></param>
+        /// <returns></returns>
         public async static Task<HeadTracker?> CreateNewForRealTime(IEyeTrackingSystem eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithCameras);
@@ -215,7 +225,7 @@ namespace OpenIris
         /// Grabs head data from the specific sensor implementation.
         /// </summary>
         /// <returns></returns>
-        HeadData GrabHeadData();
+        HeadData? GrabHeadData();
 
         /// <summary>
         /// Stops the sensor

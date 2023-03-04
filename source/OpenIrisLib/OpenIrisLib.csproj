@@ -138,7 +138,6 @@
     <Compile Include="Util\VideoTools.cs" />
     <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
     <Compile Include="Util\OpenIrisException.cs" />
-    <Compile Include="Util\PluginListTypeConverter.cs" />
     <Compile Include="Util\Consumer.cs" />
     <Compile Include="Calibration\CalibrationSession.cs" />
     <Compile Include="EyeTrackerData\ExtraData.cs">
@@ -243,7 +242,7 @@
     </Compile>
     <Compile Include="Util\SerializableDictionary.cs" />
     <Compile Include="Util\TaskErrorHandler.cs" />
-    <Compile Include="Util\VideoPlayer.cs" />
+    <Compile Include="ImageGrabbing\VideoPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Calibration\CalibrationPipelineManual.resx">

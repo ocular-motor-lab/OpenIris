@@ -31,6 +31,8 @@ namespace OpenIris
         {
             task = Task.Run(() =>
             {
+                System.Threading.Thread.CurrentThread.Name = "EyeTracker:TCP server";
+
                 try
                 {
                     // TcpListener server = new TcpListener(port);

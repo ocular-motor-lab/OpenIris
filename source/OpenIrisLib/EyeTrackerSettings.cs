@@ -337,23 +337,10 @@ namespace OpenIris
         /// </summary>
         public static EyeTrackerSettings Load()
         {
-            EyeTrackerSettings? settings = null;
-
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "EyeTrackerSettings.xml");
 
-            try
-            {
-                settings = Load(typeof(EyeTrackerSettings), filePath) as EyeTrackerSettings;
-            }
-            finally
-            {
-                if ( settings is null)
-                {
-                    settings = new EyeTrackerSettings { SettingsPath = filePath };
-                }
-            }
-
-            return settings;
+            return Load(typeof(EyeTrackerSettings), filePath) as EyeTrackerSettings ??
+                new EyeTrackerSettings { SettingsPath = filePath };
         }
     }
 

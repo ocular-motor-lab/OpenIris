@@ -67,7 +67,7 @@ namespace OpenIris
         /// <summary>
         /// Gets the settings of the current pipeline.
         /// </summary>
-        public EyeTrackingPipelineSettings? PipelineSettings => eyeTracker?.Settings.TrackingpipelineSettings;
+        public EyeTrackingPipelineSettings? PipelineSettings => eyeTracker?.Settings.TrackingPipelineSettings;
 
         /// <summary>
         /// Starts the recording.
@@ -106,7 +106,7 @@ namespace OpenIris
             var change = increase ? 1 : -1;
 
             // TODO: this is not ideal. The remote only works for EyeTrackingPipelineJOMSettings
-            var trackingSettings = eyeTracker.Settings.TrackingpipelineSettings as EyeTrackingPipelineJOMSettings;
+            var trackingSettings = eyeTracker.Settings.TrackingPipelineSettings as EyeTrackingPipelineJOMSettings;
 
             if (trackingSettings == null) return;
 
@@ -155,7 +155,7 @@ namespace OpenIris
                     switch (settingParts[0])
                     {
                         case "Tracking":
-                            typeof(EyeTrackingPipelineSettings).GetProperty(settingParts[1]).SetValue(eyeTracker.Settings.TrackingpipelineSettings, value, null);
+                            typeof(EyeTrackingPipelineSettings).GetProperty(settingParts[1]).SetValue(eyeTracker.Settings.TrackingPipelineSettings, value, null);
                             break;
                         default:
                             break;

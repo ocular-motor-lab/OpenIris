@@ -20,7 +20,7 @@ namespace OpenIris
     /// <summary>
     /// Interface for all eye tracking pipelines that process images to get data.
     /// </summary>
-    public interface IEyeTrackingPipeline
+    public interface IEyeTrackingPipeline : IPlugin
     {
         /// <summary>
         /// Process the images to get data.
@@ -36,7 +36,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        EyeTrackingPipelineUI? GetPipelineUI(Eye whichEye);
+        EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye);
     }
 
     /// <summary>

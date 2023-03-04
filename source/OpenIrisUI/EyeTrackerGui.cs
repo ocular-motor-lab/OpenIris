@@ -28,7 +28,9 @@ namespace OpenIris.UI
         private readonly Timer timerRefreshUI;
         private readonly LogTraceListener log;
 
-        private ICalibrationUI calibrationUI;
+        private CalibrationUIControl calibrationUI;
+        private EyeCollection<ImageBox> imageBoxes;
+        private EyeCollection<EyeTrackingPipelineUIControl> pipelineUI;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerGui class
@@ -36,6 +38,8 @@ namespace OpenIris.UI
         public EyeTrackerGui()
         {
             InitializeComponent();
+            
+            imageBoxes = new EyeCollection<ImageBox>(imageBoxLeftEye, imageBoxRightEye);
 
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
 
@@ -276,13 +280,14 @@ namespace OpenIris.UI
             // Update calibration UI
             if (eyeTracker.Calibrating && !tabPages.Contains(tabCalibration))
             {
-                if (eyeTracker.CalibrationSession?.CalibrationUI is UserControl calibrationControl)
+                calibrationUI = eyeTracker.CalibrationSession?.GetCalibrationUI();
+
+                if (calibrationUI != null)
                 {
-                    calibrationControl.Dock = DockStyle.Fill;
-                    calibrationControl.Location = new Point(0, 0);
-                    calibrationControl.Size = tabCalibration.ClientSize;
-                    tabCalibration.Controls.Add(calibrationControl);
-                    calibrationUI = eyeTracker.CalibrationSession?.CalibrationUI;
+                    calibrationUI.Dock = DockStyle.Fill;
+                    calibrationUI.Location = new Point(0, 0);
+                    calibrationUI.Size = tabCalibration.ClientSize;
+                    tabCalibration.Controls.Add(calibrationUI);
 
                     tabPages.TabPages.Add(tabCalibration);
                     tabPages.SelectTab(tabCalibration);
@@ -347,47 +352,30 @@ namespace OpenIris.UI
                 // Update pipeline UIs
                 foreach (var eye in eyes)
                 {
-                    var pipelineUI = eyeTracker.ImageProcessor?.PipelineUI?[eye];
-
-                    if (panels[eye].Controls.Contains(pipelineUI))
+                    if (pipelineUI?[eye]?.PipelineName == eyeTracker.Settings.TrackingPipelineSettings.EyeTrackingPipelineName)
                     {
-                        pipelineUI.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);
+                        pipelineUI?[eye]?.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);
                     }
                     else
                     {
                         if ( panels[eye].Controls.Count > 0)
                             panels[eye].Controls.Clear();
 
-                        if (pipelineUI is null) continue;
+                        if (pipelineUI is null) pipelineUI = new EyeCollection<EyeTrackingPipelineUIControl>(null, null);
 
-                        pipelineUI.Dock = DockStyle.Fill;
-                        pipelineUI.Location = new Point(0, 0);
-                        pipelineUI.Size = panels[eye].ClientSize;
-                        panels[eye].Controls.Add(pipelineUI);
+                        pipelineUI[eye] = eyeTracker.ImageProcessor.PipelineUI?[eye];
+
+                        if (pipelineUI?[eye] is null) continue;
+
+                        pipelineUI[eye].Dock = DockStyle.Fill;
+                        pipelineUI[eye].Location = new Point(0, 0);
+                        pipelineUI[eye].Size = panels[eye].ClientSize;
+                        panels[eye].Controls.Add(pipelineUI[eye]);
                     }
+                 
+                    // Update Eye Images
+                    pipelineUI?[eye]?.UpdatePipelineEyeImage(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
                 }
-
-                // Update Eye Images
-                var data = eyeTrackerViewModel.LastDataAndImages;
-                foreach (var eye in eyes)
-                {
-                    if (data != null)
-                    {
-                        var imageBoxes = new EyeCollection<ImageBox>(imageBoxLeftEye, imageBoxRightEye);
-
-                        var ui = eyeTracker.ImageProcessor?.PipelineUI?[eye];
-
-                        if (ui is null)
-                        {
-                            EyeTrackingPipelineUI.UpdatePipelineEyeImage(eye, imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
-                        }
-                        else
-                        {
-                            ui.UpdatePipelineEyeImage(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
-                        }
-                    }
-                }
-
             }
             finally
             {

@@ -129,16 +129,12 @@ namespace OpenIris
         /// <summary>
         /// Dispose objects.
         /// </summary>
-        /// <param name="disposing"></param>
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
-            base.Dispose(disposing);
+            base.Dispose();
 
-            if (disposing)
-            {
-                frameRateTimer?.Dispose();
-                frameRateTimer = null;
-            }
+            frameRateTimer?.Dispose();
+            frameRateTimer = null;
         }
 
         /// <summary>

@@ -6,9 +6,9 @@ namespace OpenIris
     /// <summary>
     /// Interface for UI for pipelines, one per eye
     /// </summary>
-    public abstract class EyeTrackingPipelineUI : UserControl
+    public abstract class EyeTrackingPipelineUIControl : UserControl
     {
-        public EyeTrackingPipelineUI(Eye whichEye)
+        public EyeTrackingPipelineUIControl(Eye whichEye)
         {
             WhichEye = whichEye;
         }
@@ -28,16 +28,14 @@ namespace OpenIris
         /// </summary>
         /// <param name="imageBox"></param>
         /// <param name="dataAndImages"></param>
-        public abstract void UpdatePipelineEyeImage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages);
-
-        public abstract void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages);
-
-        public static void UpdatePipelineEyeImage(Eye whichEye, ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
+        public virtual void UpdatePipelineEyeImage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
         {
             imageBox.Image = ImageEyeDrawing.DrawAllData(
-                                    dataAndImages.Images[whichEye],
-                                    dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
+                                    dataAndImages.Images[WhichEye],
+                                    dataAndImages.Calibration.EyeCalibrationParameters[WhichEye],
                                     dataAndImages.TrackingSettings);
         }
+
+        public abstract void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages);
     }
 }

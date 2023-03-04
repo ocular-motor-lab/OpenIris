@@ -21,6 +21,11 @@ namespace OpenIris
     public sealed class EyeTrackingPipelineSimpleCentroid : IEyeTrackingPipeline, IDisposable
     {
         /// <summary>
+        /// Name of the plugin, gets set automatically.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the ImageEyeProcess class.
         /// </summary>
         public EyeTrackingPipelineSimpleCentroid()
@@ -99,7 +104,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUI? GetPipelineUI(Eye whichEye)
+        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye)
         {
             return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye);
         }

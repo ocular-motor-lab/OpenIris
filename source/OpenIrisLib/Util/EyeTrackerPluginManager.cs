@@ -97,7 +97,7 @@ namespace OpenIris
     /// <typeparam name="TPlugin"></typeparam>
     /// <typeparam name="TPluginMetadata"></typeparam>
     public class EyeTrackerPluginLoader<TPlugin, TPluginMetadata>
-        where TPlugin : class
+        where TPlugin : class, IPlugin
         where TPluginMetadata : IEyeTrackerPluginMetadata
     {
         /// <summary>
@@ -157,8 +157,10 @@ namespace OpenIris
                 lock (this)
                 {
                     // Find a factory by its name
-                    return ClassFactories.First(x => x.Metadata.Name == name)?.CreateExport().Value ??
+                    var newPluginObject = ClassFactories.First(x => x.Metadata.Name == name)?.CreateExport().Value ??
                         throw new PluginManagerException($"Plugin '{name}' not found.");
+                    newPluginObject.Name = name;
+                    return newPluginObject;
                 }
             }
             catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentNullException)
@@ -191,6 +193,18 @@ namespace OpenIris
                 throw new PluginManagerException($" Error loading plugin '{name}'.", ex);
             }
         }
+    }
+
+
+    /// <summary>
+    /// Interface of all plugins.
+    /// </summary>
+    public interface IPlugin
+    {
+        /// <summary>
+        /// Name of the plugin.
+        /// </summary>
+        string Name { get; set; }
     }
 
     /// <summary>

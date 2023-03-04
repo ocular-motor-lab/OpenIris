@@ -10,6 +10,7 @@ namespace OpenIris
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -62,7 +63,7 @@ namespace OpenIris
 
             numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, Environment.ProcessorCount - 1));
 
-            PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(null, null);
+            PipelineUI = new EyeCollection<EyeTrackingPipelineUIControl?>(null, null);
         }
 
         /// <summary>
@@ -73,7 +74,7 @@ namespace OpenIris
         /// <summary>
         /// User interface for the current pipeline. For each eye.
         /// </summary>
-        public EyeCollection<EyeTrackingPipelineUI?> PipelineUI { get; private set; }
+        public EyeCollection<EyeTrackingPipelineUIControl?> PipelineUI { get; private set; }
 
         /// <summary>
         /// Gets the total number of frames received.
@@ -230,28 +231,26 @@ namespace OpenIris
                     }
                 }
 
-                UpdatePipelineUI(leftRightProcessor);
+                UpdatePipelineUI(leftRightProcessor.pipeline);
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="leftRightProcessor"></param>
-        private void UpdatePipelineUI(LeftRightProcessor leftRightProcessor)
+        /// <param name="pipeline"></param>
+        private void UpdatePipelineUI(EyeCollection<IEyeTrackingPipeline?> pipeline)
         {
-            if (PipelineUI[Eye.Left]?.PipelineName != leftRightProcessor.pipeline[Eye.Left].name |
-                PipelineUI[Eye.Right]?.PipelineName != leftRightProcessor.pipeline[Eye.Right].name)
+            if (PipelineUI[Eye.Left]?.PipelineName != pipeline[Eye.Left]?.Name |
+                PipelineUI[Eye.Right]?.PipelineName != pipeline[Eye.Right]?.Name)
             {
-                var pipelineUILeft = leftRightProcessor.pipeline[Eye.Left].pipeline?.GetPipelineUI(Eye.Left);
-                var pipelineUIRight = leftRightProcessor.pipeline[Eye.Right].pipeline?.GetPipelineUI(Eye.Right);
+                var pipelineUILeft = pipeline[Eye.Left]?.GetPipelineUI(Eye.Left);
+                var pipelineUIRight = pipeline[Eye.Right]?.GetPipelineUI(Eye.Right);
 
-                if (pipelineUILeft != null)
-                    pipelineUILeft.PipelineName = leftRightProcessor.pipeline[Eye.Left].name;
-                if (pipelineUIRight != null)
-                    pipelineUIRight.PipelineName = leftRightProcessor.pipeline[Eye.Right].name;
+                if (pipelineUILeft != null) pipelineUILeft.PipelineName = pipeline[Eye.Left]?.Name;
+                if (pipelineUIRight != null) pipelineUIRight.PipelineName = pipeline[Eye.Right]?.Name;
 
-                PipelineUI = new EyeCollection<EyeTrackingPipelineUI?>(pipelineUILeft, pipelineUIRight);
+                PipelineUI = new EyeCollection<EyeTrackingPipelineUIControl?>(pipelineUILeft, pipelineUIRight);
             }
         }
     }
@@ -266,7 +265,7 @@ namespace OpenIris
         private AutoResetEvent? rightEyeDoneEvent;
         private bool stopped;
         private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
-        public EyeCollection<(string name, IEyeTrackingPipeline? pipeline)> pipeline = new EyeCollection<(string, IEyeTrackingPipeline?)>(("", null), ("", null));
+        public EyeCollection<IEyeTrackingPipeline?> pipeline = new EyeCollection<IEyeTrackingPipeline?>(null, null);
 
         public async Task Start(Action<LeftRightProcessor> ProcessLoop, BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer)
         {
@@ -361,9 +360,12 @@ namespace OpenIris
                     {
                         EyeTrackerDebug.TrackTimeBeginPipeline(image.WhichEye, image.TimeStamp);
 
-                        var eyeTrackingPipeline = GetCurrentEyeTrackingPipeline(imagesAndData!.TrackingSettings.EyeTrackingPipelineName, whichEye);
-                        
-                        (image.EyeData, image.ImageTorsion) = eyeTrackingPipeline.Process(
+                        if (pipeline[whichEye]?.Name != imagesAndData!.TrackingSettings.EyeTrackingPipelineName )
+                        {
+                            pipeline[whichEye] = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(imagesAndData!.TrackingSettings.EyeTrackingPipelineName);
+                        }
+
+                        (image.EyeData, image.ImageTorsion) = pipeline[whichEye]!.Process(
                             image,
                             imagesAndData.Calibration.EyeCalibrationParameters[whichEye],
                             imagesAndData.TrackingSettings);
@@ -376,31 +378,6 @@ namespace OpenIris
                     doneWithProcessingEvent.Set();
                 }
             }
-        }
-
-        /// <summary>
-        /// Method to create the pipeline object to process the images. For each frame it has to check if the settings
-        /// have changed and it needs to update to a new pipeline. It creates an pipeline object for each thread and 
-        /// each eye to avoid conflicts in multithreading. Otherwise the pipeline classes would need to be thread safe
-        /// which is quite hard.
-        /// </summary>
-        /// <param name="newPipelineName">New pipeline name.</param>
-        /// <param name="whichEye">Which eye we are working with.</param>
-        /// <returns>The new pipeline object.</returns>
-        private IEyeTrackingPipeline GetCurrentEyeTrackingPipeline(string newPipelineName, Eye whichEye)
-        {
-            (var currentName, var currentPipeline) = pipeline[whichEye];
-
-            // if this thread does not have an pipeline 
-            if (currentName != newPipelineName || currentPipeline is null)
-            {
-                currentPipeline = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(newPipelineName)
-                    ?? throw new InvalidOperationException("bad");
-
-                pipeline[whichEye] = (newPipelineName, currentPipeline);
-            }
-
-            return currentPipeline;
         }
     }
 

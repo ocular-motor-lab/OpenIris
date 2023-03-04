@@ -14,7 +14,7 @@ namespace OpenIris.UI
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.
     /// </summary>
-    public partial class EyeTrackingPipelinePupilCRQuickSettings : EyeTrackingPipelineUI
+    public partial class EyeTrackingPipelinePupilCRQuickSettings : EyeTrackingPipelineUIControl
     {
         private EyeTrackingPipelinePupilCRSettings trackingSettings;
 

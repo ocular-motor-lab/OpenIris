@@ -14,6 +14,11 @@ namespace OpenIris
     public class CalibrationPipelineAuto : ICalibrationPipeline
     {
         /// <summary>
+        /// Name of the plugin, gets set automatically.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// Indicates weather the calibration was cancelled.
         /// </summary>
         public bool Cancelled { get; }
@@ -21,7 +26,7 @@ namespace OpenIris
         /// <summary>
         /// User interface of the calibration.
         /// </summary>
-        public ICalibrationUI? CalibrationUI { get; protected set; }
+        public CalibrationUIControl? GetCalibrationUI() => null;
 
         /// <summary>
         /// Process data towards setting a new physical model
@@ -29,6 +34,8 @@ namespace OpenIris
         public (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
         {
             if (imageEye is null) return (false, EyePhysicalModel.EmptyModel);
+
+            if (imageEye?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, EyePhysicalModel.EmptyModel);
 
             return (true, new EyePhysicalModel(imageEye.EyeData.Pupil.Center, (float)(imageEye.EyeData.Iris.Radius * 2.0)));
         }
@@ -39,6 +46,8 @@ namespace OpenIris
         public (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
             if (image is null) return ( false, null);
+
+            if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
 
             return (true, image);
         }

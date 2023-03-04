@@ -225,7 +225,7 @@ namespace OpenIris
                         : EyeTrackingSystem!.PreProcessImagesFromCameras(grabbedImages);
 
                     RecordingSession?.TryRecordImages(grabbedImages);
-                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingpipelineSettings));
+                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingPipelineSettings));
                 };
 
                 // Action for every time new images are processed
@@ -504,14 +504,14 @@ namespace OpenIris
                 using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
                 {
 
-                    var tempCalibration = await CalibrationSession.StartCalibratingEyeModel(Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                    var tempCalibration = await CalibrationSession.StartCalibratingEyeModel(Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
                     if (tempCalibration is null) return;
 
                     // IMPORTANT!! Need to update calibration so the zero reference processing is done with a
                     // proper eye model.
                     Calibration = tempCalibration;
 
-                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
                 }
             }
             catch
@@ -558,7 +558,7 @@ namespace OpenIris
             {
                 using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
                 {
-                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingpipelineSettings);
+                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
                 }
             }
             catch

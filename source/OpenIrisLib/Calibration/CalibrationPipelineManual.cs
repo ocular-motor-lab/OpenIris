@@ -19,19 +19,18 @@ namespace OpenIris.Calibration
     /// Manual calibration where a UI can be used to set the eye model and the reference position.
     /// </summary>
     [Export(typeof(ICalibrationPipeline)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
-    public partial class CalibrationPipelineManual : UserControl, ICalibrationPipeline, ICalibrationUI
+    public partial class CalibrationPipelineManual : CalibrationUIControl, ICalibrationPipeline
     {
         private EyeCollection<ImageEye?> LastImages { get; set; }
         private EyeCollection<EyePhysicalModel> eyeModels;
         private EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
 
-        public ICalibrationUI? CalibrationUI => this;
+        public CalibrationUIControl? GetCalibrationUI() => this;
 
         /// <summary>
         /// Indicates weather the calibration was cancelled.
         /// </summary>
         public bool Cancelled { get; set; }
-
 
         /// <summary>
         /// 
@@ -100,7 +99,7 @@ namespace OpenIris.Calibration
         /// <summary>
         /// Updates the UI with the image from last frame and current calibration.
         /// </summary>
-        public void UpdateUI()
+        public override void UpdateUI()
         {
             foreach (var image in LastImages)
             {
@@ -132,6 +131,8 @@ namespace OpenIris.Calibration
             if (image == null) return (false, null);
 
             LastImages[image.WhichEye] = image;
+
+            if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
 
             return (true, image);
         }
@@ -208,6 +209,11 @@ namespace OpenIris.Calibration
         private void butCancel_Click(object sender, EventArgs e)
         {
             Cancelled = true;
+        }
+
+        private void sliderTextControlLeftEyeGlobeR_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

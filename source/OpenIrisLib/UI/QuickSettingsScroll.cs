@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OpenIris.UI
 {
-    internal class QuickSettingsScroll : EyeTrackingPipelineUI
+    internal class QuickSettingsScroll : EyeTrackingPipelineUIControl
     {
         public QuickSettingsScroll(Eye whichEye)
             : base(whichEye)

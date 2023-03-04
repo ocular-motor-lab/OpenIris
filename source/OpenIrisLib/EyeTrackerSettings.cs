@@ -126,7 +126,7 @@ namespace OpenIris
         [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingPipeline>))]
         public string EyeTrackingPipeline
         {
-            get { TrackingpipelineSettings.EyeTrackingPipelineName = eyeTrackingPipeline; return eyeTrackingPipeline; }
+            get { TrackingPipelineSettings.EyeTrackingPipelineName = eyeTrackingPipeline; return eyeTrackingPipeline; }
             set
             {
                 // If the dictionary does not contain the settings for the current eye tracking
@@ -141,7 +141,7 @@ namespace OpenIris
 
                     AllTrackingPipelinesSettings[value].PropertyChanged += (o, e) =>
                     {
-                        OnPropertyChanged(o, nameof(TrackingpipelineSettings));
+                        OnPropertyChanged(o, nameof(TrackingPipelineSettings));
                     };
                 }
 
@@ -184,7 +184,7 @@ namespace OpenIris
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public EyeTrackingPipelineSettings TrackingpipelineSettings => AllTrackingPipelinesSettings[eyeTrackingPipeline];
+        public EyeTrackingPipelineSettings TrackingPipelineSettings => AllTrackingPipelinesSettings[eyeTrackingPipeline];
 
         #endregion B) Choose a tracking pipeline
 

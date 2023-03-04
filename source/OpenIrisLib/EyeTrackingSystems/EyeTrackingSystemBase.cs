@@ -12,11 +12,9 @@ namespace OpenIris
     using OpenIris.ImageGrabbing;
 
     /// <summary>
-    /// Base class for all eye tracking systems.
-    /// The eye tracking system should not hold to any resources. It will not be diposed appropriately. 
-    /// It must just create cameras, videos and/or head trackers and pass ownership of the objects. 
+    /// Base class for eye tracking systems.
     /// </summary>
-    public abstract class EyeTrackingSystemBase : IDisposable, IEyeTrackingSystem
+    public abstract class EyeTrackingSystemBase : IEyeTrackingSystem
     {
         /// <summary>
         /// Initializes an instance.
@@ -40,7 +38,6 @@ namespace OpenIris
             settings ??= EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(name) as EyeTrackingSystemSettings
                 ?? throw new OpenIrisException("Bad settings");
 
-            system.Name = name;
             system.Settings = settings;
 
             return system;
@@ -49,21 +46,8 @@ namespace OpenIris
         /// <summary>
         /// 
         /// </summary>
-        protected virtual void Dispose(bool disposing)
+        public virtual void Dispose()
         {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects).
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>

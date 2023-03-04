@@ -18,6 +18,8 @@ namespace OpenIris.Calibration
     [Export(typeof(ICalibrationPipeline)), PluginDescription("N-Point", typeof(CalibrationSettings))]
     public class EyeCalibrationNPoint : ICalibrationPipeline
     {
+        private CalibrationUIControl CalibrationUI;
+
         public EyeCollection<List<PointF>> CalibrationPoints { get; set; }
         public EyeCollection<List<PointF>> PupilPositions { get; set; }
         public EyeCollection<Image<Gray, byte>> ScatterImages { get; set; }
@@ -28,7 +30,8 @@ namespace OpenIris.Calibration
 
         public bool Cancelled { get; }
 
-        public ICalibrationUI CalibrationUI { get; private set; }
+        public CalibrationUIControl GetCalibrationUI() => CalibrationUI;
+        public string Name { get; set; }
 
         public EyeCalibrationNPoint()
         {
@@ -37,7 +40,6 @@ namespace OpenIris.Calibration
             CalibrationPoints = new EyeCollection<List<PointF>>(new List<PointF>(), new List<PointF>());
             CalibrationUI = new EyeCalibrationNPointUI(this);
         }
-
 
         /// <summary>
         /// Sets the models from the UI.
@@ -78,6 +80,8 @@ namespace OpenIris.Calibration
             CalibrationUI = null;
 
             if (image == null) return (false, null);
+
+            if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
 
             return (true, image);
         }

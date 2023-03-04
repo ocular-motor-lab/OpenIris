@@ -25,6 +25,11 @@ namespace OpenIris
     [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimplePupilCRBlobs", typeof(EyeTrackingPipelinePupilCRSettings))]
     public sealed class EyeTrackingPipelineSimplePupilCRBlobs : IEyeTrackingPipeline, IDisposable
     {
+        /// <summary>
+        /// Name of the plugin, gets set automatically.
+        /// </summary>
+        public string Name { get; set; }
+
         private readonly CvBlobDetector detector = new CvBlobDetector();
         private readonly CvBlobs blobs = new CvBlobs();
 
@@ -126,7 +131,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="whichEye"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUI? GetPipelineUI(Eye whichEye)
+        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye)
         {
             return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye);
         }

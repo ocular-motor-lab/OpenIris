@@ -105,7 +105,9 @@
     <Compile Include="UI\EyeTrackingPipelinePupilCRQuickSettings.Designer.cs">
       <DependentUpon>EyeTrackingPipelinePupilCRQuickSettings.cs</DependentUpon>
     </Compile>
-    <Compile Include="Calibration\ICalibrationUserInterface.cs" />
+    <Compile Include="Calibration\CalibrationUIControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="EyeTrackerData\DataBuffer.cs" />
     <Compile Include="EyeTrackerData\CornealReflectionData.cs" />
     <Compile Include="EyeTrackingSystems\EyeTrackingSystemDualWebCam.cs" />
@@ -121,7 +123,7 @@
     <Compile Include="RemoteServices\IEyeTrackerWebService.cs" />
     <Compile Include="UI\EyeTrackerUICommand.cs" />
     <Compile Include="UI\ImageEyeDrawing.cs" />
-    <Compile Include="UI\EyeTrackingPipelineUI.cs">
+    <Compile Include="UI\EyeTrackingPipelineUIControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="UI\ProgressBarDialog.cs">

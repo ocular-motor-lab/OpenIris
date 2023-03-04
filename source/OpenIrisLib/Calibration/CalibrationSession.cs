@@ -40,7 +40,7 @@ namespace OpenIris
         /// <summary>
         /// User interface of the calibration.
         /// </summary>
-        public ICalibrationUI? CalibrationUI { get => calibrationPipeline?.CalibrationUI; }
+        public CalibrationUIControl? GetCalibrationUI() => calibrationPipeline?.GetCalibrationUI();
 
         /// <summary>
         /// Starts a calibration session.
@@ -82,9 +82,6 @@ namespace OpenIris
                              {
                                  if (image is null) continue;
                                  if (hasModel[image.WhichEye]) continue;
-
-                                 // Only process the image for calibration if the data is good
-                                 if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) continue;
 
                                  (hasModel[image.WhichEye], eyeModels[image.WhichEye]) = calibrationPipeline.ProcessForEyeModel(calibrationSettings, processingSettings, image);
                              }
@@ -157,8 +154,6 @@ namespace OpenIris
                             {
                                 if (imageEye is null) continue;
                                 if (hasReference[imageEye.WhichEye]) continue;
-
-                                if (imageEye?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) continue;
 
                                 // Wait until we get an image that has the correct eye model.
                                 // Because images are processed in paralel in the processing pipele,

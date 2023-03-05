@@ -26,7 +26,6 @@ namespace OpenIris
     [Serializable]
     public sealed class EyeTrackerSettings : EyeTrackerSettingsXml
     {
-
         /// <summary>
         /// Initializes a new instance of the EyeTrackerSettings class.
         /// </summary>
@@ -463,6 +462,5 @@ namespace OpenIris
             // Save thesettings everytime something changes
             PropertyChanged?.Invoke(o, new PropertyChangedEventArgs(name));
         }
-
     }
 }

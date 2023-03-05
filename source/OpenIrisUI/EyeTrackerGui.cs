@@ -5,6 +5,8 @@
 //-----------------------------------------------------------------------
 namespace OpenIris.UI
 {
+#nullable enable
+
     using Emgu.CV.Structure;
     using Emgu.CV.UI;
     using OpenIris;
@@ -28,9 +30,11 @@ namespace OpenIris.UI
         private readonly Timer timerRefreshUI;
         private readonly LogTraceListener log;
 
-        private CalibrationUIControl calibrationUI;
         private EyeCollection<ImageBox> imageBoxes;
-        private EyeCollection<EyeTrackingPipelineUIControl> pipelineUI;
+
+
+        private (string name, CalibrationUIControl? control)? calibrationUI;
+        private (string name, EyeCollection<EyeTrackingPipelineUIControl?>? controls)? pipelineUI;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerGui class
@@ -283,14 +287,17 @@ namespace OpenIris.UI
             // Update calibration UI
             if (eyeTracker.Calibrating && !tabPages.Contains(tabCalibration))
             {
-                calibrationUI = eyeTracker.CalibrationSession?.GetCalibrationUI();
+                // Calibration just started
 
-                if (calibrationUI != null)
+                calibrationUI = (eyeTracker.Settings.CalibrationMethod, eyeTracker.CalibrationSession?.GetCalibrationUI());
+                var calibrationControl = calibrationUI?.control;
+
+                if (calibrationControl != null)
                 {
-                    calibrationUI.Dock = DockStyle.Fill;
-                    calibrationUI.Location = new Point(0, 0);
-                    calibrationUI.Size = tabCalibration.ClientSize;
-                    tabCalibration.Controls.Add(calibrationUI);
+                    calibrationControl.Dock = DockStyle.Fill;
+                    calibrationControl.Location = new Point(0, 0);
+                    calibrationControl.Size = tabCalibration.ClientSize;
+                    tabCalibration.Controls.Add(calibrationControl);
 
                     tabPages.TabPages.Add(tabCalibration);
                     tabPages.SelectTab(tabCalibration);
@@ -302,7 +309,7 @@ namespace OpenIris.UI
                 tabCalibration.Controls.Clear();
                 tabPages.TabPages.Remove(tabCalibration);
                 tabPages.SelectTab(0);
-                calibrationUI = null;
+                calibrationUI = (string.Empty, null);
             }
 
             if (eyeTracker.VideoPlayer != null)
@@ -352,32 +359,36 @@ namespace OpenIris.UI
 
                 var eyes = new Eye[] { Eye.Left, Eye.Right };
 
+
+                // Change the pipeline UIs if necessary
+                if (pipelineUI?.name != eyeTracker.Settings.EyeTrackingPipeline)
+                {
+                    foreach (var panel in panels)
+                    {
+                        if (panel.Controls.Count > 0)
+                            panel.Controls.Clear();
+                    }
+
+                    pipelineUI = eyeTracker.ImageProcessor?.PipelineUI;
+
+                    foreach (var eye in eyes)
+                    {
+                        var control = pipelineUI?.controls?[eye];
+                        if (control is null) continue;
+
+                        control.Dock = DockStyle.Fill;
+                        control.Location = new Point(0, 0);
+                        control.Size = panels[eye].ClientSize;
+                        panels[eye].Controls.Add(control);
+                    }
+
+                }
+
                 // Update pipeline UIs
                 foreach (var eye in eyes)
                 {
-                    if (pipelineUI?[eye]?.PipelineName == eyeTracker.Settings.TrackingPipelineSettings.EyeTrackingPipelineName)
-                    {
-                        pipelineUI?[eye]?.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);
-                    }
-                    else
-                    {
-                        if ( panels[eye].Controls.Count > 0)
-                            panels[eye].Controls.Clear();
-
-                        if (pipelineUI is null) pipelineUI = new EyeCollection<EyeTrackingPipelineUIControl>(null, null);
-
-                        pipelineUI[eye] = eyeTracker.ImageProcessor.PipelineUI?[eye];
-
-                        if (pipelineUI?[eye] is null) continue;
-
-                        pipelineUI[eye].Dock = DockStyle.Fill;
-                        pipelineUI[eye].Location = new Point(0, 0);
-                        pipelineUI[eye].Size = panels[eye].ClientSize;
-                        panels[eye].Controls.Add(pipelineUI[eye]);
-                    }
-                 
-                    // Update Eye Images
-                    pipelineUI?[eye]?.UpdatePipelineEyeImage(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
+                    pipelineUI?.controls?[eye]?.UpdatePipelineUI(eyeTrackerViewModel.LastDataAndImages);
+                    pipelineUI?.controls?[eye]?.UpdatePipelineEyeImage(imageBoxes[eye], eyeTrackerViewModel.LastDataAndImages);
                 }
             }
             finally
@@ -390,7 +401,7 @@ namespace OpenIris.UI
 
         private void UpdateTabCalibration()
         {
-            calibrationUI?.UpdateUI();
+            calibrationUI?.control?.UpdateUI();
         }
 
         private void UpdateTabViewer()

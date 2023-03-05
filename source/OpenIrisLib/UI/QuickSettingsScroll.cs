@@ -9,8 +9,8 @@ namespace OpenIris.UI
 {
     internal class QuickSettingsScroll : EyeTrackingPipelineUIControl
     {
-        public QuickSettingsScroll(Eye whichEye)
-            : base(whichEye)
+        public QuickSettingsScroll(Eye whichEye, string pipelineName)
+            : base(whichEye, pipelineName)
         {
 
         }

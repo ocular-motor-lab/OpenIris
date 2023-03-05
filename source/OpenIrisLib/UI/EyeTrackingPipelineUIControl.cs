@@ -8,9 +8,10 @@ namespace OpenIris
     /// </summary>
     public abstract class EyeTrackingPipelineUIControl : UserControl
     {
-        public EyeTrackingPipelineUIControl(Eye whichEye)
+        public EyeTrackingPipelineUIControl(Eye whichEye, string pipelineName)
         {
             WhichEye = whichEye;
+            PipelineName = pipelineName;
         }
 
         /// <summary>
@@ -21,7 +22,7 @@ namespace OpenIris
         /// <summary>
         /// Name of the pipeline.
         /// </summary>
-        public string PipelineName { get; set; }
+        public string PipelineName { get; }
 
         /// <summary>
         /// 

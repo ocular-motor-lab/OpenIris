@@ -132,15 +132,16 @@ namespace OpenIris
 
             return (eyeData, imageTorsion);
         }
-        
+
         /// <summary>
         /// Gets the current pipeline UI
         /// </summary>
         /// <param name="whichEye"></param>
+        /// <param name="pipelineName"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye)
+        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
         {
-            return new UI.EyeTrackingPipelineJOMQuickSettings(whichEye);
+            return new UI.EyeTrackingPipelineJOMQuickSettings(whichEye, pipelineName);
         }
     }
 

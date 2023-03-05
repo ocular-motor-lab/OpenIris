@@ -35,8 +35,9 @@ namespace OpenIris
         /// Get the UI to change parameters of the eye tracking pipeline.
         /// </summary>
         /// <param name="whichEye"></param>
+        /// <param name="pipelineName"></param>
         /// <returns></returns>
-        EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye);
+        EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName);
     }
 
     /// <summary>

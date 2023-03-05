@@ -130,10 +130,11 @@ namespace OpenIris
         /// 
         /// </summary>
         /// <param name="whichEye"></param>
+        /// <param name="pipelineName"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye)
+        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
         {
-            return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye);
+            return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye, pipelineName);
         }
     }
 

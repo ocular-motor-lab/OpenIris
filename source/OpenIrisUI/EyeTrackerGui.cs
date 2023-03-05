@@ -162,7 +162,9 @@ namespace OpenIris.UI
 
                 systemComboBox.DataSource = availableSystems;
                 systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
-                settings.PropertyChanged += (o, e) => { if (e.PropertyName == nameof(settings.EyeTrackerSystem)) systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem); };
+                settings.PropertyChanged += (o, e) => { 
+                    if (e.PropertyName == nameof(settings.EyeTrackerSystem))
+                        systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem); };
                 systemComboBox.SelectedIndexChanged += (o, e) => { settings.EyeTrackerSystem = availableSystems[systemComboBox.SelectedIndex]; };
 
 
@@ -196,6 +198,7 @@ namespace OpenIris.UI
                         tabPages.TabPages.Add(tabPageLog);
 
                         tabPages.SelectedTab = tabPageStart;
+                        systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
                     }
                 }
                 else

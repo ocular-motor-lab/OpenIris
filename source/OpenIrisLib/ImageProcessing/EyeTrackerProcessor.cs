@@ -11,6 +11,8 @@ namespace OpenIris
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -131,20 +133,20 @@ namespace OpenIris
                         //
                         // Not using a using statement here because the ProcessInputLoop will dispose
                         // of this events. Otherwise they get disposed before the WhenAll
-                        EyeCollection<AutoResetEvent>? newImagesEvent = new EyeCollection<AutoResetEvent>(new AutoResetEvent(false), new AutoResetEvent(false));
-                        EyeCollection<AutoResetEvent>? eyeDoneEvent = new EyeCollection<AutoResetEvent>(new AutoResetEvent(false), new AutoResetEvent(false));
+                        EyeCollection<AutoResetEvent?> newImagesEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
+                        EyeCollection<AutoResetEvent?> eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
                         (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines = (string.Empty, null);
                         EyeTrackerImagesAndData? currentImagesAndData = null;
 
-                        processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Left, newImagesEvent[Eye.Left], eyeDoneEvent[Eye.Left]),
+                        processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Left, newImagesEvents, eyeDoneEvents),
                             TaskCreationOptions.LongRunning)
                             .ContinueWith(errorHandler.HandleError));
 
-                        processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Right, newImagesEvent[Eye.Right], eyeDoneEvent[Eye.Right]),
+                        processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Right, newImagesEvents, eyeDoneEvents),
                             TaskCreationOptions.LongRunning)
                             .ContinueWith(errorHandler.HandleError));
 
-                        processingTasks.Add(Task.Factory.StartNew(() => ProcessLoop(ref currentImagesAndData, ref pipelines, newImagesEvent, eyeDoneEvent),
+                        processingTasks.Add(Task.Factory.StartNew(() => ProcessLoop(ref currentImagesAndData, ref pipelines, newImagesEvents, eyeDoneEvents),
                             TaskCreationOptions.LongRunning)
                             .ContinueWith(errorHandler.HandleError));
                     }
@@ -218,8 +220,8 @@ namespace OpenIris
         private void ProcessLoop(
             ref EyeTrackerImagesAndData? currentImagesAndData, 
             ref (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines,
-            EyeCollection<AutoResetEvent> newImagesEvent, 
-            EyeCollection<AutoResetEvent> eyeDoneEvent)
+            EyeCollection<AutoResetEvent?> newImagesEvent, 
+            EyeCollection<AutoResetEvent?> eyeDoneEvent)
         {
             Thread.CurrentThread.Name = "EyeTracker:ProcessLoop";
 
@@ -241,12 +243,12 @@ namespace OpenIris
                     // use the events to let the left and right processes know they can go and work on 
                     // the image
                     currentImagesAndData = imagesAndData;
-                    newImagesEvent[Eye.Left].Set();
-                    newImagesEvent[Eye.Right].Set();
+                    newImagesEvent[Eye.Left]?.Set();
+                    newImagesEvent[Eye.Right]?.Set();
 
                     // Wait for the left eye and right eye
-                    eyeDoneEvent[Eye.Left].WaitOne();
-                    eyeDoneEvent[Eye.Right].WaitOne();
+                    eyeDoneEvent[Eye.Left]?.WaitOne();
+                    eyeDoneEvent[Eye.Right]?.WaitOne();
 
                     //
                     // Propagate the processed images
@@ -274,7 +276,7 @@ namespace OpenIris
                         }
                     }
                 }
-                System.Diagnostics.Trace.WriteLine($"Processing loop finished.");
+                Trace.WriteLine($"Processing loop finished.");
             }
             finally
             {
@@ -283,18 +285,27 @@ namespace OpenIris
                 currentImagesAndData = null;
 
                 // Let the left and right tasks go so they can finish.
-                newImagesEvent[Eye.Left].Set();
-                newImagesEvent[Eye.Right].Set();
+                newImagesEvent[Eye.Left]?.Set();
+                newImagesEvent[Eye.Right]?.Set();
 
-                // Wait for the two threads to signal they completed their loops
-                // before we dispose the events
-                eyeDoneEvent[Eye.Left].WaitOne();
-                eyeDoneEvent[Eye.Right].WaitOne();
+                // Make the events null first to make sure nobody waits on them again
+                // Then dispose them.
 
-                newImagesEvent[Eye.Left].Dispose();
-                newImagesEvent[Eye.Right].Dispose();
-                eyeDoneEvent[Eye.Left].Dispose();
-                eyeDoneEvent[Eye.Right].Dispose();
+                var tempEvent = newImagesEvent[Eye.Left];
+                newImagesEvent[Eye.Left] = null;
+                tempEvent?.Dispose();
+
+                tempEvent = newImagesEvent[Eye.Right];
+                newImagesEvent[Eye.Right] = null;
+                tempEvent?.Dispose();
+                
+                tempEvent = eyeDoneEvent[Eye.Left];
+                eyeDoneEvent[Eye.Left] = null;
+                tempEvent?.Dispose();
+
+                tempEvent = eyeDoneEvent[Eye.Right];
+                eyeDoneEvent[Eye.Right] = null;
+                tempEvent?.Dispose();
 
                 inputBuffer = null;
             }
@@ -325,16 +336,20 @@ namespace OpenIris
             }
         }
 
-        private void ProcessOneEyeLoop(ref EyeTrackerImagesAndData? imagesAndData, ref (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines, Eye whichEye, AutoResetEvent newImageEvent, AutoResetEvent doneWithProcessingEvent)
+        private void ProcessOneEyeLoop(
+            ref EyeTrackerImagesAndData? imagesAndData, 
+            ref (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines, Eye whichEye, 
+            EyeCollection<AutoResetEvent?> newImageEvents,
+            EyeCollection<AutoResetEvent?> doneWithProcessingEvents)
         {
             Thread.CurrentThread.Name = "EyeTracker:EyeProcessLoop";
 
-            while (stopping is false)
+            while (!stopping)
             {
                 try
                 {
                     // wait for new frame
-                    newImageEvent.WaitOne();
+                    newImageEvents[whichEye]?.WaitOne();
 
                     var image = imagesAndData?.Images[whichEye];
                     var pipeline = pipelines.implementation?[whichEye];
@@ -349,7 +364,7 @@ namespace OpenIris
                 finally
                 {
                     // signal that we are done with processing
-                    doneWithProcessingEvent.Set();
+                    doneWithProcessingEvents[whichEye]?.Set();
                 }
             }
         }

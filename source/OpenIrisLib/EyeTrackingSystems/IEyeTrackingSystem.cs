@@ -19,7 +19,7 @@ namespace OpenIris
     /// <summary>
     /// 
     /// </summary>
-    public interface IEyeTrackingSystem: IPlugin, IDisposable
+    public interface IEyeTrackingSystem: IDisposable
     {
         EyeTrackingSystemSettings Settings { get; set; }
 

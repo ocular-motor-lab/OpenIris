@@ -83,11 +83,10 @@ namespace OpenIris
         /// <returns>New ImageGrabberVideoFile object.</returns>
         private VideoPlayer(IEyeTrackingSystem system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
         {
-            eyeTrackingSystemSettings = (EyeTrackingSystemSettings?)EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(system.Name ?? "")
+            eyeTrackingSystemSettings = (EyeTrackingSystemSettings?)EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(system)
                 ?? throw new InvalidOperationException("No EyeTrackingsyStemFactory");
 
             eyeTrackingSystem = system;
-            Name = eyeTrackingSystem.Name;
             Settings = eyeTrackingSystemSettings;
 
             // Check that all the video files exist

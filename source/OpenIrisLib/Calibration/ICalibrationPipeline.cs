@@ -21,7 +21,7 @@ namespace OpenIris
     /// at the same time as the model. In such case this method should return inmideately.
     /// </summary>
 
-    public interface ICalibrationPipeline : IPlugin, IDisposable
+    public interface ICalibrationPipeline : IDisposable
     {
         (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image);
         (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image);

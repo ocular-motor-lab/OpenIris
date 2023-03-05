@@ -97,7 +97,7 @@ namespace OpenIris
     /// <typeparam name="TPlugin"></typeparam>
     /// <typeparam name="TPluginMetadata"></typeparam>
     public class EyeTrackerPluginLoader<TPlugin, TPluginMetadata>
-        where TPlugin : class, IPlugin
+        where TPlugin : class
         where TPluginMetadata : IEyeTrackerPluginMetadata
     {
         /// <summary>
@@ -159,7 +159,6 @@ namespace OpenIris
                     // Find a factory by its name
                     var newPluginObject = ClassFactories.First(x => x.Metadata.Name == name)?.CreateExport().Value ??
                         throw new PluginManagerException($"Plugin '{name}' not found.");
-                    newPluginObject.Name = name;
                     return newPluginObject;
                 }
             }
@@ -193,18 +192,19 @@ namespace OpenIris
                 throw new PluginManagerException($" Error loading plugin '{name}'.", ex);
             }
         }
-    }
 
-
-    /// <summary>
-    /// Interface of all plugins.
-    /// </summary>
-    public interface IPlugin
-    {
         /// <summary>
-        /// Name of the plugin.
+        /// Gets the default settings for the plugin given the system object
         /// </summary>
-        string? Name { get; set; }
+        /// <param name="name">Name of the factory. Must match Metadata.Name.</param>
+        /// <returns></returns>
+        public EyeTrackerSettingsBase GetDefaultSettings(IEyeTrackingSystem system)
+        {
+            var systemName = (Attribute.GetCustomAttribute(system.GetType(), typeof(PluginDescriptionEyeTrackingSystemAttribute)) as PluginDescriptionEyeTrackingSystemAttribute)?.Name ?? String.Empty;
+
+            return GetDefaultSettings(systemName);
+        }
+
     }
 
     /// <summary>

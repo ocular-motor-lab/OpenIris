@@ -21,7 +21,6 @@ namespace OpenIris
         /// </summary>
         public EyeTrackingSystemBase()
         {
-            Name = "";
             Settings = new EyeTrackingSystemSettings();
         }
 
@@ -49,11 +48,6 @@ namespace OpenIris
         public virtual void Dispose()
         {
         }
-
-        /// <summary>
-        /// Gets the name of the eye tracker.
-        /// </summary>
-        public string? Name { get; set; }
 
         /// <summary>
         /// Settings of the system.

@@ -20,7 +20,7 @@ namespace OpenIris
     /// <summary>
     /// Interface for all eye tracking pipelines that process images to get data.
     /// </summary>
-    public interface IEyeTrackingPipeline : IPlugin
+    public interface IEyeTrackingPipeline
     {
         /// <summary>
         /// Process the images to get data.

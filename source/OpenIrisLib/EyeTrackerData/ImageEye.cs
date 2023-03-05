@@ -75,7 +75,7 @@ namespace OpenIris
             if (info is null) throw new ArgumentNullException(nameof(info));
 
             WhichEye = (Eye)info.GetValue("WhichEye", WhichEye.GetType());
-            TimeStamp = (ImageEyeTimestamp)info.GetValue("TimeStamp", TimeStamp.GetType());
+            TimeStamp = (ImageEyeTimestamp)info.GetValue("TimeStamp", typeof(ImageEyeTimestamp));
         }
 
         /// <summary>

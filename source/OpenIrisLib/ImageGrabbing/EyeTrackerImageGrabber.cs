@@ -126,7 +126,7 @@ namespace OpenIris
         /// Notifies listeners about a new frame available. This event runs in the grabber thread. Any
         /// event handler should be quick.
         /// </summary>
-        public event EventHandler<EyeCollection<ImageEye?>> ImagesGrabbed;
+        public event EventHandler<EyeCollection<ImageEye?>>? ImagesGrabbed;
 
         /// <summary>
         /// Gets the frame number of the last image grabbed.
@@ -492,7 +492,7 @@ namespace OpenIris
                     .Select(s => s!.CameraOrientation.IsRotated() ? s.FrameSize.Transpose() : s.FrameSize)
                     .Distinct().Single();
             }
-            catch(Exception ex)
+            catch
             {
                 throw new InvalidOperationException("The frame size of the two cameras is not the same");
             }

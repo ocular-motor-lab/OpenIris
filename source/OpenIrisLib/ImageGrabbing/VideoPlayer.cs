@@ -83,7 +83,7 @@ namespace OpenIris
         /// <returns>New ImageGrabberVideoFile object.</returns>
         private VideoPlayer(IEyeTrackingSystem system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
         {
-            eyeTrackingSystemSettings = (EyeTrackingSystemSettings?)EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(system.Name)
+            eyeTrackingSystemSettings = (EyeTrackingSystemSettings?)EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(system.Name ?? "")
                 ?? throw new InvalidOperationException("No EyeTrackingsyStemFactory");
 
             eyeTrackingSystem = system;
@@ -335,7 +335,7 @@ namespace OpenIris
 
                         lastFrameNumber = image.TimeStamp.FrameNumber;
 
-                        images[video.WhichEye] = image;
+                        images[image.WhichEye] = image;
                     }
 
                     // If paused keep grabbing the same frame

@@ -22,7 +22,7 @@ namespace OpenIris
         /// <summary>
         /// Name of the plugin, gets set automatically.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Disposes objects.

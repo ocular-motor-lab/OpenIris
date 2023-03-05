@@ -116,6 +116,7 @@ namespace OpenIris
         {
             if (procesedImages is null) return new HeadData();
             if (headDataSource is null) return new HeadData();
+            if (headDataBuffer is null) return new HeadData();
 
             // Get one current timestamp
             var imageFrameNumber = procesedImages[Eye.Right]?.EyeData?.Timestamp.FrameNumberRaw;
@@ -167,18 +168,20 @@ namespace OpenIris
                 }
             }
 
-            return null;
+            return new HeadData();
         }
 
         private void GrabbingLoop()
         {
-            if (headDataSource is null) return;
 
             Thread.CurrentThread.Name = "Camera:HeadGrabbing";
 
             long lastFrame = -1;
             while (grabbing)
             {
+                if (headDataSource is null) return;
+                if (headDataBuffer is null) return;
+
                 try
                 {
                     var data = headDataSource.GrabHeadData();

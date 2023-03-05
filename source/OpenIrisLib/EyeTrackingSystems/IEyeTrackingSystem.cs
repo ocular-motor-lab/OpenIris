@@ -23,11 +23,11 @@ namespace OpenIris
     {
         EyeTrackingSystemSettings Settings { get; set; }
 
-        EyeCollection<CameraEye?> CreateCameras();
+        EyeCollection<CameraEye?>? CreateCameras();
         EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames);
 
-        IHeadDataSource CreateHeadDataSourceWithCameras();
-        IHeadDataSource CreateHeadDataSourceWithVideos();
+        IHeadDataSource? CreateHeadDataSourceWithCameras();
+        IHeadDataSource? CreateHeadDataSourceWithVideos();
 
         EyeCollection<ImageEye?> PreProcessImagesFromCameras(EyeCollection<ImageEye?> images);
         EyeCollection<ImageEye?> PreProcessImagesFromVideos(EyeCollection<ImageEye?> images);
@@ -35,8 +35,8 @@ namespace OpenIris
         EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages);
 
 
-        Form OpenEyeTrackingSystemUI { get; }
-        ToolStripMenuItem[] GetToolStripMenuItems();
+        Form? OpenEyeTrackingSystemUI { get; }
+        ToolStripMenuItem[]? GetToolStripMenuItems();
     }
 
 

@@ -53,9 +53,6 @@
     <Reference Include="Emgu.CV.World, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.World.dll</HintPath>
     </Reference>
-    <Reference Include="MathWorks.MATLAB.ProductionServer.Client">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files\MATLAB\R2018b\toolbox\compiler_sdk\mps_clients\dotnet\MathWorks.MATLAB.ProductionServer.Client.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />

@@ -204,7 +204,7 @@ namespace OpenIris
         /// <summary>
         /// Name of the plugin.
         /// </summary>
-        string Name { get; set; }
+        string? Name { get; set; }
     }
 
     /// <summary>

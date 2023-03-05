@@ -66,7 +66,7 @@ namespace OpenIris
         {
             if (images.Count == 1 && images[0]?.WhichEye == Eye.Both)
             {
-                var image = images[0];
+                var image = images[0]!;
 
                 var width = image.Size.Width;
                 var height = image.Size.Height;

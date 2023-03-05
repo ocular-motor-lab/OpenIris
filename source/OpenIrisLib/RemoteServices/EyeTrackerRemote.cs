@@ -190,12 +190,12 @@ namespace OpenIris
                 try
                 {
                     imagesAndData.RawData = new EyeCollection<EyeData?>(
-                        eyeTracker.LastImagesAndData.Data.EyeDataRaw?[Eye.Left],
-                        eyeTracker.LastImagesAndData.Data.EyeDataRaw?[Eye.Right]);
+                        eyeTracker.LastImagesAndData.Data?.EyeDataRaw?[Eye.Left],
+                        eyeTracker.LastImagesAndData.Data?.EyeDataRaw?[Eye.Right]);
 
                     imagesAndData.CalibratedData = new EyeCollection<CalibratedEyeData>(
-                        eyeTracker.LastImagesAndData.Data.EyeDataCalibrated?[Eye.Left] ?? new CalibratedEyeData(),
-                        eyeTracker.LastImagesAndData.Data.EyeDataCalibrated?[Eye.Right] ?? new CalibratedEyeData()
+                        eyeTracker.LastImagesAndData.Data?.EyeDataCalibrated?[Eye.Left] ?? new CalibratedEyeData(),
+                        eyeTracker.LastImagesAndData.Data?.EyeDataCalibrated?[Eye.Right] ?? new CalibratedEyeData()
                         );
                     imagesAndData.Image = new EyeCollection<Bitmap?>(
                         eyeTracker.LastImagesAndData.Images[Eye.Left]?.Image.Bitmap,
@@ -401,9 +401,11 @@ namespace OpenIris
                     return bytesToSend;
                 case "GETDATA":
                     var eyedata = GetCurrentData();
+                    var leftData = eyedata?[Eye.Left] ?? new EyeData();
+                    var rightData = eyedata?[Eye.Left] ?? new EyeData();
                     var eyedatamsg =
-                    $"{eyedata[Eye.Left].Timestamp.FrameNumberRaw};{eyedata[Eye.Left].Timestamp.Seconds};{eyedata[Eye.Left].Pupil.Center.X};{eyedata[Eye.Left].Pupil.Center.Y};" +
-                    $"{eyedata[Eye.Right].Timestamp.FrameNumberRaw};{eyedata[Eye.Right].Timestamp.Seconds};{eyedata[Eye.Right].Pupil.Center.X};{eyedata[Eye.Right].Pupil.Center.Y};";
+                    $"{leftData.Timestamp.FrameNumberRaw};{leftData.Timestamp.Seconds};{leftData.Pupil.Center.X};{leftData.Pupil.Center.Y};" +
+                    $"{rightData.Timestamp.FrameNumberRaw};{rightData.Timestamp.Seconds};{rightData.Pupil.Center.X};{rightData.Pupil.Center.Y};";
                     return Encoding.ASCII.GetBytes(eyedatamsg);
                 case "RECORDEVENT":
                     var frameNumber = RecordEvent(msg[1]);

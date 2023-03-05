@@ -12,6 +12,7 @@ namespace OpenIris
     using System;
     using System.Collections.Concurrent;
     using System.Diagnostics;
+    using System.Drawing;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -94,7 +95,7 @@ namespace OpenIris
 
                     await calibrationTask;
 
-                    if (!calibrationPipeline.Cancelled)
+                    if (!calibrationPipeline.Cancelled & inputBuffer.IsAddingCompleted is false)
                     {
                         var calibrationParameters = CalibrationParameters.Default;
                         calibrationParameters.TrackingSettings = processingSettings;
@@ -166,11 +167,12 @@ namespace OpenIris
                                 }
 
                                 // Make sure there is always a model when a reference is set.
-                                if (!tempCalibration.EyeCalibrationParameters[Eye.Left].HasEyeModel)
+                                // Ideally this should never happen
+                                if (!tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].HasEyeModel)
                                 {
                                     var model = new EyePhysicalModel(
-                                                            imageEye.EyeData.Pupil.Center,
-                                                            imageEye.EyeData.Iris.Radius * 2.0f);
+                                                            imageEye.EyeData?.Pupil.Center ?? new PointF(imageEye.Size.Width / 2, imageEye.Size.Height / 2),
+                                                            (imageEye.EyeData?.Iris.Radius * 2.0f ?? (float)(12.0f / settings.GetMmPerPix())));
 
                                     tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].SetEyeModel(model);
                                 }
@@ -186,7 +188,7 @@ namespace OpenIris
 
                     await calibrationTask;
 
-                    if (!calibrationPipeline.Cancelled)
+                    if (!calibrationPipeline.Cancelled & inputBuffer.IsAddingCompleted is false)
                     {
                         tempCalibration.EyeCalibrationParameters[Eye.Left].SetReference(eyeReferences[Eye.Left]);
                         tempCalibration.EyeCalibrationParameters[Eye.Right].SetReference(eyeReferences[Eye.Right]);
@@ -216,6 +218,8 @@ namespace OpenIris
         /// <param name="newData">New data from the last frame.</param>
         internal void ProcessNewDataAndImages(EyeTrackerImagesAndData newData)
         {
+            if (inputBuffer?.IsAddingCompleted ?? true) return;
+
             // Add the frame images to the input queue for processing
             inputBuffer?.TryAdd(newData);
         }

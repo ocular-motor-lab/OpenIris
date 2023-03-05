@@ -28,7 +28,7 @@ namespace OpenIris
         /// <summary>
         /// Name of the plugin, gets set automatically.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         private readonly CvBlobDetector detector = new CvBlobDetector();
         private readonly CvBlobs blobs = new CvBlobs();
@@ -90,10 +90,6 @@ namespace OpenIris
                 var pupilBlob = blobs.OrderByDescending(blob => blob.Response).First();
 
                 pupil = new PupilData(new PointF( pupilBlob.Point.X/ scaleDownX, pupilBlob.Point.Y/ scaleDownY), new SizeF(pupilBlob.Size/ scaleDownX, pupilBlob.Size/ scaleDownY), 0.0f);
-            }
-            else
-            {
-                int a = 1;
             }
 
 

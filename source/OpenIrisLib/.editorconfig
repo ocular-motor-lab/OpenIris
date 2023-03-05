@@ -14,3 +14,27 @@ dotnet_diagnostic.CA2007.severity = none
 
 # CA1716: Identifiers should not match keywords
 dotnet_diagnostic.CA1716.severity = none
+
+# CS8767: Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+dotnet_diagnostic.CS8767.severity = error
+
+# CS8618: Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+dotnet_diagnostic.CS8618.severity = error
+
+# CS8602: Dereference of a possibly null reference.
+dotnet_diagnostic.CS8602.severity = error
+
+# CS8766: Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
+dotnet_diagnostic.CS8766.severity = error
+
+# CS8619: Nullability of reference types in value doesn't match target type.
+dotnet_diagnostic.CS8619.severity = error
+
+# CS1591: Missing XML comment for publicly visible type or member
+dotnet_diagnostic.CS1591.severity = suggestion
+
+# CS8601: Possible null reference assignment.
+dotnet_diagnostic.CS8601.severity = warning
+
+# CS8604: Possible null reference argument.
+dotnet_diagnostic.CS8604.severity = warning

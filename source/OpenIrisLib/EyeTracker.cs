@@ -460,7 +460,7 @@ namespace OpenIris
                     SessionName = Settings.SessionName,
                     SaveRawVideo = Settings.RecordVideo,
                     DecimateRatioRawVideo = Settings.DecimateVideoRatio,
-                    DataFolder = Settings?.DataFolder ?? "",
+                    DataFolder = Settings.DataFolder,
                     FrameRate = ImageGrabber?.FrameRate ?? 0.0,
                 };
 

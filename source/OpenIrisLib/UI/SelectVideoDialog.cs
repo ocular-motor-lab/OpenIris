@@ -200,7 +200,7 @@ namespace OpenIris.UI
         /// <param name="e">Event parameters.</param>
         private void SelectVideoDialog_Load(object sender, EventArgs e)
         {
-            var availableSystems = EyeTrackerPluginManager.EyeTrackingsyStemFactory.ClassesAvaiable.Select(x => x.Name).ToArray();
+            var availableSystems = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
             Array.Sort(availableSystems);
 
             systemComboBox.DataSource = availableSystems;

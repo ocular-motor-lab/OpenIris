@@ -53,7 +53,7 @@ namespace OpenIris
         /// <summary>
         /// Gets the name of the eye tracker.
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Settings of the system.
@@ -83,10 +83,8 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileNames">Names of the files to load.</param>
         /// <returns>List of image eye source objects.</returns>
-        public virtual EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?>? fileNames)
+        public virtual EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames)
         {
-            if (fileNames is null) throw new ArgumentNullException(nameof(fileNames));
-
             switch (fileNames.Count)
             {
                 case 1:
@@ -152,11 +150,7 @@ namespace OpenIris
         /// Gets custom menu items for this system to show in the main window
         /// </summary>
         /// <returns></returns>
-        public virtual ToolStripMenuItem[] GetToolStripMenuItems()
-        {
-            return null;
-        }
-
+        public virtual ToolStripMenuItem[]? GetToolStripMenuItems() => null;
     }
 
 }

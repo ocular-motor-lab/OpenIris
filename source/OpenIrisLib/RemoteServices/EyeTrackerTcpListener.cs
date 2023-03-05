@@ -43,7 +43,6 @@ namespace OpenIris
 
                     // Buffer for reading data
                     Byte[] bytes = new Byte[256];
-                    String data = null;
 
                     // Enter the listening loop.
                     while (true)
@@ -54,8 +53,6 @@ namespace OpenIris
                         // You could also use server.AcceptSocket() here.
                         using TcpClient client = server.AcceptTcpClient();
                         Trace.WriteLine("TCP server Connected!");
-
-                        data = null;
 
                         // Get a stream object for reading and writing
                         NetworkStream stream = client.GetStream();

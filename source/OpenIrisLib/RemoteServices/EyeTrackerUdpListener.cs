@@ -35,7 +35,6 @@ namespace OpenIris
 
                     // Buffer for reading data
                     Byte[] bytes;
-                    String data = null;
 
                     Trace.WriteLine($"UDP server Waiting for requests in port {port}.");
 

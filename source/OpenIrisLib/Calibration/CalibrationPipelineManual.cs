@@ -22,7 +22,7 @@ namespace OpenIris.Calibration
     public partial class CalibrationPipelineManual : CalibrationUIControl, ICalibrationPipeline
     {
         private EyeCollection<ImageEye?> LastImages { get; set; }
-        private EyeCollection<EyePhysicalModel> eyeModels;
+        private EyeCollection<EyePhysicalModel>? eyeModels;
         private EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
 
         public CalibrationUIControl? GetCalibrationUI() => this;
@@ -126,7 +126,7 @@ namespace OpenIris.Calibration
             return (true, eyeModels[image.WhichEye]);
         }
 
-        public (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        public (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
             if (image == null) return (false, null);
 

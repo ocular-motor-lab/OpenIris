@@ -73,14 +73,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SpinnakerNET_v140.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
       <Project>{ed3ad445-a2fd-41c2-a77c-ce0c22b08192}</Project>
       <Name>OpenIrisLib</Name>
-      <Private>False</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="SpinnakerNET_v140.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

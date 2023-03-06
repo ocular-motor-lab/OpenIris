@@ -42,6 +42,15 @@ namespace OpenIris
             LastVideoFolder = "";
         }
 
+        public EyeTrackerSettings(bool safeMode)
+        {
+            allEyeTrackerSystemsSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
+            allEyeTrackingPipelinesSettings = new EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings>();
+            allCalibrationImplementations = new EyeTrackerSettingsDictionary<CalibrationSettings>();
+            LastVideoEyeTrackerSystem = "";
+            LastVideoFolder = "";
+        }
+
         #region A) Choose an eye tracking system plugin"
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]

@@ -44,7 +44,7 @@ namespace OpenIris.UI
 
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
 
-            Exception ex;
+            Exception? ex;
             
             (eyeTracker, ex) = EyeTracker.Start();
             

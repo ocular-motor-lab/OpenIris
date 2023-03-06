@@ -19,39 +19,61 @@ namespace OpenIris
     /// </summary>
     public sealed partial class EyeTracker : IDisposable
     {
-        private static EyeTracker eyeTracker;
+        private static EyeTracker eyeTracker = new EyeTracker();
         private PluginManagerException? startupException;
+        private bool initialized;
         
         /// <summary>
-        /// Static constructor for eye tracking.
+        /// Constructor for EyeTracker. 
+        /// This is just to make sure the static property is never null.
+        /// This is not an initialization of the eye tracker. For that, Init must be called.
+        /// That should not be a problem. The only way to access an EyeTracker object
+        /// is by the static Start method and that one will call init appropriately.
         /// </summary>
-        static EyeTracker()
+        private EyeTracker()
         {
-            try
+            DataBuffer = new EyeTrackerDataBuffer();
+            Calibration = CalibrationParameters.Default;
+
+            // TODO: this is a bit ugly, but I don't want to make this nullable.
+            // I also don't want to load it in the statuc constructor.
+            Settings = new EyeTrackerSettings(true); 
+        }
+
+        /// <summary>
+        /// Initializes an instance of the EyeTracker class.
+        /// </summary>
+        public static (EyeTracker eyeTracker, Exception? ex) Start()
+        {
+            if (eyeTracker.initialized is false)
             {
-                eyeTracker = new EyeTracker();
+                try
+                {
+                    eyeTracker = new EyeTracker();
+                    eyeTracker.Init();
+                }
+                catch (PluginManagerException ex)
+                {
+                    eyeTracker.Init(safeMode: true);
+                    eyeTracker.startupException = ex;
+                }
             }
-            catch (PluginManagerException ex)
-            {
-                eyeTracker = new EyeTracker(safeMode: true);
-                eyeTracker.startupException = ex;
-            }
+
+            // Singleton
+            return (eyeTracker, eyeTracker.startupException);
         }
 
         /// <summary>
         /// Initializes an instance of the EyeTracker class.
         /// </summary>
         /// <param name="safeMode">True activates safe mode by not using external plugins.</param>
-        private EyeTracker(bool safeMode = false)
+        private void Init(bool safeMode = false)
         {
             try
             {
                 var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
 
                 EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"EyeTrackerLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
-
-                DataBuffer = new EyeTrackerDataBuffer();
-                Calibration = CalibrationParameters.Default;
 
                 // Initialize the object that loads the different eye tracking system objects. It can
                 // load objects from new classes present in new dlls in the application folder.
@@ -65,6 +87,8 @@ namespace OpenIris
                 // cannot be done in a separate thread.
                 EyeTrackerRemoteServices.Start(this);
 
+                initialized = true;
+
                 Trace.WriteLine($"Eye tracker initializing complete in {(EyeTrackerDebug.TimeElapsed-t1).TotalSeconds} seconds.");
             }
             catch (Exception ex)
@@ -76,16 +100,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Initializes an instance of the EyeTracker class.
-        /// </summary>
-        /// <param name="safeMode">True activates safe mode by not using external plugins.</param>
-        public static (EyeTracker eyeTracker, Exception? ex) Start(bool safeMode = false)
-        {
-            // Singleton
-            return (eyeTracker, eyeTracker.startupException);
-        }
-
-        /// <summary>
         /// Disposes objects.
         /// </summary>
         public void Dispose()
@@ -94,7 +108,6 @@ namespace OpenIris
             StopTracking();
             EyeTrackerRemoteServices.StopService();
             Settings?.Save();
-            eyeTracker = null;
         }
 
         /// <summary>

@@ -123,6 +123,12 @@
     <Compile Include="UI\EyeTrackingPipelineUIControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="UI\MultiScrollerPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\MultiScrollerPanel.Designer.cs">
+      <DependentUpon>MultiScrollerPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\ProgressBarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -244,9 +250,11 @@
   <ItemGroup>
     <EmbeddedResource Include="Calibration\CalibrationPipelineManual.resx">
       <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\DebugImagesPanel.resx">
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackingPipelinePupilCRQuickSettings.resx">
       <DependentUpon>EyeTrackingPipelinePupilCRQuickSettings.cs</DependentUpon>
@@ -256,9 +264,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\BatchAnalysis.resx">
       <DependentUpon>BatchAnalysis.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackerImageEyeBox.resx">
       <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackingPipelineJOMQuickSettings.resx">
       <DependentUpon>EyeTrackingPipelineJOMQuickSettings.cs</DependentUpon>
@@ -271,6 +281,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\GeneralForm.resx">
       <DependentUpon>GeneralForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\MultiScrollerPanel.resx">
+      <DependentUpon>MultiScrollerPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ProgressBarDialog.resx">
       <DependentUpon>ProgressBarDialog.cs</DependentUpon>

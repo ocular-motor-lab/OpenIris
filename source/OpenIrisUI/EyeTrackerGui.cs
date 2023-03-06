@@ -217,6 +217,8 @@ namespace OpenIris.UI
 
                         tabPages.SelectedTab = tabPageStart;
                         systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
+
+                        pipelineUI = null;
                     }
                 }
                 else
@@ -386,13 +388,17 @@ namespace OpenIris.UI
 
                     foreach (var eye in eyes)
                     {
-                        var control = pipelineUI?.controls?[eye];
-                        if (control is null) continue;
+                        if (eye == eyeTracker.Settings.EyeTrackingSystemSettings.Eye |
+                            Eye.Both == eyeTracker.Settings.EyeTrackingSystemSettings.Eye )
+                        {
+                            var control = pipelineUI?.controls?[eye];
+                            if (control is null) continue;
 
-                        control.Dock = DockStyle.Fill;
-                        control.Location = new Point(0, 0);
-                        control.Size = panels[eye].ClientSize;
-                        panels[eye].Controls.Add(control);
+                            control.Dock = DockStyle.Fill;
+                            control.Location = new Point(0, 0);
+                            control.Size = panels[eye].ClientSize;
+                            panels[eye].Controls.Add(control);
+                        }
                     }
                 }
 

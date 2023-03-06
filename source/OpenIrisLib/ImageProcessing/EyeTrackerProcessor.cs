@@ -257,7 +257,7 @@ namespace OpenIris
                     //
                     // Propagate the processed images
                     //
-                    if (numberOfThreads == 1 | orderNumber == outputNextExpectedNumber)
+                    if (numberOfThreads == 1 || orderNumber == outputNextExpectedNumber)
                     {
                         // if only one thread no need to use the output queue
                         // because the frames are not going to be out of order

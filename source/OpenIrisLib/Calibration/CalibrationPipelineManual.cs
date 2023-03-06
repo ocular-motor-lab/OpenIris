@@ -24,8 +24,9 @@ namespace OpenIris.Calibration
         private EyeCollection<ImageEye?> LastImages { get; set; }
         private EyeCollection<EyePhysicalModel>? eyeModels;
         private EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
+        private CalibrationUIControl? currentUI;
 
-        public CalibrationUIControl? GetCalibrationUI() => this;
+        public CalibrationUIControl? GetCalibrationUI() => currentUI;
 
         /// <summary>
         /// Indicates weather the calibration was cancelled.
@@ -119,6 +120,8 @@ namespace OpenIris.Calibration
 
         public (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
+            currentUI = this;
+
             LastImages[image.WhichEye] = image;
 
             if (eyeModels is null) return (false, EyePhysicalModel.EmptyModel);
@@ -128,6 +131,8 @@ namespace OpenIris.Calibration
 
         public (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
+            currentUI = null; // No UI for resetting reference
+
             if (image == null) return (false, null);
 
             LastImages[image.WhichEye] = image;

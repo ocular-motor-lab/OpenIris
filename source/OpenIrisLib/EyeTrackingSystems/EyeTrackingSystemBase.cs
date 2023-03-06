@@ -30,7 +30,7 @@ namespace OpenIris
         /// <param name="settings"></param>
         /// <param name="name">Name of the system.</param>
         /// <returns>The system.</returns>
-        public static IEyeTrackingSystem Create(string name, EyeTrackingSystemSettings? settings)
+        public static IEyeTrackingSystem Create(string name, EyeTrackingSystemSettings? settings = null)
         {
             var system = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.Create(name)
                 ?? throw new OpenIrisException("Bad system");

@@ -11,6 +11,7 @@ namespace OpenIris
     using System.Drawing;
     using System.Reflection;
     using Emgu.CV.Structure;
+    using System.Runtime;
 
     /// <summary>
     /// Data structure containing the geometric properties of the globe.
@@ -155,6 +156,12 @@ namespace OpenIris
         }
 
         public static EyePhysicalModel EmptyModel = new EyePhysicalModel();
+        public static EyePhysicalModel GetDefault(Size size, double mmPerPix)
+        {
+            return new EyePhysicalModel(
+                new PointF(size.Width / 2, size.Height / 2),
+                (float)(12.0f / mmPerPix));
+        }
     }
 
     /// <summary>

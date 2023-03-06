@@ -10,11 +10,11 @@ namespace OpenIris
     /// <summary>
     /// Interface for Calibration UI.
     /// </summary>
-    public abstract class CalibrationUIControl : UserControl
+    public class CalibrationUIControl : UserControl
     {
         /// <summary>
         /// Update the UI.
         /// </summary>
-        public abstract void UpdateUI();
+        public virtual void UpdateUI() { }
     }
 }

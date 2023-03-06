@@ -3,7 +3,6 @@
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
-using OpenIris;
 
 namespace OpenIris
 {
@@ -12,7 +11,6 @@ namespace OpenIris
     using System;
     using System.Collections.Concurrent;
     using System.Diagnostics;
-    using System.Drawing;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -32,16 +30,19 @@ namespace OpenIris
     /// reason it is necessary to do other calibration first to properly geocmetrically correct the
     /// image of the iris.
     /// </remarks>
-    public class CalibrationSession : IDisposable
+    public sealed class CalibrationSession : IDisposable
     {
-        private Eye whichEyeToCalibrate;
-        private ICalibrationPipeline calibrationPipeline;
+        private readonly Eye whichEyeToCalibrate;
+        private readonly ICalibrationPipeline calibrationPipeline;
         private BlockingCollection<EyeTrackerImagesAndData>? inputBuffer;
 
         /// <summary>
         /// User interface of the calibration.
         /// </summary>
-        public CalibrationUIControl? GetCalibrationUI() => calibrationPipeline?.GetCalibrationUI();
+        public CalibrationUIControl? GetCalibrationUI()
+        {
+            return calibrationPipeline?.GetCalibrationUI();
+        }
 
         /// <summary>
         /// Starts a calibration session.
@@ -87,7 +88,7 @@ namespace OpenIris
                                  (hasModel[image.WhichEye], eyeModels[image.WhichEye]) = calibrationPipeline.ProcessForEyeModel(calibrationSettings, processingSettings, image);
                              }
 
-                             if (hasModel[Eye.Left] & hasModel[Eye.Right]) break;
+                             if (hasModel[Eye.Left] && hasModel[Eye.Right]) break;
 
                              if (calibrationPipeline.Cancelled) break;
                          }
@@ -95,7 +96,7 @@ namespace OpenIris
 
                     await calibrationTask;
 
-                    if (!calibrationPipeline.Cancelled & inputBuffer.IsAddingCompleted is false)
+                    if (calibrationPipeline.Cancelled is false && inputBuffer.IsAddingCompleted is false)
                     {
                         var calibrationParameters = CalibrationParameters.Default;
                         calibrationParameters.TrackingSettings = processingSettings;
@@ -145,50 +146,49 @@ namespace OpenIris
                 {
                     using var cancellation = new CancellationTokenSource();
                     using var calibrationTask = Task.Factory.StartNew(() =>
-                    {
-                        Thread.CurrentThread.Name = "EyeTracker:CalibrationThread";
-
-                        // Keep processing images until the buffer is marked as complete and empty
-                        foreach (var data in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                         {
-                            foreach (var imageEye in data.Images)
+                            Thread.CurrentThread.Name = "EyeTracker:CalibrationThread";
+
+                            // Keep processing images until the buffer is marked as complete and empty
+                            foreach (var data in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                             {
-                                if (imageEye is null) continue;
-                                if (hasReference[imageEye.WhichEye]) continue;
-
-                                // Wait until we get an image that has the correct eye model.
-                                // Because images are processed in paralel in the processing pipele,
-                                // here in the calibration, there are images in the queue for may have been
-                                // processed with the wrong eye model. So we don't want to use them for reference.
-                                if (tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].EyePhysicalModel
-                                    != data.Calibration.EyeCalibrationParameters[imageEye.WhichEye].EyePhysicalModel)
+                                foreach (var imageEye in data.Images)
                                 {
-                                    continue;
+                                    if (imageEye is null || hasReference[imageEye.WhichEye]) continue;
+
+                                    // Wait until we get an image that has the correct eye model.
+                                    // Because images are processed in paralel in the processing pipele,
+                                    // here in the calibration, there are images in the queue for may have been
+                                    // processed with the wrong eye model. So we don't want to use them for reference.
+                                    if (tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].EyePhysicalModel
+                                        != data.Calibration.EyeCalibrationParameters[imageEye.WhichEye].EyePhysicalModel)
+                                    {
+                                        continue;
+                                    }
+
+                                    // Make sure there is always a model when a reference is set.
+                                    // Ideally this should never happen
+                                    if (!tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].HasEyeModel)
+                                    {
+                                        var model = (imageEye.EyeData is null) ?
+                                            EyePhysicalModel.GetDefault(imageEye.Size, settings.GetMmPerPix()) :
+                                            new EyePhysicalModel(imageEye.EyeData.Pupil.Center, imageEye.EyeData.Iris.Radius * 2.0f);
+
+                                        tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].SetEyeModel(model);
+                                    }
+
+                                    (hasReference[imageEye.WhichEye], eyeReferences[imageEye.WhichEye]) = calibrationPipeline.ProcessForReference(tempCalibration, calibrationSettings, settings, imageEye);
                                 }
 
-                                // Make sure there is always a model when a reference is set.
-                                // Ideally this should never happen
-                                if (!tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].HasEyeModel)
-                                {
-                                    var model = new EyePhysicalModel(
-                                                            imageEye.EyeData?.Pupil.Center ?? new PointF(imageEye.Size.Width / 2, imageEye.Size.Height / 2),
-                                                            (imageEye.EyeData?.Iris.Radius * 2.0f ?? (float)(12.0f / settings.GetMmPerPix())));
+                                if (hasReference[Eye.Left] && hasReference[Eye.Right]) break;
 
-                                    tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].SetEyeModel(model);
-                                }
-
-                                (hasReference[imageEye.WhichEye], eyeReferences[imageEye.WhichEye]) = calibrationPipeline.ProcessForReference(tempCalibration, calibrationSettings, settings, imageEye);
+                                if (calibrationPipeline.Cancelled) break;
                             }
-
-                            if (hasReference[Eye.Left] & hasReference[Eye.Right]) break;
-
-                            if (calibrationPipeline.Cancelled) break;
-                        }
-                    }, TaskCreationOptions.LongRunning);
+                        }, TaskCreationOptions.LongRunning);
 
                     await calibrationTask;
 
-                    if (!calibrationPipeline.Cancelled & inputBuffer.IsAddingCompleted is false)
+                    if (!calibrationPipeline.Cancelled && inputBuffer.IsAddingCompleted is false)
                     {
                         tempCalibration.EyeCalibrationParameters[Eye.Left].SetReference(eyeReferences[Eye.Left]);
                         tempCalibration.EyeCalibrationParameters[Eye.Right].SetReference(eyeReferences[Eye.Right]);

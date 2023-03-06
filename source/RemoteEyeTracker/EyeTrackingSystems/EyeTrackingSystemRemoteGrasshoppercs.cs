@@ -18,7 +18,7 @@ namespace OpenIris
     [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("RemoteGrasshoppercs", typeof(EyeTrackerSystemSettingsRemoteGrasshopper))]
     public class EyeTrackingSystemRemoteGrasshoppercs : EyeTrackingSystemBase
     {
-        protected CameraEyeFlyCapture camera = null;
+        protected CameraEyeFlyCapture? camera = null;
 
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 
@@ -51,7 +51,7 @@ namespace OpenIris
             // Initialize left camera if necessary
             try
             {
-                this.camera = new CameraEyeFlyCapture(Eye.Both, cameraIndex, settings.FrameRate, roi)
+                camera = new CameraEyeFlyCapture(Eye.Both, cameraIndex , settings.FrameRate, roi)
                 {
                     CameraOrientation = CameraOrientation.Upright,
                     ShouldAdjustFrameRate = false,
@@ -63,19 +63,16 @@ namespace OpenIris
                     BufferSize = 100
                 };
 
-                this.camera.Start();
+                camera.Start();
             }
             catch (Exception ex)
             {
-                if (this.camera != null)
-                {
-                    this.camera.Stop();
-                }
+                camera?.Stop();
 
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
             }
 
-            return new EyeCollection<CameraEye?>(this.camera);
+            return new EyeCollection<CameraEye?>(camera);
         }
 
         /// <summary>

@@ -207,7 +207,7 @@ namespace OpenIris
                 var errorHandler = new TaskErrorHandler(Stop);
                 var usingCameras = videoPlayer is null;
 
-                if (usingCameras & numberOfImageSources > 1)
+                if (usingCameras && numberOfImageSources > 1)
                 {
                     // Setup the queue and start the threads for each camera
                     cameraBuffer = new BlockingCollection<ImageEye>(bufferSize);

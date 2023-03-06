@@ -59,7 +59,6 @@ namespace OpenIris
                 }
             }
 
-            // Singleton
             return (eyeTracker, eyeTracker.startupException);
         }
 
@@ -107,7 +106,7 @@ namespace OpenIris
             // Stop everything just in case
             StopTracking();
             EyeTrackerRemoteServices.StopService();
-            Settings?.Save();
+            Settings.Save();
         }
 
         /// <summary>

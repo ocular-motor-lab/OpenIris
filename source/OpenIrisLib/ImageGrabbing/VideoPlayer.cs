@@ -60,7 +60,7 @@ namespace OpenIris
             if (options is null) throw new ArgumentNullException(nameof(options));
 
             var videoPlayer = new VideoPlayer(
-                EyeTrackingSystemBase.Create(options.EyeTrackingSystem, null),
+                EyeTrackingSystemBase.Create(options.EyeTrackingSystem),
                 options.VideoFileNames,
                 (options as ProcessVideoOptions)?.CustomRange ?? new Range(),
                 false);

@@ -86,7 +86,7 @@
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimplePupilCRBlobs.cs" />
-    <Compile Include="UI\EyeTrackerGuiViewModel.cs" />
+    <Compile Include="UI\EyeTrackerUICommands.cs" />
     <Compile Include="RemoteServices\EyeTrackerRemote.cs" />
     <Compile Include="RemoteServices\EyeTrackerUdpListener.cs" />
     <Compile Include="RemoteServices\EyeTrackerTcpListener.cs" />

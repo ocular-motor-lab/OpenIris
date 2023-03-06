@@ -231,7 +231,7 @@ namespace OpenIris.UI
         {
             if (dataAndImages is null) return;
 
-            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
+            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong settings for JOM pipeline.");
 
             UpdateValues(settings);
         }

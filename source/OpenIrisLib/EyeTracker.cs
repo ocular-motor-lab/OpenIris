@@ -17,9 +17,26 @@ namespace OpenIris
     /// <summary>
     /// Main class that offers the public interface to the library for eye tracking.
     /// </summary>
-    public sealed class EyeTracker : IDisposable
+    public sealed partial class EyeTracker : IDisposable
     {
-        private static EyeTracker? eyeTracker;
+        private static EyeTracker eyeTracker;
+        private PluginManagerException? startupException;
+        
+        /// <summary>
+        /// Static constructor for eye tracking.
+        /// </summary>
+        static EyeTracker()
+        {
+            try
+            {
+                eyeTracker = new EyeTracker();
+            }
+            catch (PluginManagerException ex)
+            {
+                eyeTracker = new EyeTracker(safeMode: true);
+                eyeTracker.startupException = ex;
+            }
+        }
 
         /// <summary>
         /// Initializes an instance of the EyeTracker class.
@@ -62,10 +79,10 @@ namespace OpenIris
         /// Initializes an instance of the EyeTracker class.
         /// </summary>
         /// <param name="safeMode">True activates safe mode by not using external plugins.</param>
-        public static EyeTracker Start(bool safeMode = false)
+        public static (EyeTracker eyeTracker, Exception? ex) Start(bool safeMode = false)
         {
             // Singleton
-            return eyeTracker ??= new EyeTracker(safeMode);
+            return (eyeTracker, eyeTracker.startupException);
         }
 
         /// <summary>

@@ -63,16 +63,16 @@ namespace OpenIris
         /// after a camera system is selected.
         /// </summary>       
         [Category("Camera properties"), Description("Camera resolution ( mm per pixels)")]
-        public double MmPerPix { get => mmPerPix; set => SetProperty(ref mmPerPix, value, nameof(MmPerPix)); }
+        public virtual double MmPerPix { get => mmPerPix; set => SetProperty(ref mmPerPix, value, nameof(MmPerPix)); }
         private double mmPerPix = 0.15; // default value
 
         [Category("Camera properties"), Description("Distance from the camera to the eye ( mm)")]
-        public double DistanceCameraToEyeMm { get => distanceCameraToEyeMm; set => SetProperty(ref distanceCameraToEyeMm, value, nameof(DistanceCameraToEyeMm)); }
+        public virtual double DistanceCameraToEyeMm { get => distanceCameraToEyeMm; set => SetProperty(ref distanceCameraToEyeMm, value, nameof(DistanceCameraToEyeMm)); }
         private double distanceCameraToEyeMm = 50; // default value
 
         [Category("Camera properties"), Description("Camera frame rate")]
         [NeedsRestarting]
-        public float FrameRate { get => frameRate; set => SetProperty(ref frameRate, value, nameof(FrameRate)); }
+        public virtual float FrameRate { get => frameRate; set => SetProperty(ref frameRate, value, nameof(FrameRate)); }
         private float frameRate = 100.0f; // default value
 
         [Category("Camera properties"), Description("Which eye to use.")]

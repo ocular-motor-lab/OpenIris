@@ -185,7 +185,11 @@ namespace OpenIris
         /// </returns>
         internal bool TryProcessImages(EyeTrackerImagesAndData imagesAndData)
         {
-            if (inputBuffer is null) throw new InvalidOperationException("Buffer not ready.");
+            if (inputBuffer is null)
+            {
+                Trace.WriteLine("WARNING: Processor input buffer is null but an image was received to process. Probably nothing to worry about.");
+                return false;
+            }
 
             NumberFramesReceived++;
 

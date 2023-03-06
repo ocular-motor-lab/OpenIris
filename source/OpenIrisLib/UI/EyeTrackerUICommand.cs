@@ -38,10 +38,26 @@ namespace OpenIris.UI
             };
         }
 
-        private readonly Func<object?,Task> executeMethod;
+        private readonly Func<object?, Task> executeMethod;
         private readonly Func<bool> canExecuteMethod;
 
         private bool enabled;
+
+        /// <summary>
+        /// Initializes an instance of the class EyeTrackerCommand for commands that do not need parameters
+        /// </summary>
+        /// <param name="execute">Execute method.</param>
+        /// <param name="canExecute">Can execute method.</param>
+        public EyeTrackerUICommand(Func<object?, Task> execute, Func<bool> canExecute)
+        {
+            executeMethod = execute;
+            canExecuteMethod = canExecute;
+        }
+
+        /// <summary>
+        /// Event from when the can execute changed.
+        /// </summary>
+        public event EventHandler? CanExecuteChanged;
 
         /// <summary>
         /// Binds the command to a control.
@@ -54,7 +70,7 @@ namespace OpenIris.UI
             bindings.Add(control, this);
 
             control.Enabled = enabled;
-            control.Click += (o,e) => Execute(o);
+            control.Click += (o, e) => Execute(o);
 
             CanExecuteChanged += (ob, e) => control.Enabled = enabled;
         }
@@ -70,27 +86,11 @@ namespace OpenIris.UI
             bindings.Add(menuItem, this);
 
             menuItem.Enabled = enabled;
-            menuItem.Click += (o, e) => 
-            Execute(o);
+            menuItem.Click += (o, e) => Execute(o);
 
             CanExecuteChanged += (ob, e) => menuItem.Enabled = enabled;
         }
 
-        /// <summary>
-        /// Initializes an instance of the class EyeTrackerCommand for commands that do not need parameters
-        /// </summary>
-        /// <param name="execute">Execute method.</param>
-        /// <param name="canExecute">Can execute method.</param>
-        public EyeTrackerUICommand(Func<object?, Task> execute, Func<bool> canExecute)
-        {
-            this.executeMethod = execute;
-            this.canExecuteMethod = canExecute;
-        }
-
-        /// <summary>
-        /// Event from when the can execute changed.
-        /// </summary>
-        public event EventHandler? CanExecuteChanged;
 
         /// <summary>
         /// Checks if the command can be executed.

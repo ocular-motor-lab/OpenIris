@@ -8,6 +8,7 @@ namespace OpenIris
 #nullable enable
 
     using System;
+    using System.ComponentModel;
     using System.ComponentModel.Composition;
     using OpenIris.ImageGrabbing;
 
@@ -43,4 +44,19 @@ namespace OpenIris
             return new EyeCollection<CameraEye?>(cameraLeft, cameraRight);
         }
     }
+
+    // TODO: idea to disable inherited settings in case a new system does not need them.
+
+    //public class EyeTrackingSystemSimulationSettings: EyeTrackingSystemSettings
+    //{
+    //    [Category("Camera properties"), Description("Camera frame rate")]
+    //    [NeedsRestarting]
+    //    [ReadOnly(true)]
+    //    public override float FrameRate { get => 100; set => SetProperty(ref frameRate, 100, nameof(FrameRate)); }
+    //    private float frameRate = 100.0f; // default value
+
+
+    //    public float FrameRatet { get => 100; set => SetProperty(ref tframeRate, 100, nameof(FrameRatet)); }
+    //    private float tframeRate = 100.0f; // default value
+    //}
 }

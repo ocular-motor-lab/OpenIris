@@ -40,7 +40,7 @@ namespace OpenIris.UI
         {
             this.label.Enabled = this.Enabled;
             this.trackBar.Enabled = this.Enabled;
-            this.textBox.Enabled = this.Enabled;
+            this.numericUpDown1.Enabled = this.Enabled;
         }
 
         /// <summary>
@@ -81,6 +81,9 @@ namespace OpenIris.UI
 
                 trackBar.Minimum = (int)range.Begin;
                 trackBar.Maximum = (int)range.End;
+
+                numericUpDown1.Minimum = (int)range.Begin;
+                numericUpDown1.Maximum = (int)range.End;
             }
         }
 
@@ -113,7 +116,7 @@ namespace OpenIris.UI
                     sliderValue = value;
 
                     trackBar.Value = sliderValue;
-                    textBox.Text = sliderValue.ToString();
+                    numericUpDown1.Value = sliderValue;
 
                     if (EnableValueChangedEvent)
                     {
@@ -132,18 +135,14 @@ namespace OpenIris.UI
             this.ValueChanged?.Invoke(this, e);
         }
 
-        private void textBox_TextChanged(object sender, EventArgs e)
-        {
-            var result = int.TryParse(this.textBox.Text, out var value);
-            if ( result)
-            {
-                this.Value = value;
-            }
-        }
-
         private void trackBar_Scroll(object sender, EventArgs e)
         {
             this.Value = this.trackBar.Value;
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            this.Value = (int)this.numericUpDown1.Value;
         }
     }
 }

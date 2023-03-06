@@ -11,7 +11,7 @@ namespace OpenIris.UI
     using OpenIris;
     using Emgu.CV;
     using Emgu.CV.UI;
-    using Emgu.CV.Structure;
+    using System.Windows.Forms;
 
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.
@@ -19,6 +19,10 @@ namespace OpenIris.UI
     public partial class EyeTrackingPipelineJOMQuickSettings : EyeTrackingPipelineUIControl
     {
         private EyeTrackingPipelineJOMSettings trackingSettings;
+        public EyeTrackingPipelineJOMQuickSettings()
+        {
+            trackingSettings = new EyeTrackingPipelineJOMSettings();
+        }
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerQuickSettings class.
@@ -28,8 +32,17 @@ namespace OpenIris.UI
         {
             InitializeComponent();
 
-            trackBarIrisRadius.Maximum = 500;
-            trackBarIrisRadius.Minimum = 0;
+            sliderIrisRadius.Text = "Iris Radius";
+            sliderPupilThreshold.Text = "Pupil Threshold";
+            sliderCRThreshold.Text = "CR Threshold";
+
+            sliderIrisRadius.Range = new Range(0, 500);
+            sliderPupilThreshold.Range = new Range(0, 255);
+            sliderCRThreshold.Range = new Range(0, 255);
+
+            sliderIrisRadius.Dock = DockStyle.Fill;
+            sliderPupilThreshold.Dock = DockStyle.Fill;
+            sliderCRThreshold.Dock = DockStyle.Fill;
 
             trackingSettings = new EyeTrackingPipelineJOMSettings();
         }
@@ -43,9 +56,9 @@ namespace OpenIris.UI
             
             if (trackingSettings is null) return;
 
-            if (trackBarIrisRadius.Maximum != trackingSettings.MaxIrisRadPixd)
+            if (sliderIrisRadius.Range.End != trackingSettings.MaxIrisRadPixd)
             {
-                trackBarIrisRadius.Maximum = trackingSettings.MaxIrisRadPixd;
+                sliderIrisRadius.Range = new Range(0, trackingSettings.MaxIrisRadPixd);
             }
 
             trackingSettings.IrisRadiusPixLeft = Math.Min(trackingSettings.IrisRadiusPixLeft, trackingSettings.MaxIrisRadPixd);
@@ -54,132 +67,15 @@ namespace OpenIris.UI
 
             if (WhichEye == Eye.Left)
             {
-                trackBarPupilThreshold.Value = trackingSettings.DarkThresholdLeftEye;
-                textBoxPupilThreshold.Text = trackingSettings.DarkThresholdLeftEye.ToString();
-
-                trackBarIrisRadius.Value = (int)Math.Round(trackingSettings.IrisRadiusPixLeft);
-                textBoxReflectionThreshold.Text = trackingSettings.BrightThresholdLeftEye.ToString();
-
-                trackBarReflectionThreshold.Value = trackingSettings.BrightThresholdLeftEye;
-                textBoxIrisRadius.Text = trackingSettings.IrisRadiusPixLeft.ToString();
+                sliderPupilThreshold.Value = trackingSettings.DarkThresholdLeftEye;
+                sliderCRThreshold.Value = trackingSettings.BrightThresholdLeftEye;
+                sliderIrisRadius.Value = (int)trackingSettings.IrisRadiusPixLeft;
             }
             else
             {
-                trackBarIrisRadius.Value = (int)Math.Round(trackingSettings.IrisRadiusPixRight);
-                textBoxIrisRadius.Text = trackingSettings.IrisRadiusPixRight.ToString();
-
-                trackBarPupilThreshold.Value = trackingSettings.DarkThresholdRightEye;
-                textBoxPupilThreshold.Text = trackingSettings.DarkThresholdRightEye.ToString();
-
-                trackBarReflectionThreshold.Value = trackingSettings.BrightThresholdRightEye;
-                textBoxReflectionThreshold.Text = trackingSettings.BrightThresholdRightEye.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Handles the event.
-        /// </summary>
-        /// <param name="sender">Object sender.</param>
-        /// <param name="e">Event parameters.</param>
-        private void TrackBarPupilThreshold_Scroll(object sender, EventArgs e)
-        {
-            if (WhichEye == Eye.Left)
-            {
-                trackingSettings.DarkThresholdLeftEye = trackBarPupilThreshold.Value;
-            }
-            else
-            {
-                trackingSettings.DarkThresholdRightEye = trackBarPupilThreshold.Value;
-            }
-        }
-
-        /// <summary>
-        /// Handles the event.
-        /// </summary>
-        /// <param name="sender">Object sender.</param>
-        /// <param name="e">Event parameters.</param>
-        private void TextBoxPupilThreshold_TextChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(textBoxPupilThreshold.Text, out int value))
-            {
-                value = Math.Max(Math.Min(value, 255), 0);
-
-                if (WhichEye == Eye.Left)
-                {
-                    trackingSettings.DarkThresholdLeftEye = value;
-                }
-                else
-                {
-                    trackingSettings.DarkThresholdRightEye = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the event.
-        /// </summary>
-        /// <param name="sender">Object sender.</param>
-        /// <param name="e">Event parameters.</param>
-        private void TrackBarIrisRadius_Scroll(object sender, EventArgs e)
-        {
-            if (WhichEye == Eye.Left)
-            {
-                trackingSettings.IrisRadiusPixLeft = trackBarIrisRadius.Value;
-            }
-            else
-            {
-                trackingSettings.IrisRadiusPixRight = trackBarIrisRadius.Value;
-            }
-        }
-
-        private void TextBoxIrisRadius_TextChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(textBoxIrisRadius.Text, out int value))
-            {
-                value = Math.Max(Math.Min(value, trackingSettings.MaxIrisRadPixd), 0);
-
-                if (WhichEye == Eye.Left)
-                {
-                    trackingSettings.IrisRadiusPixLeft = value;
-                }
-                else
-                {
-                    trackingSettings.IrisRadiusPixRight = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the event.
-        /// </summary>
-        /// <param name="sender">Object sender.</param>
-        /// <param name="e">Event parameters.</param>
-        private void TrackBarReflectionThreshold_Scroll(object sender, EventArgs e)
-        {
-            if (WhichEye == Eye.Left)
-            {
-                trackingSettings.BrightThresholdLeftEye = trackBarReflectionThreshold.Value;
-            }
-            else
-            {
-                trackingSettings.BrightThresholdRightEye = trackBarReflectionThreshold.Value;
-            }
-        }
-
-        private void TextBoxReflectionThreshold_TextChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(textBoxReflectionThreshold.Text, out int value))
-            {
-                value = Math.Max(Math.Min(value, 255), 0);
-
-                if (WhichEye == Eye.Left)
-                {
-                    trackingSettings.BrightThresholdLeftEye = value;
-                }
-                else
-                {
-                    trackingSettings.BrightThresholdRightEye = value;
-                }
+                sliderPupilThreshold.Value = trackingSettings.DarkThresholdRightEye;
+                sliderCRThreshold.Value = trackingSettings.BrightThresholdRightEye;
+                sliderIrisRadius.Value = (int)trackingSettings.IrisRadiusPixRight;
             }
         }
 
@@ -199,15 +95,15 @@ namespace OpenIris.UI
             // Update Images
             imageBox.Image = ImageEyeDrawing.DrawAllData(image, eyeCalibration, settings);
 
-            Image<Gray, byte>? imageTorsion = null;
-            Image<Gray, byte>? imageTorsionRef = null;
+            Image<Emgu.CV.Structure.Gray, byte>? imageTorsion = null;
+            Image<Emgu.CV.Structure.Gray, byte>? imageTorsionRef = null;
 
             // Torsion image
             if (image?.ImageTorsion != null)
             {
                 if (image.ImageTorsion.Size.Width > 4)
                 {
-                    imageTorsion = new Image<Gray, byte>(image.ImageTorsion.Size.Height, image.ImageTorsion.Size.Width);
+                    imageTorsion = new Image<Emgu.CV.Structure.Gray, byte>(image.ImageTorsion.Size.Height, image.ImageTorsion.Size.Width);
                     CvInvoke.Transpose(image.ImageTorsion, imageTorsion);
                 }
             }
@@ -218,7 +114,7 @@ namespace OpenIris.UI
                 var torsionRef = eyeCalibration.ImageTorsionReference;
                 if (torsionRef != null && torsionRef.Size.Width > 4)
                 {
-                    imageTorsionRef = new Image<Gray, byte>(torsionRef.Size.Height, torsionRef.Size.Width);
+                    imageTorsionRef = new Image<Emgu.CV.Structure.Gray, byte>(torsionRef.Size.Height, torsionRef.Size.Width);
                     CvInvoke.Transpose(torsionRef, imageTorsionRef);
                 }
             }
@@ -234,6 +130,43 @@ namespace OpenIris.UI
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong settings for JOM pipeline.");
 
             UpdateValues(settings);
+        }
+
+        private void sliderPupilThreshold_ValueChanged(object sender, EventArgs e)
+        {
+            if (sender == sliderPupilThreshold)
+            {
+                if (WhichEye == Eye.Left)
+                {
+                    trackingSettings.DarkThresholdLeftEye = sliderPupilThreshold.Value;
+                }
+                else
+                {
+                    trackingSettings.DarkThresholdRightEye = sliderPupilThreshold.Value;
+                }
+            }
+            if (sender == sliderCRThreshold)
+            {
+                if (WhichEye == Eye.Left)
+                {
+                    trackingSettings.BrightThresholdLeftEye = sliderCRThreshold.Value;
+                }
+                else
+                {
+                    trackingSettings.BrightThresholdRightEye = sliderCRThreshold.Value;
+                }
+            }
+            if (sender == sliderIrisRadius)
+            {
+                if (WhichEye == Eye.Left)
+                {
+                    trackingSettings.IrisRadiusPixLeft = sliderIrisRadius.Value;
+                }
+                else
+                {
+                    trackingSettings.IrisRadiusPixRight = sliderIrisRadius.Value;
+                }
+            }
         }
     }
 }

@@ -31,143 +31,26 @@ namespace OpenIris.UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.label3 = new System.Windows.Forms.Label();
-            this.trackBarIrisRadius = new System.Windows.Forms.TrackBar();
-            this.trackBarPupilThreshold = new System.Windows.Forms.TrackBar();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.trackBarReflectionThreshold = new System.Windows.Forms.TrackBar();
-            this.textBoxPupilThreshold = new System.Windows.Forms.TextBox();
-            this.textBoxReflectionThreshold = new System.Windows.Forms.TextBox();
-            this.textBoxIrisRadius = new System.Windows.Forms.TextBox();
             this.imageBoxIrisRefeference = new Emgu.CV.UI.ImageBox();
             this.imageBoxIris = new Emgu.CV.UI.ImageBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarIrisRadius)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarPupilThreshold)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarReflectionThreshold)).BeginInit();
+            this.sliderIrisRadius = new OpenIris.UI.SliderTextControl();
+            this.sliderCRThreshold = new OpenIris.UI.SliderTextControl();
+            this.sliderPupilThreshold = new OpenIris.UI.SliderTextControl();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRefeference)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxIris)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // label3
-            // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(5, 167);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(59, 13);
-            this.label3.TabIndex = 26;
-            this.label3.Text = "Iris Radius:";
-            // 
-            // trackBarIrisRadius
-            // 
-            this.trackBarIrisRadius.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBarIrisRadius.Location = new System.Drawing.Point(108, 167);
-            this.trackBarIrisRadius.Maximum = 120;
-            this.trackBarIrisRadius.Minimum = 20;
-            this.trackBarIrisRadius.Name = "trackBarIrisRadius";
-            this.trackBarIrisRadius.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.trackBarIrisRadius.Size = new System.Drawing.Size(230, 45);
-            this.trackBarIrisRadius.TabIndex = 25;
-            this.trackBarIrisRadius.TickFrequency = 10;
-            this.trackBarIrisRadius.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBarIrisRadius.Value = 60;
-            this.trackBarIrisRadius.Scroll += new System.EventHandler(this.TrackBarIrisRadius_Scroll);
-            // 
-            // trackBarPupilThreshold
-            // 
-            this.trackBarPupilThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBarPupilThreshold.Location = new System.Drawing.Point(108, 99);
-            this.trackBarPupilThreshold.Maximum = 255;
-            this.trackBarPupilThreshold.Name = "trackBarPupilThreshold";
-            this.trackBarPupilThreshold.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.trackBarPupilThreshold.Size = new System.Drawing.Size(230, 45);
-            this.trackBarPupilThreshold.TabIndex = 23;
-            this.trackBarPupilThreshold.TickFrequency = 10;
-            this.trackBarPupilThreshold.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBarPupilThreshold.Value = 60;
-            this.trackBarPupilThreshold.Scroll += new System.EventHandler(this.TrackBarPupilThreshold_Scroll);
-            // 
-            // label2
-            // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(5, 99);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(80, 13);
-            this.label2.TabIndex = 24;
-            this.label2.Text = "Pupil Threshold";
-            // 
-            // label5
-            // 
-            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(5, 135);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(105, 13);
-            this.label5.TabIndex = 24;
-            this.label5.Text = "Reflection Threshold";
-            // 
-            // trackBarReflectionThreshold
-            // 
-            this.trackBarReflectionThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBarReflectionThreshold.Location = new System.Drawing.Point(108, 135);
-            this.trackBarReflectionThreshold.Maximum = 255;
-            this.trackBarReflectionThreshold.Name = "trackBarReflectionThreshold";
-            this.trackBarReflectionThreshold.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.trackBarReflectionThreshold.Size = new System.Drawing.Size(230, 45);
-            this.trackBarReflectionThreshold.TabIndex = 23;
-            this.trackBarReflectionThreshold.TickFrequency = 10;
-            this.trackBarReflectionThreshold.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBarReflectionThreshold.Value = 60;
-            this.trackBarReflectionThreshold.Scroll += new System.EventHandler(this.TrackBarReflectionThreshold_Scroll);
-            // 
-            // textBoxPupilThreshold
-            // 
-            this.textBoxPupilThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxPupilThreshold.BackColor = System.Drawing.SystemColors.Control;
-            this.textBoxPupilThreshold.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxPupilThreshold.Location = new System.Drawing.Point(342, 99);
-            this.textBoxPupilThreshold.Name = "textBoxPupilThreshold";
-            this.textBoxPupilThreshold.Size = new System.Drawing.Size(33, 13);
-            this.textBoxPupilThreshold.TabIndex = 33;
-            this.textBoxPupilThreshold.TextChanged += new System.EventHandler(this.TextBoxPupilThreshold_TextChanged);
-            // 
-            // textBoxReflectionThreshold
-            // 
-            this.textBoxReflectionThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxReflectionThreshold.BackColor = System.Drawing.SystemColors.Control;
-            this.textBoxReflectionThreshold.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxReflectionThreshold.Location = new System.Drawing.Point(342, 135);
-            this.textBoxReflectionThreshold.Name = "textBoxReflectionThreshold";
-            this.textBoxReflectionThreshold.Size = new System.Drawing.Size(33, 13);
-            this.textBoxReflectionThreshold.TabIndex = 34;
-            this.textBoxReflectionThreshold.TextChanged += new System.EventHandler(this.TextBoxReflectionThreshold_TextChanged);
-            // 
-            // textBoxIrisRadius
-            // 
-            this.textBoxIrisRadius.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxIrisRadius.BackColor = System.Drawing.SystemColors.Control;
-            this.textBoxIrisRadius.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxIrisRadius.Location = new System.Drawing.Point(342, 167);
-            this.textBoxIrisRadius.Name = "textBoxIrisRadius";
-            this.textBoxIrisRadius.Size = new System.Drawing.Size(33, 13);
-            this.textBoxIrisRadius.TabIndex = 35;
-            this.textBoxIrisRadius.TextChanged += new System.EventHandler(this.TextBoxIrisRadius_TextChanged);
             // 
             // imageBoxIrisRefeference
             // 
             this.imageBoxIrisRefeference.BackColor = System.Drawing.SystemColors.Control;
             this.imageBoxIrisRefeference.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxIrisRefeference.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
-            this.imageBoxIrisRefeference.Location = new System.Drawing.Point(3, 3);
+            this.imageBoxIrisRefeference.Location = new System.Drawing.Point(4, 5);
+            this.imageBoxIrisRefeference.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.imageBoxIrisRefeference.Name = "imageBoxIrisRefeference";
-            this.imageBoxIrisRefeference.Size = new System.Drawing.Size(371, 31);
+            this.imageBoxIrisRefeference.Size = new System.Drawing.Size(635, 50);
             this.imageBoxIrisRefeference.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBoxIrisRefeference.TabIndex = 36;
             this.imageBoxIrisRefeference.TabStop = false;
@@ -177,69 +60,93 @@ namespace OpenIris.UI
             this.imageBoxIris.BackColor = System.Drawing.SystemColors.Control;
             this.imageBoxIris.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxIris.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
-            this.imageBoxIris.Location = new System.Drawing.Point(3, 40);
+            this.imageBoxIris.Location = new System.Drawing.Point(4, 65);
+            this.imageBoxIris.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.imageBoxIris.Name = "imageBoxIris";
-            this.imageBoxIris.Size = new System.Drawing.Size(371, 32);
+            this.imageBoxIris.Size = new System.Drawing.Size(635, 50);
             this.imageBoxIris.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.imageBoxIris.TabIndex = 37;
             this.imageBoxIris.TabStop = false;
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.ColumnCount = 1;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.sliderIrisRadius, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.imageBoxIrisRefeference, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.sliderCRThreshold, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.imageBoxIris, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.sliderPupilThreshold, 0, 2);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(377, 75);
+            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(643, 334);
             this.tableLayoutPanel1.TabIndex = 38;
             // 
-            // EyeTrackerQuickSettings
+            // sliderIrisRadius
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.sliderIrisRadius.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sliderIrisRadius.EnableValueChangedEvent = true;
+            this.sliderIrisRadius.Location = new System.Drawing.Point(4, 267);
+            this.sliderIrisRadius.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.sliderIrisRadius.Name = "sliderIrisRadius";
+            this.sliderIrisRadius.Size = new System.Drawing.Size(635, 62);
+            this.sliderIrisRadius.TabIndex = 44;
+            this.sliderIrisRadius.Value = 0;
+            this.sliderIrisRadius.ValueChanged += new System.EventHandler(this.sliderPupilThreshold_ValueChanged);
+            // 
+            // sliderCRThreshold
+            // 
+            this.sliderCRThreshold.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sliderCRThreshold.EnableValueChangedEvent = true;
+            this.sliderCRThreshold.Location = new System.Drawing.Point(4, 196);
+            this.sliderCRThreshold.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.sliderCRThreshold.Name = "sliderCRThreshold";
+            this.sliderCRThreshold.Size = new System.Drawing.Size(635, 61);
+            this.sliderCRThreshold.TabIndex = 43;
+            this.sliderCRThreshold.Value = 0;
+            this.sliderCRThreshold.ValueChanged += new System.EventHandler(this.sliderPupilThreshold_ValueChanged);
+            // 
+            // sliderPupilThreshold
+            // 
+            this.sliderPupilThreshold.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sliderPupilThreshold.EnableValueChangedEvent = true;
+            this.sliderPupilThreshold.Location = new System.Drawing.Point(4, 125);
+            this.sliderPupilThreshold.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.sliderPupilThreshold.Name = "sliderPupilThreshold";
+            this.sliderPupilThreshold.Size = new System.Drawing.Size(635, 61);
+            this.sliderPupilThreshold.TabIndex = 42;
+            this.sliderPupilThreshold.Value = 0;
+            this.sliderPupilThreshold.ValueChanged += new System.EventHandler(this.sliderPupilThreshold_ValueChanged);
+            // 
+            // EyeTrackingPipelineJOMQuickSettings
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Controls.Add(this.textBoxIrisRadius);
-            this.Controls.Add(this.textBoxReflectionThreshold);
-            this.Controls.Add(this.textBoxPupilThreshold);
-            this.Controls.Add(this.trackBarIrisRadius);
-            this.Controls.Add(this.trackBarReflectionThreshold);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.trackBarPupilThreshold);
-            this.Controls.Add(this.label2);
-            this.Name = "EyeTrackerQuickSettings";
-            this.Size = new System.Drawing.Size(378, 212);
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarIrisRadius)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarPupilThreshold)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarReflectionThreshold)).EndInit();
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Name = "EyeTrackingPipelineJOMQuickSettings";
+            this.Size = new System.Drawing.Size(643, 334);
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRefeference)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxIris)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TrackBar trackBarIrisRadius;
-        private System.Windows.Forms.TrackBar trackBarPupilThreshold;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TrackBar trackBarReflectionThreshold;
-        private System.Windows.Forms.TextBox textBoxPupilThreshold;
-        private System.Windows.Forms.TextBox textBoxReflectionThreshold;
-        private System.Windows.Forms.TextBox textBoxIrisRadius;
         private Emgu.CV.UI.ImageBox imageBoxIrisRefeference;
         private Emgu.CV.UI.ImageBox imageBoxIris;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private SliderTextControl sliderPupilThreshold;
+        private SliderTextControl sliderCRThreshold;
+        private SliderTextControl sliderIrisRadius;
     }
 }

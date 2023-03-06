@@ -6,8 +6,14 @@ namespace OpenIris
     /// <summary>
     /// Interface for UI for pipelines, one per eye
     /// </summary>
-    public abstract class EyeTrackingPipelineUIControl : UserControl
+    public class EyeTrackingPipelineUIControl : UserControl
     {
+        public EyeTrackingPipelineUIControl()
+        {
+            WhichEye = Eye.Left;
+            PipelineName = string.Empty;
+        }
+
         public EyeTrackingPipelineUIControl(Eye whichEye, string pipelineName)
         {
             WhichEye = whichEye;
@@ -37,6 +43,6 @@ namespace OpenIris
                                     dataAndImages.TrackingSettings);
         }
 
-        public abstract void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages);
+        public virtual void UpdatePipelineUI(EyeTrackerImagesAndData dataAndImages) { }
     }
 }

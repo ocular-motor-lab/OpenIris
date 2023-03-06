@@ -11,6 +11,7 @@ namespace OpenIris
     using System.Drawing;
     using System.IO;
     using System.ServiceModel;
+    using System.Threading.Tasks;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 

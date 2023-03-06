@@ -59,7 +59,7 @@ namespace OpenIris
             {
                 eyeTrackerHostWeb = new ServiceHost(eyeTracker, new Uri[] { new Uri("http://localhost:" + (newEyeTracker.Settings.ServiceListeningPort + 1) + "/EyeTrackerEndpoint") });
                 eyeTrackerHostWeb.AddServiceEndpoint(typeof(IEyeTrackerWebService), new BasicHttpBinding(), "Soap");
-                var endpoint = eyeTrackerHostWeb.AddServiceEndpoint(typeof(IEyeTrackerWebService), new WebHttpBinding(), "Web");
+                var endpoint = eyeTrackerHostWeb.AddServiceEndpoint(typeof(IEyeTrackerWebService), new WebHttpBinding(WebHttpSecurityMode.None), "Web");
                 endpoint.EndpointBehaviors.Add(new WebHttpBehavior());
                 eyeTrackerHostWeb.Open();
                 Trace.WriteLine(eyeTrackerHostWeb.State);

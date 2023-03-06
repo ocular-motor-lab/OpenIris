@@ -34,6 +34,10 @@ namespace OpenIris
             get;
         }
 
+
+        [OperationContract, WebGet(UriTemplate = "/")]
+        public System.IO.Stream GetWebsite();
+
         [OperationContract]
         [WebGet]
         bool ChangeSetting(string settingName, object value);
@@ -53,6 +57,10 @@ namespace OpenIris
         [OperationContract]
         [WebGet]
         long RecordEvent(string message);
+
+        [OperationContract]
+        [WebGet]
+        System.IO.Stream GetFileWeb();
 
     }
 }

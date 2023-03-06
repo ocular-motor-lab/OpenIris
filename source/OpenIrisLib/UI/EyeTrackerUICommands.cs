@@ -7,7 +7,6 @@ namespace OpenIris
 {
 #nullable enable
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
     using OpenIris.UI;
@@ -79,10 +78,7 @@ namespace OpenIris
         /// 
         /// </summary>
         public  EyeTrackerUICommand StartRecordingCommand = new EyeTrackerUICommand(
-                execute: async _ =>
-                {
-                    await eyeTracker.StartRecording();
-                },
+                execute: async _ =>  await eyeTracker.StartRecording(),
                 canExecute: () => eyeTracker.Tracking && !eyeTracker.Recording && !(eyeTracker.RecordingSession?.Stopping ?? false));
         
         /// <summary>
@@ -232,8 +228,7 @@ namespace OpenIris
         public EyeTrackerUICommand TrimVideosCommand = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
-                    ProcessVideoOptions? options = SelectVideoDialog.SelectVideoForProcessing(eyeTracker.Settings);
-
+                    var options = SelectVideoDialog.SelectVideoForProcessing(eyeTracker.Settings);
                     if (options?.VideoFileNames is null) return;
 
                     await VideoTools.TrimVideosCommandExecute(options);

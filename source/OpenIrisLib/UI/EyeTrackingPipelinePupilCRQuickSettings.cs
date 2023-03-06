@@ -10,6 +10,7 @@ namespace OpenIris.UI
     using System;
     using OpenIris;
     using Emgu.CV.UI;
+    using System.Windows.Forms;
 
     /// <summary>
     /// Control with some quick settings of the eye tracker for a single eye.
@@ -26,6 +27,12 @@ namespace OpenIris.UI
         {
             InitializeComponent();
 
+            sliderPupil.Text = "Pupil Threshold";
+            sliderCR.Text = "CR Threshold";
+
+            sliderPupil.Range = new Range(0, 255);
+            sliderCR.Range = new Range(0, 255);
+
             trackingSettings = new EyeTrackingPipelinePupilCRSettings();
         }
 
@@ -41,95 +48,15 @@ namespace OpenIris.UI
 
             if (WhichEye == Eye.Left)
             {
-                trackBarPupilThreshold.Value = trackingSettings.DarkThresholdLeftEye;
-                textBoxPupilThreshold.Text = trackingSettings.DarkThresholdLeftEye.ToString();
-
-                trackBarReflectionThreshold.Value = trackingSettings.BrightThresholdLeftEye;
-                textBoxReflectionThreshold.Text = trackingSettings.BrightThresholdLeftEye.ToString();
+                sliderPupil.Value = trackingSettings.DarkThresholdLeftEye;
+                sliderCR.Value = trackingSettings.BrightThresholdLeftEye;
             }
             else
             {
-                trackBarPupilThreshold.Value = trackingSettings.DarkThresholdRightEye;
-                textBoxPupilThreshold.Text = trackingSettings.DarkThresholdRightEye.ToString();
-
-                trackBarReflectionThreshold.Value = trackingSettings.BrightThresholdRightEye;
-                textBoxReflectionThreshold.Text = trackingSettings.BrightThresholdRightEye.ToString();
+                sliderPupil.Value = trackingSettings.DarkThresholdRightEye;
+                sliderCR.Value = trackingSettings.BrightThresholdRightEye;
             }
         }
-
-        /// <summary>
-        /// Handles the event.
-        /// </summary>
-        /// <param name="sender">Object sender.</param>
-        /// <param name="e">Event parameters.</param>
-        private void TrackBarPupilThreshold_Scroll(object sender, EventArgs e)
-        {
-            if (WhichEye == Eye.Left)
-            {
-                trackingSettings.DarkThresholdLeftEye = trackBarPupilThreshold.Value;
-            }
-            else
-            {
-                trackingSettings.DarkThresholdRightEye = trackBarPupilThreshold.Value;
-            }
-        }
-
-        /// <summary>
-        /// Handles the event.
-        /// </summary>
-        /// <param name="sender">Object sender.</param>
-        /// <param name="e">Event parameters.</param>
-        private void TextBoxPupilThreshold_TextChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(textBoxPupilThreshold.Text, out int value))
-            {
-                value = Math.Max(Math.Min(value, 255), 0);
-
-                if (WhichEye == Eye.Left)
-                {
-                    trackingSettings.DarkThresholdLeftEye = value;
-                }
-                else
-                {
-                    trackingSettings.DarkThresholdRightEye = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Handles the event.
-        /// </summary>
-        /// <param name="sender">Object sender.</param>
-        /// <param name="e">Event parameters.</param>
-        private void TrackBarReflectionThreshold_Scroll(object sender, EventArgs e)
-        {
-            if (WhichEye == Eye.Left)
-            {
-                trackingSettings.BrightThresholdLeftEye = trackBarReflectionThreshold.Value;
-            }
-            else
-            {
-                trackingSettings.BrightThresholdRightEye = trackBarReflectionThreshold.Value;
-            }
-        }
-
-        private void TextBoxReflectionThreshold_TextChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(textBoxReflectionThreshold.Text, out int value))
-            {
-                value = Math.Max(Math.Min(value, 255), 0);
-
-                if (WhichEye == Eye.Left)
-                {
-                    trackingSettings.BrightThresholdLeftEye = value;
-                }
-                else
-                {
-                    trackingSettings.BrightThresholdRightEye = value;
-                }
-            }
-        }
-
 
         /// <summary>
         /// Update the pipeline UI.
@@ -150,6 +77,34 @@ namespace OpenIris.UI
             var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
 
             UpdateValues(settings);
+        }
+
+        private void sliderPupil_ValueChanged(object sender, EventArgs e)
+        {
+            if ( sender == sliderPupil)
+            {
+                if (WhichEye == Eye.Left)
+                {
+                    trackingSettings.DarkThresholdLeftEye = sliderPupil.Value;
+                }
+                else
+                {
+                    trackingSettings.DarkThresholdRightEye = sliderPupil.Value;
+                }
+
+            }
+
+            if ( sender == sliderCR)
+            {
+                if (WhichEye == Eye.Left)
+                {
+                    trackingSettings.BrightThresholdLeftEye = sliderCR.Value;
+                }
+                else
+                {
+                    trackingSettings.BrightThresholdRightEye = sliderCR.Value;
+                }
+            }
         }
     }
 }

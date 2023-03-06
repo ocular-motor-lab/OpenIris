@@ -30,120 +30,70 @@ namespace OpenIris.UI
         /// </summary>
         private void InitializeComponent()
         {
-            this.trackBarPupilThreshold = new System.Windows.Forms.TrackBar();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.trackBarReflectionThreshold = new System.Windows.Forms.TrackBar();
-            this.textBoxPupilThreshold = new System.Windows.Forms.TextBox();
-            this.textBoxReflectionThreshold = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarPupilThreshold)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarReflectionThreshold)).BeginInit();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.sliderPupil = new OpenIris.UI.SliderTextControl();
+            this.sliderCR = new OpenIris.UI.SliderTextControl();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // trackBarPupilThreshold
+            // tableLayoutPanel1
             // 
-            this.trackBarPupilThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBarPupilThreshold.Location = new System.Drawing.Point(162, 152);
-            this.trackBarPupilThreshold.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.trackBarPupilThreshold.Maximum = 255;
-            this.trackBarPupilThreshold.Name = "trackBarPupilThreshold";
-            this.trackBarPupilThreshold.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.trackBarPupilThreshold.Size = new System.Drawing.Size(345, 69);
-            this.trackBarPupilThreshold.TabIndex = 23;
-            this.trackBarPupilThreshold.TickFrequency = 10;
-            this.trackBarPupilThreshold.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBarPupilThreshold.Value = 60;
-            this.trackBarPupilThreshold.Scroll += new System.EventHandler(this.TrackBarPupilThreshold_Scroll);
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Controls.Add(this.sliderCR, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.sliderPupil, 0, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(567, 326);
+            this.tableLayoutPanel1.TabIndex = 35;
             // 
-            // label2
+            // sliderPupil
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(8, 152);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(117, 20);
-            this.label2.TabIndex = 24;
-            this.label2.Text = "Pupil Threshold";
+            this.sliderPupil.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sliderPupil.EnableValueChangedEvent = true;
+            this.sliderPupil.Location = new System.Drawing.Point(4, 86);
+            this.sliderPupil.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.sliderPupil.Name = "sliderPupil";
+            this.sliderPupil.Size = new System.Drawing.Size(559, 71);
+            this.sliderPupil.TabIndex = 0;
+            this.sliderPupil.Value = 0;
+            this.sliderPupil.ValueChanged += new System.EventHandler(this.sliderPupil_ValueChanged);
             // 
-            // label5
+            // sliderCR
             // 
-            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(8, 208);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(155, 20);
-            this.label5.TabIndex = 24;
-            this.label5.Text = "Reflection Threshold";
-            // 
-            // trackBarReflectionThreshold
-            // 
-            this.trackBarReflectionThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.trackBarReflectionThreshold.Location = new System.Drawing.Point(162, 208);
-            this.trackBarReflectionThreshold.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.trackBarReflectionThreshold.Maximum = 255;
-            this.trackBarReflectionThreshold.Name = "trackBarReflectionThreshold";
-            this.trackBarReflectionThreshold.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.trackBarReflectionThreshold.Size = new System.Drawing.Size(345, 69);
-            this.trackBarReflectionThreshold.TabIndex = 23;
-            this.trackBarReflectionThreshold.TickFrequency = 10;
-            this.trackBarReflectionThreshold.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.trackBarReflectionThreshold.Value = 60;
-            this.trackBarReflectionThreshold.Scroll += new System.EventHandler(this.TrackBarReflectionThreshold_Scroll);
-            // 
-            // textBoxPupilThreshold
-            // 
-            this.textBoxPupilThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxPupilThreshold.BackColor = System.Drawing.SystemColors.Control;
-            this.textBoxPupilThreshold.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxPupilThreshold.Location = new System.Drawing.Point(513, 152);
-            this.textBoxPupilThreshold.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.textBoxPupilThreshold.Name = "textBoxPupilThreshold";
-            this.textBoxPupilThreshold.Size = new System.Drawing.Size(50, 19);
-            this.textBoxPupilThreshold.TabIndex = 33;
-            this.textBoxPupilThreshold.TextChanged += new System.EventHandler(this.TextBoxPupilThreshold_TextChanged);
-            // 
-            // textBoxReflectionThreshold
-            // 
-            this.textBoxReflectionThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxReflectionThreshold.BackColor = System.Drawing.SystemColors.Control;
-            this.textBoxReflectionThreshold.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBoxReflectionThreshold.Location = new System.Drawing.Point(513, 208);
-            this.textBoxReflectionThreshold.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.textBoxReflectionThreshold.Name = "textBoxReflectionThreshold";
-            this.textBoxReflectionThreshold.Size = new System.Drawing.Size(50, 19);
-            this.textBoxReflectionThreshold.TabIndex = 34;
-            this.textBoxReflectionThreshold.TextChanged += new System.EventHandler(this.TextBoxReflectionThreshold_TextChanged);
+            this.sliderCR.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sliderCR.EnableValueChangedEvent = true;
+            this.sliderCR.Location = new System.Drawing.Point(4, 167);
+            this.sliderCR.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.sliderCR.Name = "sliderCR";
+            this.sliderCR.Size = new System.Drawing.Size(559, 71);
+            this.sliderCR.TabIndex = 1;
+            this.sliderCR.Value = 0;
+            this.sliderCR.ValueChanged += new System.EventHandler(this.sliderPupil_ValueChanged);
             // 
             // EyeTrackingPipelinePupilCRQuickSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.textBoxReflectionThreshold);
-            this.Controls.Add(this.textBoxPupilThreshold);
-            this.Controls.Add(this.trackBarReflectionThreshold);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.trackBarPupilThreshold);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.tableLayoutPanel1);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.Name = "EyeTrackingPipelinePupilCRQuickSettings";
             this.Size = new System.Drawing.Size(567, 326);
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarPupilThreshold)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarReflectionThreshold)).EndInit();
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TrackBar trackBarPupilThreshold;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TrackBar trackBarReflectionThreshold;
-        private System.Windows.Forms.TextBox textBoxPupilThreshold;
-        private System.Windows.Forms.TextBox textBoxReflectionThreshold;
+
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private SliderTextControl sliderCR;
+        private SliderTextControl sliderPupil;
     }
 }

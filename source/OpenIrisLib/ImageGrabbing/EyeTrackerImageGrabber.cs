@@ -82,7 +82,7 @@ namespace OpenIris
         private EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, int bufferSize = 100, Eye whichEye = Eye.Both)
         {
             // Check if the sources are videos and get the video player
-            videoPlayer = (sources.FirstOrDefault(s=>s is VideoEye) as VideoEye)?.VideoPlayer;
+            videoPlayer = (sources.FirstOrDefault(s => s is VideoEye) as VideoEye)?.VideoPlayer;
 
             imageSources = sources;
 
@@ -99,7 +99,7 @@ namespace OpenIris
                 {
                     imageSources[Eye.Right]?.Stop();
                     (imageSources[Eye.Right] as IDisposable)?.Dispose();
-                    
+
                     imageSources = new EyeCollection<IImageEyeSource?>(imageSources[Eye.Left], null);
                 }
 
@@ -114,12 +114,10 @@ namespace OpenIris
 
             numberOfImageSources = imageSources.Count(c => (c != null));
 
-            if (numberOfImageSources > 1)
-            {
-                // Check same frame rate and frame size
-                FrameSize = CheckFrameSize(imageSources);
-                FrameRate = CheckFrameRate(imageSources);
-            }
+
+            // Check same frame rate and frame size
+            FrameSize = CheckFrameSize(imageSources);
+            FrameRate = CheckFrameRate(imageSources);
         }
 
         /// <summary>

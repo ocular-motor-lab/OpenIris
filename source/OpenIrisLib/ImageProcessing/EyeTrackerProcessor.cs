@@ -333,9 +333,14 @@ namespace OpenIris
                 // the pipeline
                 if (PipelineUI.name != currentPipelineName)
                 {
+                    var pipelineLeft = pipelines.implementation?[Eye.Left]?.GetPipelineUI();
+                    var pipelineRight = pipelines.implementation?[Eye.Right]?.GetPipelineUI();
+                    if (pipelineLeft != null)
+                        pipelineLeft.WhichEye = Eye.Left;
+                    if (pipelineRight != null)
+                        pipelineRight.WhichEye = Eye.Right;
                     PipelineUI = (currentPipelineName, new EyeCollection<EyeTrackingPipelineUIControl?>(
-                        pipelines.implementation?[Eye.Left]?.GetPipelineUI(Eye.Left, currentPipelineName),
-                        pipelines.implementation?[Eye.Right]?.GetPipelineUI(Eye.Right, currentPipelineName)));
+                        pipelineLeft, pipelineRight));
                 }
             }
         }

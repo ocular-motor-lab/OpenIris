@@ -22,8 +22,7 @@ namespace OpenIris.UI
         /// <summary>
         /// Initializes a new instance of the EyeTrackerQuickSettings class.
         /// </summary>
-        public EyeTrackingPipelinePupilCRQuickSettings(Eye whichEye, string pipelineName)
-            : base(whichEye, pipelineName)
+        public EyeTrackingPipelinePupilCRQuickSettings()
         {
             InitializeComponent();
 

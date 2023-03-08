@@ -31,11 +31,6 @@ namespace OpenIris
         private readonly IrisTracker irisTracker;
 
         /// <summary>
-        /// Name of the plugin, gets set automatically.
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the ImageEyeProcess class.
         /// </summary>
         public EyeTrackingPipelineJOM()
@@ -139,9 +134,9 @@ namespace OpenIris
         /// <param name="whichEye"></param>
         /// <param name="pipelineName"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
+        public EyeTrackingPipelineUIControl? GetPipelineUI()
         {
-            return new UI.EyeTrackingPipelineJOMQuickSettings(whichEye, pipelineName);
+            return new UI.EyeTrackingPipelineJOMQuickSettings();
         }
     }
 

@@ -9,12 +9,6 @@ namespace OpenIris.UI
 {
     internal class QuickSettingsScroll : EyeTrackingPipelineUIControl
     {
-        public QuickSettingsScroll(Eye whichEye, string pipelineName)
-            : base(whichEye, pipelineName)
-        {
-
-        }
-
         public override void UpdatePipelineEyeImage(ImageBox imageBox, EyeTrackerImagesAndData dataAndImages)
         {
             throw new NotImplementedException();

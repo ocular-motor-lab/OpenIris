@@ -19,16 +19,11 @@ namespace OpenIris.UI
     public partial class EyeTrackingPipelineJOMQuickSettings : EyeTrackingPipelineUIControl
     {
         private EyeTrackingPipelineJOMSettings trackingSettings;
-        public EyeTrackingPipelineJOMQuickSettings()
-        {
-            trackingSettings = new EyeTrackingPipelineJOMSettings();
-        }
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerQuickSettings class.
         /// </summary>
-        public EyeTrackingPipelineJOMQuickSettings(Eye whichEye, string pipelineName) 
-            : base(whichEye, pipelineName)
+        public EyeTrackingPipelineJOMQuickSettings() 
         {
             InitializeComponent();
 

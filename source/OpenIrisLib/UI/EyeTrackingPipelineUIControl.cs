@@ -8,27 +8,10 @@ namespace OpenIris
     /// </summary>
     public class EyeTrackingPipelineUIControl : UserControl
     {
-        public EyeTrackingPipelineUIControl()
-        {
-            WhichEye = Eye.Left;
-            PipelineName = string.Empty;
-        }
-
-        public EyeTrackingPipelineUIControl(Eye whichEye, string pipelineName)
-        {
-            WhichEye = whichEye;
-            PipelineName = pipelineName;
-        }
-
         /// <summary>
         /// Gets or sets left or right eye.
         /// </summary>
-        public Eye WhichEye { get; }
-
-        /// <summary>
-        /// Name of the pipeline.
-        /// </summary>
-        public string PipelineName { get; }
+        public Eye WhichEye { get; set;  }
 
         /// <summary>
         /// 

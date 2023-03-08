@@ -20,11 +20,6 @@ namespace OpenIris
     public sealed class EyeTrackingPipelineNothing : IEyeTrackingPipeline, IDisposable
     {
         /// <summary>
-        /// Name of the plugin, gets set automatically.
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
         /// Disposes objects.
         /// </summary>
         public void Dispose()
@@ -49,7 +44,7 @@ namespace OpenIris
         /// <param name="whichEye"></param>
         /// <param name="pipelineName"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
+        public EyeTrackingPipelineUIControl? GetPipelineUI()
         {
             return null;
         }

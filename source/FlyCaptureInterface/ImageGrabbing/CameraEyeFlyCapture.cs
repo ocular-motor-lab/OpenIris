@@ -147,26 +147,26 @@ namespace OpenIris.ImageGrabbing
                 var ndrops = (long)(lastTimeStamp.FrameNumberRaw - firstTimeStamp.FrameNumberRaw + 1) - numberFramesGrabbed;
 
                 string s = string.Empty;
-                s = s + "cycles128sec".PadLeft(30) + " : " + cycles128sec.ToString() + "\r\n";
+                s += "cycles128sec".PadLeft(30) + " : " + cycles128sec.ToString() + "\r\n";
 
-                s = s + "firstSeconds".PadLeft(30) + " : " + firstTimeStamp.ToString() + "\r\n";
-                s = s + "lastSeconds".PadLeft(30) + " : " + lastTimeStamp.Seconds.ToString() + "\r\n";
+                s += "firstSeconds".PadLeft(30) + " : " + firstTimeStamp.ToString() + "\r\n";
+                s += "lastSeconds".PadLeft(30) + " : " + lastTimeStamp.Seconds.ToString() + "\r\n";
 
-                s = s + "firstRawFrameNumber".PadLeft(30) + " : " + firstTimeStamp.FrameNumberRaw.ToString() + "\r\n";
-                s = s + "lastRawFrameNumber".PadLeft(30) + " : " + lastTimeStamp.FrameNumberRaw.ToString() + "\r\n";
-                s = s + "\r\n";
-                s = s + "FramesCounter".PadLeft(30) + " : " + numberFramesGrabbed.ToString() + "\r\n";
-                s = s + "DroppedFramesCounter".PadLeft(30) + " : " + ndrops.ToString() + "\r\n";
-                s = s + "\r\n";
+                s += "firstRawFrameNumber".PadLeft(30) + " : " + firstTimeStamp.FrameNumberRaw.ToString() + "\r\n";
+                s += "lastRawFrameNumber".PadLeft(30) + " : " + lastTimeStamp.FrameNumberRaw.ToString() + "\r\n";
+                s += "\r\n";
+                s += "FramesCounter".PadLeft(30) + " : " + numberFramesGrabbed.ToString() + "\r\n";
+                s += "DroppedFramesCounter".PadLeft(30) + " : " + ndrops.ToString() + "\r\n";
+                s += "\r\n";
 
                 var delay = (lastTimeStamp.Seconds - firstTimeStamp.Seconds) - ((lastTimeStamp.FrameNumberRaw - firstTimeStamp.FrameNumberRaw) / RequestedFrameRate);
 
-                s = s + "delay".PadLeft(30) + " : " + string.Format("{000:0000.0000}", delay) + "\r\n";
+                s += "delay".PadLeft(30) + " : " + string.Format("{000:0000.0000}", delay) + "\r\n";
 
-                s = s + "lastFreq".PadLeft(30) + " : " + lastFrameRateRequested.ToString() + "\r\n";
-                s = s + "reportedFrameRate".PadLeft(30) + " : " + FrameRate.ToString() + "\r\n";
+                s += "lastFreq".PadLeft(30) + " : " + lastFrameRateRequested.ToString() + "\r\n";
+                s += "reportedFrameRate".PadLeft(30) + " : " + FrameRate.ToString() + "\r\n";
 
-                s = s + "\r\n";
+                s += "\r\n";
 
                 return s;
             }

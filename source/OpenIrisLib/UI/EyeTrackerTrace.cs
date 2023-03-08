@@ -165,8 +165,7 @@ namespace OpenIris.UI
 
                 foreach (var series in tracesChart.Series)
                 {
-                    var traceSeries = series as EyeTraceSeries;
-                    if (traceSeries != null && traceSeries.traceChartArea.Visible)
+                    if (series is EyeTraceSeries traceSeries  && traceSeries.traceChartArea.Visible)
                     {
                         traceSeries.Update(dataBuffer, frameRate, settings.TraceSpan);
                     }
@@ -191,8 +190,7 @@ namespace OpenIris.UI
         {
             foreach (var chartArea in tracesChart.ChartAreas)
             {
-                var traceChartArea = chartArea as TraceChartArea;
-                if (traceChartArea != null)
+                if (chartArea is TraceChartArea traceChartArea)
                 {
                     if (!double.IsNaN(traceChartArea.MovingAverage))
                     {
@@ -363,8 +361,7 @@ namespace OpenIris.UI
         {
             foreach (var chartArea in tracesChart.ChartAreas)
             {
-                var traceChartArea = chartArea as TraceChartArea;
-                if (traceChartArea != null)
+                if (chartArea is TraceChartArea traceChartArea)
                 {
                     traceChartArea.ResetAxis();
                 }
@@ -461,8 +458,8 @@ namespace OpenIris.UI
     class EyeTraceSeries : Series
     {
         public TraceChartArea traceChartArea;
-        private Eye whichEye;
-        private DataStream dataSource;
+        private readonly Eye whichEye;
+        private readonly DataStream dataSource;
 
         public static int numberOfPoints = 500;
 

@@ -138,7 +138,6 @@
     <Compile Include="UI\QuickSettingsScroll.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Util\IsExternalInit.cs" />
     <Compile Include="Util\VideoTools.cs" />
     <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
     <Compile Include="Util\OpenIrisException.cs" />
@@ -161,12 +160,6 @@
     <Compile Include="EyeTrackerData\PupilData.cs" />
     <Compile Include="Util\EyeCollection.cs" />
     <Compile Include="ImageGrabbing\IMovableImageEyeSource.cs" />
-    <Compile Include="UI\ImageGrabberUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\ImageGrabberUI.Designer.cs">
-      <DependentUpon>ImageGrabberUI.cs</DependentUpon>
-    </Compile>
     <Compile Include="EyeTrackerData\Eye.cs" />
     <Compile Include="Util\EyeTrackerLog.cs" />
     <Compile Include="Util\SoundRecorder.cs" />
@@ -179,12 +172,6 @@
     </Compile>
     <Compile Include="UI\BatchAnalysis.Designer.cs">
       <DependentUpon>BatchAnalysis.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\GeneralForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\GeneralForm.Designer.cs">
-      <DependentUpon>GeneralForm.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\NamespaceDoc.cs" />
     <Compile Include="EyeTracker.cs" />
@@ -260,9 +247,6 @@
     <EmbeddedResource Include="UI\EyeTrackingPipelinePupilCRQuickSettings.resx">
       <DependentUpon>EyeTrackingPipelinePupilCRQuickSettings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\ImageGrabberUI.resx">
-      <DependentUpon>ImageGrabberUI.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\BatchAnalysis.resx">
       <DependentUpon>BatchAnalysis.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -279,9 +263,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackerTrace.resx">
       <DependentUpon>EyeTrackerTrace.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\GeneralForm.resx">
-      <DependentUpon>GeneralForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\MultiScrollerPanel.resx">
       <DependentUpon>MultiScrollerPanel.cs</DependentUpon>

@@ -16,16 +16,6 @@ namespace OpenIris.ImageGrabbing
     public abstract class CameraEye : IImageEyeSource
     {
         /// <summary>
-        /// Gets left or right eye (or both).
-        /// </summary>
-        public Eye WhichEye { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the camera is upside down, rotated or mirrored.
-        /// </summary>
-        public CameraOrientation CameraOrientation { get; set; }
-
-        /// <summary>
         /// Gets the frame rate of the camera.
         /// </summary>
         public double FrameRate { get; protected set; }
@@ -34,6 +24,16 @@ namespace OpenIris.ImageGrabbing
         /// Frame size of the camera.
         /// </summary>
         public Size FrameSize { get; protected set; }
+
+        /// <summary>
+        /// Gets left or right eye (or both).
+        /// </summary>
+        public Eye WhichEye { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the camera is upside down, rotated or mirrored.
+        /// </summary>
+        public CameraOrientation CameraOrientation { get; set; }
 
         /// <summary>
         /// Last frame number captured.
@@ -60,6 +60,13 @@ namespace OpenIris.ImageGrabbing
         /// </summary>
         /// <returns>Image grabbed.</returns>
         protected abstract ImageEye GrabImageFromCamera();
+
+        /// <summary>
+        /// Gets the current time in the camera. Not all cameras will implement this feature
+        /// Needs to be fast and not interfere with the image transmission. 
+        /// </summary>
+        /// <returns>The current time in the camera.</returns>
+        public virtual double GetCameraTime() => double.NaN;
 
         /// <summary>
         /// Retrieves an image from the camera buffer.

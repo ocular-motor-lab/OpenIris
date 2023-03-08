@@ -23,7 +23,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>..\CodeAnalysisRules.ruleset</CodeAnalysisRuleSet>
     <NullableContextOptions>enable</NullableContextOptions>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
@@ -33,18 +33,18 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <Optimize>true</Optimize>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <OutputPath>..\..\bin\x64\Debug\</OutputPath>
     <DocumentationFile>..\..\bin\x64\Debug\OpenIrisLib.xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Emgu.CV.UI, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
@@ -138,6 +138,7 @@
     <Compile Include="UI\QuickSettingsScroll.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Util\IsExternalInit.cs" />
     <Compile Include="Util\VideoTools.cs" />
     <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
     <Compile Include="Util\OpenIrisException.cs" />

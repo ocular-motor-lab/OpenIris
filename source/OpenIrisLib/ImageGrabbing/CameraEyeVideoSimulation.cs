@@ -31,14 +31,6 @@ namespace OpenIris.ImageGrabbing
             FrameSize = videoEye.FrameSize;
             CameraOrientation = videoEye.CameraOrientation;
         }
-        
-        /// <summary>
-        /// Disposes reserouces.
-        /// </summary>
-        public void Dispose()
-        {
-            videoEye?.Dispose();
-        }
 
         /// <summary>
         /// Gets the number of frames of the video.
@@ -54,18 +46,17 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Starts the camera.
         /// </summary>
-        public override void Start()
-        {
-            videoEye.Start();
-        }
+        public override void Start() => videoEye.Start();
 
         /// <summary>
         /// Stops the camera
         /// </summary>
-        public override void Stop()
-        {
-            videoEye.Stop();
-        }
+        public override void Stop() => videoEye.Stop();
+
+        /// <summary>
+        /// Disposes reserouces.
+        /// </summary>
+        public void Dispose() => videoEye?.Dispose();
 
         /// <summary>
         /// Grabs the images from the videos.
@@ -86,7 +77,6 @@ namespace OpenIris.ImageGrabbing
             var newTimeStamp = image.TimeStamp;
             newTimeStamp.FrameNumber = (ulong)numberFramesGrabbed;
             image.TimeStamp = newTimeStamp;
-
 
             return image;
         }

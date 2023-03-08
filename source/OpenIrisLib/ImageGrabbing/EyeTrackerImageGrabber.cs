@@ -27,17 +27,18 @@ namespace OpenIris
     /// </summary>
     public sealed class EyeTrackerImageGrabber
     {
+        private readonly int numberOfImageSources;
+        private readonly VideoPlayer? videoPlayer;
+        private readonly int bufferSize;
+
         private CancellationTokenSource? cancellation;
 
         private EyeCollection<IImageEyeSource?>? imageSources;
-        private int numberOfImageSources;
         private BlockingCollection<ImageEye>? cameraBuffer;
         private EyeCollection<Queue<ImageEye>?>? cameraQueues;
-        private readonly VideoPlayer? videoPlayer;
         private (double TimeStamp, long FrameCounter) lastCheckGrabbing;
         private bool started;
         private bool stopping;
-        private int bufferSize;
 
         /// <summary>
         /// 

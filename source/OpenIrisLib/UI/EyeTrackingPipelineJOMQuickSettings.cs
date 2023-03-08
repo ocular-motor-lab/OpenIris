@@ -43,38 +43,6 @@ namespace OpenIris.UI
         }
 
         /// <summary>
-        /// Updates the control.
-        /// </summary>
-        public void UpdateValues(EyeTrackingPipelinePupilCRSettings currentTrackingSettings)
-        {
-            trackingSettings = currentTrackingSettings as EyeTrackingPipelineJOMSettings;
-            
-            if (trackingSettings is null) return;
-
-            if (sliderIrisRadius.Range.End != trackingSettings.MaxIrisRadPixd)
-            {
-                sliderIrisRadius.Range = new Range(0, trackingSettings.MaxIrisRadPixd);
-            }
-
-            trackingSettings.IrisRadiusPixLeft = Math.Min(trackingSettings.IrisRadiusPixLeft, trackingSettings.MaxIrisRadPixd);
-            trackingSettings.IrisRadiusPixRight = Math.Min(trackingSettings.IrisRadiusPixRight, trackingSettings.MaxIrisRadPixd);
-
-
-            if (WhichEye == Eye.Left)
-            {
-                sliderPupilThreshold.Value = trackingSettings.DarkThresholdLeftEye;
-                sliderCRThreshold.Value = trackingSettings.BrightThresholdLeftEye;
-                sliderIrisRadius.Value = (int)trackingSettings.IrisRadiusPixLeft;
-            }
-            else
-            {
-                sliderPupilThreshold.Value = trackingSettings.DarkThresholdRightEye;
-                sliderCRThreshold.Value = trackingSettings.BrightThresholdRightEye;
-                sliderIrisRadius.Value = (int)trackingSettings.IrisRadiusPixRight;
-            }
-        }
-
-        /// <summary>
         /// Update the pipeline UI.
         /// </summary>
         /// <param name="imageBox">image box for the eye image.</param>
@@ -84,7 +52,7 @@ namespace OpenIris.UI
             if (dataAndImages is null) return;
 
             var image = dataAndImages.Images[WhichEye];
-            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception();
+            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelineJOMSettings ?? throw new Exception();
             var eyeCalibration = dataAndImages.Calibration.EyeCalibrationParameters[WhichEye];
 
             // Update Images
@@ -122,9 +90,29 @@ namespace OpenIris.UI
         {
             if (dataAndImages is null) return;
 
-            var settings = dataAndImages.TrackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong settings for JOM pipeline.");
+            trackingSettings = dataAndImages.TrackingSettings as EyeTrackingPipelineJOMSettings ?? throw new Exception("Wrong settings for JOM pipeline.");
 
-            UpdateValues(settings);
+            // Update ranges if needed
+            if (sliderIrisRadius.Range.End != trackingSettings.MaxIrisRadPixd)
+            {
+                sliderIrisRadius.Range = new Range(0, trackingSettings.MaxIrisRadPixd);
+                trackingSettings.IrisRadiusPixLeft = Math.Min(trackingSettings.IrisRadiusPixLeft, trackingSettings.MaxIrisRadPixd);
+                trackingSettings.IrisRadiusPixRight = Math.Min(trackingSettings.IrisRadiusPixRight, trackingSettings.MaxIrisRadPixd);
+            }
+
+            // Update values
+            if (WhichEye == Eye.Left)
+            {
+                sliderPupilThreshold.Value = trackingSettings.DarkThresholdLeftEye;
+                sliderCRThreshold.Value = trackingSettings.BrightThresholdLeftEye;
+                sliderIrisRadius.Value = (int)trackingSettings.IrisRadiusPixLeft;
+            }
+            else
+            {
+                sliderPupilThreshold.Value = trackingSettings.DarkThresholdRightEye;
+                sliderCRThreshold.Value = trackingSettings.BrightThresholdRightEye;
+                sliderIrisRadius.Value = (int)trackingSettings.IrisRadiusPixRight;
+            }
         }
 
         private void sliderPupilThreshold_ValueChanged(object sender, EventArgs e)

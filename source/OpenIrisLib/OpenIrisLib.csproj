@@ -173,7 +173,6 @@
     <Compile Include="UI\BatchAnalysis.Designer.cs">
       <DependentUpon>BatchAnalysis.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\NamespaceDoc.cs" />
     <Compile Include="EyeTracker.cs" />
     <Compile Include="EyeTrackerData\ImageEyeTimestamp.cs" />
     <Compile Include="Util\EyeTrackerDebug.cs" />

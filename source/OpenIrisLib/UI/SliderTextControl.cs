@@ -31,16 +31,16 @@ namespace OpenIris.UI
         {
             InitializeComponent();
 
-            this.sliderValue = 0;
+            sliderValue = 0;
 
-            this.EnabledChanged += SliderTextControl_EnabledChanged;
+            EnabledChanged += SliderTextControl_EnabledChanged;
         }
 
         void SliderTextControl_EnabledChanged(object sender, EventArgs e)
         {
-            this.label.Enabled = this.Enabled;
-            this.trackBar.Enabled = this.Enabled;
-            this.numericUpDown1.Enabled = this.Enabled;
+            label.Enabled = Enabled;
+            trackBar.Enabled = Enabled;
+            numericUpDown1.Enabled = Enabled;
         }
 
         /// <summary>
@@ -132,17 +132,17 @@ namespace OpenIris.UI
         /// <param name="e">Event parameters.</param>
         protected void OnValueChanged(EventArgs e)
         {
-            this.ValueChanged?.Invoke(this, e);
+            ValueChanged?.Invoke(this, e);
         }
 
         private void trackBar_Scroll(object sender, EventArgs e)
         {
-            this.Value = this.trackBar.Value;
+            Value = trackBar.Value;
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            this.Value = (int)this.numericUpDown1.Value;
+            Value = (int)numericUpDown1.Value;
         }
     }
 }

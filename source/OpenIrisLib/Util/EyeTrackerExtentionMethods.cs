@@ -31,8 +31,6 @@ namespace OpenIris
         /// <returns></returns>
         public static Size GetFrameSize(this EyeCollection<ImageEye?> images)
         {
-            if (images is null) throw new ArgumentNullException(nameof(images));
-
             return images[0]?.Size ?? images[1]?.Size ?? throw new InvalidOperationException("No images");
         }
 
@@ -43,8 +41,6 @@ namespace OpenIris
         /// <returns></returns>
         public static Size GetFrameSize(this EyeCollection<(Eye, Image<Gray, byte>?)> images)
         {
-            if (images is null) throw new ArgumentNullException(nameof(images));
-
             return images[0].Item2?.Size ?? images[1].Item2?.Size ?? throw new InvalidOperationException("No images");
         }
 
@@ -55,8 +51,6 @@ namespace OpenIris
         /// <returns></returns>
         public static long GetFrameNumber(this EyeCollection<ImageEye?> images)
         {
-            if (images is null) throw new ArgumentNullException(nameof(images));
-
             return (long)(images[0]?.TimeStamp.FrameNumber ?? images[1]?.TimeStamp.FrameNumber ?? throw new InvalidOperationException("No images"));
         }
     }

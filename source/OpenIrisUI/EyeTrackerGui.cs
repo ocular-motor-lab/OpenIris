@@ -25,10 +25,11 @@ namespace OpenIris.UI
         private static object _locker = new object();
 
         private readonly EyeTracker eyeTracker;
+        private readonly EyeTrackerUICommands eyeTrackerUICommands;
         private readonly Timer timerRefreshUI;
         private readonly LogTraceListener log;
 
-        private EyeCollection<ImageBox> imageBoxes;
+        private readonly EyeCollection<ImageBox> imageBoxes;
 
         private (string name, CalibrationUIControl? control)? calibrationUI;
         private (string name, EyeCollection<EyeTrackingPipelineUIControl?>? controls)? pipelineUI;
@@ -73,6 +74,8 @@ namespace OpenIris.UI
                     }
                 };
 
+            eyeTrackerUICommands = new EyeTrackerUICommands(eyeTracker);
+
             timerRefreshUI = new Timer(components)
             {
                 Interval = 100,
@@ -109,46 +112,46 @@ namespace OpenIris.UI
                 // Bind commands with UI items
                 //
 
-                eyeTracker.PlayVideoCommand.Bind(playVideoToolStripMenuItem);
-                eyeTracker.PlayVideoCommand.Bind(buttonPlayVideo);
-                eyeTracker.ProcessVideoCommand.Bind(processVideoToolStripMenuItem);
-                eyeTracker.ProcessVideoCommand.Bind(buttonProcessVideo);
-                eyeTracker.BatchProcessVideoCommand.Bind(batchAnalysisToolStripMenuItem);
+                eyeTrackerUICommands.PlayVideoCommand.Bind(playVideoToolStripMenuItem);
+                eyeTrackerUICommands.PlayVideoCommand.Bind(buttonPlayVideo);
+                eyeTrackerUICommands.ProcessVideoCommand.Bind(processVideoToolStripMenuItem);
+                eyeTrackerUICommands.ProcessVideoCommand.Bind(buttonProcessVideo);
+                eyeTrackerUICommands.BatchProcessVideoCommand.Bind(batchAnalysisToolStripMenuItem);
 
-                eyeTracker.StopCommand.Bind(stopToolStripMenuItem);
+                eyeTrackerUICommands.StopCommand.Bind(stopToolStripMenuItem);
 
-                eyeTracker.StartCalibrationCommand.Bind(calibrateToolStripMenuItem);
-                eyeTracker.CancelCalibrationCommand.Bind(cancelCalibrationToolStripMenuItem);
-                eyeTracker.StartCancelCalibrationCommand.Bind(buttonCalibrate);
-                eyeTracker.LoadCalibrationCommand.Bind(loadCalibrationToolStripMenuItem);
-                eyeTracker.SaveCalibrationCommand.Bind(saveCalibrationToolStripMenuItem);
-                eyeTracker.ResetReferenceCommand.Bind(buttonResetReference);
-                eyeTracker.ResetReferenceCommand.Bind(resetReferenceToolStripMenuItem);
-                eyeTracker.ResetCalibrationCommand.Bind(resetCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.StartCalibrationCommand.Bind(calibrateToolStripMenuItem);
+                eyeTrackerUICommands.CancelCalibrationCommand.Bind(cancelCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.StartCancelCalibrationCommand.Bind(buttonCalibrate);
+                eyeTrackerUICommands.LoadCalibrationCommand.Bind(loadCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.SaveCalibrationCommand.Bind(saveCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.ResetReferenceCommand.Bind(buttonResetReference);
+                eyeTrackerUICommands.ResetReferenceCommand.Bind(resetReferenceToolStripMenuItem);
+                eyeTrackerUICommands.ResetCalibrationCommand.Bind(resetCalibrationToolStripMenuItem);
 
-                eyeTracker.StartStopRecordingCommand.Bind(startStopRecordingToolStripMenuItem);
-                eyeTracker.StartStopRecordingCommand.Bind(buttonRecord);
+                eyeTrackerUICommands.StartStopRecordingCommand.Bind(startStopRecordingToolStripMenuItem);
+                eyeTrackerUICommands.StartStopRecordingCommand.Bind(buttonRecord);
 
-                eyeTracker.StartTrackingCommand.Bind(startTrackingToolStripMenuItem);
-                eyeTracker.StartTrackingCommand.Bind(buttonStartTracking);
+                eyeTrackerUICommands.StartTrackingCommand.Bind(startTrackingToolStripMenuItem);
+                eyeTrackerUICommands.StartTrackingCommand.Bind(buttonStartTracking);
 
-                eyeTracker.EditSettingsCommand.Bind(configurationToolStripMenuItem);
+                eyeTrackerUICommands.EditSettingsCommand.Bind(configurationToolStripMenuItem);
 
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeRight);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeLeft);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeUp);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeDown);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeRight);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeLeft);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeRight);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeLeft);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeUp);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeDown);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeRight);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeLeft);
 
-                eyeTracker.CenterCamerasCommand.Bind(buttonCenterEyes);
+                eyeTrackerUICommands.CenterCamerasCommand.Bind(buttonCenterEyes);
 
-                eyeTracker.ChangeDataFolderCommand.Bind(buttonSelectFolder);
+                eyeTrackerUICommands.ChangeDataFolderCommand.Bind(buttonSelectFolder);
 
-                eyeTracker.TrimVideosCommand.Bind(trimVideosToolStripMenuItem);
-                eyeTracker.ConvertVideoToRGBCommand.Bind(convertVideoToRGBToolStripMenuItem);
+                eyeTrackerUICommands.TrimVideosCommand.Bind(trimVideosToolStripMenuItem);
+                eyeTrackerUICommands.ConvertVideoToRGBCommand.Bind(convertVideoToRGBToolStripMenuItem);
 
                 //
                 // Data Bindings with settings
@@ -289,7 +292,7 @@ namespace OpenIris.UI
 
             // Calibration
 
-            if (eyeTracker.CancelCalibrationCommand.CanExecute())
+            if (eyeTrackerUICommands.CancelCalibrationCommand.CanExecute())
             {
                 buttonCalibrate.Text = "Cancel calibration";
                 buttonCalibrate.BackColor = Color.LightYellow;
@@ -579,7 +582,7 @@ namespace OpenIris.UI
 
         private void EyeTrackerGUI_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var stillRecording = eyeTracker.StopRecordingCommand.CanExecute();
+            var stillRecording = eyeTrackerUICommands.StopRecordingCommand.CanExecute();
             bool CanFinish = !stillRecording;
 
             try

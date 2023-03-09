@@ -37,7 +37,8 @@ namespace SpinnakerInterface
 
             Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
             
-            camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
+            camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0], (double) Settings.FrameRate);
+
             try
             {
                 this.camera.Start();
@@ -49,7 +50,7 @@ namespace SpinnakerInterface
                     this.camera.Stop();
                 }
 
-                throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
+                throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }
 
             switch (settings.Eye)

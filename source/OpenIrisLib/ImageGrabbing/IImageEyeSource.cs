@@ -14,7 +14,7 @@ namespace OpenIris.ImageGrabbing
     /// <summary>
     /// Generic interface for a camera in an eye tracker or a video file.
     /// </summary>
-    public interface IImageEyeSource
+    public interface IImageEyeSource: IDisposable
     {
         /// <summary>
         /// Gets or sets which eye the images are from: left eye, right eye, or both.

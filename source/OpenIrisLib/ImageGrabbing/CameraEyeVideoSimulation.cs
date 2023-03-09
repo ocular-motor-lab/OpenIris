@@ -11,7 +11,7 @@ namespace OpenIris.ImageGrabbing
     /// This camera actually uses a video but it does behave like a camera in most senses
     /// and it is very useful to debug.
     /// </summary>
-    public sealed class CameraEyeVideoSimulation : CameraEye, IDisposable
+    public sealed class CameraEyeVideoSimulation : CameraEye
     { 
         private readonly VideoEye videoEye;    
         private long numberFramesGrabbed;
@@ -56,7 +56,7 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Disposes reserouces.
         /// </summary>
-        public void Dispose() => videoEye?.Dispose();
+        public override void Dispose() => videoEye?.Dispose();
 
         /// <summary>
         /// Grabs the images from the videos.

@@ -119,6 +119,7 @@ namespace OpenIris.ImageGrabbing
         {
             if (disposing)
             {
+                base.Dispose();
                 camera.Dispose();
             }
         }
@@ -126,7 +127,7 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Disposes resources.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);

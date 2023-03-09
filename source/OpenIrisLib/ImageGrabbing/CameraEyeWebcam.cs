@@ -43,8 +43,9 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Disposes reserouces.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
+            base.Dispose();
             capture.Dispose();
         }
 

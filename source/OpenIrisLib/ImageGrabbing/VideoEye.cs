@@ -16,7 +16,7 @@ namespace OpenIris.ImageGrabbing
     /// <summary>
     /// Captures eye images from video files.
     /// </summary>
-    public class VideoEye : IImageEyeSource, IDisposable
+    public class VideoEye : IImageEyeSource
     {
         /// <summary>
         /// True after Stop is called.
@@ -52,25 +52,11 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Disposes reserouces.
         /// </summary>
-        /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Stop();
-
-                Video.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Disposes reserouces.
-        /// </summary>
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            Stop();
+
+            Video.Dispose();
         }
 
         /// <summary>
@@ -174,7 +160,7 @@ namespace OpenIris.ImageGrabbing
         public virtual ImageEye GrabImageEyeFromVideo()
         {
             // Set up the timestamp for the image
-            ImageEyeTimestamp timestamp = new ImageEyeTimestamp
+            var timestamp = new ImageEyeTimestamp
             {
                 FrameNumber = (ulong)Video.GetCaptureProperty(CapProp.PosFrames),
                 FrameNumberRaw = (ulong)Video.GetCaptureProperty(CapProp.PosFrames),

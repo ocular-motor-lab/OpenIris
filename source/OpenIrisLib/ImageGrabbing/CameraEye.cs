@@ -51,9 +51,14 @@ namespace OpenIris.ImageGrabbing
         public abstract void Start();
 
         /// <summary>
-        /// Overrides the StopCapture method.
+        /// Finish grabbing images from the camera and free resources.
         /// </summary>
         public abstract void Stop();
+
+        /// <summary>
+        /// Disposes the camera
+        /// </summary>
+        public virtual void Dispose() => Stop();
 
         /// <summary>
         /// Retrieves an image from the camera buffer.

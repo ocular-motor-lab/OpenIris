@@ -242,7 +242,7 @@ namespace OpenIris
 
                 cancellation = null;
 
-                imageSources?.ForEach(source => (source as IDisposable)?.Dispose());
+                imageSources?.ForEach(source => source?.Dispose());
                 imageSources = null;
             }
         }

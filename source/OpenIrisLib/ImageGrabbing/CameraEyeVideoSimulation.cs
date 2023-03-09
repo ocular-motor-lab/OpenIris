@@ -56,7 +56,13 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Disposes reserouces.
         /// </summary>
-        public override void Dispose() => videoEye?.Dispose();
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                videoEye?.Dispose();
+            }
+        }
 
         /// <summary>
         /// Grabs the images from the videos.

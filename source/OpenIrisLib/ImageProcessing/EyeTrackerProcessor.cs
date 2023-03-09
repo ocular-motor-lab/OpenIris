@@ -116,8 +116,8 @@ namespace OpenIris
             if (started) throw new InvalidOperationException("Cannot start the processor again. Already running.");
             started = true;
 
-            List<Task>? processingTasks = new List<Task>();
-            TaskErrorHandler? errorHandler = new TaskErrorHandler(Stop);
+            List<Task>? processingTasks = new ();
+            TaskErrorHandler? errorHandler = new (Stop);
 
             try
             {
@@ -131,8 +131,8 @@ namespace OpenIris
                         //
                         // Not using a using statement here because the ProcessInputLoop will dispose
                         // of this events. Otherwise they get disposed before the WhenAll
-                        EyeCollection<AutoResetEvent?> newImagesEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
-                        EyeCollection<AutoResetEvent?> eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
+                        var newImagesEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
+                        var eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
                         (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines = (string.Empty, null);
                         EyeTrackerImagesAndData? currentImagesAndData = null;
 
@@ -233,7 +233,7 @@ namespace OpenIris
             try
             {
                 // Keep processing images until the buffer is marked as complete and empty
-                using CancellationTokenSource? cancellation = new CancellationTokenSource();
+                using CancellationTokenSource? cancellation = new ();
                 foreach ((EyeTrackerImagesAndData imagesAndData, long orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                 {
                     UpdatePipeline(ref pipelines, imagesAndData);

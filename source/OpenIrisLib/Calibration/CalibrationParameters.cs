@@ -21,17 +21,15 @@ namespace OpenIris
         /// <summary>
         /// Default calibration parameters.
         /// </summary>
-        public static CalibrationParameters Default => new CalibrationParameters();
+        public static CalibrationParameters Default => new();
 
         /// <summary>
         /// Initializes a new instance of the CalibrationParameters class;
         /// </summary>
         public CalibrationParameters()
         {
-            EyeCalibrationParameters = new EyeCollection<EyeCalibration>(
-                                                        new EyeCalibration(Eye.Left),
-                                                        new EyeCalibration(Eye.Right));
-            HeadCalibrationParameters = new HeadCalibration();
+            EyeCalibrationParameters = new(new EyeCalibration(Eye.Left),new EyeCalibration(Eye.Right));
+            HeadCalibrationParameters = new();
         }
 
         /// <summary>

@@ -15,6 +15,8 @@ namespace OpenIris.ImageGrabbing
     /// be accessed using openCV.</remarks>
     public abstract class CameraEye : IImageEyeSource
     {
+        private bool disposedValue;
+
         /// <summary>
         /// Gets the frame rate of the camera.
         /// </summary>
@@ -56,11 +58,6 @@ namespace OpenIris.ImageGrabbing
         public abstract void Stop();
 
         /// <summary>
-        /// Disposes the camera
-        /// </summary>
-        public virtual void Dispose() => Stop();
-
-        /// <summary>
         /// Retrieves an image from the camera buffer.
         /// </summary>
         /// <returns>Image grabbed.</returns>
@@ -96,6 +93,34 @@ namespace OpenIris.ImageGrabbing
             image.CorrectOrientation(CameraOrientation);
 
             return image;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~CameraEye()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

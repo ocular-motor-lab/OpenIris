@@ -40,13 +40,15 @@ namespace OpenIris.ImageGrabbing
             FrameRate = capture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.Fps);
         }
 
-        /// <summary>
-        /// Disposes reserouces.
-        /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
+            if (disposing)
+            {
+                capture.Stop();
+                capture.Dispose();
+            }
+
             base.Dispose();
-            capture.Dispose();
         }
 
         /// <summary>

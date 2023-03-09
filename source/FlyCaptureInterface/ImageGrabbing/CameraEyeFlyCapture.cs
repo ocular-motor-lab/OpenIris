@@ -16,7 +16,7 @@ namespace OpenIris.ImageGrabbing
     /// <summary>
     /// Class to control a point grey camera in the context of eye tracking.
     /// </summary>
-    public partial class CameraEyeFlyCapture : CameraEye, IMovableImageEyeSource, IDisposable
+    public partial class CameraEyeFlyCapture : CameraEye, IMovableImageEyeSource
     {
         public enum CameraPixelFormat { Raw8, Mono8 }
         public enum GPIOMode { input, output, strobe }
@@ -115,22 +115,12 @@ namespace OpenIris.ImageGrabbing
         /// Disposes resources.
         /// </summary>
         /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                base.Dispose();
                 camera.Dispose();
             }
-        }
-
-        /// <summary>
-        /// Disposes resources.
-        /// </summary>
-        public override void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         #endregion constructor
@@ -276,7 +266,7 @@ namespace OpenIris.ImageGrabbing
         /// </summary>
         public override void Stop()
         {
-            if (camera == null) return;
+            if (camera == null || stopping is true) return;
 
             try
             {

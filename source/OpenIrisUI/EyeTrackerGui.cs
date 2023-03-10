@@ -254,7 +254,6 @@ namespace OpenIris.UI
                 tabPages.ResumeLayout();
             }
 
-
             if (!eyeTrackerTrace.Initialized)
             {
                 eyeTrackerTrace.Init(settings);
@@ -401,6 +400,24 @@ namespace OpenIris.UI
                             control.Location = new Point(0, 0);
                             control.Size = panels[eye].ClientSize;
                             panels[eye].Controls.Add(control);
+
+                            //var list  = control.BuildPipelineUI(eye, settings.TrackingPipelineSettings);
+
+                            //var table = new TableLayoutPanel();
+                            //table.RowCount = list.Count;
+                            //table.ColumnCount = 1;
+                            //table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+                            //table.Dock = DockStyle.Top;
+                            //table.Height = 55 * list.Count;
+                            //for (int i = 0; i < list.Count; i++)
+                            //{
+                            //    table.RowStyles.Add(new RowStyle(SizeType.Absolute, 50f));
+
+                            //    table.Controls.Add(list[i], i, 0);
+                            //}
+
+                            //panel2.Controls.Clear();
+                            //panel2.Controls.Add(table);
                         }
                     }
                 }

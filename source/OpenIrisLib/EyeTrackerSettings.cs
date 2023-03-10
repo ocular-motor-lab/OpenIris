@@ -157,7 +157,6 @@ namespace OpenIris
                 {
                     eyeTrackingPipeline = value;
 
-
                     OnPropertyChanged(this, nameof(EyeTrackingPipeline));
                 }
             }

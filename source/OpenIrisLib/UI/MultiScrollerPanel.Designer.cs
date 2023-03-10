@@ -34,6 +34,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.Name = "MultiScrollerPanel";
             this.Size = new System.Drawing.Size(977, 676);
             this.ResumeLayout(false);

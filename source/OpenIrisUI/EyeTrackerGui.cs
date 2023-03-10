@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------
 namespace OpenIris.UI
 {
+    using Emgu.CV;
 #nullable enable
 
     using Emgu.CV.Structure;
@@ -12,10 +13,12 @@ namespace OpenIris.UI
     using OpenIris;
     using OpenIris.ImageGrabbing;
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Drawing;
     using System.Linq;
     using System.Windows.Forms;
+    using static System.Net.Mime.MediaTypeNames;
 
     /// <summary>
     /// Main graphical user interface of the eye tracker
@@ -32,7 +35,7 @@ namespace OpenIris.UI
         private readonly EyeCollection<ImageBox> imageBoxes;
 
         private (string name, CalibrationUIControl? control)? calibrationUI;
-        private (string name, EyeCollection<EyeTrackingPipelineUIControl?>? controls)? pipelineUI;
+        private (string name, EyeCollection<IEyeTrackingPipeline?>? pipelines)? pipelineUI;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerGui class
@@ -372,7 +375,7 @@ namespace OpenIris.UI
 
                 if (!eyeTracker.Tracking) return;
 
-                var settings = eyeTracker.Settings;
+                var settings = eyeTracker.Settings.TrackingPipelineSettings;
                 if (settings is null) return;
 
                 var eyes = new Eye[] { Eye.Left, Eye.Right };
@@ -380,53 +383,93 @@ namespace OpenIris.UI
                 // Change the pipeline UIs if necessary
                 if (pipelineUI?.name != eyeTracker.Settings.EyeTrackingPipeline)
                 {
-                    foreach (var panel in panels)
-                    {
-                        if (panel.Controls.Count > 0)
-                            panel.Controls.Clear();
-                    }
+                    panels[Eye.Left].Controls.Clear();
+                    panels[Eye.Right].Controls.Clear();
 
-                    pipelineUI = eyeTracker.ImageProcessor?.PipelineUI;
+                    pipelineUI = eyeTracker.ImageProcessor?.PipelineForUI;
 
                     foreach (var eye in eyes)
                     {
-                        if (eye == eyeTracker.Settings.EyeTrackingSystemSettings.Eye |
-                            Eye.Both == eyeTracker.Settings.EyeTrackingSystemSettings.Eye )
+                        // Check if we are doing this eye
+                        if (eye != eyeTracker.Settings.EyeTrackingSystemSettings.Eye &&
+                            Eye.Both != eyeTracker.Settings.EyeTrackingSystemSettings.Eye)
+                            continue;
+
+                        var list = pipelineUI?.pipelines?[eye]?.GetQuickSettingsList(eye, settings);
+                        if (list is null) continue;
+
+                        var table = new TableLayoutPanel
                         {
-                            var control = pipelineUI?.controls?[eye];
-                            if (control is null) continue;
+                            RowCount = list.Count,
+                            ColumnCount = 1,
+                            Height = list.Count * 55,
+                            Dock = DockStyle.Fill
+                        };
+                        table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
-                            control.Dock = DockStyle.Fill;
-                            control.Location = new Point(0, 0);
-                            control.Size = panels[eye].ClientSize;
-                            panels[eye].Controls.Add(control);
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 50f));
+                            var (text, range, settingName) = list[i];
 
-                            //var list  = control.BuildPipelineUI(eye, settings.TrackingPipelineSettings);
+                            var sliderPupil = new SliderTextControl
+                            {
+                                Text = text,
+                                Range = range,
+                                Dock = DockStyle.Fill,
+                            };
+                            sliderPupil.Value = Convert.ToInt32(settings.GetType().GetProperty(settingName)?.GetValue(settings));
+                            sliderPupil.ValueChanged += (o, e) => settings.GetType().GetProperty(settingName)?.SetValue(settings, sliderPupil.Value);
+                            // TODO: not sure if this may cause a problem for adding and never removing event handler to the settings.
+                            settings.PropertyChanged += (o, e) => { if (e.PropertyName == settingName) sliderPupil.Value = Convert.ToInt32(settings.GetType().GetProperty(settingName)?.GetValue(settings)); };
 
-                            //var table = new TableLayoutPanel();
-                            //table.RowCount = list.Count;
-                            //table.ColumnCount = 1;
-                            //table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-                            //table.Dock = DockStyle.Top;
-                            //table.Height = 55 * list.Count;
-                            //for (int i = 0; i < list.Count; i++)
-                            //{
-                            //    table.RowStyles.Add(new RowStyle(SizeType.Absolute, 50f));
-
-                            //    table.Controls.Add(list[i], i, 0);
-                            //}
-
-                            //panel2.Controls.Clear();
-                            //panel2.Controls.Add(table);
+                            table.Controls.Add(sliderPupil, i, 0);
                         }
+
+                        panels[eye].Controls.Add(table);
                     }
+                }
+
+                // Update Torsion images
+                var imageBoxIris = new EyeCollection<ImageBox>(imageBoxIrisLeft, imageBoxIrisRight);
+                var imageBoxIrisReference = new EyeCollection<ImageBox>(imageBoxIrisRefeferenceLeft, imageBoxIrisRefeferenceRight);
+
+                foreach (var eye in eyes)
+                {
+                    Image<Gray, byte>? imageTorsion = null;
+                    Image<Gray, byte>? imageTorsionRef = null;
+
+                    // Torsion image
+                    var torsionImage = eyeTracker.LastImagesAndData?.Images[eye]?.ImageTorsion;
+                    if (torsionImage?.Size.Width > 4)
+                    {
+                        imageTorsion = new Image<Gray, byte>(torsionImage.Size.Height, torsionImage.Size.Width);
+                        CvInvoke.Transpose(torsionImage, imageTorsion);
+                    }
+
+                    // Torsion reference
+                    var torsionRef = eyeTracker.LastImagesAndData?.Calibration.EyeCalibrationParameters[eye]?.ImageTorsionReference;
+                    if (torsionRef?.Size.Width > 4)
+                    {
+                        imageTorsionRef = new Image<Gray, byte>(torsionRef.Size.Height, torsionRef.Size.Width);
+                        CvInvoke.Transpose(torsionRef, imageTorsionRef);
+                    }
+
+                    imageBoxIris[eye].Image = imageTorsion;
+                    imageBoxIrisReference[eye].Image = imageTorsionRef;
                 }
 
                 // Update pipeline UIs
                 foreach (var eye in eyes)
                 {
-                    pipelineUI?.controls?[eye]?.UpdatePipelineUI(eyeTracker.LastImagesAndData);
-                    pipelineUI?.controls?[eye]?.UpdatePipelineEyeImage(imageBoxes[eye], eyeTracker.LastImagesAndData);
+                    if (eyeTracker.LastImagesAndData != null)
+                    {
+                        imageBoxes[eye].Image = pipelineUI?.pipelines?[eye]?.UpdatePipelineEyeImage(eye, eyeTracker.LastImagesAndData);
+                    }
+                    else
+                    {
+                      //  imageBoxes[eye].Image = null;
+                    }
                 }
             }
             finally

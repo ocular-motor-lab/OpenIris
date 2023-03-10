@@ -78,7 +78,7 @@ namespace OpenIris
         /// <summary>
         /// User interface for the current pipeline. For each eye.
         /// </summary>
-        public (string name, EyeCollection<EyeTrackingPipelineUIControl?>? controls) PipelineUI { get; private set; }
+        public (string name, EyeCollection<IEyeTrackingPipeline?>? controls) PipelineForUI { get; private set; }
 
         /// <summary>
         /// Gets the total number of frames received.
@@ -329,16 +329,9 @@ namespace OpenIris
                 // need this condition also because there may be many threads
                 // only one needs to change the UI but all of them need to change
                 // the pipeline
-                if (PipelineUI.name != currentPipelineName)
+                if (PipelineForUI.name != currentPipelineName)
                 {
-                    var pipelineLeft = pipelines.implementation?[Eye.Left]?.GetPipelineUI();
-                    var pipelineRight = pipelines.implementation?[Eye.Right]?.GetPipelineUI();
-                    if (pipelineLeft != null)
-                        pipelineLeft.WhichEye = Eye.Left;
-                    if (pipelineRight != null)
-                        pipelineRight.WhichEye = Eye.Right;
-                    PipelineUI = (currentPipelineName, new EyeCollection<EyeTrackingPipelineUIControl?>(
-                        pipelineLeft, pipelineRight));
+                    PipelineForUI = pipelines;
                 }
             }
         }

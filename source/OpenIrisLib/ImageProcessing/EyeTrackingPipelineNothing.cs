@@ -10,6 +10,7 @@ namespace OpenIris
     using Emgu.CV;
     using Emgu.CV.Structure;
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.Composition;
 
     /// <summary>
@@ -39,12 +40,26 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// 
+        /// Updates the image of the eye on the setup tab.
         /// </summary>
-        /// <param name="whichEye"></param>
-        /// <param name="pipelineName"></param>
+        /// <param name="whichEye">Which eye to draw.</param>
+        /// <param name="dataAndImages">Data of the corresponding image.</param>
+        /// <returns>The new image with all the overlay of the data.</returns>
+        public IInputArray? UpdatePipelineEyeImage(Eye whichEye, EyeTrackerImagesAndData dataAndImages)
+        {
+            if (dataAndImages is null) return null;
+
+            return ImageEyeDrawing.DrawAllData(
+                                    dataAndImages.Images[whichEye],
+                                    dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
+                                    dataAndImages.TrackingSettings);
+        }
+
+        /// <summary>
+        /// Get the list of tracking settings that will be shown as sliders in the setup UI.
+        /// </summary>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI()
+        public List<(string text, Range range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings)
         {
             return null;
         }

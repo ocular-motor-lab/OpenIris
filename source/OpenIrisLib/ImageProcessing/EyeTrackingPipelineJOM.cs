@@ -14,6 +14,9 @@ namespace OpenIris
     using System.ComponentModel;
     using System.ComponentModel.Composition;
     using OpenIris.ImageProcessing;
+    using System.Windows.Forms;
+    using System.Collections.Generic;
+    using Emgu.CV.UI;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
@@ -129,14 +132,53 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Gets the current pipeline UI
+        /// Updates the image of the eye on the setup tab.
         /// </summary>
-        /// <param name="whichEye"></param>
-        /// <param name="pipelineName"></param>
-        /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI()
+        /// <param name="whichEye">Which eye to draw.</param>
+        /// <param name="dataAndImages">Data of the corresponding image.</param>
+        /// <returns>The new image with all the overlay of the data.</returns>
+        public IInputArray? UpdatePipelineEyeImage(Eye whichEye, EyeTrackerImagesAndData dataAndImages)
         {
-            return new UI.EyeTrackingPipelineJOMQuickSettings();
+            if (dataAndImages is null) return null;
+
+            return ImageEyeDrawing.DrawAllData(
+                                    dataAndImages.Images[whichEye],
+                                    dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
+                                    dataAndImages.TrackingSettings);
+        }
+
+        /// <summary>
+        /// Get the list of tracking settings that will be shown as sliders in the setup UI.
+        /// </summary>
+        /// <returns></returns>
+        public List<(string text, Range range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings)
+        {
+            var theSettings = settings as EyeTrackingPipelineJOMSettings ?? throw new InvalidOperationException("bad settings");
+
+            var list = new List<(string text, Range range, string SettingName)>();
+
+            var settingName = whichEye switch
+            {
+                Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
+                Eye.Right => nameof(theSettings.DarkThresholdRightEye),
+            };
+            list.Add(("Pupil threshold", new Range(0, 255), settingName));
+
+            settingName = whichEye switch
+            {
+                Eye.Left => nameof(theSettings.BrightThresholdLeftEye),
+                Eye.Right => nameof(theSettings.BrightThresholdRightEye),
+            };
+            list.Add(("CR threshold", new Range(0, 255), settingName));
+
+            settingName = whichEye switch
+            {
+                Eye.Left => nameof(theSettings.IrisRadiusPixLeft),
+                Eye.Right => nameof(theSettings.IrisRadiusPixRight),
+            };
+            list.Add(("Iris radius", new Range(0, theSettings.MaxIrisRadPixd), settingName));
+
+            return list;
         }
     }
 

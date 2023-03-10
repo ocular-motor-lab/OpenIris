@@ -63,6 +63,7 @@ namespace OpenIris
         /// after a camera system is selected.
         /// </summary>       
         [Category("Camera properties"), Description("Camera resolution ( mm per pixels)")]
+        [NeedsRestarting]
         public virtual double MmPerPix { get => mmPerPix; set => SetProperty(ref mmPerPix, value, nameof(MmPerPix)); }
         private double mmPerPix = 0.15; // default value
 

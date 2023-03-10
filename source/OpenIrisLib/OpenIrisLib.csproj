@@ -96,12 +96,6 @@
     <Compile Include="UI\DebugImagesPanel.Designer.cs">
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\EyeTrackingPipelinePupilCRQuickSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\EyeTrackingPipelinePupilCRQuickSettings.Designer.cs">
-      <DependentUpon>EyeTrackingPipelinePupilCRQuickSettings.cs</DependentUpon>
-    </Compile>
     <Compile Include="Calibration\CalibrationUIControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -120,23 +114,11 @@
     <Compile Include="RemoteServices\IEyeTrackerWebService.cs" />
     <Compile Include="UI\EyeTrackerUICommand.cs" />
     <Compile Include="UI\ImageEyeDrawing.cs" />
-    <Compile Include="UI\EyeTrackingPipelineUIControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\MultiScrollerPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\MultiScrollerPanel.Designer.cs">
-      <DependentUpon>MultiScrollerPanel.cs</DependentUpon>
-    </Compile>
     <Compile Include="UI\ProgressBarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\ProgressBarDialog.Designer.cs">
       <DependentUpon>ProgressBarDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\QuickSettingsScroll.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Util\VideoTools.cs" />
     <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
@@ -181,12 +163,6 @@
     </Compile>
     <Compile Include="UI\EyeTrackerImageEyeBox.Designer.cs">
       <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\EyeTrackingPipelineJOMQuickSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\EyeTrackingPipelineJOMQuickSettings.Designer.cs">
-      <DependentUpon>EyeTrackingPipelineJOMQuickSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\EyeTrackerSettingsForm.cs">
       <SubType>Form</SubType>
@@ -243,9 +219,6 @@
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\EyeTrackingPipelinePupilCRQuickSettings.resx">
-      <DependentUpon>EyeTrackingPipelinePupilCRQuickSettings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\BatchAnalysis.resx">
       <DependentUpon>BatchAnalysis.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -254,17 +227,11 @@
       <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\EyeTrackingPipelineJOMQuickSettings.resx">
-      <DependentUpon>EyeTrackingPipelineJOMQuickSettings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackerSettingsForm.resx">
       <DependentUpon>EyeTrackerSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackerTrace.resx">
       <DependentUpon>EyeTrackerTrace.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\MultiScrollerPanel.resx">
-      <DependentUpon>MultiScrollerPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ProgressBarDialog.resx">
       <DependentUpon>ProgressBarDialog.cs</DependentUpon>

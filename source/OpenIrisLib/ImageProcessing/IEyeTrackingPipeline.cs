@@ -13,9 +13,11 @@ namespace OpenIris
     using System;
     using System.Linq;
     using System.Drawing;
+    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Runtime.Serialization;
     using System.Xml.Serialization;
+    using Emgu.CV.UI;
 
     /// <summary>
     /// Interface for all eye tracking pipelines that process images to get data.
@@ -32,10 +34,18 @@ namespace OpenIris
         (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSettings);
 
         /// <summary>
-        /// Get the UI to change parameters of the eye tracking pipeline.
+        /// Updates the image of the eye on the setup tab.
+        /// </summary>
+        /// <param name="whichEye">Which eye to draw.</param>
+        /// <param name="dataAndImages">Data of the corresponding image.</param>
+        /// <returns>The new image with all the overlay of the data.</returns>
+        IInputArray? UpdatePipelineEyeImage(Eye whichEye, EyeTrackerImagesAndData dataAndImages);
+
+        /// <summary>
+        /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
         /// <returns></returns>
-        EyeTrackingPipelineUIControl? GetPipelineUI();
+        public List<(string text, Range range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings);
     }
 
     /// <summary>

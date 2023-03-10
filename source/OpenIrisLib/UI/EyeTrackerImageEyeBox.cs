@@ -36,18 +36,16 @@ namespace OpenIris.UI
         /// <param name="mmPerPix">Resolution of the image in mm per pix.</param>
         public void UpdateImageEyeBox(ImageEye imageEye, EyePhysicalModel eyeGlobe, int thresholdDark, int threshdoldBright, Rectangle croppingBox, double mmPerPix)
         {
-            this.imageBoxEye.SuspendLayout();
-
             if (imageEye != null)
             {
+                imageBoxEye.SuspendLayout();
                 // Draw image of the eye with tracking information
                 var image = imageEye.Image.Convert<Bgr, byte>();
                 ImageEyeDrawing.DrawAllData(image, imageEye.EyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingBox, mmPerPix);
 
-                this.imageBoxEye.Image = image;
+                imageBoxEye.Image = image;
+                imageBoxEye.ResumeLayout();
             }
-
-            imageBoxEye.ResumeLayout();
         }
 
 
@@ -57,17 +55,16 @@ namespace OpenIris.UI
         /// <param name="imageEye">New image to draw.</param>
         public void UpdateImageEyeBox(ImageEye imageEye)
         {
-            this.imageBoxEye.SuspendLayout();
-
             if (imageEye != null)
             {
-                // Draw image of the eye with tracking information
+                imageBoxEye.SuspendLayout();
+
                 Image<Bgr, byte> imageEyeColor = imageEye.Image.Convert<Bgr, byte>();
 
-                this.imageBoxEye.Image = imageEyeColor;
-            }
+                imageBoxEye.Image = imageEyeColor;
 
-            imageBoxEye.ResumeLayout();
+                imageBoxEye.ResumeLayout();
+            }
         }
 
 

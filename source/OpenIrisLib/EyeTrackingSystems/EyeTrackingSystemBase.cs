@@ -58,7 +58,7 @@ namespace OpenIris
         /// Gets the cameras.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        public virtual EyeCollection<CameraEye?>? CreateCameras() => null;
+        public virtual EyeCollection<CameraEye?>? CreateAndStartCameras() => null;
 
         /// <summary>
         /// Gets the head tracking sensor. 

@@ -20,7 +20,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
             var frameRate = Settings.FrameRate;
             var roi = new System.Drawing.Rectangle(0, 60, 376 * 2, 120 * 2);

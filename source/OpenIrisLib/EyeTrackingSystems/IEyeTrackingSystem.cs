@@ -23,7 +23,7 @@ namespace OpenIris
     {
         EyeTrackingSystemSettings Settings { get; set; }
 
-        EyeCollection<CameraEye?>? CreateCameras();
+        EyeCollection<CameraEye?>? CreateAndStartCameras();
         EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames);
 
         IHeadDataSource? CreateHeadDataSourceWithCameras();

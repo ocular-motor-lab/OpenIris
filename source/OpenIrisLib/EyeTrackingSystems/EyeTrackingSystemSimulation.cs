@@ -22,7 +22,7 @@ namespace OpenIris
         /// Gets the cameras. In this case just one single camera.
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye?> CreateCameras()
+        public override EyeCollection<CameraEye?> CreateAndStartCameras()
         {
             string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             var fileNames = new string[]

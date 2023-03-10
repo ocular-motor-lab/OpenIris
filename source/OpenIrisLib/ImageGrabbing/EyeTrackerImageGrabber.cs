@@ -66,7 +66,7 @@ namespace OpenIris
         /// <exception cref="OpenIrisException"></exception>
         internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(IEyeTrackingSystem eyeTrackingSystem, int bufferSize = 100)
         {
-               var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
+               var newSources = await Task.Run(() => eyeTrackingSystem.CreateAndStartCameras().Select(c => c as IImageEyeSource))
                 ?? throw new OpenIrisException("No cameras started.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
@@ -228,7 +228,7 @@ namespace OpenIris
                     imageSources?.ForEach(source => source?.Stop());
 
                     // wait for the camera threads if necessary
-                    await (cameraTasks ?? Task.CompletedTask);
+                    if (cameraTasks is not null) await cameraTasks;
 
                     errorHandler.CheckForErrors();
                 }

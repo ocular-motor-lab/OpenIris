@@ -24,7 +24,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye?> CreateCameras()
+        public override EyeCollection<CameraEye?> CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackerSystemSettingsRemoteGrasshopper ??
                 throw new InvalidOperationException("Wrong settings.");

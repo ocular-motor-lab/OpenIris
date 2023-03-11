@@ -73,7 +73,7 @@ namespace SimpleEyeTrackerUI
                 // mm per pixels in the image. Not critical for tracking to have a very precise value,
                 // just ballpark. Only used to transform minimum and maximum sizes from mm to pix that
                 // way only one setting needs to be changed when changing the eye tracker system.
-                GetMmPerPix = ()=>0.15,
+                MmPerPix = 0.15,
 
                 // Minimum size of the pupil in mm. Useful when identifying blobs.
                 MinPupRadmm = 1,

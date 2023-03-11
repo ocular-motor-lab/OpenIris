@@ -71,6 +71,18 @@ namespace OpenIris
                     AllEyeTrackerSystemSettings.Add(value, eyeTrackerSystemSettings);
 
                     AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingSystemSettings));
+                    AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) =>
+                    {
+                        // TODO: very ugly line to just make sure the settings are updated properly
+                        // Need to set the mm per pixel for the tracking settings
+                        if (e.PropertyName == nameof(EyeTrackingSystemSettings.MmPerPix))
+                        {
+                            foreach (var t in AllTrackingPipelinesSettings.Values)
+                            {
+                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
+                            }
+                        }
+                    };
                 }
 
                 if (value != eyeTrackerSystem)
@@ -82,12 +94,9 @@ namespace OpenIris
 
                 // TODO: very ugly line to just make sure the settings are updated properly
                 // Need to set the mm per pixel for the tracking settings
-                // Updated on 2/10/23. A little less ugly but still not great. 
-                // at least fixed the problem of updating the mmperpix in pipeline when 
-                // it gets updated on the system settings. 
                 foreach (var t in AllTrackingPipelinesSettings.Values)
                 {
-                    t.GetMmPerPix = ()=> EyeTrackingSystemSettings.MmPerPix;
+                    t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
                 }
             }
         }

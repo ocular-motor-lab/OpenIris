@@ -17,6 +17,7 @@ namespace OpenIris.UI
     using System.Diagnostics;
     using System.Drawing;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Windows.Forms;
     using static System.Net.Mime.MediaTypeNames;
 
@@ -49,11 +50,11 @@ namespace OpenIris.UI
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
 
             Exception? ex;
-            
+
             (eyeTracker, ex) = EyeTracker.Start();
-            
-            if ( ex is PluginManagerException) MessageBox.Show("Error initializing, trying safe mode (no plugins). " + ex.Message);
-            
+
+            if (ex is PluginManagerException) MessageBox.Show("Error initializing, trying safe mode (no plugins). " + ex.Message);
+
             // Check if settings changed need restarting
             eyeTracker.Settings.PropertyChanged += (o, e) =>
                 {

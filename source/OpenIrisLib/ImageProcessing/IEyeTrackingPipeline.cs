@@ -86,7 +86,7 @@ namespace OpenIris
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public Func<double> GetMmPerPix { get; set; } = () => 0.1;
+        public double MmPerPix { get; set; }
 
         /// <summary>
         /// Gets or sets the left part to the frame that is not processed. Right, top, left, bottom.

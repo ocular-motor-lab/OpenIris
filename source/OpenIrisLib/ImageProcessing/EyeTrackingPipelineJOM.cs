@@ -232,15 +232,15 @@ namespace OpenIris
         private bool calculateTorsion = true;
         
         [Category("Torsion settings"), Description("Current radius of the left iris.")]
-        public double IrisRadiusPixLeft { get => irisRadiusPixLeft; set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, this.MaxIrisRadPixd), nameof(IrisRadiusPixLeft)); }
+        public double IrisRadiusPixLeft { get => irisRadiusPixLeft; set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixLeft)); }
         private double irisRadiusPixLeft = 80;
 
         [Category("Torsion settings"), Description("Current radius of the right iris.")]
-        public double IrisRadiusPixRight { get => irisRadiusPixRight; set => SetProperty(ref irisRadiusPixRight, Math.Min(value, this.MaxIrisRadPixd), nameof(IrisRadiusPixRight)); }
+        public double IrisRadiusPixRight { get => irisRadiusPixRight; set => SetProperty(ref irisRadiusPixRight, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixRight)); }
         private double irisRadiusPixRight = 80;
 
         [Browsable(false)]
-        public int MaxIrisRadPixd { get { return (int)Math.Ceiling(this.maxIrisRadmm / this.GetMmPerPix()); } }
+        public int MaxIrisRadPixd { get { return (int)Math.Ceiling(maxIrisRadmm / MmPerPix); } }
 
         [Category("Torsion settings"), Description("Maximum radius of the iris in milimiters.")]
         public double MaxIrisRadmm { get => maxIrisRadmm; set => SetProperty(ref maxIrisRadmm, value, nameof(MaxIrisRadmm)); }

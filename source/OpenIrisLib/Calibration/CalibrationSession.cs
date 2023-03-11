@@ -171,7 +171,7 @@ namespace OpenIris
                                     if (!tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].HasEyeModel)
                                     {
                                         var model = (imageEye.EyeData is null) ?
-                                            EyePhysicalModel.GetDefault(imageEye.Size, settings.GetMmPerPix()) :
+                                            EyePhysicalModel.GetDefault(imageEye.Size, settings.MmPerPix) :
                                             new EyePhysicalModel(imageEye.EyeData.Pupil.Center, imageEye.EyeData.Iris.Radius * 2.0f);
 
                                         tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].SetEyeModel(model);

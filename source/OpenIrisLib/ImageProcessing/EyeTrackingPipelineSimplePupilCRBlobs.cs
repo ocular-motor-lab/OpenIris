@@ -72,7 +72,7 @@ namespace OpenIris
             {
                 FilterByArea = true,
                 MinArea = (float)(Math.PI * Math.Pow(trackingSettings.MinPupRadPix * scaleDownX, 2)),
-                MaxArea = (float)(Math.PI * Math.Pow(12 / trackingSettings.GetMmPerPix() * scaleDownX, 2)),
+                MaxArea = (float)(Math.PI * Math.Pow(12 / trackingSettings.MmPerPix * scaleDownX, 2)),
                 FilterByCircularity = false,
                 FilterByConvexity = false,
                 FilterByInertia = false,
@@ -107,7 +107,7 @@ namespace OpenIris
                 WhichEye = imageEye.WhichEye,
                 Timestamp = imageEye.TimeStamp,
                 Pupil = pupil,
-                Iris = new IrisData(pupil.Center, (float)(12 / trackingSettings.GetMmPerPix())),
+                Iris = new IrisData(pupil.Center, (float)(12 / trackingSettings.MmPerPix)),
                 CornealReflections = null,
                 TorsionAngle = 0.0,
                 Eyelids = new EyelidData(),
@@ -192,17 +192,17 @@ namespace OpenIris
         private int thresholdBrightRightEye = 250;
 
         [Browsable(false)]
-        public double MinPupRadPix { get { return this.minPupRadmm / this.GetMmPerPix(); } }
+        public double MinPupRadPix { get { return minPupRadmm / MmPerPix; } }
 
         [Category("Pupil tracking settings"), Description("Minimum radius of the pupil in mms.")]
         public double MinPupRadmm { get => minPupRadmm; set => SetProperty(ref minPupRadmm, value, nameof(MinPupRadmm)); }
         private double minPupRadmm = 1;
 
         [Browsable(false)]
-        public double MinCRRadPix { get { return this.minCRRadmm / this.GetMmPerPix(); } }
+        public double MinCRRadPix { get { return minCRRadmm / MmPerPix; } }
 
         [Browsable(false)]
-        public double MaxCRRadPix { get { return this.maxCRRadmm / this.GetMmPerPix(); } }
+        public double MaxCRRadPix { get { return maxCRRadmm / MmPerPix; } }
 
         [Category("Corneal Reflection tracking settings"), Description("Minimum radius of the CR in mmms.")]
         public double MinCRRadmm { get => minCRRadmm; set => SetProperty(ref minCRRadmm, value, nameof(MinCRRadmm)); }

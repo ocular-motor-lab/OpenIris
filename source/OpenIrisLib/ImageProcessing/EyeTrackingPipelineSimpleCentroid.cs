@@ -86,7 +86,7 @@ namespace OpenIris
             var eyeData = new EyeData(imageEye, ProcessFrameResult.Good)
             {
                 Pupil = pupil,
-                Iris = new IrisData( pupil.Center,  (float)(12.0f/trackingSettings.GetMmPerPix())),
+                Iris = new IrisData( pupil.Center,  (float)(12.0f/trackingSettings.MmPerPix)),
                 CornealReflections = null,
                 TorsionAngle = 0,
                 Eyelids = null,

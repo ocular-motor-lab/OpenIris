@@ -267,7 +267,7 @@ namespace OpenIris
         [Category("D) General settings"), Description("Maximum number of processing threads.")]
         [NeedsRestarting(true)]
         public int MaxNumberOfProcessingThreads { get => maxNumberOfProcessingThreads; set => SetProperty(ref maxNumberOfProcessingThreads, value, nameof(MaxNumberOfProcessingThreads)); }
-        private int maxNumberOfProcessingThreads = 10; // Default value
+        private int maxNumberOfProcessingThreads = 5; // Default value
 
         [Category("D) General settings"), Description("Value indicating where debuging images should be shown")]
         public bool Debug { get => debug; set => SetProperty(ref debug, value, nameof(Debug)); }

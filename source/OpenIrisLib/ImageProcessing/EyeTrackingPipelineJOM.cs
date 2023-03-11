@@ -221,7 +221,7 @@ namespace OpenIris
 
         [Category("EyeLid tracking settings"), Description("Method to track the EyeLid.")]
         public EyeLidTracking.EyeLidTrackingMethod EyelidTrackingMethod { get => eyelidTrackingMethod; set => SetProperty(ref eyelidTrackingMethod, value, nameof(EyelidTrackingMethod)); }
-        private EyeLidTracking.EyeLidTrackingMethod eyelidTrackingMethod = EyeLidTracking.EyeLidTrackingMethod.HoughLines;
+        private EyeLidTracking.EyeLidTrackingMethod eyelidTrackingMethod = EyeLidTracking.EyeLidTrackingMethod.None;
 
         #endregion EyeLid tracking settings
 

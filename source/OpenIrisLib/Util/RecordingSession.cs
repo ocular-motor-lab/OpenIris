@@ -15,6 +15,7 @@ namespace OpenIris
     using System.Threading.Tasks;
     using Emgu.CV;
     using Emgu.CV.Structure;
+    using OpenIris.UI;
 
     /// <summary>
     /// Class that controls data and video recording. The object has to take care of syncronizing all
@@ -403,8 +404,8 @@ namespace OpenIris
 
                             if (image.EyeData is null) continue;
 
-                            if (processedVideoOptions.AddCross) ImageEyeDrawing.DrawCross(imageColor, image.EyeData);
-                            if (processedVideoOptions.AddEyelids) ImageEyeDrawing.DrawEyelids(imageColor, image.EyeData, eyeModel);
+                            if (processedVideoOptions.AddCross) ImageEyeBox.DrawCross(imageColor, image.EyeData);
+                            if (processedVideoOptions.AddEyelids) ImageEyeBox.DrawEyelids(imageColor, image.EyeData, eyeModel);
                         }
 
                         using var imageForVideo = (processedVideoOptions.WhichEye, images.Count) switch

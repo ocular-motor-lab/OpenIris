@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using OpenIris.ImageProcessing;
+using OpenIris.UI;
 
 namespace SimpleEyeTrackerUI
 {
@@ -176,7 +177,7 @@ namespace SimpleEyeTrackerUI
             // Update frame counter in UI
             toolStripTextBox1.Text = $"{this.video.LastFrameNumber}/{this.video.NumberOfFrames} frames";
 
-            var imageForDisplay = ImageEyeDrawing.DrawAllData(rawImageEye, this.calibration, this.settings);
+            var imageForDisplay = ImageEyeBox.DrawAllData(rawImageEye, this.calibration, this.settings);
 
             this.imageBoxEye.Image = imageForDisplay;
         }

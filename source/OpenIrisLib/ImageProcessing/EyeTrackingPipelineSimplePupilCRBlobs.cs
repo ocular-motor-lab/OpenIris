@@ -18,6 +18,7 @@ namespace OpenIris
     using System.Drawing;
     using System.Linq;
     using System.Collections.Generic;
+    using OpenIris.UI;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
@@ -128,7 +129,7 @@ namespace OpenIris
         {
             if (dataAndImages is null) return null;
 
-            return ImageEyeDrawing.DrawAllData(
+            return ImageEyeBox.DrawAllData(
                                     dataAndImages.Images[whichEye],
                                     dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
                                     dataAndImages.TrackingSettings);

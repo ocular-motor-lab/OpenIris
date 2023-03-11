@@ -25,9 +25,11 @@ namespace OpenIris
         /// <returns>The list of cameras.</returns>
         public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
-            var cameraLeft = new CameraEyeVirtualEye(Eye.Left, this.UIform);
+            var cameraLeft = new CameraEyeVirtualEye(Eye.Left, UIform);
+            cameraLeft.Start();
 
-            var cameraRight = new CameraEyeVirtualEye(Eye.Right, this.UIform);
+            var cameraRight = new CameraEyeVirtualEye(Eye.Right, UIform);
+            cameraRight.Start();
 
             return new EyeCollection<CameraEye>(cameraLeft, cameraRight);
         }
@@ -36,9 +38,9 @@ namespace OpenIris
         {
             get
             {
-                this.UIform.Show();
+                UIform.Show();
 
-                return this.UIform;
+                return UIform;
             }
         }
     }

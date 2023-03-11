@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.eyeTrackerImageEyeBox2 = new OpenIris.UI.EyeTrackerImageEyeBox();
-            this.eyeTrackerImageEyeBox1 = new OpenIris.UI.EyeTrackerImageEyeBox();
+            this.eyeTrackerImageEyeBox2 = new OpenIris.UI.ImageEyeBox();
+            this.eyeTrackerImageEyeBox1 = new OpenIris.UI.ImageEyeBox();
             this.videoPlayerUI1 = new OpenIris.UI.VideoPlayerUI();
             this.panel1 = new System.Windows.Forms.Panel();
             this.buttonOpen = new System.Windows.Forms.Button();
@@ -168,8 +168,8 @@
         #endregion
 
         private OpenIris.UI.VideoPlayerUI videoPlayerUI1;
-        private OpenIris.UI.EyeTrackerImageEyeBox eyeTrackerImageEyeBox1;
-        private OpenIris.UI.EyeTrackerImageEyeBox eyeTrackerImageEyeBox2;
+        private OpenIris.UI.ImageEyeBox eyeTrackerImageEyeBox1;
+        private OpenIris.UI.ImageEyeBox eyeTrackerImageEyeBox2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button buttonOpen;

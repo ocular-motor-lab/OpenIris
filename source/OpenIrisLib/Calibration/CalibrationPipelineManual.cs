@@ -10,6 +10,7 @@ namespace OpenIris.Calibration
 
     using Emgu.CV.Structure;
     using OpenIris.ImageProcessing;
+    using OpenIris.UI;
     using System;
     using System.ComponentModel.Composition;
     using System.Drawing;
@@ -108,7 +109,7 @@ namespace OpenIris.Calibration
                 {
                     var imageColor= image.Image.Convert<Bgr, byte>();
 
-                    ImageEyeDrawing.DrawEyeGlobe(imageColor, GetEyeGlobe(image.WhichEye), true);
+                    ImageEyeBox.DrawEyeGlobe(imageColor, GetEyeGlobe(image.WhichEye), true);
 
                     imageBoxes[image.WhichEye].Image = imageColor;
                 }

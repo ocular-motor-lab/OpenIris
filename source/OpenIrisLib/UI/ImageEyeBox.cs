@@ -1,24 +1,104 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="ImageEyeDrawing.cs">
+// <copyright file="ImageEyeBox.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace OpenIris
+namespace OpenIris.UI
 {
-#nullable enable
-
     using System;
     using System.Drawing;
+    using System.Windows.Forms;
     using Emgu.CV;
     using Emgu.CV.Structure;
+    using OpenIris;
     using OpenIris.ImageProcessing;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     /// <summary>
-    /// Helper class to draw stuff into images of eyes.
+    /// Control that displays the image of the eye.
     /// </summary>
-    public static class ImageEyeDrawing
+    public partial class ImageEyeBox : UserControl
     {
+        /// <summary>
+        /// Initializes a new instance of the EyeTrackerImageEyeBox class.
+        /// </summary>
+        public ImageEyeBox()
+        {
+            this.InitializeComponent();
+        }
+
+        /// <summary>
+        /// Updates the image in the control.
+        /// </summary>
+        /// <param name="imageEye">New image to draw.</param>
+        /// <param name="eyeGlobe"></param>
+        /// <param name="thresholdDark">Threshold dark.</param>
+        /// <param name="threshdoldBright">Threshold bright.</param>
+        /// <param name="croppingBox">Cropping rectangle where to search for a pupil.</param>
+        /// <param name="mmPerPix">Resolution of the image in mm per pix.</param>
+        public void UpdateImageEyeBox(ImageEye imageEye, EyePhysicalModel eyeGlobe, int thresholdDark, int threshdoldBright, Rectangle croppingBox, double mmPerPix)
+        {
+            if (imageEye != null)
+            {
+                imageBoxEye.SuspendLayout();
+                // Draw image of the eye with tracking information
+                var image = imageEye.Image.Convert<Bgr, byte>();
+                ImageEyeBox.DrawAllData(image, imageEye.EyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingBox, mmPerPix);
+
+                imageBoxEye.Image = image;
+                imageBoxEye.ResumeLayout();
+            }
+        }
+
+
+        /// <summary>
+        /// Updates the image in the control.
+        /// </summary>
+        /// <param name="imageEye">New image to draw.</param>
+        public void UpdateImageEyeBox(ImageEye imageEye)
+        {
+            if (imageEye != null)
+            {
+                imageBoxEye.SuspendLayout();
+
+                Image<Bgr, byte> imageEyeColor = imageEye.Image.Convert<Bgr, byte>();
+
+                imageBoxEye.Image = imageEyeColor;
+
+                imageBoxEye.ResumeLayout();
+            }
+        }
+
+
+        /// <summary>
+        /// Updates the image in the control.
+        /// </summary>
+        /// <param name="imageEye">New image to draw.</param>
+        /// <param name="calibration"></param>
+        /// <param name="settings"></param>
+        public void UpdateImageEyeBox(ImageEye imageEye, EyeCalibration calibration, EyeTrackingPipelineSettings settings)
+        {
+            this.imageBoxEye.SuspendLayout();
+
+            if (imageEye != null)
+            {
+                // Draw image of the eye with tracking information
+                var imageEyeColor = ImageEyeBox.DrawAllData(imageEye, calibration, settings);
+
+                this.imageBoxEye.Image = imageEyeColor;
+            }
+
+            imageBoxEye.ResumeLayout();
+        }
+
+        /// <summary>
+        /// Resets the image to blank.
+        /// </summary>
+        public void ResetImage()
+        {
+            imageBoxEye.Image = null;
+        }
+
+
         /// <summary>
         /// Gets the image with data overlay for display.
         /// </summary>
@@ -30,16 +110,15 @@ namespace OpenIris
         {
             if (imageEye == null) return null;
 
-            var trackingSettings = settings as EyeTrackingPipelinePupilCRSettings;
-
             var image = imageEye.Image.Convert<Bgr, byte>();
 
-            EyePhysicalModel eyeGlobe = calibrationParameters.EyePhysicalModel;
-            double thresholdDark = (imageEye.WhichEye == Eye.Left) ? trackingSettings?.DarkThresholdLeftEye ?? 0 : trackingSettings?.DarkThresholdRightEye ?? 0;
-            double threshdoldBright = (imageEye.WhichEye == Eye.Left) ? trackingSettings?.BrightThresholdLeftEye ?? 0 : trackingSettings?.BrightThresholdRightEye ?? 0;
-            Rectangle croppingRectangle = (imageEye.WhichEye == Eye.Left) ? settings.CroppingLeftEye : settings.CroppingRightEye;
+            var trackingSettings = settings as EyeTrackingPipelinePupilCRSettings;
+            var thresholdDark = (imageEye.WhichEye == Eye.Left) ? trackingSettings?.DarkThresholdLeftEye ?? 0 : trackingSettings?.DarkThresholdRightEye ?? 0;
+            var threshdoldBright = (imageEye.WhichEye == Eye.Left) ? trackingSettings?.BrightThresholdLeftEye ?? 255 : trackingSettings?.BrightThresholdRightEye ?? 255;
 
-            DrawAllData(image, imageEye.EyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingRectangle, settings.GetMmPerPix());
+            var croppingRectangle = (imageEye.WhichEye == Eye.Left) ? settings.CroppingLeftEye : settings.CroppingRightEye;
+
+            DrawAllData(image, imageEye.EyeData, calibrationParameters.EyePhysicalModel, thresholdDark, threshdoldBright, croppingRectangle, settings.GetMmPerPix());
             return image;
         }
 
@@ -54,32 +133,32 @@ namespace OpenIris
         /// <param name="croppingRectangle"></param>
         public static void DrawAllData(Image<Bgr, byte>? image, EyeData data, EyePhysicalModel eyeGlobe, double thresholdDark, double threshdoldBright, Rectangle croppingRectangle, double mmPerPix)
         {
-            if (image is null)  return;
+            if (image is null) return;
 
             if (thresholdDark > 0)
             {
-                ImageEyeDrawing.DrawThresdholds(image, thresholdDark, threshdoldBright);
+                ImageEyeBox.DrawThresdholds(image, thresholdDark, threshdoldBright);
 
                 // Draw eyelids
-                ImageEyeDrawing.DrawEyelids(image, data, eyeGlobe);
+                ImageEyeBox.DrawEyelids(image, data, eyeGlobe);
             }
 
-            ImageEyeDrawing.DrawEyeGlobe(image, eyeGlobe, false);
+            ImageEyeBox.DrawEyeGlobe(image, eyeGlobe, false);
 
             if (!croppingRectangle.IsEmpty)
             {
-                ImageEyeDrawing.DrawCroppingBox(image, croppingRectangle);
+                ImageEyeBox.DrawCroppingBox(image, croppingRectangle);
             }
 
-            ImageEyeDrawing.DrawPupil(image, data);
+            ImageEyeBox.DrawPupil(image, data);
 
-            ImageEyeDrawing.DrawCR(image, data);
+            ImageEyeBox.DrawCR(image, data);
 
-            ImageEyeDrawing.DrawIris(image, data, eyeGlobe);
+            ImageEyeBox.DrawIris(image, data, eyeGlobe);
 
-            ImageEyeDrawing.DrawCross(image, data);
+            ImageEyeBox.DrawCross(image, data);
 
-            ImageEyeDrawing.DrawMMScale(image, mmPerPix);
+            ImageEyeBox.DrawMMScale(image, mmPerPix);
         }
 
         public static void DrawCross(Image<Bgr, byte> image, EyeData data)
@@ -91,7 +170,7 @@ namespace OpenIris
             var c = new Bgr(color);
 
             var angle = !double.IsNaN(data.TorsionAngle) ? data.TorsionAngle : 0.0;
-            
+
             // Draw torsion line
             CvInvoke.Line(image,
                     new Point(
@@ -100,8 +179,8 @@ namespace OpenIris
                     new Point(
                         (int)Math.Round((double)center.X + (Math.Cos(angle / 180 * Math.PI) * data.Iris.Radius)),
                         (int)Math.Round((double)center.Y - (Math.Sin(angle / 180 * Math.PI) * data.Iris.Radius))),
-                    c.MCvScalar, 
-                    2, 
+                    c.MCvScalar,
+                    2,
                     Emgu.CV.CvEnum.LineType.AntiAlias);
 
             CvInvoke.Line(image,
@@ -110,9 +189,9 @@ namespace OpenIris
                         (int)Math.Round((double)center.Y - (Math.Cos(angle / 180 * Math.PI) * data.Iris.Radius))),
                     new Point(
                         (int)Math.Round((double)center.X + (Math.Sin(angle / 180 * Math.PI) * data.Iris.Radius)),
-                        (int)Math.Round((double)center.Y + (Math.Cos(angle / 180 * Math.PI) * data.Iris.Radius))), 
-                    c.MCvScalar, 
-                    2, 
+                        (int)Math.Round((double)center.Y + (Math.Cos(angle / 180 * Math.PI) * data.Iris.Radius))),
+                    c.MCvScalar,
+                    2,
                     Emgu.CV.CvEnum.LineType.AntiAlias);
         }
 
@@ -154,7 +233,7 @@ namespace OpenIris
                 top[7] = c2;
                 Array.Copy(upperEyelid, 0, top, 1, 4);
 
-                var top2 = top.FitParabola( eyeModel);
+                var top2 = top.FitParabola(eyeModel);
 
                 CvInvoke.Polylines(image, top2, false, (new Bgr(Color.Orange)).MCvScalar, 2, Emgu.CV.CvEnum.LineType.AntiAlias);
             }

@@ -9,6 +9,7 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Structure;
+    using OpenIris.UI;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;
@@ -49,7 +50,7 @@ namespace OpenIris
         {
             if (dataAndImages is null) return null;
 
-            return ImageEyeDrawing.DrawAllData(
+            return ImageEyeBox.DrawAllData(
                                     dataAndImages.Images[whichEye],
                                     dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
                                     dataAndImages.TrackingSettings);

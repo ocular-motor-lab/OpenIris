@@ -41,7 +41,7 @@
             // 
             this.trackBar.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trackBar.Location = new System.Drawing.Point(137, 4);
-            this.trackBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.trackBar.Margin = new System.Windows.Forms.Padding(4);
             this.trackBar.Maximum = 100;
             this.trackBar.Minimum = 100;
             this.trackBar.Name = "trackBar";
@@ -98,7 +98,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "SliderTextControl";
             this.Size = new System.Drawing.Size(531, 37);
             ((System.ComponentModel.ISupportInitialize)(this.trackBar)).EndInit();

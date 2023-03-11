@@ -37,8 +37,8 @@
             this.imageBoxRightEye = new Emgu.CV.UI.ImageBox();
             this.imageBoxLeftEye = new Emgu.CV.UI.ImageBox();
             this.buttonLeftBack = new System.Windows.Forms.Button();
-            this.imageBoxLeftEyeIm = new EyeTrackerImageEyeBox();
-            this.imageBoxRightEyeIm = new EyeTrackerImageEyeBox();
+            this.imageBoxLeftEyeIm = new ImageEyeBox();
+            this.imageBoxRightEyeIm = new ImageEyeBox();
             this.buttonRightBack = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
@@ -184,8 +184,8 @@
         private Emgu.CV.UI.ImageBox imageBoxLeftEye;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button buttonRightBack;
-        private EyeTrackerImageEyeBox imageBoxLeftEyeIm;
-        private EyeTrackerImageEyeBox imageBoxRightEyeIm;
+        private ImageEyeBox imageBoxLeftEyeIm;
+        private ImageEyeBox imageBoxRightEyeIm;
         private System.Windows.Forms.Button buttonLeftBack;
     }
 }

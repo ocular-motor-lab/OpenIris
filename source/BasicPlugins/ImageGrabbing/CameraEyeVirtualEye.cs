@@ -34,6 +34,7 @@ namespace OpenIris.ImageGrabbing
         {
             WhichEye = whichEye;
             FrameSize = new Size(400, 400);
+            FrameRate = 50;
             UI = controller;
             initialTime = DateTime.Now;
 

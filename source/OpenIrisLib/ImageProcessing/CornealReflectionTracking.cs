@@ -75,7 +75,7 @@ namespace OpenIris.ImageProcessing
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
 
-            int blurSize = (int)Math.Round(trackingSettings.MinCRRadPix / 2);
+            int blurSize = (int)Math.Ceiling(trackingSettings.MinCRRadPix / 2);
             var threshold = (imageEye.WhichEye == Eye.Left) ? trackingSettings.BrightThresholdLeftEye : trackingSettings.BrightThresholdRightEye;
             var maxBlobArea = trackingSettings.MaxCRRadPix * Math.PI * Math.PI;
             var minBlobArea = trackingSettings.MinCRRadPix * Math.PI * Math.PI;

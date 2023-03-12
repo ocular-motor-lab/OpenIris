@@ -69,9 +69,10 @@ namespace OpenIris
         public void Stop()
         {
             server.Close();
-            //Task.WaitAll(task);
-            task.Dispose();
+            var tempTask = task;
             task = null;
+            tempTask?.Wait();
+            tempTask?.Dispose();
         }
 
         protected virtual void Dispose(bool disposing)

@@ -4,14 +4,9 @@ namespace OpenIris
     using System;
     using System.Net;
     using System.Net.Sockets;
-    using System.Text;
     using System.Threading.Tasks;
     using System.Diagnostics;
-    using System.Drawing;
-    using System.IO;
-    using System.Net.NetworkInformation;
     using System.Threading;
-    using System.ServiceModel;
 
     internal class EyeTrackerTcpListener : IDisposable
     {
@@ -87,9 +82,10 @@ namespace OpenIris
         public void Stop()
         {
             server.Stop();
-            //Task.WaitAll(task);
-            task.Dispose();
+            var tempTask = task;
             task = null;
+            tempTask?.Wait();
+            tempTask?.Dispose();
         }
 
         protected virtual void Dispose(bool disposing)

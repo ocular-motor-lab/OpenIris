@@ -1,225 +1,54 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="EyeCalibrationManualUI.cs">
+// <copyright file="CalibrationSession.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace OpenIris.Calibration
+namespace OpenIris
 {
+    using OpenIris.Calibration;
 #nullable enable
 
-    using Emgu.CV.Structure;
-    using OpenIris.ImageProcessing;
-    using OpenIris.UI;
-    using System;
     using System.ComponentModel.Composition;
-    using System.Drawing;
-    using System.Windows.Forms;
 
-    /// <summary>
-    /// Manual calibration where a UI can be used to set the eye model and the reference position.
-    /// </summary>
     [Export(typeof(ICalibrationPipeline)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
-    public partial class CalibrationPipelineManual : UserControl, ICalibrationPipeline, ICalibrationUIControl
+    public class CalibrationPipelineManual : CalibrationPipelineBase
     {
-        private readonly EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
-        private EyeCollection<ImageEye?> lastImages;
-        private EyeCollection<EyePhysicalModel>? eyeModels;
-        private ICalibrationUIControl? currentUI;
-
-        public ICalibrationUIControl? GetCalibrationUI() => currentUI;
+        private CalibrationPipelineManualUI? ui;
 
         /// <summary>
-        /// Indicates weather the calibration was cancelled.
+        /// User interface of the calibration.
         /// </summary>
-        public bool Cancelled { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public CalibrationPipelineManual()
+        public override ICalibrationUIControl? GetCalibrationUI()
         {
-            lastImages = new EyeCollection<ImageEye?>(null, null);
-
-            InitializeComponent();
-
-            imageBoxes = new EyeCollection<Emgu.CV.UI.ImageBox>(imageBoxLeftEye, imageBoxRightEye);
-
-
-            sliderTextControlLeftEyeGlobeH.Text = "Left Eye globe H";
-            sliderTextControlLeftEyeGlobeH.Range = new OpenIris.RangeDouble(0, 2000);
-            sliderTextControlLeftEyeGlobeH.Value = 0;
-
-            sliderTextControlLeftEyeGlobeV.Text = "Left Eye globe V";
-            sliderTextControlLeftEyeGlobeV.Range = new OpenIris.RangeDouble(0, 2000);
-            sliderTextControlLeftEyeGlobeV.Value = 0;
-
-            sliderTextControlLeftEyeGlobeR.Text = "Left Eye globe R";
-            sliderTextControlLeftEyeGlobeR.Range = new OpenIris.RangeDouble(0, 2000);
-            sliderTextControlLeftEyeGlobeR.Value = 10;
-
-            sliderTextControlRightEyeGlobeH.Text = "Right Eye globe H";
-            sliderTextControlRightEyeGlobeH.Range = new OpenIris.RangeDouble(0, 2000);
-            sliderTextControlRightEyeGlobeH.Value = 0;
-
-            sliderTextControlRightEyeGlobeV.Text = "Right Eye globe V";
-            sliderTextControlRightEyeGlobeV.Range = new OpenIris.RangeDouble(0, 2000);
-            sliderTextControlRightEyeGlobeV.Value = 0;
-
-            sliderTextControlRightEyeGlobeR.Text = "Right Eye globe R";
-            sliderTextControlRightEyeGlobeR.Range = new OpenIris.RangeDouble(0, 2000);
-            sliderTextControlRightEyeGlobeR.Value = 10;
+            
+            return ui;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="whichEye"></param>
-        /// <returns></returns>
-        public EyePhysicalModel GetEyeGlobe(Eye whichEye)
+        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel( EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
-            return whichEye switch
+            if (ui is null)
             {
-                Eye.Left => new EyePhysicalModel(
-                                   new PointF(
-                                       (float)sliderTextControlLeftEyeGlobeH.Value,
-                                       (float)sliderTextControlLeftEyeGlobeV.Value),
-                                   (float)sliderTextControlLeftEyeGlobeR.Value),
-
-                Eye.Right => new EyePhysicalModel(
-                                    new PointF(
-                                        (float)sliderTextControlRightEyeGlobeH.Value,
-                                        (float)sliderTextControlRightEyeGlobeV.Value),
-                                    (float)sliderTextControlRightEyeGlobeR.Value),
-
-                _ => new EyePhysicalModel(),
-            };
-        }
-
-        #region ICalibrationUI Members
-
-        /// <summary>
-        /// Updates the UI with the image from last frame and current calibration.
-        /// </summary>
-        public void UpdateUI()
-        {
-            foreach (var image in lastImages)
-            {
-                if (image != null)
-                {
-                    var imageColor = image.Image.Convert<Bgr, byte>();
-
-                    ImageEyeBox.DrawEyeGlobe(imageColor, GetEyeGlobe(image.WhichEye), true);
-
-                    imageBoxes[image.WhichEye].Image = imageColor;
-                }
+                ui = new CalibrationPipelineManualUI();
             }
+
+            ui.lastImages[image.WhichEye] = image;
+
+            if (ui.eyeModels is null) return (false, EyePhysicalModel.EmptyModel);
+
+            return (true, ui.eyeModels[image.WhichEye]);
         }
 
-        #endregion ICalibrationUI Members
-
-
-        public (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        public override (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
-            currentUI = this;
-
-            lastImages[image.WhichEye] = image;
-
-            if (eyeModels is null) return (false, EyePhysicalModel.EmptyModel);
-
-            return (true, eyeModels[image.WhichEye]);
-        }
-
-        public (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
-        {
-            currentUI = null; // No UI for resetting reference
+            ui = null; // No UI for resetting reference
 
             if (image == null) return (false, null);
-
-            lastImages[image.WhichEye] = image;
 
             if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
 
             return (true, image);
         }
-
-        private void buttonAccept_Click(object sender, EventArgs e)
-        {
-            eyeModels = new EyeCollection<EyePhysicalModel>(GetEyeGlobe(Eye.Left), GetEyeGlobe(Eye.Right));
-        }
-
-        private void buttonAuto_Click(object sender, EventArgs e)
-        {
-            var lastImageLeftEye = lastImages[Eye.Left];
-            var lastImageRightEye = lastImages[Eye.Right];
-
-            if (lastImageLeftEye != null)
-            {
-                sliderTextControlLeftEyeGlobeH.Value = (int)Math.Round(lastImageLeftEye.EyeData?.Pupil.Center.X ?? 0);
-                sliderTextControlLeftEyeGlobeV.Value = (int)Math.Round(lastImageLeftEye.EyeData?.Pupil.Center.Y ?? 0);
-                sliderTextControlLeftEyeGlobeR.Value = (int)Math.Round(lastImageLeftEye.EyeData?.Iris.Radius * 2.0 ?? 0);
-            }
-
-            if (lastImageRightEye != null)
-            {
-                sliderTextControlRightEyeGlobeH.Value = (int)Math.Round(lastImageRightEye.EyeData?.Pupil.Center.X ?? 0);
-                sliderTextControlRightEyeGlobeV.Value = (int)Math.Round(lastImageRightEye.EyeData?.Pupil.Center.Y ?? 0);
-                sliderTextControlRightEyeGlobeR.Value = (int)Math.Round(lastImageRightEye.EyeData?.Iris.Radius * 2.0 ?? 0);
-            }
-        }
-        
-        private void imageBoxLeftEye_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                var mousePosition = e.Location.ConvertCoordinates(imageBoxLeftEye);
-
-                sliderTextControlLeftEyeGlobeH.Value = mousePosition.X;
-                sliderTextControlLeftEyeGlobeV.Value = mousePosition.Y;
-            }
-        }
-
-        private void imageBoxLeftEye_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                var mousePosition = e.Location.ConvertCoordinates(imageBoxLeftEye);
-
-                sliderTextControlLeftEyeGlobeH.Value = mousePosition.X;
-                sliderTextControlLeftEyeGlobeV.Value = mousePosition.Y;
-            }
-        }
-
-        private void imageBoxRightEye_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                var mousePosition = e.Location.ConvertCoordinates(imageBoxRightEye);
-
-                sliderTextControlRightEyeGlobeH.Value = mousePosition.X;
-                sliderTextControlRightEyeGlobeV.Value = mousePosition.Y;
-            }
-        }
-
-        private void imageBoxRightEye_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                var mousePosition = e.Location.ConvertCoordinates(imageBoxRightEye);
-
-                sliderTextControlRightEyeGlobeH.Value = mousePosition.X;
-                sliderTextControlRightEyeGlobeV.Value = mousePosition.Y;
-            }
-        }
-
-        private void butCancel_Click(object sender, EventArgs e)
-        {
-            Cancelled = true;
-        }
-
-        private void sliderTextControlLeftEyeGlobeR_Load(object sender, EventArgs e)
-        {
-
-        }
     }
+
 }

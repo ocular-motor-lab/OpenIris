@@ -68,14 +68,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Calibration\CalibrationPipelineManual.cs" />
+    <Compile Include="Calibration\CalibrationPipelineBase.cs" />
     <Compile Include="Calibration\CalibrationPipelineAuto.cs" />
     <Compile Include="Calibration\EyeCalibration.cs" />
     <Compile Include="Calibration\CalibrationParameters.cs" />
-    <Compile Include="Calibration\CalibrationPipelineManual.cs">
+    <Compile Include="Calibration\CalibrationPipelineManualUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Calibration\CalibrationPipelineManual.Designer.cs">
-      <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
+    <Compile Include="Calibration\CalibrationPipelineManualUI.Designer.cs">
+      <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
     <Compile Include="EyeTrackingSystems\IEyeTrackingSystem.cs" />
@@ -208,8 +210,8 @@
     <Compile Include="ImageGrabbing\VideoPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Calibration\CalibrationPipelineManual.resx">
-      <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
+    <EmbeddedResource Include="Calibration\CalibrationPipelineManualUI.resx">
+      <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\DebugImagesPanel.resx">

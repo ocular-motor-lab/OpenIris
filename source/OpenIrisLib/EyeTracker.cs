@@ -530,7 +530,7 @@ namespace OpenIris
 
             try
             {
-                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
                 {
 
                     var tempCalibration = await CalibrationSession.StartCalibratingEyeModel(Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
@@ -585,7 +585,7 @@ namespace OpenIris
 
             try
             {
-                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
                 {
                     Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
                 }

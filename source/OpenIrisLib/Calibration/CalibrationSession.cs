@@ -49,12 +49,12 @@ namespace OpenIris
         /// </summary>
         /// <param name="whichEyeToCalibrate">Which eye we need to calibrate: both, left, or right.</param>
         /// <param name="calibrationPipelineName">Name of the pipeline to use for calibration.</param>
+        /// <param name="settings"></param>
         /// <returns>The calibration parameters.</returns>
         /// <exception cref="InvalidOperationException">If the pipeline name does not exist.</exception>
-        internal CalibrationSession(Eye whichEyeToCalibrate, string calibrationPipelineName)
+        internal CalibrationSession(Eye whichEyeToCalibrate, string calibrationPipelineName, CalibrationSettings settings)
         {
-            calibrationPipeline = EyeTrackerPluginManager.CalibrationPipelineFactory?.Create(calibrationPipelineName)
-                    ?? throw new InvalidOperationException("No factory");
+            calibrationPipeline = CalibrationPipelineBase.Create(calibrationPipelineName, settings);
 
             this.whichEyeToCalibrate = whichEyeToCalibrate;
         }
@@ -85,7 +85,7 @@ namespace OpenIris
                                  if (image is null) continue;
                                  if (hasModel[image.WhichEye]) continue;
 
-                                 (hasModel[image.WhichEye], eyeModels[image.WhichEye]) = calibrationPipeline.ProcessForEyeModel(calibrationSettings, processingSettings, image);
+                                 (hasModel[image.WhichEye], eyeModels[image.WhichEye]) = calibrationPipeline.ProcessForEyeModel(processingSettings, image);
                              }
 
                              if (hasModel[Eye.Left] && hasModel[Eye.Right]) break;
@@ -177,7 +177,7 @@ namespace OpenIris
                                         tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].SetEyeModel(model);
                                     }
 
-                                    (hasReference[imageEye.WhichEye], eyeReferences[imageEye.WhichEye]) = calibrationPipeline.ProcessForReference(tempCalibration, calibrationSettings, settings, imageEye);
+                                    (hasReference[imageEye.WhichEye], eyeReferences[imageEye.WhichEye]) = calibrationPipeline.ProcessForReference(tempCalibration, settings, imageEye);
                                 }
 
                                 if (hasReference[Eye.Left] && hasReference[Eye.Right]) break;

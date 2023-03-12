@@ -24,23 +24,31 @@ namespace OpenIris
     public interface ICalibrationPipeline : IDisposable
     {
         /// <summary>
+        /// Name of the plugin, gets set automatically.
+        /// </summary>
+        string Name { get; set; }
+
+        /// <summary>
         /// 
         /// </summary>
-        /// <param name="calibrationSettings"></param>
+        CalibrationSettings Settings { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="processingSettings"></param>
         /// <param name="image"></param>
         /// <returns></returns>
-        (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image);
+        (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(EyeTrackingPipelineSettings processingSettings, ImageEye image);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="currentCalibration"></param>
-        /// <param name="calibrationSettings"></param>
         /// <param name="processingSettings"></param>
         /// <param name="image"></param>
         /// <returns></returns>
-        (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image);
+        (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image);
 
 
         /// <summary>

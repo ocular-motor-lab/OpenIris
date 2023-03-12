@@ -16,7 +16,7 @@ namespace OpenIris.Calibration
 
 
     [Export(typeof(ICalibrationPipeline)), PluginDescription("N-Point", typeof(CalibrationSettings))]
-    public class EyeCalibrationNPoint : ICalibrationPipeline
+    public class EyeCalibrationNPoint : CalibrationPipelineBase
     {
         private ICalibrationUIControl CalibrationUI;
 
@@ -28,10 +28,7 @@ namespace OpenIris.Calibration
 
         private EyeCollection<EyePhysicalModel> eyeModels;
 
-        public bool Cancelled { get; }
-
-        public ICalibrationUIControl GetCalibrationUI() => CalibrationUI;
-        public string Name { get; set; }
+        public override ICalibrationUIControl GetCalibrationUI() => CalibrationUI;
 
         public EyeCalibrationNPoint()
         {
@@ -51,7 +48,7 @@ namespace OpenIris.Calibration
             eyeModels = new EyeCollection<EyePhysicalModel> { leftEye, rightEye };
         }
 
-        public (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
+        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
         {
             PupilPositions[imageEye.WhichEye].Add(imageEye.EyeData.Pupil.Center);
 
@@ -75,7 +72,7 @@ namespace OpenIris.Calibration
             return (true, EyePhysicalModel.EmptyModel);
         }
 
-        public (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        public override (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
             CalibrationUI = null;
 

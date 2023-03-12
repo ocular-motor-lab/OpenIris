@@ -414,14 +414,14 @@ namespace OpenIris.UI
                         {
                             RowCount = settingsList.Count,
                             ColumnCount = 1,
-                            Height = settingsList.Count * 55,
-                            Dock = DockStyle.Fill
+                            Height = settingsList.Count * 40,
+                            Dock = DockStyle.Top
                         };
                         table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
                         for (int i = 0; i < settingsList.Count; i++)
                         {
-                            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 50f));
+                            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
 
                             var sliderPupil = new SliderTextControl
                             {

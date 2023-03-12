@@ -155,29 +155,31 @@ namespace OpenIris
         public List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings)
         {
             var theSettings = settings as EyeTrackingPipelineJOMSettings ?? throw new InvalidOperationException("bad settings");
-            
-            var list = new List<(string text, RangeDouble range, string SettingName)>
+
+            return whichEye switch
             {
-                ("Pupil threshold", new RangeDouble(0, 255), whichEye switch
-                {
-                    Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
-                    Eye.Right => nameof(theSettings.DarkThresholdRightEye),
-                }),
-
-                ("CR threshold", new RangeDouble(0, 255), whichEye switch
-                {
-                    Eye.Left => nameof(theSettings.BrightThresholdLeftEye),
-                    Eye.Right => nameof(theSettings.BrightThresholdRightEye),
-                }),
-
-                ("Iris radius", new RangeDouble(0, theSettings.MaxIrisRadPixd), whichEye switch
-                {
-                    Eye.Left => nameof(theSettings.IrisRadiusPixLeft),
-                    Eye.Right => nameof(theSettings.IrisRadiusPixRight),
-                })
+                Eye.Left => new List<(string text, RangeDouble range, string SettingName)>
+                    {
+                        ("Pupil threshold (px)",    new RangeDouble(0, 255),                        nameof(theSettings.DarkThresholdLeftEye)),
+                        ("CR threshold (px)",       new RangeDouble(0, 255),                        nameof(theSettings.BrightThresholdLeftEye)),
+                        ("Iris radius (px)",        new RangeDouble(0, theSettings.MaxIrisRadPixd), nameof(theSettings.IrisRadiusPixLeft)),
+                        ("Min Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinPupRadmm)),
+                        ("Max Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxPupRadmm)),
+                        ("Min CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinCRRadmm)),
+                        ("Max CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxCRRadmm)),
+                    },
+                Eye.Right => new List<(string text, RangeDouble range, string SettingName)>
+                    {
+                        ("Pupil threshold (px)",    new RangeDouble(0, 255),                        nameof(theSettings.DarkThresholdRightEye)),
+                        ("CR threshold (px)",       new RangeDouble(0, 255),                        nameof(theSettings.BrightThresholdRightEye)),
+                        ("Iris radius (px)",        new RangeDouble(0, theSettings.MaxIrisRadPixd), nameof(theSettings.IrisRadiusPixRight)),
+                        ("Min Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinPupRadmm)),
+                        ("Max Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxPupRadmm)),
+                        ("Min CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinCRRadmm)),
+                        ("Max CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxCRRadmm)),
+                    },
+                _ => throw new Exception("Wrong eye."),
             };
-
-            return list;
         }
     }
 
@@ -200,7 +202,7 @@ namespace OpenIris
         [Category("Pupil tracking settings"), Description("Method to track the pupil.")]
         public PupilTracking.PupilTrackingMethod PupilTrackingMethod { get => pupilTrackingMethod; set => SetProperty(ref pupilTrackingMethod, value, nameof(PupilTrackingMethod)); }
         private PupilTracking.PupilTrackingMethod pupilTrackingMethod = PupilTracking.PupilTrackingMethod.Blob;
-        
+
         [Category("Pupil tracking settings"), Description("Method to track the position.")]
         public PositionTrackerEllipseFitting.PositionTrackingMethod PositionTrackingMethod { get => positionTrackingMethod; set => SetProperty(ref positionTrackingMethod, value, nameof(PositionTrackingMethod)); }
         private PositionTrackerEllipseFitting.PositionTrackingMethod positionTrackingMethod = PositionTrackerEllipseFitting.PositionTrackingMethod.EllipseFitting;
@@ -228,19 +230,25 @@ namespace OpenIris
         [Category("Torsion settings"), Description("Should we calculate torsion.")]
         public bool CalculateTorsion { get => calculateTorsion; set => SetProperty(ref calculateTorsion, value, nameof(CalculateTorsion)); }
         private bool calculateTorsion = true;
-        
+
         [Category("Torsion settings"), Description("Current radius of the left iris.")]
-        public double IrisRadiusPixLeft { get => irisRadiusPixLeft; 
-            
-            set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixLeft)); }
+        public double IrisRadiusPixLeft
+        {
+            get => irisRadiusPixLeft;
+
+            set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixLeft));
+        }
         private double irisRadiusPixLeft = 80;
 
         [Category("Torsion settings"), Description("Current radius of the right iris.")]
-        public double IrisRadiusPixRight { get => irisRadiusPixRight; 
-            set => SetProperty(ref irisRadiusPixRight, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixRight)); }
+        public double IrisRadiusPixRight
+        {
+            get => irisRadiusPixRight;
+            set => SetProperty(ref irisRadiusPixRight, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixRight));
+        }
         private double irisRadiusPixRight = 80;
 
-       // [Browsable(false)]
+        // [Browsable(false)]
         public int MaxIrisRadPixd { get { return (int)Math.Ceiling(maxIrisRadmm / MmPerPix); } }
 
         [Category("Torsion settings"), Description("Maximum radius of the iris in milimiters.")]

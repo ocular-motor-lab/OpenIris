@@ -1061,6 +1061,7 @@ namespace OpenIris.UI
             // 
             // panelPipelineQuickSettingsRightEye
             // 
+            this.panelPipelineQuickSettingsRightEye.AutoScroll = true;
             this.panelPipelineQuickSettingsRightEye.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPipelineQuickSettingsRightEye.Location = new System.Drawing.Point(3, 2);
             this.panelPipelineQuickSettingsRightEye.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -1070,6 +1071,7 @@ namespace OpenIris.UI
             // 
             // panelPipelineQuickSettingsLeftEye
             // 
+            this.panelPipelineQuickSettingsLeftEye.AutoScroll = true;
             this.panelPipelineQuickSettingsLeftEye.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelPipelineQuickSettingsLeftEye.Location = new System.Drawing.Point(621, 2);
             this.panelPipelineQuickSettingsLeftEye.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -1084,7 +1086,7 @@ namespace OpenIris.UI
             this.tabCalibration.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabCalibration.Name = "tabCalibration";
             this.tabCalibration.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabCalibration.Size = new System.Drawing.Size(1652, 925);
+            this.tabCalibration.Size = new System.Drawing.Size(1652, 928);
             this.tabCalibration.TabIndex = 4;
             this.tabCalibration.Text = "Calibration";
             this.tabCalibration.UseVisualStyleBackColor = true;
@@ -1098,7 +1100,7 @@ namespace OpenIris.UI
             this.tabViewer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabViewer.Name = "tabViewer";
             this.tabViewer.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabViewer.Size = new System.Drawing.Size(1652, 925);
+            this.tabViewer.Size = new System.Drawing.Size(1652, 928);
             this.tabViewer.TabIndex = 1;
             this.tabViewer.Text = "Viewer";
             // 
@@ -1117,7 +1119,7 @@ namespace OpenIris.UI
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.eyeTrackerTrace);
-            this.splitContainer1.Size = new System.Drawing.Size(1644, 915);
+            this.splitContainer1.Size = new System.Drawing.Size(1644, 918);
             this.splitContainer1.SplitterDistance = 205;
             this.splitContainer1.SplitterWidth = 6;
             this.splitContainer1.TabIndex = 0;
@@ -1191,7 +1193,7 @@ namespace OpenIris.UI
             this.eyeTrackerTrace.Location = new System.Drawing.Point(0, 0);
             this.eyeTrackerTrace.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
             this.eyeTrackerTrace.Name = "eyeTrackerTrace";
-            this.eyeTrackerTrace.Size = new System.Drawing.Size(1644, 704);
+            this.eyeTrackerTrace.Size = new System.Drawing.Size(1644, 707);
             this.eyeTrackerTrace.TabIndex = 0;
             // 
             // tabDebug
@@ -1201,7 +1203,7 @@ namespace OpenIris.UI
             this.tabDebug.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabDebug.Name = "tabDebug";
             this.tabDebug.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabDebug.Size = new System.Drawing.Size(1652, 925);
+            this.tabDebug.Size = new System.Drawing.Size(1652, 928);
             this.tabDebug.TabIndex = 2;
             this.tabDebug.Text = "Debug";
             this.tabDebug.UseVisualStyleBackColor = true;
@@ -1212,7 +1214,7 @@ namespace OpenIris.UI
             this.panel6.Location = new System.Drawing.Point(4, 5);
             this.panel6.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(1644, 915);
+            this.panel6.Size = new System.Drawing.Size(1644, 918);
             this.panel6.TabIndex = 0;
             // 
             // tabTiming
@@ -1223,7 +1225,7 @@ namespace OpenIris.UI
             this.tabTiming.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabTiming.Name = "tabTiming";
             this.tabTiming.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabTiming.Size = new System.Drawing.Size(1652, 925);
+            this.tabTiming.Size = new System.Drawing.Size(1652, 928);
             this.tabTiming.TabIndex = 3;
             this.tabTiming.Text = "Timing";
             this.tabTiming.UseVisualStyleBackColor = true;
@@ -1257,7 +1259,7 @@ namespace OpenIris.UI
             this.tabPageLog.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPageLog.Name = "tabPageLog";
             this.tabPageLog.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageLog.Size = new System.Drawing.Size(1652, 925);
+            this.tabPageLog.Size = new System.Drawing.Size(1652, 928);
             this.tabPageLog.TabIndex = 5;
             this.tabPageLog.Text = "Log";
             this.tabPageLog.UseVisualStyleBackColor = true;
@@ -1270,7 +1272,7 @@ namespace OpenIris.UI
             this.richTextBoxLogLarge.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.richTextBoxLogLarge.Name = "richTextBoxLogLarge";
             this.richTextBoxLogLarge.ReadOnly = true;
-            this.richTextBoxLogLarge.Size = new System.Drawing.Size(1644, 915);
+            this.richTextBoxLogLarge.Size = new System.Drawing.Size(1644, 918);
             this.richTextBoxLogLarge.TabIndex = 0;
             this.richTextBoxLogLarge.Text = "";
             this.richTextBoxLogLarge.WordWrap = false;

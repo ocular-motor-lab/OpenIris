@@ -199,6 +199,14 @@ namespace OpenIris
         private double minPupRadmm = 1;
 
         [Browsable(false)]
+        public double MaxPupRadPix { get { return maxPupRadmm / MmPerPix; } }
+
+        [Category("Pupil tracking settings"), Description("Maximum radius of the pupil in mms.")]
+        public double MaxPupRadmm { get => maxPupRadmm; set => SetProperty(ref maxPupRadmm, value, nameof(MaxPupRadmm)); }
+        private double maxPupRadmm = 15;
+
+
+        [Browsable(false)]
         public double MinCRRadPix { get { return minCRRadmm / MmPerPix; } }
 
         [Browsable(false)]

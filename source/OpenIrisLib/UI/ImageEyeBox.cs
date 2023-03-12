@@ -402,6 +402,8 @@ namespace OpenIris.UI
 
         public static void DrawMMScale(Image<Bgr, byte> image, double mmPerPix)
         {
+            CvInvoke.PutText(image, "10mm", new Point(2, image.Size.Height - 10), Emgu.CV.CvEnum.FontFace.HersheyPlain, 0.6, new Bgr(Color.White).MCvScalar);
+
             CvInvoke.Line(image,
                     new Point(
                         2,

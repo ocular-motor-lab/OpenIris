@@ -22,8 +22,9 @@ namespace OpenIris.UI
         /// Value represented in the slider and the text box.
         /// </summary>
         private double sliderValue;
-
         private RangeDouble range;
+        private INotifyPropertyChanged? settingsForBinding;
+        private string? settingNameForBinding;
 
         /// <summary>
         /// Initializes a new instance of the SliderTextControl class.
@@ -35,13 +36,13 @@ namespace OpenIris.UI
             sliderValue = 0;
 
             EnabledChanged += SliderTextControl_EnabledChanged;
-
-            this.ParentChanged += (o, e) => 
-            {
-                int a = 1;
-            };
         }
 
+        /// <summary>
+        /// Binds this slider with a particular setting.
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="settingName"></param>
         public void Bind(INotifyPropertyChanged settings, string settingName )
         {
             Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
@@ -51,19 +52,23 @@ namespace OpenIris.UI
                 propInfo?.SetValue(settings, Convert.ChangeType(Value, propInfo.PropertyType));
             };
 
-            settingsChangedHandler = (o, e) =>
-            {
-                if (e.PropertyName == settingName)
-                {
-                    Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
-                }
-            };
+            settingsForBinding = settings;
+            settingNameForBinding = settingName;
             settings.PropertyChanged += settingsChangedHandler;
-            settingsForNotify = settings;
         }
 
-        private PropertyChangedEventHandler? settingsChangedHandler;
-        private INotifyPropertyChanged? settingsForNotify;
+        /// <summary>
+        /// Handles the change of the bind setting.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void settingsChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == settingNameForBinding)
+            {
+                Value = Convert.ToDouble(settingsForBinding?.GetType().GetProperty(settingNameForBinding)?.GetValue(settingsForBinding));
+            }
+        }
 
 
         /// <summary> 
@@ -72,8 +77,12 @@ namespace OpenIris.UI
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-                if (settingsForNotify is not null)
-                    settingsForNotify.PropertyChanged -= settingsChangedHandler;
+            // This is VERY important so old sliders do not keep messing around with the setting
+            if (settingsForBinding is not null)
+            {
+                settingsForBinding.PropertyChanged -= settingsChangedHandler;
+            }
+
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -129,6 +138,13 @@ namespace OpenIris.UI
 
                 numericUpDown1.Minimum = (decimal)range.Begin;
                 numericUpDown1.Maximum = (decimal)range.End;
+
+                numericUpDown1.DecimalPlaces = Range.End switch
+                {
+                    < 1 => 2,
+                    < 20 => 1,
+                    _ => 0,
+                };
             }
         }
 
@@ -187,7 +203,7 @@ namespace OpenIris.UI
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            Value = (int)numericUpDown1.Value;
+            Value = (double)numericUpDown1.Value;
         }
     }
 }

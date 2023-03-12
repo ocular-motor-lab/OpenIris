@@ -34,7 +34,7 @@
             this.trackBar.Minimum = 100;
             this.trackBar.Name = "trackBar";
             this.trackBar.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.trackBar.Size = new System.Drawing.Size(339, 36);
+            this.trackBar.Size = new System.Drawing.Size(359, 36);
             this.trackBar.TabIndex = 46;
             this.trackBar.TickFrequency = 10;
             this.trackBar.TickStyle = System.Windows.Forms.TickStyle.None;
@@ -56,10 +56,10 @@
             // 
             this.numericUpDown1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.numericUpDown1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numericUpDown1.Location = new System.Drawing.Point(500, 2);
+            this.numericUpDown1.Location = new System.Drawing.Point(520, 2);
             this.numericUpDown1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(94, 30);
+            this.numericUpDown1.Size = new System.Drawing.Size(74, 30);
             this.numericUpDown1.TabIndex = 48;
             this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
@@ -68,7 +68,7 @@
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tableLayoutPanel1.Controls.Add(this.label, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.numericUpDown1, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.trackBar, 1, 0);

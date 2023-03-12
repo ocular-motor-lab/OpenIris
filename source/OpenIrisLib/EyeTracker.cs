@@ -72,7 +72,7 @@ namespace OpenIris
             {
                 var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
 
-                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"EyeTrackerLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
+                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
 
                 // Initialize the object that loads the different eye tracking system objects. It can
                 // load objects from new classes present in new dlls in the application folder.

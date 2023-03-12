@@ -25,7 +25,7 @@ namespace OpenIris
     /// position and the torsion angle.
     /// </summary>
     [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimplePupilCRBlobs", typeof(EyeTrackingPipelinePupilCRSettings))]
-    public sealed class EyeTrackingPipelineSimplePupilCRBlobs : IEyeTrackingPipeline, IDisposable
+    public sealed class EyeTrackingPipelineSimplePupilCRBlobs : EyeTrackingPipelineBase
     {
         private readonly CvBlobDetector detector = new CvBlobDetector();
         private readonly CvBlobs blobs = new CvBlobs();
@@ -33,10 +33,12 @@ namespace OpenIris
         /// <summary>
         /// Disposes objects.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             detector.Dispose();
             blobs.Dispose();
+
+            base.Dispose();
         }
 
         /// <summary>
@@ -44,14 +46,13 @@ namespace OpenIris
         /// </summary>
         /// <param name="imageEye"></param>
         /// <param name="eyeCalibrationParameters"></param>
-        /// <param name="settings"></param>
         /// <returns></returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings settings)
+        public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
-            var trackingSettings = settings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong type of settings");
+            var trackingSettings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong type of settings");
 
             // Cropping rectangle and eye ROI (minimum size 20x20 pix)
-            var eyeROI = imageEye.WhichEye == Eye.Left ? settings.CroppingLeftEye : settings.CroppingRightEye;
+            var eyeROI = imageEye.WhichEye == Eye.Left ? Settings.CroppingLeftEye : Settings.CroppingRightEye;
             eyeROI = new Rectangle(
                 new Point(eyeROI.Left, eyeROI.Top),
                 new Size((imageEye.Size.Width - eyeROI.Left - eyeROI.Width), (imageEye.Size.Height - eyeROI.Top - eyeROI.Height)));
@@ -120,39 +121,23 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Updates the image of the eye on the setup tab.
-        /// </summary>
-        /// <param name="whichEye">Which eye to draw.</param>
-        /// <param name="dataAndImages">Data of the corresponding image.</param>
-        /// <returns>The new image with all the overlay of the data.</returns>
-        public IInputArray? UpdatePipelineEyeImage(Eye whichEye, EyeTrackerImagesAndData dataAndImages)
-        {
-            if (dataAndImages is null) return null;
-
-            return ImageEyeBox.DrawAllData(
-                                    dataAndImages.Images[whichEye],
-                                    dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
-                                    dataAndImages.TrackingSettings);
-        }
-
-        /// <summary>
         /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
         /// <returns></returns>
-        public List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings)
+        public override List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList()
         {
-            var theSettings = settings as EyeTrackingPipelinePupilCRSettings ?? throw new InvalidOperationException("bad settings");
+            var theSettings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new InvalidOperationException("bad settings");
 
             var list = new List<(string text, RangeDouble range, string SettingName)>();
 
-            var settingName = whichEye switch
+            var settingName = WhichEye switch
             {
                 Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
                 Eye.Right => nameof(theSettings.DarkThresholdRightEye),
             };
             list.Add(("Pupil threshold", new RangeDouble(0, 255), settingName));
 
-            settingName = whichEye switch
+            settingName = WhichEye switch
             {
                 Eye.Left => nameof(theSettings.BrightThresholdLeftEye),
                 Eye.Right => nameof(theSettings.BrightThresholdRightEye),

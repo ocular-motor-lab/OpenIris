@@ -20,34 +20,20 @@ namespace OpenIris
     /// position and the torsion angle.
     /// </summary>
     [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimpleCentroid", typeof(EyeTrackingPipelinePupilCRSettings))]
-    public sealed class EyeTrackingPipelineSimpleCentroid : IEyeTrackingPipeline, IDisposable
+    public sealed class EyeTrackingPipelineSimpleCentroid : EyeTrackingPipelineBase, IDisposable
     {
-        /// <summary>
-        /// Initializes a new instance of the ImageEyeProcess class.
-        /// </summary>
-        public EyeTrackingPipelineSimpleCentroid()
-        {
-        }
-
-        /// <summary>
-        /// Dispose objects.
-        /// </summary>
-        public void Dispose()
-        {
-        }
 
         /// <summary>
         /// Processes the current image to get the eye movement data.
         /// </summary>
         /// <param name="imageEye">Image from current frame.</param>
         /// <param name="eyeCalibrationParameters">Calibration info.</param>
-        /// <param name="trackingSetting">Configuration parameters.</param>
         /// <returns>The data obtained from processing the image.</returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSettings)
+        public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (eyeCalibrationParameters is null) throw new ArgumentNullException(nameof(eyeCalibrationParameters));
-            var settings = trackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new ArgumentNullException(nameof(trackingSettings));
+            var settings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new ArgumentNullException(nameof(Settings));
 
             // Copy the calibration variables just in case they change during the processing to avoid
             // inconsistencies The next frame will use the updated calibration
@@ -86,7 +72,7 @@ namespace OpenIris
             var eyeData = new EyeData(imageEye, ProcessFrameResult.Good)
             {
                 Pupil = pupil,
-                Iris = new IrisData( pupil.Center,  (float)(12.0f/trackingSettings.MmPerPix)),
+                Iris = new IrisData( pupil.Center,  (float)(12.0f/settings.MmPerPix)),
                 CornealReflections = null,
                 TorsionAngle = 0,
                 Eyelids = null,
@@ -97,32 +83,16 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Updates the image of the eye on the setup tab.
-        /// </summary>
-        /// <param name="whichEye">Which eye to draw.</param>
-        /// <param name="dataAndImages">Data of the corresponding image.</param>
-        /// <returns>The new image with all the overlay of the data.</returns>
-        public IInputArray? UpdatePipelineEyeImage(Eye whichEye, EyeTrackerImagesAndData dataAndImages)
-        {
-            if (dataAndImages is null) return null;
-
-            return ImageEyeBox.DrawAllData(
-                                    dataAndImages.Images[whichEye],
-                                    dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
-                                    dataAndImages.TrackingSettings);
-        }
-
-        /// <summary>
         /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
         /// <returns></returns>
-        public List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings)
+        public override List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList()
         {
-            var theSettings = settings as EyeTrackingPipelinePupilCRSettings ?? throw new InvalidOperationException("bad settings");
+            var theSettings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new InvalidOperationException("bad settings");
 
             var list = new List<(string text, RangeDouble range, string SettingName)>();
 
-            var settingName = whichEye switch
+            var settingName = WhichEye switch
             {
                 Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
                 Eye.Right => nameof(theSettings.DarkThresholdRightEye),

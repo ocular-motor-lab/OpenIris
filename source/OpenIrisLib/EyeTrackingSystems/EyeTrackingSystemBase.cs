@@ -19,10 +19,21 @@ namespace OpenIris
         /// <summary>
         /// Initializes an instance.
         /// </summary>
-        public EyeTrackingSystemBase()
+        protected EyeTrackingSystemBase()
         {
             Settings = new EyeTrackingSystemSettings();
+            Name = string.Empty;
         }
+
+        /// <summary>
+        /// Name of the eye tracking System.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Settings of the system.
+        /// </summary>
+        public EyeTrackingSystemSettings Settings { get; set; }
 
         /// <summary>
         /// Initializzes an insstance of the class EyeTrackinSystem.
@@ -37,6 +48,7 @@ namespace OpenIris
             settings ??= EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(name) as EyeTrackingSystemSettings
                 ?? throw new OpenIrisException("Bad settings");
 
+            system.Name = name;
             system.Settings = settings;
 
             return system;
@@ -49,10 +61,6 @@ namespace OpenIris
         {
         }
 
-        /// <summary>
-        /// Settings of the system.
-        /// </summary>
-        public EyeTrackingSystemSettings Settings { get; set; }
 
         /// <summary>
         /// Gets the cameras.

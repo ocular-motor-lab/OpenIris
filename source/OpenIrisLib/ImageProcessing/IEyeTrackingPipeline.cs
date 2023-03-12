@@ -21,16 +21,30 @@ namespace OpenIris
     /// <summary>
     /// Interface for all eye tracking pipelines that process images to get data.
     /// </summary>
-    public interface IEyeTrackingPipeline
+    public interface IEyeTrackingPipeline : IDisposable
     {
+        /// <summary>
+        /// Name of the eye tracking System.
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Which eye is this pipeline for
+        /// </summary>
+        Eye WhichEye { get; set; }
+
+        /// <summary>
+        /// Settings for the pipeline processing.
+        /// </summary>
+        EyeTrackingPipelineSettings Settings { get; set; }
+
         /// <summary>
         /// Process the images to get data.
         /// </summary>
         /// <param name="imageEye"></param>
         /// <param name="eyeCalibrationParameters"></param>
-        /// <param name="trackingSettings"></param>
         /// <returns></returns>
-        (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSettings);
+        (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters);
 
         /// <summary>
         /// Updates the image of the eye on the setup tab.
@@ -44,7 +58,7 @@ namespace OpenIris
         /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
         /// <returns></returns>
-        public List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings);
+        public List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList();
     }
 
     /// <summary>

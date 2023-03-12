@@ -45,7 +45,7 @@ namespace SimpleEyeTrackerUI
 
             // Some can go with default values. Others need to be set depending on the resolution and
             // brightnessof the image
-            this.settings = new EyeTrackingPipelineJOMSettings
+            imageProcessor.Settings = new EyeTrackingPipelineJOMSettings
             {
 
                 // Select the specific algorithms to be used for each processing step.
@@ -95,7 +95,7 @@ namespace SimpleEyeTrackerUI
             this.calibration.SetEyeModel(new EyePhysicalModel(new PointF(175, 100), 160));
 
             var imageEye = this.video.GrabImageEye();
-            (imageEye.EyeData, imageEye.ImageTorsion) = this.imageProcessor.Process(imageEye, this.calibration, this.settings);
+            (imageEye.EyeData, imageEye.ImageTorsion) = this.imageProcessor.Process(imageEye, this.calibration);
 
             // Get the torsion reference image
             this.calibration.SetReference(imageEye);
@@ -118,7 +118,7 @@ namespace SimpleEyeTrackerUI
 
             // Complete procesing of the image, pupil, eyelids, torsion.The object processedImageEye
             // will contain the raw image but also the data obtained after the processing
-            (rawImageEye.EyeData, rawImageEye.ImageTorsion) = this.imageProcessor.Process(rawImageEye, this.calibration, this.settings);
+            (rawImageEye.EyeData, rawImageEye.ImageTorsion) = this.imageProcessor.Process(rawImageEye, this.calibration);
 
             //======================================================================================
             // Processing: Option 2 only eyelids, mask and torsion (asuming pupil position has been

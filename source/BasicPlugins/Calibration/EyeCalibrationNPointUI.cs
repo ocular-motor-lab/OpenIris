@@ -52,9 +52,6 @@ namespace OpenIris.Calibration
 
                 imageBoxes[eye].Image = im2;
             }
-
-            this.imageBoxLeftEyeIm.UpdateImageEyeBox(calibration.LastImageLeftEye);
-            this.imageBoxRightEyeIm.UpdateImageEyeBox(calibration.LastImageRightEye);
         }
 
         #endregion

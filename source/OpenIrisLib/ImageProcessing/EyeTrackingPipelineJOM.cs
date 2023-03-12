@@ -24,7 +24,7 @@ namespace OpenIris
     /// position and the torsion angle.
     /// </summary>
     [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("JOM", typeof(EyeTrackingPipelineJOMSettings))]
-    public sealed class EyeTrackingPipelineJOM : IEyeTrackingPipeline, IDisposable
+    public sealed class EyeTrackingPipelineJOM : EyeTrackingPipelineBase, IDisposable
     {
         private readonly PupilTracking pupilTracker;
         private readonly CornealReflectionTracking cornealReflectionTracker;
@@ -51,10 +51,11 @@ namespace OpenIris
         /// <summary>
         /// Dispose objects.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             pupilTracker.Dispose();
             cornealReflectionTracker.Dispose();
+            base.Dispose();
         }
 
         /// <summary>
@@ -64,11 +65,11 @@ namespace OpenIris
         /// <param name="eyeCalibrationParameters">Calibration info.</param>
         /// <param name="trackingSetting">Configuration parameters.</param>
         /// <returns>The data obtained from processing the image.</returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSetting)
+        public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (eyeCalibrationParameters is null) throw new ArgumentNullException(nameof(eyeCalibrationParameters));
-            var settings = trackingSetting as EyeTrackingPipelineJOMSettings ?? throw new ArgumentNullException(nameof(trackingSetting));
+            var settings = Settings as EyeTrackingPipelineJOMSettings ?? throw new ArgumentNullException(nameof(Settings));
 
             // Copy the calibration variables just in case they change during the processing to avoid
             // inconsistencies The next frame will use the updated calibration
@@ -133,30 +134,14 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Updates the image of the eye on the setup tab.
-        /// </summary>
-        /// <param name="whichEye">Which eye to draw.</param>
-        /// <param name="dataAndImages">Data of the corresponding image.</param>
-        /// <returns>The new image with all the overlay of the data.</returns>
-        public IInputArray? UpdatePipelineEyeImage(Eye whichEye, EyeTrackerImagesAndData dataAndImages)
-        {
-            if (dataAndImages is null) return null;
-
-            return ImageEyeBox.DrawAllData(
-                                    dataAndImages.Images[whichEye],
-                                    dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
-                                    dataAndImages.TrackingSettings);
-        }
-
-        /// <summary>
         /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
         /// <returns></returns>
-        public List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings)
+        public override List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList()
         {
-            var theSettings = settings as EyeTrackingPipelineJOMSettings ?? throw new InvalidOperationException("bad settings");
+            var theSettings = Settings as EyeTrackingPipelineJOMSettings ?? throw new InvalidOperationException("bad settings");
 
-            return whichEye switch
+            return WhichEye switch
             {
                 Eye.Left => new List<(string text, RangeDouble range, string SettingName)>
                     {

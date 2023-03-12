@@ -398,7 +398,7 @@ namespace OpenIris.UI
                     panels[Eye.Right].Controls.Clear();
                     // end clear the quick settings
 
-                    pipelineUI = eyeTracker.ImageProcessor?.PipelineForUI;
+                    pipelineUI = (eyeTracker.Settings.EyeTrackingPipeline, eyeTracker.ImageProcessor?.PipelineForUI);
 
                     foreach (var eye in eyes)
                     {
@@ -407,7 +407,7 @@ namespace OpenIris.UI
                             Eye.Both != eyeTracker.Settings.EyeTrackingSystemSettings.Eye)
                             continue;
 
-                        var settingsList = pipelineUI?.pipelines?[eye]?.GetQuickSettingsList(eye, settings);
+                        var settingsList = pipelineUI?.pipelines?[eye]?.GetQuickSettingsList();
                         if (settingsList is null) continue;
 
                         var table = new TableLayoutPanel

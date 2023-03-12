@@ -81,6 +81,7 @@
     <Compile Include="EyeTrackingSystems\IEyeTrackingSystem.cs" />
     <Compile Include="HeadTracking\HeadTracker.cs" />
     <Compile Include="Calibration\ICalibrationPipeline.cs" />
+    <Compile Include="ImageProcessing\EyeTrackingPipelineBase.cs" />
     <Compile Include="ImageProcessing\IEyeTrackingPipeline.cs" />
     <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
@@ -245,6 +246,7 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="app.config" />
+    <None Include="OpenIrisClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

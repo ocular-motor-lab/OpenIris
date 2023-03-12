@@ -21,9 +21,9 @@ namespace OpenIris.UI
         /// <summary>
         /// Value represented in the slider and the text box.
         /// </summary>
-        private int sliderValue;
+        private double sliderValue;
 
-        private Range range;
+        private RangeDouble range;
 
         /// <summary>
         /// Initializes a new instance of the SliderTextControl class.
@@ -70,7 +70,7 @@ namespace OpenIris.UI
         /// </summary>
         [Browsable(true)]
         [Description("Range of values allowed."), Category("Data")]
-        public Range Range
+        public RangeDouble Range
         {
             get
             {
@@ -80,11 +80,11 @@ namespace OpenIris.UI
             {
                 range = value;
 
-                trackBar.Minimum = (int)range.Begin;
-                trackBar.Maximum = (int)range.End;
+                trackBar.Minimum = 0;
+                trackBar.Maximum = 100;
 
-                numericUpDown1.Minimum = (int)range.Begin;
-                numericUpDown1.Maximum = (int)range.End;
+                numericUpDown1.Minimum = (decimal)range.Begin;
+                numericUpDown1.Maximum = (decimal)range.End;
             }
         }
 
@@ -93,7 +93,7 @@ namespace OpenIris.UI
         /// </summary>
         [Browsable(true)]
         [Description("Current value."), Category("Data")]  
-        public int Value
+        public double Value
         {
             get { return sliderValue; }
             set
@@ -106,18 +106,18 @@ namespace OpenIris.UI
                     {
                         if ( value > range.End )
                         {
-                            value = (int)range.End;
+                            value = range.End;
                         }
                         if ( value < range.Begin)
                         {
-                            value = (int)range.Begin;
+                            value = range.Begin;
                         }
                     }
 
                     sliderValue = value;
 
-                    trackBar.Value = sliderValue;
-                    numericUpDown1.Value = sliderValue;
+                    trackBar.Value = (int)Math.Max(0, Math.Min(100, Math.Round((sliderValue - Range.Begin) *100.0 / (Range.End - Range.Begin))));
+                    numericUpDown1.Value = (decimal)sliderValue;
 
                     if (EnableValueChangedEvent)
                     {
@@ -138,7 +138,7 @@ namespace OpenIris.UI
 
         private void trackBar_Scroll(object sender, EventArgs e)
         {
-            Value = trackBar.Value;
+            Value = trackBar.Value / 100.0 * (Range.End - Range.Begin) + Range.Begin;
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)

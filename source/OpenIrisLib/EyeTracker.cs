@@ -82,8 +82,6 @@ namespace OpenIris
                 // load the settings of each plugin
                 Settings = EyeTrackerSettings.Load();
 
-                Settings.PropertyChanged += (o, e) => Trace.WriteLine("Setting changed: " + e.PropertyName);
-
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
                 EyeTrackerRemoteServices.Start(this);

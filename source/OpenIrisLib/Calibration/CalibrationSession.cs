@@ -39,7 +39,7 @@ namespace OpenIris
         /// <summary>
         /// User interface of the calibration.
         /// </summary>
-        public CalibrationUIControl? GetCalibrationUI()
+        public ICalibrationUIControl? GetCalibrationUI()
         {
             return calibrationPipeline?.GetCalibrationUI();
         }

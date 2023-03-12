@@ -17,7 +17,7 @@ namespace OpenIris.Calibration
     using OpenIris.ImageProcessing;
     using OpenIris.UI;
 
-    public partial class EyeCalibrationNPointUI : CalibrationUIControl
+    public partial class EyeCalibrationNPointUI : UserControl, ICalibrationUIControl
     {
         private EyeCalibrationNPoint calibration;
 
@@ -35,7 +35,7 @@ namespace OpenIris.Calibration
         
         #region ICalibrationUI Members
 
-        public override void UpdateUI()
+        public void UpdateUI()
         {
             var imageBoxes = new EyeCollection<ImageBox>(this.imageBoxLeftEye, this.imageBoxRightEye);
 

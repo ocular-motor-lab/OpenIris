@@ -23,7 +23,23 @@ namespace OpenIris
 
     public interface ICalibrationPipeline : IDisposable
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="calibrationSettings"></param>
+        /// <param name="processingSettings"></param>
+        /// <param name="image"></param>
+        /// <returns></returns>
         (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="currentCalibration"></param>
+        /// <param name="calibrationSettings"></param>
+        /// <param name="processingSettings"></param>
+        /// <param name="image"></param>
+        /// <returns></returns>
         (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image);
 
 
@@ -35,16 +51,13 @@ namespace OpenIris
         /// <summary>
         /// User interface of the calibration.
         /// </summary>
-        public CalibrationUIControl? GetCalibrationUI();
+        public ICalibrationUIControl? GetCalibrationUI();
     }
-
 
     /// <summary>
     /// Settings.
     /// </summary>
-    /// 
     [KnownType("GetDerivedTypes")] // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.knowntypeattribute?view=netframework-4.8
-
     public class CalibrationSettings : EyeTrackerSettingsBase
     {
         /// <summary>

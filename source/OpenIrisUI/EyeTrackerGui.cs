@@ -35,7 +35,7 @@ namespace OpenIris.UI
 
         private readonly EyeCollection<ImageBox> imageBoxes;
 
-        private (string name, CalibrationUIControl? control)? calibrationUI;
+        private (string name, ICalibrationUIControl? control)? calibrationUI;
         private (string name, EyeCollection<IEyeTrackingPipeline?>? pipelines)? pipelineUI;
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace OpenIris.UI
                 // Calibration just started
 
                 calibrationUI = (eyeTracker.Settings.CalibrationMethod, eyeTracker.CalibrationSession?.GetCalibrationUI());
-                var calibrationControl = calibrationUI?.control;
+                var calibrationControl = calibrationUI?.control as UserControl;
 
                 if (calibrationControl != null)
                 {
@@ -419,10 +419,20 @@ namespace OpenIris.UI
                                 Range = range,
                                 Dock = DockStyle.Fill,
                             };
-                            sliderPupil.Value = Convert.ToInt32(settings.GetType().GetProperty(settingName)?.GetValue(settings));
-                            sliderPupil.ValueChanged += (o, e) => settings.GetType().GetProperty(settingName)?.SetValue(settings, sliderPupil.Value);
+                            sliderPupil.Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
+                            sliderPupil.ValueChanged += (o, e) =>
+                            {
+                                var propInfo = settings.GetType().GetProperty(settingName);
+                                propInfo?.SetValue(settings, Convert.ChangeType(sliderPupil.Value, propInfo.PropertyType));
+                            };
                             // TODO: not sure if this may cause a problem for adding and never removing event handler to the settings.
-                            settings.PropertyChanged += (o, e) => { if (e.PropertyName == settingName) sliderPupil.Value = Convert.ToInt32(settings.GetType().GetProperty(settingName)?.GetValue(settings)); };
+                            settings.PropertyChanged += (o, e) =>
+                            {
+                                if (e.PropertyName == settingName)
+                                {
+                                    sliderPupil.Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
+                                }
+                            };
 
                             table.Controls.Add(sliderPupil, i, 0);
                         }

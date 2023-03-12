@@ -20,14 +20,14 @@ namespace OpenIris.Calibration
     /// Manual calibration where a UI can be used to set the eye model and the reference position.
     /// </summary>
     [Export(typeof(ICalibrationPipeline)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
-    public partial class CalibrationPipelineManual : CalibrationUIControl, ICalibrationPipeline
+    public partial class CalibrationPipelineManual : UserControl, ICalibrationPipeline, ICalibrationUIControl
     {
-        private EyeCollection<ImageEye?> LastImages { get; set; }
+        private readonly EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
+        private EyeCollection<ImageEye?> lastImages;
         private EyeCollection<EyePhysicalModel>? eyeModels;
-        private EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
-        private CalibrationUIControl? currentUI;
+        private ICalibrationUIControl? currentUI;
 
-        public CalibrationUIControl? GetCalibrationUI() => currentUI;
+        public ICalibrationUIControl? GetCalibrationUI() => currentUI;
 
         /// <summary>
         /// Indicates weather the calibration was cancelled.
@@ -39,7 +39,7 @@ namespace OpenIris.Calibration
         /// </summary>
         public CalibrationPipelineManual()
         {
-            LastImages = new EyeCollection<ImageEye?>(null, null);
+            lastImages = new EyeCollection<ImageEye?>(null, null);
 
             InitializeComponent();
 
@@ -47,27 +47,27 @@ namespace OpenIris.Calibration
 
 
             sliderTextControlLeftEyeGlobeH.Text = "Left Eye globe H";
-            sliderTextControlLeftEyeGlobeH.Range = new OpenIris.Range(0, 2000);
+            sliderTextControlLeftEyeGlobeH.Range = new OpenIris.RangeDouble(0, 2000);
             sliderTextControlLeftEyeGlobeH.Value = 0;
 
             sliderTextControlLeftEyeGlobeV.Text = "Left Eye globe V";
-            sliderTextControlLeftEyeGlobeV.Range = new OpenIris.Range(0, 2000);
+            sliderTextControlLeftEyeGlobeV.Range = new OpenIris.RangeDouble(0, 2000);
             sliderTextControlLeftEyeGlobeV.Value = 0;
 
             sliderTextControlLeftEyeGlobeR.Text = "Left Eye globe R";
-            sliderTextControlLeftEyeGlobeR.Range = new OpenIris.Range(0, 2000);
+            sliderTextControlLeftEyeGlobeR.Range = new OpenIris.RangeDouble(0, 2000);
             sliderTextControlLeftEyeGlobeR.Value = 10;
 
             sliderTextControlRightEyeGlobeH.Text = "Right Eye globe H";
-            sliderTextControlRightEyeGlobeH.Range = new OpenIris.Range(0, 2000);
+            sliderTextControlRightEyeGlobeH.Range = new OpenIris.RangeDouble(0, 2000);
             sliderTextControlRightEyeGlobeH.Value = 0;
 
             sliderTextControlRightEyeGlobeV.Text = "Right Eye globe V";
-            sliderTextControlRightEyeGlobeV.Range = new OpenIris.Range(0, 2000);
+            sliderTextControlRightEyeGlobeV.Range = new OpenIris.RangeDouble(0, 2000);
             sliderTextControlRightEyeGlobeV.Value = 0;
 
             sliderTextControlRightEyeGlobeR.Text = "Right Eye globe R";
-            sliderTextControlRightEyeGlobeR.Range = new OpenIris.Range(0, 2000);
+            sliderTextControlRightEyeGlobeR.Range = new OpenIris.RangeDouble(0, 2000);
             sliderTextControlRightEyeGlobeR.Value = 10;
         }
 
@@ -101,13 +101,13 @@ namespace OpenIris.Calibration
         /// <summary>
         /// Updates the UI with the image from last frame and current calibration.
         /// </summary>
-        public override void UpdateUI()
+        public void UpdateUI()
         {
-            foreach (var image in LastImages)
+            foreach (var image in lastImages)
             {
-                if ( image != null )
+                if (image != null)
                 {
-                    var imageColor= image.Image.Convert<Bgr, byte>();
+                    var imageColor = image.Image.Convert<Bgr, byte>();
 
                     ImageEyeBox.DrawEyeGlobe(imageColor, GetEyeGlobe(image.WhichEye), true);
 
@@ -123,7 +123,7 @@ namespace OpenIris.Calibration
         {
             currentUI = this;
 
-            LastImages[image.WhichEye] = image;
+            lastImages[image.WhichEye] = image;
 
             if (eyeModels is null) return (false, EyePhysicalModel.EmptyModel);
 
@@ -136,7 +136,7 @@ namespace OpenIris.Calibration
 
             if (image == null) return (false, null);
 
-            LastImages[image.WhichEye] = image;
+            lastImages[image.WhichEye] = image;
 
             if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
 
@@ -150,8 +150,8 @@ namespace OpenIris.Calibration
 
         private void buttonAuto_Click(object sender, EventArgs e)
         {
-            var lastImageLeftEye = LastImages[Eye.Left];
-            var lastImageRightEye = LastImages[Eye.Right];
+            var lastImageLeftEye = lastImages[Eye.Left];
+            var lastImageRightEye = lastImages[Eye.Right];
 
             if (lastImageLeftEye != null)
             {

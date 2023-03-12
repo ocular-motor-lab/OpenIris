@@ -25,41 +25,41 @@ namespace OpenIris.EyeTrackingSystems
         private void FakeEyeControlUI_Load(object sender, EventArgs ea)
         {
             this.ListingAngle.Text = "Angle";
-            this.ListingAngle.Range = new Range(-180, 180);
+            this.ListingAngle.Range = new RangeDouble(-180, 180);
             this.ListingAngle.Value = 0;
             this.ListingAngle.ValueChanged += ListingValueChanged;
             this.ListingEccentricity.Text = "Eccentricity";
-            this.ListingEccentricity.Range = new Range(0, 90);
+            this.ListingEccentricity.Range = new RangeDouble(0, 90);
             this.ListingEccentricity.Value = 0;
             this.ListingEccentricity.ValueChanged += ListingValueChanged;
             this.ListingTorsion.Text = "Torsion";
-            this.ListingTorsion.Range = new Range(-90, 90);
+            this.ListingTorsion.Range = new RangeDouble(-90, 90);
             this.ListingTorsion.Value = 0;
             this.ListingTorsion.ValueChanged += ListingValueChanged;
 
             this.FickHorizontal.Text = "Horizontal";
-            this.FickHorizontal.Range = new Range(-90, 90);
+            this.FickHorizontal.Range = new RangeDouble(-90, 90);
             this.FickHorizontal.Value = 0;
             this.FickHorizontal.ValueChanged += Fick_ValueChanged;
             this.FickVertical.Text = "Vertical";
-            this.FickVertical.Range = new Range(-90, 90);
+            this.FickVertical.Range = new RangeDouble(-90, 90);
             this.FickVertical.Value = 0;
             this.FickVertical.ValueChanged += (o, e) => { };
             this.FickTorsion.Text = "Torsion";
-            this.FickTorsion.Range = new Range(-90, 90);
+            this.FickTorsion.Range = new RangeDouble(-90, 90);
             this.FickTorsion.Value = 0;
             this.FickTorsion.ValueChanged += (o, e) => { };
 
             this.HelmholtzHorizontal.Text = "Horizontal";
-            this.HelmholtzHorizontal.Range = new Range(-90, 90);
+            this.HelmholtzHorizontal.Range = new RangeDouble(-90, 90);
             this.HelmholtzHorizontal.Value = 0;
             this.HelmholtzHorizontal.ValueChanged += (o, e) => { };
             this.HelmholtzVertical.Text = "Vertical";
-            this.HelmholtzVertical.Range = new Range(-90, 90);
+            this.HelmholtzVertical.Range = new RangeDouble(-90, 90);
             this.HelmholtzVertical.Value = 0;
             this.HelmholtzVertical.ValueChanged += (o, e) => { };
             this.HelmholtzTorsion.Text = "Torsion";
-            this.HelmholtzTorsion.Range = new Range(-90, 90);
+            this.HelmholtzTorsion.Range = new RangeDouble(-90, 90);
             this.HelmholtzTorsion.Value = 0;
             this.HelmholtzTorsion.ValueChanged += (o, e) => { };
 
@@ -72,41 +72,41 @@ namespace OpenIris.EyeTrackingSystems
             this.FickTorsion.Enabled = false;
 
             this.HessHorizontal.Text = "Horizontal";
-            this.HessHorizontal.Range = new Range(-90, 90);
+            this.HessHorizontal.Range = new RangeDouble(-90, 90);
             this.HessHorizontal.Value = 0;
             this.HessHorizontal.ValueChanged += Hess_ValueChanged;
             this.HessVertical.Text = "Vertical";
-            this.HessVertical.Range = new Range(-90, 90);
+            this.HessVertical.Range = new RangeDouble(-90, 90);
             this.HessVertical.Value = 0;
             this.HessVertical.ValueChanged += Hess_ValueChanged;
             this.HessTorsion.Text = "Torsion";
-            this.HessTorsion.Range = new Range(-90, 90);
+            this.HessTorsion.Range = new RangeDouble(-90, 90);
             this.HessTorsion.Value = 0;
             this.HessTorsion.ValueChanged += Hess_ValueChanged;
 
             this.HarmsHorizontal.Text = "Horizontal";
-            this.HarmsHorizontal.Range = new Range(-90, 90);
+            this.HarmsHorizontal.Range = new RangeDouble(-90, 90);
             this.HarmsHorizontal.Value = 0;
             this.HarmsHorizontal.ValueChanged += Harms_ValueChanged;
             this.HarmsVertical.Text = "Vertical";
-            this.HarmsVertical.Range = new Range(-90, 90);
+            this.HarmsVertical.Range = new RangeDouble(-90, 90);
             this.HarmsVertical.Value = 0;
             this.HarmsVertical.ValueChanged += Harms_ValueChanged;
             this.HarmsTorsion.Text = "Torsion";
-            this.HarmsTorsion.Range = new Range(-90, 90);
+            this.HarmsTorsion.Range = new RangeDouble(-90, 90);
             this.HarmsTorsion.Value = 0;
             this.HarmsTorsion.ValueChanged += Harms_ValueChanged;
 
             this.RotationVectorX.Text = "X (line of sight axis)";
-            this.RotationVectorX.Range = new Range(-1, 1);
+            this.RotationVectorX.Range = new RangeDouble(-1, 1);
             this.RotationVectorX.Value = 0;
             //this.RotationVectorX.ValueChanged += RotationVector_ValueChanged;
             this.RotationVectorY.Text = "Y (Interaural axis)";
-            this.RotationVectorY.Range = new Range(-1, 1);
+            this.RotationVectorY.Range = new RangeDouble(-1, 1);
             this.RotationVectorY.Value = 0;
             //this.RotationVectorY.ValueChanged += RotationVector_ValueChanged;
             this.RotationVectorZ.Text = "Z (Vertical axis)";
-            this.RotationVectorZ.Range = new Range(-1, 1);
+            this.RotationVectorZ.Range = new RangeDouble(-1, 1);
             this.RotationVectorZ.Value = 0;
             //this.RotationVectorZ.ValueChanged += RotationVector_ValueChanged;
         }

@@ -133,7 +133,7 @@ namespace OpenIris
                         {
                             foreach (var t in AllTrackingPipelinesSettings.Values)
                             {
-                                //t.SetMmPerPix(EyeTrackingSystemSettings);
+                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
                             }
                         }
                     };

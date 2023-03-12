@@ -96,9 +96,7 @@
     <Compile Include="UI\DebugImagesPanel.Designer.cs">
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Calibration\CalibrationUIControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="Calibration\CalibrationUIControl.cs" />
     <Compile Include="EyeTrackerData\DataBuffer.cs" />
     <Compile Include="EyeTrackerData\CornealReflectionData.cs" />
     <Compile Include="EyeTrackingSystems\EyeTrackingSystemDualWebCam.cs" />

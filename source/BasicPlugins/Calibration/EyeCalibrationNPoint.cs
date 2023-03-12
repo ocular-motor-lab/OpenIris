@@ -18,7 +18,7 @@ namespace OpenIris.Calibration
     [Export(typeof(ICalibrationPipeline)), PluginDescription("N-Point", typeof(CalibrationSettings))]
     public class EyeCalibrationNPoint : ICalibrationPipeline
     {
-        private CalibrationUIControl CalibrationUI;
+        private ICalibrationUIControl CalibrationUI;
 
         public EyeCollection<List<PointF>> CalibrationPoints { get; set; }
         public EyeCollection<List<PointF>> PupilPositions { get; set; }
@@ -30,7 +30,7 @@ namespace OpenIris.Calibration
 
         public bool Cancelled { get; }
 
-        public CalibrationUIControl GetCalibrationUI() => CalibrationUI;
+        public ICalibrationUIControl GetCalibrationUI() => CalibrationUI;
         public string Name { get; set; }
 
         public EyeCalibrationNPoint()

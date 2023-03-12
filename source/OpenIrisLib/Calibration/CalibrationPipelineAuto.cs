@@ -26,7 +26,7 @@ namespace OpenIris
         /// <summary>
         /// User interface of the calibration.
         /// </summary>
-        public CalibrationUIControl? GetCalibrationUI() => null;
+        public ICalibrationUIControl? GetCalibrationUI() => null;
 
         /// <summary>
         /// Process data towards setting a new physical model

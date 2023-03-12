@@ -200,7 +200,7 @@ namespace OpenIris
     {
         public EyeTrackingSystemSettingsInteracoustics()
         {
-            MmPerPix = 0.15;
+            PixPerMm = 6;
             DistanceCameraToEyeMm = 70;
             AutoExposure = false;
         }

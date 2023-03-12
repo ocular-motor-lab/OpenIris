@@ -58,7 +58,7 @@ namespace OpenIris.UI
             // Check if settings changed need restarting
             eyeTracker.Settings.PropertyChanged += (o, e) =>
                 {
-                    var needsRestartingAttributes = typeof(EyeTrackerSettings).GetProperty(e.PropertyName)?.
+                    var needsRestartingAttributes = o.GetType().GetProperty(e.PropertyName)?.
                         GetCustomAttributes(typeof(NeedsRestartingAttribute), false) as NeedsRestartingAttribute[];
 
                     bool needsRestarting = needsRestartingAttributes?.Select(x => x.Value).SingleOrDefault() ?? false;
@@ -312,9 +312,8 @@ namespace OpenIris.UI
                 // Calibration just started
 
                 calibrationUI = (eyeTracker.Settings.CalibrationMethod, eyeTracker.CalibrationSession?.GetCalibrationUI());
-                var calibrationControl = calibrationUI?.control as UserControl;
 
-                if (calibrationControl != null)
+                if (calibrationUI?.control is UserControl calibrationControl)
                 {
                     calibrationControl.Dock = DockStyle.Fill;
                     calibrationControl.Location = new Point(0, 0);
@@ -384,8 +383,20 @@ namespace OpenIris.UI
                 // Change the pipeline UIs if necessary
                 if (pipelineUI?.name != eyeTracker.Settings.EyeTrackingPipeline)
                 {
+                    // Clear the two panels for quick settings
+                    foreach (var c in panels[Eye.Left].Controls )
+                    {
+                        var table = c as TableLayoutPanel;
+                        table?.Dispose();
+                    }
+                    foreach (var c in panels[Eye.Right].Controls)
+                    {
+                        var table = c as TableLayoutPanel;
+                        table?.Dispose();
+                    }
                     panels[Eye.Left].Controls.Clear();
                     panels[Eye.Right].Controls.Clear();
+                    // end clear the quick settings
 
                     pipelineUI = eyeTracker.ImageProcessor?.PipelineForUI;
 
@@ -396,43 +407,29 @@ namespace OpenIris.UI
                             Eye.Both != eyeTracker.Settings.EyeTrackingSystemSettings.Eye)
                             continue;
 
-                        var list = pipelineUI?.pipelines?[eye]?.GetQuickSettingsList(eye, settings);
-                        if (list is null) continue;
+                        var settingsList = pipelineUI?.pipelines?[eye]?.GetQuickSettingsList(eye, settings);
+                        if (settingsList is null) continue;
 
                         var table = new TableLayoutPanel
                         {
-                            RowCount = list.Count,
+                            RowCount = settingsList.Count,
                             ColumnCount = 1,
-                            Height = list.Count * 55,
+                            Height = settingsList.Count * 55,
                             Dock = DockStyle.Fill
                         };
                         table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
 
-                        for (int i = 0; i < list.Count; i++)
+                        for (int i = 0; i < settingsList.Count; i++)
                         {
                             table.RowStyles.Add(new RowStyle(SizeType.Absolute, 50f));
-                            var (text, range, settingName) = list[i];
 
                             var sliderPupil = new SliderTextControl
                             {
-                                Text = text,
-                                Range = range,
+                                Text = settingsList[i].text,
+                                Range = settingsList[i].range,
                                 Dock = DockStyle.Fill,
                             };
-                            sliderPupil.Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
-                            sliderPupil.ValueChanged += (o, e) =>
-                            {
-                                var propInfo = settings.GetType().GetProperty(settingName);
-                                propInfo?.SetValue(settings, Convert.ChangeType(sliderPupil.Value, propInfo.PropertyType));
-                            };
-                            // TODO: not sure if this may cause a problem for adding and never removing event handler to the settings.
-                            settings.PropertyChanged += (o, e) =>
-                            {
-                                if (e.PropertyName == settingName)
-                                {
-                                    sliderPupil.Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
-                                }
-                            };
+                            sliderPupil.Bind(settings, settingsList[i].settingName);
 
                             table.Controls.Add(sliderPupil, i, 0);
                         }

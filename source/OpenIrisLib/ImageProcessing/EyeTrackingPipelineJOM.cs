@@ -155,29 +155,27 @@ namespace OpenIris
         public List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList(Eye whichEye, EyeTrackingPipelineSettings settings)
         {
             var theSettings = settings as EyeTrackingPipelineJOMSettings ?? throw new InvalidOperationException("bad settings");
-
-            var list = new List<(string text, RangeDouble range, string SettingName)>();
-
-            var settingName = whichEye switch
+            
+            var list = new List<(string text, RangeDouble range, string SettingName)>
             {
-                Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
-                Eye.Right => nameof(theSettings.DarkThresholdRightEye),
-            };
-            list.Add(("Pupil threshold", new RangeDouble(0, 255), settingName));
+                ("Pupil threshold", new RangeDouble(0, 255), whichEye switch
+                {
+                    Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
+                    Eye.Right => nameof(theSettings.DarkThresholdRightEye),
+                }),
 
-            settingName = whichEye switch
-            {
-                Eye.Left => nameof(theSettings.BrightThresholdLeftEye),
-                Eye.Right => nameof(theSettings.BrightThresholdRightEye),
-            };
-            list.Add(("CR threshold", new RangeDouble(0, 255), settingName));
+                ("CR threshold", new RangeDouble(0, 255), whichEye switch
+                {
+                    Eye.Left => nameof(theSettings.BrightThresholdLeftEye),
+                    Eye.Right => nameof(theSettings.BrightThresholdRightEye),
+                }),
 
-            settingName = whichEye switch
-            {
-                Eye.Left => nameof(theSettings.IrisRadiusPixLeft),
-                Eye.Right => nameof(theSettings.IrisRadiusPixRight),
+                ("Iris radius", new RangeDouble(0, theSettings.MaxIrisRadPixd), whichEye switch
+                {
+                    Eye.Left => nameof(theSettings.IrisRadiusPixLeft),
+                    Eye.Right => nameof(theSettings.IrisRadiusPixRight),
+                })
             };
-            list.Add(("Iris radius", new RangeDouble(0, theSettings.MaxIrisRadPixd), settingName));
 
             return list;
         }
@@ -232,17 +230,21 @@ namespace OpenIris
         private bool calculateTorsion = true;
         
         [Category("Torsion settings"), Description("Current radius of the left iris.")]
-        public double IrisRadiusPixLeft { get => irisRadiusPixLeft; set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixLeft)); }
+        public double IrisRadiusPixLeft { get => irisRadiusPixLeft; 
+            
+            set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixLeft)); }
         private double irisRadiusPixLeft = 80;
 
         [Category("Torsion settings"), Description("Current radius of the right iris.")]
-        public double IrisRadiusPixRight { get => irisRadiusPixRight; set => SetProperty(ref irisRadiusPixRight, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixRight)); }
+        public double IrisRadiusPixRight { get => irisRadiusPixRight; 
+            set => SetProperty(ref irisRadiusPixRight, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixRight)); }
         private double irisRadiusPixRight = 80;
 
-        [Browsable(false)]
+       // [Browsable(false)]
         public int MaxIrisRadPixd { get { return (int)Math.Ceiling(maxIrisRadmm / MmPerPix); } }
 
         [Category("Torsion settings"), Description("Maximum radius of the iris in milimiters.")]
+        [NeedsRestarting]
         public double MaxIrisRadmm { get => maxIrisRadmm; set => SetProperty(ref maxIrisRadmm, value, nameof(MaxIrisRadmm)); }
         private double maxIrisRadmm = 15;
 

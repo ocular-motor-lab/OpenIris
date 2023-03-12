@@ -197,11 +197,12 @@ namespace OpenIris.UI
 
         public static void DrawThresdholds(Image<Bgr, byte> image, double thresholdDark, double threshdoldBright)
         {
-            var imageThreshold = image.Convert<Gray, byte>().ThresholdBinaryInv(new Gray(thresholdDark), new Gray(255));
-            image.SetValue(new Bgr(255, 255, 0), imageThreshold);
+            var imageThreshold1 = image.Convert<Gray, byte>().ThresholdBinary(new Gray(threshdoldBright), new Gray(255));
+            var imageThreshold2 = image.Convert<Gray, byte>().ThresholdBinaryInv(new Gray(thresholdDark), new Gray(255));
 
-            imageThreshold = image.Convert<Gray, byte>().ThresholdBinary(new Gray(threshdoldBright), new Gray(255));
-            image.SetValue(new Bgr(0, 255, 255), imageThreshold);
+            image.SetValue(new Bgr(0, 255, 255), imageThreshold1);
+            image.SetValue(new Bgr(255, 255, 0), imageThreshold2);
+
         }
 
         public static void DrawEyelids(Image<Bgr, byte> image, EyeData data, EyePhysicalModel eyeModel)

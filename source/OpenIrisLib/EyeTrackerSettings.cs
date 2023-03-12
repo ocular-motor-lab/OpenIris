@@ -12,6 +12,7 @@ namespace OpenIris
     using System.Xml;
     using System.Xml.Serialization;
     using System.Collections;
+    using System.Linq;
 
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -64,17 +65,23 @@ namespace OpenIris
             {
                 allEyeTrackerSystemsSettings = value;
 
+                foreach (var v in value.Values)
+                {
+                    // make sure the property changes propagate
+                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                }
+
                 foreach (var set in value)
                 {
-                    set.Value.PropertyChanged += (o, e) =>
+                    set.Value.MmPerPixChanged += (o, e) =>
                     {
-                        if (EyeTrackerSystem == set.Key && e.PropertyName == nameof(EyeTrackingSystemSettings.MmPerPix))
+                        if (EyeTrackerSystem == set.Key)
                         {
                             // TODO: very ugly line to just make sure the settings are updated properly
                             // Need to set the mm per pixel for the tracking settings
                             foreach (var t in AllTrackingPipelinesSettings.Values)
                             {
-                                t.MmPerPix = set.Value.MmPerPix;
+                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
                             }
                         }
                     };
@@ -109,7 +116,7 @@ namespace OpenIris
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
         [NeedsRestarting]
-        [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingSystemBase>))]
+        [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingSystem>))]
         public string EyeTrackerSystem
         {
             get { return eyeTrackerSystem; }
@@ -125,16 +132,11 @@ namespace OpenIris
                     AllEyeTrackerSystemSettings.Add(value, eyeTrackerSystemSettings);
 
                     AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
-                    AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) =>
+                    AllEyeTrackerSystemSettings[value].MmPerPixChanged += (o, e) =>
                     {
-                        // TODO: very ugly line to just make sure the settings are updated properly
-                        // Need to set the mm per pixel for the tracking settings
-                        if (e.PropertyName == nameof(EyeTrackingSystemSettings.MmPerPix))
+                        foreach (var t in AllTrackingPipelinesSettings.Values)
                         {
-                            foreach (var t in AllTrackingPipelinesSettings.Values)
-                            {
-                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
-                            }
+                            t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
                         }
                     };
                 }
@@ -218,7 +220,7 @@ namespace OpenIris
 
 
         [Category("C) Choose a calibration method"), Description("Calibration method")]
-        [TypeConverter(typeof(PluginListTypeConverter<CalibrationSession>))]
+        [TypeConverter(typeof(PluginListTypeConverter<ICalibrationPipeline>))]
         public string CalibrationMethod
         {
             get { return calibrationMethod; }

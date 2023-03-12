@@ -58,14 +58,25 @@ namespace OpenIris
         /// <returns></returns>
         public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingSystemSettings))).ToArray();
 
+        [Browsable(false)]
+        public double MmPerPix { get => 1.0 / pixPerMm; }
+
         /// <summary>
         /// Gets or sets the resolution of the camera in mm per pixel. This should be set up automatically
         /// after a camera system is selected.
         /// </summary>       
         [Category("Camera properties"), Description("Camera resolution ( mm per pixels)")]
         [NeedsRestarting]
-        public virtual double MmPerPix { get => mmPerPix; set => SetProperty(ref mmPerPix, value, nameof(MmPerPix)); }
-        private double mmPerPix = 0.15; // default value
+        public virtual double PixPerMm
+        {
+            get => pixPerMm; 
+            set
+            {
+                SetProperty(ref pixPerMm, value, nameof(PixPerMm));
+                MmPerPixChanged?.Invoke(this, new EventArgs());
+            }
+        }
+        private double pixPerMm = 6;
 
         [Category("Camera properties"), Description("Distance from the camera to the eye ( mm)")]
         public virtual double DistanceCameraToEyeMm { get => distanceCameraToEyeMm; set => SetProperty(ref distanceCameraToEyeMm, value, nameof(DistanceCameraToEyeMm)); }
@@ -80,5 +91,8 @@ namespace OpenIris
         [NeedsRestarting]
         public Eye Eye { get => eye; set => SetProperty(ref eye, value, nameof(Eye)); }
         private Eye eye = Eye.Both; // default value
+
+        [field: NonSerialized]
+        public event EventHandler? MmPerPixChanged;
     }
 }

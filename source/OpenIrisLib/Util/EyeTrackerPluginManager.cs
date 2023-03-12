@@ -400,28 +400,15 @@ namespace OpenIris
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            string[]? classesAvailable = null;
-
-            if (typeof(T) == typeof(EyeTrackingSystemBase))
+            var classesAvailable = typeof(T) switch
             {
-                classesAvailable = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
-            }
+                Type _ when typeof(T) == typeof(IEyeTrackingSystem) => EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name),
+                Type _ when typeof(T) == typeof(ICalibrationPipeline) => EyeTrackerPluginManager.CalibrationPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
+                Type _ when typeof(T) == typeof(IEyeTrackingPipeline) => EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
+                _ => null,
+            } ?? throw new InvalidOperationException("Wrong type");
 
-            if (typeof(T) == typeof(CalibrationSession))
-            {
-                classesAvailable = EyeTrackerPluginManager.CalibrationPipelineFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
-            }
-
-            if (typeof(T) == typeof(IEyeTrackingPipeline))
-            {
-                classesAvailable = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(x => x.Name).ToArray();
-            }
-
-            if (classesAvailable is null) throw new InvalidOperationException("Wrong type");
-
-            Array.Sort(classesAvailable);
-
-            return new StandardValuesCollection(classesAvailable);
+            return new StandardValuesCollection(classesAvailable.OrderBy(x => x).ToList());
         }
     }
 }

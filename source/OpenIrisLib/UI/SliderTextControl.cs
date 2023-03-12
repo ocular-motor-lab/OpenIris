@@ -16,7 +16,7 @@ namespace OpenIris.UI
     /// User control that contains a text label, a slider and a text box. The slider and the text box are.
     /// Coordinated to as they represent the same value all the time.
     /// </summary>
-    public partial class SliderTextControl : UserControl
+    public partial class SliderTextControl : UserControl, IDisposable
     {
         /// <summary>
         /// Value represented in the slider and the text box.
@@ -35,6 +35,50 @@ namespace OpenIris.UI
             sliderValue = 0;
 
             EnabledChanged += SliderTextControl_EnabledChanged;
+
+            this.ParentChanged += (o, e) => 
+            {
+                int a = 1;
+            };
+        }
+
+        public void Bind(INotifyPropertyChanged settings, string settingName )
+        {
+            Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
+            ValueChanged += (o, e) =>
+            {
+                var propInfo = settings.GetType().GetProperty(settingName);
+                propInfo?.SetValue(settings, Convert.ChangeType(Value, propInfo.PropertyType));
+            };
+
+            settingsChangedHandler = (o, e) =>
+            {
+                if (e.PropertyName == settingName)
+                {
+                    Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
+                }
+            };
+            settings.PropertyChanged += settingsChangedHandler;
+            settingsForNotify = settings;
+        }
+
+        private PropertyChangedEventHandler? settingsChangedHandler;
+        private INotifyPropertyChanged? settingsForNotify;
+
+
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+                if (settingsForNotify is not null)
+                    settingsForNotify.PropertyChanged -= settingsChangedHandler;
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         void SliderTextControl_EnabledChanged(object sender, EventArgs e)

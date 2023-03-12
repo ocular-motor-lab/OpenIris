@@ -27,76 +27,83 @@ namespace OpenIris
             binding.MaxReceivedMessageSize = 2147483647;
             binding.Security.Mode = SecurityMode.None;
 
-            this.proxy = ChannelFactory<IEyeTrackerService>.CreateChannel(
+            proxy = ChannelFactory<IEyeTrackerService>.CreateChannel(
                 binding,
                 new EndpointAddress("net.tcp://" + hostname + ":" + port + "/EyeTrackerEndpoint"));
 
-            System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "IP.txt"), hostname);
+            try
+            {
+                System.IO.File.WriteAllText(System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "IP.txt"), hostname);
+            }
+            finally
+            {
+
+            }
         }
 
         public EyeTrackerStatusSummary Status
         {
-            get { return this.proxy.StatusSummary; }
+            get { return proxy.StatusSummary; }
         }
 
         public EyeTrackingPipelineSettings Settings
         {
-            get { return this.proxy.PipelineSettings; }
+            get { return proxy.PipelineSettings; }
         }
 
         public bool ChangeSetting(string settingName, object value)
         {
-            return this.proxy.ChangeSetting(settingName, value);
-        }
+            return proxy.ChangeSetting(settingName, value);
+        }   
 
         public ImagesAndData GetCurrentImagesAndData()
         {
-            return this.proxy.GetCurrentImagesAndData();
+            return proxy.GetCurrentImagesAndData();
         }
 
         public EyeCalibrationParamteres GetCalibrationParameters()
         {
-            return this.proxy.GetCalibrationParameters();
+            return proxy.GetCalibrationParameters();
         }
 
         public void StartRecording()
         {
-            this.proxy.StartRecording();
+            proxy.StartRecording();
         }
         
         public void StopRecording()
         {
-            this.proxy.StopRecording();
+            proxy.StopRecording();
         }
 
         public void ResetReference()
         {
-            this.proxy.ResetReference();
+            proxy.ResetReference();
         }
 
         public long RecordEvent(string message)
         {
-           return this.proxy.RecordEvent(message);
+           return proxy.RecordEvent(message);
         }
 
         public EyeCollection<EyeData?>? GetCurrentData()
         {
-            return this.proxy.GetCurrentData();
+            return proxy.GetCurrentData();
         }
         
         public EyeCollection<EyeData?>? WaitForNewData()
         {
-            return this.proxy.WaitForNewData();
+            return proxy.WaitForNewData();
         }
 
         public void ChangeThreshold(bool increase, bool dark, Eye whichEye)
         {
-            this.proxy.changeThreshold(increase, dark, whichEye);
+            proxy.changeThreshold(increase, dark, whichEye);
         }
 
         public List<string> DownloadFile()
         {
-            var task = Task.Run(async () => await this.DownloadFileAsync());
+            var task = Task.Run(async () => await DownloadFileAsync());
             task.Wait();
             return task.Result;
         }
@@ -122,14 +129,14 @@ namespace OpenIris
                 var remoteFilesInfo = new RemoteFileInfo[3];
                 var localFiles = new List<string>();
                 // data file
-                remoteFilesInfo[0] = await this.proxy.DownloadLastFile();
+                remoteFilesInfo[0] = await proxy.DownloadLastFile();
                 var req = new DownloadRequest();
                 // calibraiton file
                 req.FileName = remoteFilesInfo[0].FileName.Replace(".txt", ".cal");
-                remoteFilesInfo[1] = await this.proxy.DownloadFile(req);
+                remoteFilesInfo[1] = await proxy.DownloadFile(req);
                 // events file
                 req.FileName = remoteFilesInfo[0].FileName.Replace(".txt", "-events.txt");
-                remoteFilesInfo[2] = await this.proxy.DownloadFile(req);
+                remoteFilesInfo[2] = await proxy.DownloadFile(req);
 
                 foreach (var remoteFileInfo in remoteFilesInfo)
                 {

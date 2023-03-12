@@ -248,9 +248,12 @@ namespace OpenIris
                     newImagesEvent[Eye.Left]?.Set();
                     newImagesEvent[Eye.Right]?.Set();
 
-                    // Wait for the left eye and right eye
-                    eyeDoneEvent[Eye.Left]?.WaitOne();
-                    eyeDoneEvent[Eye.Right]?.WaitOne();
+                    if (!stopping)
+                    {
+                        // Wait for the left eye and right eye
+                        eyeDoneEvent[Eye.Left]?.WaitOne();
+                        eyeDoneEvent[Eye.Right]?.WaitOne();
+                    }
 
                     //
                     // Propagate the processed images
@@ -342,7 +345,7 @@ namespace OpenIris
             EyeCollection<AutoResetEvent?> newImageEvents,
             EyeCollection<AutoResetEvent?> doneWithProcessingEvents)
         {
-            Thread.CurrentThread.Name = "EyeTracker:EyeProcessLoop";
+            Thread.CurrentThread.Name = "EyeTracker:EyeProcessLoop " + whichEye;
 
             while (!stopping)
             {
@@ -360,6 +363,11 @@ namespace OpenIris
                     EyeTrackerDebug.TrackTimeBeginPipeline(whichEye, image.TimeStamp);
                     (image.EyeData, image.ImageTorsion) = pipeline.Process(image, imagesAndData!.Calibration.EyeCalibrationParameters[whichEye], imagesAndData.TrackingSettings);
                     EyeTrackerDebug.TrackTimeEndPipeline();
+                }
+                catch
+                {
+                    stopping = true;
+                    throw;
                 }
                 finally
                 {

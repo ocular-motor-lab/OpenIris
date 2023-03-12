@@ -17,7 +17,7 @@ namespace OpenIris
     [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("SimulationFakeEye")]
     public class EyeTrackingSystemSimulationFakeEye : EyeTrackingSystemBase
     {
-        private OpenIris.EyeTrackingSystems.FakeEyeControlUI UIform = new OpenIris.EyeTrackingSystems.FakeEyeControlUI();
+        private EyeTrackingSystems.FakeEyeControlUI UIform = new EyeTrackingSystems.FakeEyeControlUI();
 
         /// <summary>
         /// Gets the cameras. In this case just one single camera.

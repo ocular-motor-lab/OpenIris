@@ -136,7 +136,7 @@ namespace OpenIris.ImageGrabbing
             numberFramesGrabbed++;
             timeLastImage = t.DateTimeGrabbed;
 
-            System.Threading.Thread.Sleep((int)Math.Max(0, 10 - (t.DateTimeGrabbed - timeLastImage).TotalMilliseconds));
+            System.Threading.Thread.Sleep(5);
             var newImage = new ImageEye(image, WhichEye, t, null);
             return newImage;
         }

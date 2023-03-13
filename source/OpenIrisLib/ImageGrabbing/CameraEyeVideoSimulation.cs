@@ -71,7 +71,8 @@ namespace OpenIris.ImageGrabbing
         protected override ImageEye GrabImageFromCamera()
         {
             // If reached the end of the video loop
-            if (videoEye.LastFrameNumber >= LoopAtFrame) videoEye.Scroll(0);
+            if (videoEye.LastFrameNumber >= LoopAtFrame) 
+                videoEye.Scroll(1);
 
             ImageEye image = videoEye.GrabImageEyeFromVideo();
             numberFramesGrabbed++;

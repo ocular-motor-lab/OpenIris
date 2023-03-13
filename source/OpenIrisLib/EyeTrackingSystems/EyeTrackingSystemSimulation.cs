@@ -8,7 +8,6 @@ namespace OpenIris
 #nullable enable
 
     using System;
-    using System.ComponentModel;
     using System.ComponentModel.Composition;
     using OpenIris.ImageGrabbing;
 

@@ -303,8 +303,6 @@ namespace OpenIris.UI
         {
             if (data is null || image is null || data.Pupil.IsEmpty) return;
 
-            var iris = data.Iris;
-
             // Draw iris circle
             var points = new Point[36];
             for (int i = 0; i < points.Length; i++)

@@ -13,14 +13,13 @@
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="ImageGrabber" />
-      <Property Name="EyeTrackingSystem" />
-      <Property Name="ImageProcessor" />
       <Property Name="VideoPlayer" />
-      <Property Name="Settings" />
-      <Property Name="Calibration" />
-      <Property Name="CalibrationSession" />
+      <Property Name="ImageProcessor" />
       <Property Name="HeadTracker" />
       <Property Name="RecordingSession" />
+      <Property Name="CalibrationSession" />
+      <Property Name="Calibration" />
+      <Property Name="Settings" />
     </ShowAsAssociation>
     <Lollipop Position="0.2" />
   </Class>
@@ -119,55 +118,36 @@
     <Position X="7" Y="8.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAABAQAACQAABIIAgAIAAQACAAAAAAAAA=</HashCode>
-      <FileName>EyeTrackingSystems\IEyeTrackingSystem.cs</FileName>
+      <FileName>EyeTrackingSystems\EyeTrackingSystemBase.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OpenIris.EyeTrackingPipelineSettings" Collapsed="true">
     <Position X="7" Y="9.25" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAEgAAAAAABBEAAgAAAgAAAAAAAAAAAA=</HashCode>
-      <FileName>ImageProcessing\IEyeTrackingPipeline.cs</FileName>
+      <FileName>ImageProcessing\EyeTrackingPipelineBase.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="OpenIris.CalibrationSettings" Collapsed="true">
     <Position X="7" Y="10" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Calibration\ICalibrationPipeline.cs</FileName>
+      <FileName>Calibration\CalibrationPipelineBase.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Interface Name="OpenIris.IEyeTrackingSystem" Collapsed="true">
-    <Position X="6.25" Y="0.5" Width="1.75" />
+  <Class Name="OpenIris.CalibrationPipelineBase" Collapsed="true">
+    <Position X="9.25" Y="5.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAABACAAAAAACAAAAAAAAAACAAQAAgAEAQIAACAA=</HashCode>
-      <FileName>EyeTrackingSystems\IEyeTrackingSystem.cs</FileName>
+      <HashCode>AAAAAAAAACAAUAAAACAAAAQAAAAAAEAAgAAAAAAAAAA=</HashCode>
+      <FileName>Calibration\CalibrationPipelineBase.cs</FileName>
     </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="Settings" />
-    </ShowAsAssociation>
-  </Interface>
+    <Lollipop Position="0.2" />
+  </Class>
   <Interface Name="OpenIris.ImageGrabbing.IImageEyeSource" Collapsed="true">
     <Position X="8.75" Y="2" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAIAAAAACABAAAAAAAAAAICEAAEAAAAA=</HashCode>
       <FileName>ImageGrabbing\IImageEyeSource.cs</FileName>
-    </TypeIdentifier>
-  </Interface>
-  <Interface Name="OpenIris.IEyeTrackingPipeline" Collapsed="true">
-    <Position X="8.5" Y="3.5" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAgBEAAAAAAAA=</HashCode>
-      <FileName>ImageProcessing\IEyeTrackingPipeline.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="Settings" />
-    </ShowAsAssociation>
-  </Interface>
-  <Interface Name="OpenIris.ICalibrationPipeline" Collapsed="true">
-    <Position X="10.25" Y="5.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAACAAUAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Calibration\ICalibrationPipeline.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Font Name="Segoe UI" Size="9" />

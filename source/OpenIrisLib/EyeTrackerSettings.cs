@@ -177,7 +177,7 @@ namespace OpenIris
         [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingPipelineBase>))]
         public string EyeTrackingPipeline
         {
-            get { TrackingPipelineSettings.EyeTrackingPipelineName = eyeTrackingPipeline; return eyeTrackingPipeline; }
+            get { return eyeTrackingPipeline; }
             set
             {
                 // If the dictionary does not contain the settings for the current eye tracking
@@ -186,7 +186,6 @@ namespace OpenIris
                 {
                     var trackingSettings = (EyeTrackingPipelineSettings?)EyeTrackerPluginManager.EyeTrackingPipelineFactory?.GetDefaultSettings(value)
                         ?? throw new InvalidOperationException("Bad EyeTrackingPipelineFactory");
-                    trackingSettings.EyeTrackingPipelineName = value;
 
                     AllTrackingPipelinesSettings.Add(value, trackingSettings);
 

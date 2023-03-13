@@ -9,12 +9,9 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Cvb;
-    using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
-    using Emgu.CV.Features2D;
     using System;
     using System.ComponentModel;
-    using System.ComponentModel.Composition;
     using System.Drawing;
     using System.Linq;
     using System.Collections.Generic;
@@ -23,21 +20,17 @@ namespace OpenIris
     using System.Xml.Serialization;
 
     /// <summary>
-    /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
-    /// position and the torsion angle.
+    /// Base class for all eye tracking pipelines that process images to get data.
     /// </summary>
     public abstract class EyeTrackingPipelineBase : IDisposable
     {
-        private readonly CvBlobDetector detector = new CvBlobDetector();
-        private readonly CvBlobs blobs = new CvBlobs();
-
         /// <summary>
         /// Name of the pipeline.
         /// </summary>
         public string Name { get; private set; }
 
         /// <summary>
-        /// Which eye is this pipeline for
+        /// Which eye is this pipeline for.
         /// </summary>
         public Eye WhichEye { get; private set; }
 
@@ -131,20 +124,6 @@ namespace OpenIris
         /// </summary>
         /// <returns></returns>
         public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingPipelineSettings))).ToArray();
-
-        /// <summary>
-        /// Initializes the settings.
-        /// </summary>
-        public EyeTrackingPipelineSettings()
-        {
-            EyeTrackingPipelineName = "JOM";
-        }
-
-        /// <summary>
-        /// Name of the pipeline will be automatically set.
-        /// </summary>
-        [Browsable(false)]
-        public string EyeTrackingPipelineName { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum radius of the pupil. This is a bit complicated. 

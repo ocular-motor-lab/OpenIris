@@ -13,6 +13,15 @@ namespace OpenIris
     using System.Linq;
     using System.Runtime.Serialization;
 
+    /// <summary>
+    /// Base class for calibration pipelines. When a calibration session starts
+    /// The method <see cref="ProcessForEyeModel"/> will be called with new images anda data
+    /// until the model is completely calibrated. 
+    /// Then the method <see cref="ProcessForReference"/> will be called with new images anda data
+    /// until the reference completely calibrated. It is possible that the reference is calibrated
+    /// at the same time as the model. In such case this method should return inmideately.
+    /// </summary>
+
     public abstract class CalibrationPipelineBase : IDisposable
     {
         /// <summary>

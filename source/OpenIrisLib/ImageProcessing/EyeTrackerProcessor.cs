@@ -322,7 +322,7 @@ namespace OpenIris
             // 
             // Check if it is necessary to change the pipeline and the corresponding UI
             //
-            string currentPipelineName = imagesAndData.TrackingSettings.EyeTrackingPipelineName;
+            string currentPipelineName = imagesAndData.EyeTrackingPipelineName;
 
             if (pipelines?[Eye.Left]?.Name != currentPipelineName || pipelines?[Eye.Right]?.Name != currentPipelineName)
             {

@@ -254,7 +254,7 @@ namespace OpenIris
                         : EyeTrackingSystem!.PreProcessImagesFromCameras(grabbedImages);
 
                     RecordingSession?.TryRecordImages(grabbedImages);
-                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingPipelineSettings));
+                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.EyeTrackingPipeline, Settings.TrackingPipelineSettings));
                 };
 
                 // Action for every time new images are processed

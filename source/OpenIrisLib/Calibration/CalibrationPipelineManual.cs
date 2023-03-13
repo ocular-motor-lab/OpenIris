@@ -11,7 +11,7 @@ namespace OpenIris
 
     using System.ComponentModel.Composition;
 
-    [Export(typeof(ICalibrationPipeline)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
+    [Export(typeof(CalibrationPipelineBase)), PluginDescription("Manual Calibration", typeof(CalibrationSettings))]
     public class CalibrationPipelineManual : CalibrationPipelineBase
     {
         private CalibrationPipelineManualUI? ui;

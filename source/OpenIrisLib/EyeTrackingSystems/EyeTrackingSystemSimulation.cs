@@ -15,7 +15,7 @@ namespace OpenIris
     /// <summary>
     /// Simulator of eye tracker from videos.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Simulation", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Simulation", typeof(EyeTrackingSystemSettings))]
     public class EyeTrackingSystemSimulation : EyeTrackingSystemBase
     {
         /// <summary>

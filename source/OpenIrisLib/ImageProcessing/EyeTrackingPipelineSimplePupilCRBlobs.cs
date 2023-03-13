@@ -24,7 +24,7 @@ namespace OpenIris
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimplePupilCRBlobs", typeof(EyeTrackingPipelinePupilCRSettings))]
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("SimplePupilCRBlobs", typeof(EyeTrackingPipelinePupilCRSettings))]
     public sealed class EyeTrackingPipelineSimplePupilCRBlobs : EyeTrackingPipelineBase
     {
         private readonly CvBlobDetector detector = new CvBlobDetector();

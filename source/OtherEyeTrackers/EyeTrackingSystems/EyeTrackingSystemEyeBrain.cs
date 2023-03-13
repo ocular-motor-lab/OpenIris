@@ -15,7 +15,7 @@ namespace OpenIris
     /// <summary>
     /// EyeBrain system.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("EyeBrain")]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("EyeBrain")]
     public class EyeTrackingSystemEyeBrain : EyeTrackingSystemBase
     {
         /// <summary>

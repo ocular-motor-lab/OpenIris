@@ -79,7 +79,7 @@ namespace OpenIris
         /// <summary>
         /// User interface for the current pipeline. For each eye.
         /// </summary>
-        public EyeCollection<IEyeTrackingPipeline?>? PipelineForUI { get; private set; }
+        public EyeCollection<EyeTrackingPipelineBase?>? PipelineForUI { get; private set; }
 
         /// <summary>
         /// Gets the total number of frames received.
@@ -134,7 +134,7 @@ namespace OpenIris
                         // of this events. Otherwise they get disposed before the WhenAll
                         var newImagesEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
                         var eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
-                        EyeCollection<IEyeTrackingPipeline?>?  pipelines = null;
+                        EyeCollection<EyeTrackingPipelineBase?>?  pipelines = null;
                         EyeTrackerImagesAndData? currentImagesAndData = null;
 
                         processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Left, newImagesEvents, eyeDoneEvents),
@@ -222,7 +222,7 @@ namespace OpenIris
         /// </summary>
         private void ProcessLoop(
             ref EyeTrackerImagesAndData? currentImagesAndData, 
-            ref EyeCollection<IEyeTrackingPipeline?>? pipelines,
+            ref EyeCollection<EyeTrackingPipelineBase?>? pipelines,
             EyeCollection<AutoResetEvent?> newImagesEvent, 
             EyeCollection<AutoResetEvent?> eyeDoneEvent)
         {
@@ -317,7 +317,7 @@ namespace OpenIris
             }
         }
 
-        private void UpdatePipeline(ref EyeCollection<IEyeTrackingPipeline?>? pipelines, EyeTrackerImagesAndData imagesAndData)
+        private void UpdatePipeline(ref EyeCollection<EyeTrackingPipelineBase?>? pipelines, EyeTrackerImagesAndData imagesAndData)
         {
             // 
             // Check if it is necessary to change the pipeline and the corresponding UI
@@ -326,7 +326,7 @@ namespace OpenIris
 
             if (pipelines?[Eye.Left]?.Name != currentPipelineName || pipelines?[Eye.Right]?.Name != currentPipelineName)
             {
-                pipelines = new EyeCollection<IEyeTrackingPipeline?>(
+                pipelines = new EyeCollection<EyeTrackingPipelineBase?>(
                     EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Left, imagesAndData.TrackingSettings),
                     EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Right, imagesAndData.TrackingSettings));
 
@@ -342,7 +342,7 @@ namespace OpenIris
 
         private void ProcessOneEyeLoop(
             ref EyeTrackerImagesAndData? imagesAndData, 
-            ref EyeCollection<IEyeTrackingPipeline?>?  pipelines, Eye whichEye, 
+            ref EyeCollection<EyeTrackingPipelineBase?>?  pipelines, Eye whichEye, 
             EyeCollection<AutoResetEvent?> newImageEvents,
             EyeCollection<AutoResetEvent?> doneWithProcessingEvents)
         {

@@ -36,7 +36,7 @@ namespace OpenIris.UI
         private readonly EyeCollection<ImageBox> imageBoxes;
 
         private (string name, ICalibrationUIControl? control)? calibrationUI;
-        private (string name, EyeCollection<IEyeTrackingPipeline?>? pipelines)? pipelineUI;
+        private (string name, EyeCollection<EyeTrackingPipelineBase?>? pipelines)? pipelineUI;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerGui class

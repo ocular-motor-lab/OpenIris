@@ -45,9 +45,9 @@ namespace OpenIris
                     catalog.Catalogs.Add(pluginCatalog);
                 }
 
-                EyeTrackingsyStemFactory = new EyeTrackerPluginLoader<IEyeTrackingSystem, IEyeTrackingSystemMetadata>(catalog);
-                CalibrationPipelineFactory = new EyeTrackerPluginLoader<ICalibrationPipeline, IEyeTrackerPluginMetadata>(catalog);
-                EyeTrackingPipelineFactory = new EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>(catalog);
+                EyeTrackingsyStemFactory = new EyeTrackerPluginLoader<EyeTrackingSystemBase, IEyeTrackingSystemMetadata>(catalog);
+                CalibrationPipelineFactory = new EyeTrackerPluginLoader<CalibrationPipelineBase, IEyeTrackerPluginMetadata>(catalog);
+                EyeTrackingPipelineFactory = new EyeTrackerPluginLoader<EyeTrackingPipelineBase, IEyeTrackerPluginMetadata>(catalog);
 
                 ExtraSettingsTypesForXML = new List<Type>();
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingsyStemFactory.ClassesAvaiable.Select(t => t.SettingsType));
@@ -68,17 +68,17 @@ namespace OpenIris
         /// <summary>
         /// Factory for eye tracking systems.
         /// </summary>
-        public static EyeTrackerPluginLoader<IEyeTrackingSystem, IEyeTrackingSystemMetadata>? EyeTrackingsyStemFactory { get; private set; }
+        public static EyeTrackerPluginLoader<EyeTrackingSystemBase, IEyeTrackingSystemMetadata>? EyeTrackingsyStemFactory { get; private set; }
 
         /// <summary>
         /// Factory for eye tracking calibration methods.
         /// </summary>
-        public static EyeTrackerPluginLoader<ICalibrationPipeline, IEyeTrackerPluginMetadata>? CalibrationPipelineFactory { get; private set; }
+        public static EyeTrackerPluginLoader<CalibrationPipelineBase, IEyeTrackerPluginMetadata>? CalibrationPipelineFactory { get; private set; }
 
         /// <summary>
         /// Factory for eye tracking pipelines.
         /// </summary>
-        public static EyeTrackerPluginLoader<IEyeTrackingPipeline, IEyeTrackerPluginMetadata>? EyeTrackingPipelineFactory { get; private set; }
+        public static EyeTrackerPluginLoader<EyeTrackingPipelineBase, IEyeTrackerPluginMetadata>? EyeTrackingPipelineFactory { get; private set; }
 
         /// <summary>
         /// Gets the name of the plugin.
@@ -198,7 +198,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="name">Name of the factory. Must match Metadata.Name.</param>
         /// <returns></returns>
-        public EyeTrackerSettingsBase GetDefaultSettings(IEyeTrackingSystem system)
+        public EyeTrackerSettingsBase GetDefaultSettings(EyeTrackingSystemBase system)
         {
             var systemName = (Attribute.GetCustomAttribute(system.GetType(), typeof(PluginDescriptionEyeTrackingSystemAttribute)) as PluginDescriptionEyeTrackingSystemAttribute)?.Name ?? String.Empty;
 
@@ -402,9 +402,9 @@ namespace OpenIris
         {
             var classesAvailable = typeof(T) switch
             {
-                Type _ when typeof(T) == typeof(IEyeTrackingSystem) => EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name),
-                Type _ when typeof(T) == typeof(ICalibrationPipeline) => EyeTrackerPluginManager.CalibrationPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
-                Type _ when typeof(T) == typeof(IEyeTrackingPipeline) => EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
+                Type _ when typeof(T) == typeof(EyeTrackingSystemBase) => EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name),
+                Type _ when typeof(T) == typeof(CalibrationPipelineBase) => EyeTrackerPluginManager.CalibrationPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
+                Type _ when typeof(T) == typeof(EyeTrackingPipelineBase) => EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
                 _ => null,
             } ?? throw new InvalidOperationException("Wrong type");
 

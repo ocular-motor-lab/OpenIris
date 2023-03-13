@@ -19,7 +19,7 @@ namespace OpenIris
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimpleCentroid", typeof(EyeTrackingPipelinePupilCRSettings))]
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("SimpleCentroid", typeof(EyeTrackingPipelinePupilCRSettings))]
     public sealed class EyeTrackingPipelineSimpleCentroid : EyeTrackingPipelineBase, IDisposable
     {
 

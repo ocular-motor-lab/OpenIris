@@ -116,7 +116,7 @@ namespace OpenIris
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
         [NeedsRestarting]
-        [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingSystem>))]
+        [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingSystemBase>))]
         public string EyeTrackerSystem
         {
             get { return eyeTrackerSystem; }
@@ -174,7 +174,7 @@ namespace OpenIris
         #region B) Choose a tracking pipeline plugin
 
         [Category("B) Choose a tracking pipeline"), Description("Tracking pipeline. What pipeline for tracking position, torsion etc you want to use?")]
-        [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingPipeline>))]
+        [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingPipelineBase>))]
         public string EyeTrackingPipeline
         {
             get { TrackingPipelineSettings.EyeTrackingPipelineName = eyeTrackingPipeline; return eyeTrackingPipeline; }
@@ -220,7 +220,7 @@ namespace OpenIris
 
 
         [Category("C) Choose a calibration method"), Description("Calibration method")]
-        [TypeConverter(typeof(PluginListTypeConverter<ICalibrationPipeline>))]
+        [TypeConverter(typeof(PluginListTypeConverter<CalibrationPipelineBase>))]
         public string CalibrationMethod
         {
             get { return calibrationMethod; }

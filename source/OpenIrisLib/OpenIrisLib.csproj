@@ -80,11 +80,8 @@
       <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
-    <Compile Include="EyeTrackingSystems\IEyeTrackingSystem.cs" />
     <Compile Include="HeadTracking\HeadTracker.cs" />
-    <Compile Include="Calibration\ICalibrationPipeline.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineBase.cs" />
-    <Compile Include="ImageProcessing\IEyeTrackingPipeline.cs" />
     <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />

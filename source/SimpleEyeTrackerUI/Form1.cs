@@ -34,18 +34,12 @@ namespace SimpleEyeTrackerUI
             this.video = new VideoEye(Eye.Left, this.fileName);
 
             //======================================================================================
-            // Initialize eye tracker.
-            //======================================================================================
-            EyeTrackerPluginManager.Init(true);
-            this.imageProcessor = new EyeTrackingPipelineJOM();
-
-            //======================================================================================
             // Initialize settings.
             //======================================================================================
 
             // Some can go with default values. Others need to be set depending on the resolution and
             // brightnessof the image
-            imageProcessor.Settings = new EyeTrackingPipelineJOMSettings
+            var settings = new EyeTrackingPipelineJOMSettings
             {
 
                 // Select the specific algorithms to be used for each processing step.
@@ -82,6 +76,12 @@ namespace SimpleEyeTrackerUI
                 // Maximum torsion allowed
                 MaxTorsion = 25
             };
+
+            //======================================================================================
+            // Initialize eye tracker.
+            //======================================================================================
+            EyeTrackerPluginManager.Init(true);
+            this.imageProcessor = EyeTrackingPipelineBase.Create("JOM", Eye.Left, settings) as EyeTrackingPipelineJOM;
 
             //======================================================================================
             // Initialize calibration.

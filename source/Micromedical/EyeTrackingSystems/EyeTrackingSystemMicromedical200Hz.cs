@@ -15,7 +15,7 @@ namespace OpenIris
     /// <summary>
     /// Micromedical system.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystemAttribute("Micromedical200Hz", typeof(EyeTrackingSystemSettingsMicromedical))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystemAttribute("Micromedical200Hz", typeof(EyeTrackingSystemSettingsMicromedical))]
     public class EyeTrackingSystemMicromedical200Hz : EyeTrackingSystemMicromedical
     {
         /// <summary>

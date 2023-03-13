@@ -6,11 +6,14 @@
 
 namespace OpenIris
 {
+    using System;
 #nullable enable
 
     using System.ComponentModel.Composition;
+    using System.Linq;
+    using System.Runtime.Serialization;
 
-    public abstract class CalibrationPipelineBase : ICalibrationPipeline
+    public abstract class CalibrationPipelineBase : IDisposable
     {
         /// <summary>
         /// Name of the plugin, gets set automatically.
@@ -39,7 +42,7 @@ namespace OpenIris
         /// <param name="name">Name of the pipeline.</param>
         /// <param name="settings">Settings of the pipeline.</param>
         /// <returns>The system.</returns>
-        public static ICalibrationPipeline Create(string name, CalibrationSettings? settings = null)
+        public static CalibrationPipelineBase Create(string name, CalibrationSettings? settings = null)
         {
             var pipeline = EyeTrackerPluginManager.CalibrationPipelineFactory?.Create(name)
                 ?? throw new OpenIrisException("Bad system");
@@ -72,4 +75,18 @@ namespace OpenIris
         }
     }
 
+
+    /// <summary>
+    /// Settings.
+    /// </summary>
+    [KnownType("GetDerivedTypes")] // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.knowntypeattribute?view=netframework-4.8
+    public class CalibrationSettings : EyeTrackerSettingsBase
+    {
+        /// <summary>
+        /// Gets the derived types for the serialization over wcf. This is necessary for the settings to be loaded. It's complicated. Because we are loading plugins in runtime we 
+        /// don't know a prioiry the types. 
+        /// </summary>
+        /// <returns></returns>
+        public static System.Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(CalibrationSettings))).ToArray();
+    }
 }

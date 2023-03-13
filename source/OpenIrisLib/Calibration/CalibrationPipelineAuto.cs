@@ -10,7 +10,7 @@ namespace OpenIris
 
     using System.ComponentModel.Composition;
 
-    [Export(typeof(ICalibrationPipeline)), PluginDescription("Auto", typeof(CalibrationSettings))]
+    [Export(typeof(CalibrationPipelineBase)), PluginDescription("Auto", typeof(CalibrationSettings))]
     public class CalibrationPipelineAuto : CalibrationPipelineBase
     {
         /// <summary>

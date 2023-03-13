@@ -16,7 +16,7 @@ namespace OpenIris
     /// <summary>
     /// Generic system with any one camera.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Single webcam", typeof(EyeTrackingSystemSettingsWebCam), VideoEyeConfiguration.SingleVideoOneEye)]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Single webcam", typeof(EyeTrackingSystemSettingsWebCam), VideoEyeConfiguration.SingleVideoOneEye)]
     public class EyeTrackingSystemSingleWebCam : EyeTrackingSystemBase
     {
         /// <summary>

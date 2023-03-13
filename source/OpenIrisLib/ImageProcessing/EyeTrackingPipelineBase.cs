@@ -19,12 +19,14 @@ namespace OpenIris
     using System.Linq;
     using System.Collections.Generic;
     using OpenIris.UI;
+    using System.Runtime.Serialization;
+    using System.Xml.Serialization;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    public abstract class EyeTrackingPipelineBase : IEyeTrackingPipeline
+    public abstract class EyeTrackingPipelineBase : IDisposable
     {
         private readonly CvBlobDetector detector = new CvBlobDetector();
         private readonly CvBlobs blobs = new CvBlobs();
@@ -32,17 +34,17 @@ namespace OpenIris
         /// <summary>
         /// Name of the pipeline.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Which eye is this pipeline for
         /// </summary>
-        public Eye WhichEye { get; set; }
+        public Eye WhichEye { get; private set; }
 
         /// <summary>
         /// Settings for the pipeline processing.
         /// </summary>
-        public EyeTrackingPipelineSettings Settings { get; set; }
+        public EyeTrackingPipelineSettings Settings { get; private set; }
 
         /// <summary>
         /// Initializes an instance.
@@ -60,7 +62,7 @@ namespace OpenIris
         /// <param name="eye">Which eye is the pipeline for.</param>
         /// <param name="settings">Settings of the pipeline.</param>
         /// <returns>The system.</returns>
-        public static IEyeTrackingPipeline Create(string name, Eye eye, EyeTrackingPipelineSettings? settings = null)
+        public static EyeTrackingPipelineBase Create(string name, Eye eye, EyeTrackingPipelineSettings? settings = null)
         {
             var pipeline = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(name)
                 ?? throw new OpenIrisException("Bad system");
@@ -114,4 +116,61 @@ namespace OpenIris
             return null;
         }
     }
+
+    /// <summary>
+    /// Base clase for settings of eye tracking pipelines.
+    /// </summary>
+    /// // There may be a better solution https://stackoverflow.com/questions/16220242/generally-accepted-way-to-avoid-knowntype-attribute-for-every-derived-class
+    [Serializable]
+    [KnownType("GetDerivedTypes")] // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.knowntypeattribute?view=netframework-4.8
+    public class EyeTrackingPipelineSettings : EyeTrackerSettingsBase
+    {
+        /// <summary>
+        /// Gets the derived types for the serialization over wcf. This is necessary for the settings to be loaded. It's complicated. Because we are loading plugins in runtime we 
+        /// don't know a prioiry the types. 
+        /// </summary>
+        /// <returns></returns>
+        public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingPipelineSettings))).ToArray();
+
+        /// <summary>
+        /// Initializes the settings.
+        /// </summary>
+        public EyeTrackingPipelineSettings()
+        {
+            EyeTrackingPipelineName = "JOM";
+        }
+
+        /// <summary>
+        /// Name of the pipeline will be automatically set.
+        /// </summary>
+        [Browsable(false)]
+        public string EyeTrackingPipelineName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum radius of the pupil. This is a bit complicated. 
+        /// The mm per pixel is a setting that depends on the eye tracking system, resolution of the cameras and distance to 
+        /// the eyes. Whenever the eye tracking system is changed it will also change this setting. That way all the settings
+        /// about eye properties can be set in milimiters (system independent) and then convert to pixels using this values.
+        /// That is, the pipelines need values in pixels but it is much easier and consistent to think in miliminters for sizes
+        /// of eye parts.
+        /// </summary>
+        [XmlIgnore]
+        [Browsable(false)]
+        public double MmPerPix { get; set; } = 0.1;
+
+        /// <summary>
+        /// Gets or sets the left part to the frame that is not processed. Right, top, left, bottom.
+        /// </summary>
+        [Category("General tracking settings"), Description("Part to the frame that is not processed. Right, top, left, bottom.")]
+        public Rectangle CroppingLeftEye { get => croppingLeftEye; set => SetProperty(ref croppingLeftEye, value, nameof(CroppingLeftEye)); }
+        private Rectangle croppingLeftEye = new Rectangle(0, 0, 0, 0); // Default value
+
+        /// <summary>
+        /// Gets or sets the left part to the frame that is not processed. Right, top, left, bottom.
+        /// </summary>
+        [Category("General tracking settings"), Description("Part to the frame that is not processed. Right, top, left, bottom.")]
+        public Rectangle CroppingRightEye { get => croppingRightEye; set => SetProperty(ref croppingRightEye, value, nameof(CroppingRightEye)); }
+        private Rectangle croppingRightEye = new Rectangle(0, 0, 0, 0); // Default value
+    }
+
 }

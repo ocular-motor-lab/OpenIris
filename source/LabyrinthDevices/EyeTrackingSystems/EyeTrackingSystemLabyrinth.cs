@@ -13,7 +13,7 @@ namespace OpenIris
     /// <summary>
     /// Labyrinth system.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("LabyrinthJOM", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("LabyrinthJOM", typeof(EyeTrackingSystemSettings))]
     public class EyeTrackingSystemLabyrinth : EyeTrackingSystemBase
     {
         private CameraEyeFlyCapture camera;

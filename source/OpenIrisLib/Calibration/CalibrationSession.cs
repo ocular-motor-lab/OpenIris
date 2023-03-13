@@ -33,7 +33,7 @@ namespace OpenIris
     public sealed class CalibrationSession : IDisposable
     {
         private readonly Eye whichEyeToCalibrate;
-        private readonly ICalibrationPipeline calibrationPipeline;
+        private readonly CalibrationPipelineBase calibrationPipeline;
         private BlockingCollection<EyeTrackerImagesAndData>? inputBuffer;
 
         /// <summary>

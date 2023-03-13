@@ -47,7 +47,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="eyeTrackingSystem"></param>
         /// <returns></returns>
-        public async static Task<HeadTracker?> CreateNewforOffLine(IEyeTrackingSystem eyeTrackingSystem)
+        public async static Task<HeadTracker?> CreateNewforOffLine(EyeTrackingSystemBase eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithVideos);
 
@@ -59,7 +59,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="eyeTrackingSystem"></param>
         /// <returns></returns>
-        public async static Task<HeadTracker?> CreateNewForRealTime(IEyeTrackingSystem eyeTrackingSystem)
+        public async static Task<HeadTracker?> CreateNewForRealTime(EyeTrackingSystemBase eyeTrackingSystem)
         {
             var headDataSource = await Task.Run(eyeTrackingSystem.CreateHeadDataSourceWithCameras);
 

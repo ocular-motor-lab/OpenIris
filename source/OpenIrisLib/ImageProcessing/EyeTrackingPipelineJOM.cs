@@ -23,7 +23,7 @@ namespace OpenIris
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("JOM", typeof(EyeTrackingPipelineJOMSettings))]
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("JOM", typeof(EyeTrackingPipelineJOMSettings))]
     public sealed class EyeTrackingPipelineJOM : EyeTrackingPipelineBase, IDisposable
     {
         private readonly PupilTracking pupilTracker;
@@ -37,7 +37,7 @@ namespace OpenIris
         /// <summary>
         /// Initializes a new instance of the ImageEyeProcess class.
         /// </summary>
-        public EyeTrackingPipelineJOM()
+        private EyeTrackingPipelineJOM()
         {
             pupilTracker = new PupilTracking();
             cornealReflectionTracker = new CornealReflectionTracking();

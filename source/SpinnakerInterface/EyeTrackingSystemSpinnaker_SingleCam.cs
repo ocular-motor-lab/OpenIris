@@ -14,7 +14,7 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {

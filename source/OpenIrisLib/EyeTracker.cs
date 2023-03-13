@@ -112,7 +112,7 @@ namespace OpenIris
         /// <summary>
         /// Gets the Eye tracker system corresponding with the current hardware set up.
         /// </summary>
-        public IEyeTrackingSystem? EyeTrackingSystem { get; private set; }
+        public EyeTrackingSystemBase? EyeTrackingSystem { get; private set; }
 
         /// <summary>
         /// Gets the image grabber. In charge of getting images from cameras or videos.

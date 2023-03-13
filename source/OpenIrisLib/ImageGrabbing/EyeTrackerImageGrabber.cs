@@ -89,34 +89,8 @@ namespace OpenIris
 
             this.bufferSize = bufferSize;
 
-            if (sources.Count == 2)
-            {
-                // TODO: this may not be a good idea for systems with two cameras
-                // where one may be master and the other slave. Not sure how to deal
-                // with it
-
-                // Dispose the sources we don't need
-                if (whichEye == Eye.Left)
-                {
-                    imageSources[Eye.Right]?.Stop();
-                    (imageSources[Eye.Right] as IDisposable)?.Dispose();
-
-                    imageSources = new EyeCollection<IImageEyeSource?>(imageSources[Eye.Left], null);
-                }
-
-                if (whichEye == Eye.Right)
-                {
-                    imageSources[Eye.Left]?.Stop();
-                    (imageSources[Eye.Left] as IDisposable)?.Dispose();
-
-                    imageSources = new EyeCollection<IImageEyeSource?>(null, imageSources[Eye.Right]);
-                }
-            }
-
-            numberOfImageSources = imageSources.Count(c => (c != null));
-
-
             // Check same frame rate and frame size
+            numberOfImageSources = CheckNumberOfSources(imageSources, whichEye);
             FrameSize = CheckFrameSize(imageSources);
             FrameRate = CheckFrameRate(imageSources);
         }
@@ -476,6 +450,36 @@ namespace OpenIris
 
             return frameRates.Average();
         }
+
+        private static int CheckNumberOfSources(EyeCollection<IImageEyeSource?> sources, Eye whichEyes)
+        {
+            var numberOfSources = 0;
+            switch (whichEyes)
+            {
+                case Eye.Left:
+                    if (sources.Count != 2 || sources[Eye.Left] == null || sources[Eye.Right] != null )
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    numberOfSources = 1;
+                    break;
+                case Eye.Right:
+                    if (sources.Count != 2 || sources[Eye.Right] == null || sources[Eye.Left] != null)
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    numberOfSources = 1;
+                    break;
+                case Eye.Both:
+                    if (sources.Count == 1 && sources[Eye.Both] == null)
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    if (sources.Count == 2 && (sources[Eye.Left] == null || sources[Eye.Right] == null))
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    numberOfSources = sources.Count;
+                    break;
+                default:
+                    throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+            }
+
+            return numberOfSources;
+        }
+
 
         /// <summary>
         /// Checks if the frame size of all the sources is the same.

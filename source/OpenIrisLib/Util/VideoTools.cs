@@ -81,7 +81,7 @@ namespace OpenIris.UI
             progressDialog.Close();
         }
 
-        public static async Task ConvertVideoToRGBCommandExecute()
+        public static async Task ConvertVideoToRGB()
         {
             using (var dialog = new OpenFileDialog())
             {
@@ -92,6 +92,32 @@ namespace OpenIris.UI
 
                 using (var videoReader = new VideoCapture(dialog.FileName))
                 using (var videoWriter = new VideoWriter(dialog.FileName + "out2.avi", 100, new Size(videoReader.Width, videoReader.Height), true))
+                {
+                    while (true)
+                    {
+                        var img = videoReader.QueryFrame();
+                        if (img is null)
+                        {
+                            return;
+                        }
+
+                        videoWriter.Write(img);
+                    }
+                }
+            }
+        }
+
+        public static async Task ConvertToMP4()
+        {
+            using (var dialog = new OpenFileDialog())
+            {
+                if (dialog.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+                // TODO: it does not work
+                using (var videoReader = new VideoCapture(dialog.FileName))
+                using (var videoWriter = new VideoWriter(dialog.FileName + "out2.mp4", 100, new Size(videoReader.Width, videoReader.Height), true))
                 {
                     while (true)
                     {

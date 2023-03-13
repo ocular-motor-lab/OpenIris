@@ -328,7 +328,7 @@ namespace OpenIris.ImageGrabbing
 
                 unsafe
                 {
-                    //// TODO: make sure this is ok memorywise. I am afraid the rawImage object 
+                    //// This seems ok so far memorywise. I am afraid the rawImage object 
                     //// may be disposed and mess up with the image object
                     //// I actually don't understand very well why this works and never crashes. 
                     //// RawImage is inside a using so it should get disposed.
@@ -460,7 +460,6 @@ namespace OpenIris.ImageGrabbing
 
             Point roiOrigin;
 
-            // TODO: Deal with rotation
             // Round the center to a multiple of 4
             if (CameraOrientation.IsUpsideDown())
             {

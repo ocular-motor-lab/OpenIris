@@ -48,7 +48,7 @@ namespace OpenIris.ImageGrabbing
                 capture.Dispose();
             }
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
 
         /// <summary>

@@ -417,8 +417,7 @@ namespace OpenIris.HeadTracking
 
             if (this.cameraSync != null)
             {
-                var timeStamp = new ImageEyeTimestamp();
-                timeStamp.Seconds = this.cameraSync.GetCurrentSeconds();
+                var timeStamp = new ImageEyeTimestamp(cameraSync.GetCurrentSeconds(), 0, 0);
                 headData.TimeStamp = timeStamp;
             }
 

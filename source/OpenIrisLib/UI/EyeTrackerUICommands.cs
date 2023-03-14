@@ -14,7 +14,6 @@ namespace OpenIris
     using System;
     using System.Threading.Tasks;
     using System.Windows.Forms;
-    using System.CodeDom.Compiler;
     using System.Collections.Generic;
     using System.Windows.Input;
 

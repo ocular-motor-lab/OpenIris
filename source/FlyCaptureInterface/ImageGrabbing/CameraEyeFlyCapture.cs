@@ -45,12 +45,12 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// First timestamp
         /// </summary>
-        private ImageEyeTimestamp firstTimeStamp = new ImageEyeTimestamp();
+        private ImageEyeTimestamp firstTimeStamp = ImageEyeTimestamp.Empty;
 
         /// <summary>
         /// Timestamp of the last frame.
         /// </summary>
-        private ImageEyeTimestamp lastTimeStamp = new ImageEyeTimestamp();
+        private ImageEyeTimestamp lastTimeStamp = ImageEyeTimestamp.Empty;
 
         /// <summary>
         /// Last frame rate requested to the camera.
@@ -304,11 +304,11 @@ namespace OpenIris.ImageGrabbing
                 if (lastRawTimeStamp.cycleSeconds > rawImage.timeStamp.cycleSeconds) cycles128sec++;
 
                 var timestamp = new ImageEyeTimestamp
-                {
-                    Seconds = GetTimestampSeconds(rawImage.timeStamp),
-                    FrameNumber = rawImage.imageMetadata.embeddedFrameCounter - firstTimeStamp.FrameNumberRaw,
-                    FrameNumberRaw = rawImage.imageMetadata.embeddedFrameCounter
-                };
+                (
+                    seconds : GetTimestampSeconds(rawImage.timeStamp),
+                    frameNumber : rawImage.imageMetadata.embeddedFrameCounter - firstTimeStamp.FrameNumberRaw,
+                    frameNumberRaw : rawImage.imageMetadata.embeddedFrameCounter
+                );
 
                 // If it is the first frame save some info
                 if (numberFramesGrabbed == 1)

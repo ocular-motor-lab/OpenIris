@@ -14,11 +14,31 @@ namespace OpenIris
     public class ImageEyeTimestamp : IEquatable<ImageEyeTimestamp>
     {
         /// <summary>
-        /// Initializes a new instance of timestamp.
+        /// Empty timestamp
         /// </summary>
-        public ImageEyeTimestamp()
+        public static ImageEyeTimestamp Empty = new ImageEyeTimestamp(0, 0, 0);
+
+        /// <summary>
+        /// Initializes a new instance of timestamp.
+        /// Required for serialization! 
+        /// </summary>
+        private ImageEyeTimestamp()
         {
-            DateTimeGrabbed = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Initializer for timestamps of new grabbed frames.
+        /// </summary>
+        /// <param name="seconds">Timestamp in seconds from the camera clock ideally.</param>
+        /// <param name="frameNumber"> Main frame number, starts at 1 when camera is started. 
+        /// Needs to match between cameras</param>
+        /// <param name="frameNumberRaw">Raw frame number from the camera. 
+        /// It starts at some arbitrary number. Does not need to match the other camera</param>
+        public ImageEyeTimestamp(double seconds, ulong frameNumber, ulong frameNumberRaw)
+        {
+            Seconds = seconds;
+            FrameNumber = frameNumber;
+            FrameNumberRaw = frameNumberRaw;
         }
 
         /// <summary>   
@@ -36,15 +56,19 @@ namespace OpenIris
         /// the camera at the begining of the recording.
         /// </summary>
         public ulong FrameNumberRaw { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the timestamp from the time the image is grabbed on the computer.
+        /// This is only set by the constructor. However, it has to have a public set to allow
+        /// serialization and deserialization.
         /// </summary>
         public DateTime DateTimeGrabbed { get; set; }
 
         /// <summary>
         /// Gets or sets the ammount of time in seconds since the eye tracker started.
         /// Note that this is not a reliable timestamp. It is used for debuging purposes.
+        /// It does get set by the image grabber automatically, the classes that override CameraEye
+        /// Don't need to worry about it.. 
         /// </summary>
         public double TimeGrabbed { get; set; }
 
@@ -115,11 +139,8 @@ namespace OpenIris
         /// <returns></returns>
         public ImageEyeTimestamp Copy()
         {
-            return new ImageEyeTimestamp
+            return new ImageEyeTimestamp(Seconds, FrameNumber, FrameNumberRaw)
             {
-                FrameNumber = FrameNumber,
-                FrameNumberRaw = FrameNumberRaw,
-                Seconds = Seconds,
                 DateTimeGrabbed = DateTimeGrabbed,
                 TimeGrabbed = TimeGrabbed,
             };

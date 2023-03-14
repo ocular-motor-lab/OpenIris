@@ -59,7 +59,7 @@ namespace OpenIris
         /// </summary>
         public EyeData() 
         {
-            Timestamp = new ImageEyeTimestamp();
+            Timestamp = ImageEyeTimestamp.Empty;
         }
 
         /// <summary>

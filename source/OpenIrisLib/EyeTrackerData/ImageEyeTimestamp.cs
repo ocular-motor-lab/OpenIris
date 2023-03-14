@@ -41,6 +41,21 @@ namespace OpenIris
             FrameNumberRaw = frameNumberRaw;
         }
 
+        /// <summary>
+        /// Initializer for timestamps of new grabbed frames without raw frame number. If you want
+        /// to also save a raw frame number use the other constructor.
+        /// </summary>
+        /// <param name="seconds">Timestamp in seconds from the camera clock ideally.</param>
+        /// <param name="frameNumber"> Main frame number, starts at 1 when camera is started. 
+        /// Needs to match between cameras</param>
+        /// It starts at some arbitrary number. Does not need to match the other camera</param>
+        public ImageEyeTimestamp(double seconds, ulong frameNumber)
+        {
+            Seconds = seconds;
+            FrameNumber = frameNumber;
+            FrameNumberRaw = frameNumber;
+        }
+
         /// <summary>   
         /// Gets or sets the Seconds from some reference. I.e. connecting to the camera.
         /// </summary>

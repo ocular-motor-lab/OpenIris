@@ -15,7 +15,7 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettingsSpinnakerTest))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettingsSpinnaker_SingleCam))]
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {
@@ -23,7 +23,7 @@ namespace SpinnakerInterface
         
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
-            var settings = Settings as EyeTrackingSystemSettingsSpinnakerTest ?? throw new ArgumentNullException(nameof(Settings));
+            var settings = Settings as EyeTrackingSystemSettingsSpinnaker_SingleCam ?? throw new ArgumentNullException(nameof(Settings));
 
             try
             {
@@ -35,13 +35,13 @@ namespace SpinnakerInterface
                 frameRate: (double)Settings.FrameRate,
                 roi: new Rectangle { Width = 720, Height = 450 });
 
-                this.camera.Start();
+                camera.Start();
             }
             catch (Exception ex)
             {
-                if (this.camera != null)
+                if (camera != null)
                 {
-                    this.camera.Stop();
+                   camera.Stop();
                 }
 
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
@@ -55,6 +55,7 @@ namespace SpinnakerInterface
                     return new EyeCollection<CameraEye?>(null, camera);
                 case Eye.Both:
                     return new EyeCollection<CameraEye?>(camera);
+                default: return new EyeCollection<CameraEye?>(camera);
             }
         }
 
@@ -85,9 +86,9 @@ namespace SpinnakerInterface
             return base.PreProcessImagesFromVideos(images);
         }
     }
-    public class EyeTrackingSystemSettingsSpinnakerTest : EyeTrackingSystemSettings
+    public class EyeTrackingSystemSettingsSpinnaker_SingleCam : EyeTrackingSystemSettings
     {
-        public EyeTrackingSystemSettingsSpinnakerTest()
+        public EyeTrackingSystemSettingsSpinnaker_SingleCam()
         {
             PixPerMm = 7;
             DistanceCameraToEyeMm = 70;

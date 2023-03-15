@@ -13,6 +13,7 @@ using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
 using SpinnakerNET.GenApi;
+using static OpenIris.EyeTrackerExtentionMethods;
 
 namespace SpinnakerInterface
 {
@@ -21,78 +22,42 @@ namespace SpinnakerInterface
         IManagedCamera cam;
 
         #region Static Methods
-        // Static members, to keep track of all cameras.
-        private static List<CameraEyeSpinnaker> camList = new List<CameraEyeSpinnaker>();
-
-        // One "MASTER" camera is chosen "arbitrarily" to generate hardware triggers for
-        // all cameras.
-        private static CameraEyeSpinnaker masterCam = null;
 
         private static bool __TriggersEnabled = false;
         private static bool TriggersEnabled => __TriggersEnabled;
-        private static void EnableTriggers(bool Enable) => masterCam.EnableMasterTriggers(Enable);
+        private static void EnableTriggers(bool Enable, CameraEyeSpinnaker masterCam) => masterCam.EnableMasterTriggers(Enable);
         //public static void ToggleTriggers(object sender, System.EventArgs e) => EnableTriggers(!TriggersEnabled);
-        public static void ToggleTriggers() => EnableTriggers(!TriggersEnabled);
+        public static void ToggleTriggers(CameraEyeSpinnaker masterCam) => EnableTriggers(!TriggersEnabled,masterCam );
 
         //need to be set in system
-        public static bool IfSingleCam { get; set; }
+        private static bool IfSingleCam { get; set; }
+
+        public bool IsMaster { get; set; }
 
         public static List<IManagedCamera> FindCameras(Eye whichEye, int numberOfCameras)
         {
             // TODO: add optional search by serial number string
-
+            
+            IfSingleCam = numberOfCameras == 1;
             // Retrieve singleton reference to Spinnaker system object
             ManagedSystem system = new ManagedSystem();
 
             // Retrieve list of cameras from the system
-            var camList = system.GetCameras();
+            var camList_ = system.GetCameras();
 
-            switch (whichEye, numberOfCameras, camList.Count)
+            switch (whichEye, numberOfCameras, camList_.Count)
             {
                 case (Eye.Both, 1, 1):
-                    return camList;
+                    return camList_;
                 case (Eye.Both, 2,2):
-                    return camList;
+                    return camList_;
                 case (_, 1, 1) when whichEye == Eye.Left | whichEye == Eye.Right:
-                    return camList;
+                    return camList_;
                 default:
-                    throw new Exception($"Need exactly {numberOfCameras} camera(s). {camList.Count} FLIR Spinnaker compatible camera(s) found.");
+                    throw new Exception($"Need exactly {numberOfCameras} camera(s). {camList_.Count} FLIR Spinnaker compatible camera(s) found.");
             }
         }
 
-        private static SyncCameras()
-        {
-            // Pick one of the cameras (MUST be a Blackfly) to be the MASTER.
-            masterCam = null;
-            foreach (var CAM in camList)
-                if (CAM.cam.DeviceModelName.Value.Contains("Blackfly"))
-                {
-                    masterCam = CAM;
-                    break;
-                }
-            return camList;
-        }
-
-        private static void EndSynchronizedAcquisition()
-        {
-            if (masterCam == null) return;
-            masterCam.EnableMasterTriggers(false);   // Stop the triggers.
-            Thread.Sleep(50);
-            foreach (var CAM in camList)
-                try { CAM.cam.EndAcquisition(); } catch { }
-        }
-
-        public static void BeginSynchronizedAcquisition()
-        {
-            EndSynchronizedAcquisition();  // Make sure everyone is stopped.
-
-            camList[0].Start();
-            camList[1].Start();
-            masterCam.SetMaster();
-            masterCam.cam.BeginAcquisition();
-            masterCam.EnableMasterTriggers(true);
-
-        }
         #endregion Static Methods
 
         #region constructor
@@ -105,7 +70,6 @@ namespace SpinnakerInterface
             FrameSize = roi.Size;
 
             cam.Init();
-            
         }
 
         #endregion constructor
@@ -120,11 +84,8 @@ namespace SpinnakerInterface
         int Count = 0;
         string camModelName = "";
         public override object Info =>
-            $"This string shows up in Timing tab!! [{WhichEye}{(ISMASTER ? "[Master]" : "")}: {camModelName}] (updated periodically {Count++})\n"
+            $"This string shows up in Timing tab!! [{WhichEye}{(IsMaster ? "[Master]" : "")}: {camModelName}] (updated periodically {Count++})\n"
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n";
-
-
-
 
         #region public methods
 
@@ -220,19 +181,32 @@ namespace SpinnakerInterface
         }
         #endregion public methods
 
-        #region private methods
-        // Note that "CurrentFrameID" has FirstFrameID subtracted out of it, and +1 added, so it is "one based"
-        // (i.e., there is no "frame 0"), so it can be directly compared to NumFramesGrabbed.
-        bool IsFirstFrame = true;
-        ulong FirstFrameID, CurrentFrameID;  // CurrentFrameID is based on the internal camera hardware frame counter.
-        ulong NumFramesGrabbed = 0;
-        bool ISMASTER => this == masterCam;
-
-        const string triggerLine = "Line2";
-        const string strobeOutLine = "Line1";
-        private void EnableMasterTriggers(bool Enable)
+        #region Sync Cameras
+        private static void EndSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
         {
-            if (this != masterCam) return;
+            if (masterCam == null) return;
+            try
+            {
+                masterCam.EnableMasterTriggers(false);   // Stop the triggers.
+                Thread.Sleep(50);
+                masterCam.cam.EndAcquisition();
+                slaveCam.cam.EndAcquisition();
+            }
+            catch { }
+        }
+
+        public static void BeginSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
+        {
+            EndSynchronizedAcquisition(masterCam, slaveCam);  // Make sure everyone is stopped.
+
+            masterCam.IsMaster = true;
+
+            masterCam.Start();
+            slaveCam.Start();
+        }
+        public void EnableMasterTriggers(bool Enable)
+        {
+            if (!IsMaster) return;
 
             if (Enable)
                 // Allow internal camera triggering, so this camera generates frame triggers.
@@ -245,13 +219,35 @@ namespace SpinnakerInterface
             }
             __TriggersEnabled = Enable;
         }
+        public void SetMaster(bool Enable = false)
+        {
+            cam.EndAcquisition();         // Make sure camera is not acquiring images.
+            EnableMasterTriggers(false);  // And disable trigger until we are ready!
+
+            cam.LineSelector.FromString(triggerLine);
+            cam.LineMode.FromString("Output");
+            cam.LineSource.FromString("ExposureActive");
+
+            cam.AcquisitionMode.FromString("Continuous");
+
+
+            if (Enable)
+                EnableMasterTriggers(true);
+        }
+        #endregion Sync Cameras
+
+        #region private methods
+        // Note that "CurrentFrameID" has FirstFrameID subtracted out of it, and +1 added, so it is "one based"
+        // (i.e., there is no "frame 0"), so it can be directly compared to NumFramesGrabbed.
+        bool IsFirstFrame = true;
+        ulong FirstFrameID, CurrentFrameID;  // CurrentFrameID is based on the internal camera hardware frame counter.
+        ulong NumFramesGrabbed = 0;
+
+        const string triggerLine = "Line2";
+        const string strobeOutLine = "Line1";
+        
 
         Vector2 maxROI_Offset, roiSize;
-
-        Vector2 Round(Vector2 V) => new Vector2((float)Math.Round(V.X), (float)Math.Round(V.Y));
-        Vector2 Max(Vector2 V1, Vector2 V2) => Vector2.Max(V1, V2);
-        Vector2 Min(Vector2 V1, Vector2 V2) => Vector2.Min(V1, V2);
-
         // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.
         private void SetROI(Vector2 Offset)
         {
@@ -320,23 +316,6 @@ namespace SpinnakerInterface
             cam.AcquisitionFrameRateEnable.Value = true;
             cam.AcquisitionFrameRate.Value = FrameRate;
         }
-
-        private void SetMaster(bool Enable = false)
-        {
-            cam.EndAcquisition();         // Make sure camera is not acquiring images.
-            EnableMasterTriggers(false);  // And disable trigger until we are ready!
-
-            cam.LineSelector.FromString(triggerLine);
-            cam.LineMode.FromString("Output");
-            cam.LineSource.FromString("ExposureActive");
-
-            cam.AcquisitionMode.FromString("Continuous");
-            
-
-            if (Enable)
-                EnableMasterTriggers(true);
-        }
-
         private void InitParameters_TriggerSettings()
         {
             //# Trigger Settings
@@ -369,6 +348,12 @@ namespace SpinnakerInterface
                 cam.UserOutputValue.Value = true;
             }
             catch { }
+
+            if (IsMaster)
+            {
+                SetMaster();
+                EnableMasterTriggers(true);
+            }
         }
 
 

@@ -18,26 +18,20 @@ namespace SpinnakerInterface
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {
-        protected Spinnaker_SingleCam camera = null;
-
+        protected CameraEyeSpinnaker camera = null;
+        
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
+            CameraEyeSpinnaker.IfSingleCam = true;
+
             var settings = Settings as EyeTrackingSystemSettings;
 
             // Retrieve singleton reference to Spinnaker system object
             ManagedSystem system = new ManagedSystem();
 
-            // Retrieve list of cameras from the system
-            var cam_list = system.GetCameras();
+            Rectangle roi = new Rectangle { Width = 720, Height = 450 };
+            CameraEyeSpinnaker.EnumerateCameras(Settings.Eye, (double)Settings.FrameRate, roi);
 
-            if (cam_list.Count < 1)
-            {
-                throw new Exception($"NEED AT LEAST ONE CAMERAS!! Found {cam_list.Count} FLIR Spinnaker compatible camera(s).");
-            }
-
-            Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
-            
-            camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0], (double) Settings.FrameRate);
 
             try
             {

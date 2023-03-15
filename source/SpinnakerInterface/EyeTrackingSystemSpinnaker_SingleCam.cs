@@ -15,7 +15,7 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettingsSpinnaker_SingleCam))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {
@@ -23,7 +23,7 @@ namespace SpinnakerInterface
         
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
-            var settings = Settings as EyeTrackingSystemSettingsSpinnaker_SingleCam ?? throw new ArgumentNullException(nameof(Settings));
+            var settings = Settings as EyeTrackingSystemSettings;
 
             try
             {
@@ -86,12 +86,5 @@ namespace SpinnakerInterface
             return base.PreProcessImagesFromVideos(images);
         }
     }
-    public class EyeTrackingSystemSettingsSpinnaker_SingleCam : EyeTrackingSystemSettings
-    {
-        public EyeTrackingSystemSettingsSpinnaker_SingleCam()
-        {
-            PixPerMm = 7;
-            DistanceCameraToEyeMm = 70;
-        }
-    }
+
 }

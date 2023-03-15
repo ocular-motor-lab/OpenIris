@@ -49,7 +49,7 @@ namespace SpinnakerInterface
             {
                 case (Eye.Both, 1, 1):
                     return camList_;
-                case (Eye.Both, 2,2):
+                case (Eye.Both, 2, 2):
                     return camList_;
                 case (_, 1, 1) when whichEye == Eye.Left | whichEye == Eye.Right:
                     return camList_;
@@ -184,7 +184,6 @@ namespace SpinnakerInterface
         #region Sync Cameras
         public static void EndSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
         {
-            if (masterCam == null) return;
             try
             {
                 masterCam.EnableMasterTriggers(false);   // Stop the triggers.
@@ -197,9 +196,9 @@ namespace SpinnakerInterface
 
         public static void BeginSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
         {
-            EndSynchronizedAcquisition(masterCam, slaveCam);  // Make sure everyone is stopped.
-
             masterCam.IsMaster = true;
+
+            try { EndSynchronizedAcquisition(masterCam, slaveCam); } catch { }  // Make sure everyone is stopped.
 
             masterCam.Start();
             slaveCam.Start();
@@ -221,7 +220,7 @@ namespace SpinnakerInterface
         }
         public void SetMaster(bool Enable = false)
         {
-            cam.EndAcquisition();         // Make sure camera is not acquiring images.
+            try { cam.EndAcquisition(); } catch { }         // Make sure camera is not acquiring images.
             EnableMasterTriggers(false);  // And disable trigger until we are ready!
 
             cam.LineSelector.FromString(triggerLine);

@@ -16,7 +16,7 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Dual Camera - RS Test", typeof(EyeTrackingSystemSettingsSpinnakerTest))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Dual Camera - RS Test", typeof(EyeTrackingSystemSettings))]
 
     class EyeTrackingSystemSpinnaker_DualCam : EyeTrackingSystemBase
     {
@@ -25,11 +25,9 @@ namespace SpinnakerInterface
 
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
-            var settings = Settings as EyeTrackingSystemSettingsSpinnakerTest ?? throw new ArgumentNullException(nameof(Settings));
-
             try
             {
-                var cameraList = CameraEyeSpinnaker.FindCameras(Eye.Both, 1);
+                var cameraList = CameraEyeSpinnaker.FindCameras(Eye.Both, 2);
 
                 cameraLeft = new CameraEyeSpinnaker(
                 whichEye: Eye.Left,
@@ -55,44 +53,8 @@ namespace SpinnakerInterface
 
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }
-            return new EyeCollection<CameraEye>(cameraLeft,cameraRight);
+            return new EyeCollection<CameraEye?>(cameraLeft,cameraRight);
         }
-
-        public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)
-        {
-            var settings = Settings as EyeTrackingSystemSettings;
-
-            switch (settings.Eye)
-            {
-                case Eye.Both:
-                    var roiLeft = new Rectangle(images[Eye.Both].Size.Width/2, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-                    var roiRight = new Rectangle(0, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-
-                    var imageLeft = images[Eye.Both].Copy(roiLeft);
-                    imageLeft.WhichEye = Eye.Left;
-                    var imageRight = images[Eye.Both].Copy(roiRight);
-                    imageRight.WhichEye = Eye.Right;
-                    return new EyeCollection<ImageEye>(imageLeft, imageRight);
-                default:
-                    return images;
-            }
-        }
-
-        public override EyeCollection<ImageEye> PreProcessImagesFromVideos(EyeCollection<ImageEye> images)
-        {
-            // Because only the right image has the timestamp in the bytes we copy the raw frame number to the left image
-            images[Eye.Left].TimeStamp.FrameNumberRaw = images[Eye.Right].TimeStamp.FrameNumberRaw;
-            return base.PreProcessImagesFromVideos(images);
-        }
-
        
-    }
-    public class EyeTrackingSystemSettingsSpinnakerTest : EyeTrackingSystemSettings
-    {
-        public EyeTrackingSystemSettingsSpinnakerTest()
-        {
-            PixPerMm = 7;
-            DistanceCameraToEyeMm = 70;
-        }
     }
 }

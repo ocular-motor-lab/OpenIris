@@ -37,14 +37,14 @@ namespace SpinnakerInterface
             cam.Init();
             CamModelName = cam.DeviceModelName.Value;
             WhichEye = whichEye;
-            FrameRate= frameRate;
-            
+            FrameRate = frameRate;
+
         }
 
         public override void Start()
         {
-            if(cam==null) { return; }
-            
+            if (cam == null) { return; }
+
             //to check if the cam feature changed:
             //var nodemap = cam.GetNodeMap();
             //IEnum iGainAuto = nodemap.GetNode<IEnum>("GainAuto");
@@ -146,4 +146,5 @@ namespace SpinnakerInterface
             }
         }
     }
+
 }

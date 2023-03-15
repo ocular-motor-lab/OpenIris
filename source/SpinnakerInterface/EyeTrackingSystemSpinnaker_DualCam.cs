@@ -15,27 +15,40 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettingsSpinnakerTest))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Dual Camera - RS Test", typeof(EyeTrackingSystemSettingsSpinnakerTest))]
 
-    class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
+    class EyeTrackingSystemSpinnaker_DualCam : EyeTrackingSystemBase
     {
-        protected CameraEyeSpinnaker camera = null;
-        
+        protected CameraEyeSpinnaker cameraLeft = null;
+        protected CameraEyeSpinnaker cameraRight = null;
+
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsSpinnakerTest ?? throw new ArgumentNullException(nameof(Settings));
 
             try
             {
-                var cameraList = CameraEyeSpinnaker.FindCameras(Settings.Eye, 1);
+                var cameraList = CameraEyeSpinnaker.FindCameras(Eye.Both, 1);
 
-                camera = new CameraEyeSpinnaker(
-                whichEye: Settings.Eye,
+                cameraLeft = new CameraEyeSpinnaker(
+                whichEye: Eye.Left,
                 camera: cameraList[0],
                 frameRate: (double)Settings.FrameRate,
                 roi: new Rectangle { Width = 720, Height = 450 });
 
-                this.camera.Start();
+                cameraRight = new CameraEyeSpinnaker(
+                whichEye: Eye.Right,
+                camera: cameraList[1],
+                frameRate: (double)Settings.FrameRate,
+                roi: new Rectangle { Width = 720, Height = 450 });
+
+
+                //MAke one master
+                camera.SetAsMaster();
+                    camera.SetAsSlave();
+
+                cameraLeft.Start();
+                cameraRight.Start();
             }
             catch (Exception ex)
             {
@@ -49,13 +62,17 @@ namespace SpinnakerInterface
 
             switch (settings.Eye)
             {
-                case Eye.Left:
-                    return new EyeCollection<CameraEye?>(camera, null);
+                case Eye.Left:                    
+                    return new EyeCollection<CameraEye?>(this.camera,null);
                 case Eye.Right:
                     return new EyeCollection<CameraEye?>(null, camera);
                 case Eye.Both:
                     return new EyeCollection<CameraEye?>(camera);
+                default:
+                    return new EyeCollection<CameraEye?>(this.camera);
             }
+
+           
         }
 
         public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)

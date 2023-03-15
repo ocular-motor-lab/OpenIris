@@ -37,36 +37,31 @@ namespace SpinnakerInterface
         //need to be set in system
         public static bool IfSingleCam { get; set; }
 
-        public static List<CameraEyeSpinnaker> EnumerateCameras(Eye whichEye, double frameRate, Rectangle roi)
+        public static List<IManagedCamera> FindCameras(Eye whichEye, int numberOfCameras)
         {
+            // TODO: add optional search by serial number string
+
             // Retrieve singleton reference to Spinnaker system object
             ManagedSystem system = new ManagedSystem();
-            
-            camList = new List<CameraEyeSpinnaker>();
 
             // Retrieve list of cameras from the system
-            var cam_list = system.GetCameras();
+            var camList = system.GetCameras();
 
-            if (cam_list.Count < 1)
+            switch (whichEye, numberOfCameras, camList.Count)
             {
-                throw new Exception($"Need at least one camera. 0 FLIR Spinnaker compatible camera(s) found.");
-            }   
-            else if (IfSingleCam)
-            {
-                Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
-                camList.Add(new CameraEyeSpinnaker(whichEye, cam_list[0], frameRate, roi));
+                case (Eye.Both, 1, 1):
+                    return camList;
+                case (Eye.Both, 2,2):
+                    return camList;
+                case (_, 1, 1) when whichEye == Eye.Left | whichEye == Eye.Right:
+                    return camList;
+                default:
+                    throw new Exception($"Need exactly {numberOfCameras} camera(s). {camList.Count} FLIR Spinnaker compatible camera(s) found.");
             }
-            else if( (!IfSingleCam) && camList.Count < 2)
-            {
-                throw new Exception($"Need at least two cameras. {camList.Count} FLIR Spinakker compatible camera found");
-            }   
-            else if ( (!IfSingleCam) && camList.Count > 1)
-            {
-                Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
-                camList.Add(new CameraEyeSpinnaker(Eye.Left, cam_list[0], frameRate, roi));
-                camList.Add(new CameraEyeSpinnaker(Eye.Right, cam_list[1], frameRate, roi));
-            }
+        }
 
+        private static SyncCameras()
+        {
             // Pick one of the cameras (MUST be a Blackfly) to be the MASTER.
             masterCam = null;
             foreach (var CAM in camList)

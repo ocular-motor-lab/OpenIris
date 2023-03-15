@@ -78,7 +78,7 @@ namespace OpenIris
         /// Process data for setting a new reference.
         /// </summary>
         public abstract (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image);
-        
+
         public virtual void Dispose()
         {
         }

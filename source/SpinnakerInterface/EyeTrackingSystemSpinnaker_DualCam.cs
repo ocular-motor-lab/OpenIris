@@ -43,37 +43,19 @@ namespace SpinnakerInterface
                 frameRate: (double)Settings.FrameRate,
                 roi: new Rectangle { Width = 720, Height = 450 });
 
+                CameraEyeSpinnaker.BeginSynchronizedAcquisition(cameraLeft, cameraRight);
 
-                //MAke one master
-                camera.SetAsMaster();
-                    camera.SetAsSlave();
-
-                cameraLeft.Start();
-                cameraRight.Start();
             }
             catch (Exception ex)
             {
-                if (this.camera != null)
+                if (cameraLeft != null || cameraRight != null)
                 {
-                    this.camera.Stop();
+                    CameraEyeSpinnaker.EndSynchronizedAcquisition(cameraLeft,cameraRight);
                 }
 
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }
-
-            switch (settings.Eye)
-            {
-                case Eye.Left:                    
-                    return new EyeCollection<CameraEye?>(this.camera,null);
-                case Eye.Right:
-                    return new EyeCollection<CameraEye?>(null, camera);
-                case Eye.Both:
-                    return new EyeCollection<CameraEye?>(camera);
-                default:
-                    return new EyeCollection<CameraEye?>(this.camera);
-            }
-
-           
+            return new EyeCollection<CameraEye>(cameraLeft,cameraRight);
         }
 
         public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)

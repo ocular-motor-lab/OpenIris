@@ -182,7 +182,7 @@ namespace SpinnakerInterface
         #endregion public methods
 
         #region Sync Cameras
-        private static void EndSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
+        public static void EndSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
         {
             if (masterCam == null) return;
             try

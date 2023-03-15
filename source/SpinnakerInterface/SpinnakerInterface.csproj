@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Acquisition_CSharp.cs" />
+    <Compile Include="CameraEyeSpinnaker.cs" />
     <Compile Include="Enumeration_CSharp.cs" />
     <Compile Include="EyeTrackingSystemSpinnaker_SingleCam.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

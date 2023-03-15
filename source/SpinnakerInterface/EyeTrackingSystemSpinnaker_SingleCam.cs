@@ -30,8 +30,7 @@ namespace SpinnakerInterface
             ManagedSystem system = new ManagedSystem();
 
             Rectangle roi = new Rectangle { Width = 720, Height = 450 };
-            CameraEyeSpinnaker.EnumerateCameras(Settings.Eye, (double)Settings.FrameRate, roi);
-
+            camera = CameraEyeSpinnaker.EnumerateCameras(Settings.Eye, (double)Settings.FrameRate, roi)[0];
 
             try
             {

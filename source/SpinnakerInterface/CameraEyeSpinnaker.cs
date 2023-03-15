@@ -108,7 +108,6 @@ namespace SpinnakerInterface
             WhichEye = whichEye;
             FrameRate = frameRate;
             FrameSize = roi.Size;
-            camModelName = cam.DeviceModelName.Value; 
 
             cam.Init();
             
@@ -276,6 +275,8 @@ namespace SpinnakerInterface
             // Make sure camera is really stopped.
             cam.BeginAcquisition();
             cam.EndAcquisition();
+
+            camModelName = cam.DeviceModelName.Value;
 
             IsFirstFrame = true;  // Remember to grab first frame number and save it.
 

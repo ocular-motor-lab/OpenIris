@@ -1,44 +1,47 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Numerics;
-using System.Runtime;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
-using SpinnakerNET.GenApi;
 using static OpenIris.EyeTrackerExtentionMethods;
 
 namespace SpinnakerInterface
 {
+#nullable enable
+
     class CameraEyeSpinnaker : CameraEye, IMovableImageEyeSource
     {
-        IManagedCamera cam;
+        public enum TriggerMode
+        {
+            Default,
+            Master,
+            Slave,
+        }
+
+        private IManagedCamera cam;
+        private string camModelName = "";
+        private TriggerMode isMaster;
+        // Note that "CurrentFrameID" has FirstFrameID subtracted out of it, and +1 added, so it is "one based"
+        // (i.e., there is no "frame 0"), so it can be directly compared to NumFramesGrabbed.
+        private bool IsFirstFrame = true;
+        private ulong FirstFrameID, CurrentFrameID;  // CurrentFrameID is based on the internal camera hardware frame counter.
+        private ulong NumFramesGrabbed = 0;
+
+        private const string TRIGGER_LINE = "Line2";
+        private const string STROBE_OUT_LINE = "Line1";
+
+
+        Vector2 maxROI_Offset, roiSize;
 
         #region Static Methods
-
-        private static bool __TriggersEnabled = false;
-        private static bool TriggersEnabled => __TriggersEnabled;
-        private static void EnableTriggers(bool Enable, CameraEyeSpinnaker masterCam) => masterCam.EnableMasterTriggers(Enable);
-        //public static void ToggleTriggers(object sender, System.EventArgs e) => EnableTriggers(!TriggersEnabled);
-        public static void ToggleTriggers(CameraEyeSpinnaker masterCam) => EnableTriggers(!TriggersEnabled,masterCam );
-
-        //need to be set in system
-        private static bool IfSingleCam { get; set; }
-
-        public bool IsMaster { get; set; }
 
         public static List<IManagedCamera> FindCameras(Eye whichEye, int numberOfCameras)
         {
             // TODO: add optional search by serial number string
-            
-            IfSingleCam = numberOfCameras == 1;
+
             // Retrieve singleton reference to Spinnaker system object
             ManagedSystem system = new ManagedSystem();
 
@@ -58,51 +61,47 @@ namespace SpinnakerInterface
             }
         }
 
+        public static void BeginSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
+        {
+            masterCam.isMaster = TriggerMode.Master;
+            slaveCam.isMaster = TriggerMode.Slave;
+
+            masterCam.Start();
+            slaveCam.Start();
+        }
+
         #endregion Static Methods
 
         #region constructor
         public CameraEyeSpinnaker(Eye whichEye, IManagedCamera camera, double frameRate, Rectangle roi)
         {
-            this.cam = camera;
+            cam = camera;
 
             WhichEye = whichEye;
             FrameRate = frameRate;
             FrameSize = roi.Size;
 
-            cam.Init();
+            isMaster = TriggerMode.Default;
         }
 
         #endregion constructor
-
-        // If this Info property is implemented, then it is evaluated periodically by the GUI, and
-        // the string it returns is displayed on the Timing tab, if Debug is enabled.
-        //
-        // Handy for showing a continuously updated Debug string in the Timing tab. Can show things
-        // like camera frame numbers, dropped frames, whatever. MUST enable Debug in the Settings in
-        // order for the Debug and Timing tabs to show up in the user interface. Every camera gets
-        // its own string, so we must distinguish which camera this pertains to.
-        int Count = 0;
-        string camModelName = "";
-        public override object Info =>
-            $"This string shows up in Timing tab!! [{WhichEye}{(IsMaster ? "[Master]" : "")}: {camModelName}] (updated periodically {Count++})\n"
-          + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n";
 
         #region public methods
 
         public override void Start()
         {
-            if (cam == null) return;
-            
+            cam.Init();
+
             InitParameters();
 
-            if (!IfSingleCam)
-                InitParameters_TriggerSettings();
+            InitParameters_TriggerSettings();
 
             cam.BeginAcquisition();
         }
 
         public override void Stop()
         {
+            // TODO: potentially reset trigger settings here.
             cam.EndAcquisition();
         }
 
@@ -161,6 +160,17 @@ namespace SpinnakerInterface
             }
         }
 
+        // If this Info property is implemented, then it is evaluated periodically by the GUI, and
+        // the string it returns is displayed on the Timing tab, if Debug is enabled.
+        //
+        // Handy for showing a continuously updated Debug string in the Timing tab. Can show things
+        // like camera frame numbers, dropped frames, whatever. MUST enable Debug in the Settings in
+        // order for the Debug and Timing tabs to show up in the user interface. Every camera gets
+        // its own string, so we must distinguish which camera this pertains to.
+        public override object Info =>
+            $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
+          + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n";
+
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel
         // location of the tracked pupil within the ROI, so we use it to offset the
         // current ROI to bring the pupil to the center. One liner!!
@@ -181,83 +191,7 @@ namespace SpinnakerInterface
         }
         #endregion public methods
 
-        #region Sync Cameras
-        public static void EndSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
-        {
-            try
-            {
-                masterCam.EnableMasterTriggers(false);   // Stop the triggers.
-                Thread.Sleep(50);
-                masterCam.cam.EndAcquisition();
-                slaveCam.cam.EndAcquisition();
-            }
-            catch { }
-        }
-
-        public static void BeginSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
-        {
-            masterCam.IsMaster = true;
-
-            try { EndSynchronizedAcquisition(masterCam, slaveCam); } catch { }  // Make sure everyone is stopped.
-
-            masterCam.Start();
-            slaveCam.Start();
-        }
-        public void EnableMasterTriggers(bool Enable)
-        {
-            if (!IsMaster) return;
-
-            if (Enable)
-                // Allow internal camera triggering, so this camera generates frame triggers.
-                cam.TriggerMode.FromString("Off");
-            else
-            {
-                // Disable camera triggering.
-                cam.TriggerSource.FromString("Software");
-                cam.TriggerMode.FromString("On");
-            }
-            __TriggersEnabled = Enable;
-        }
-        public void SetMaster(bool Enable = false)
-        {
-            try { cam.EndAcquisition(); } catch { }         // Make sure camera is not acquiring images.
-            EnableMasterTriggers(false);  // And disable trigger until we are ready!
-
-            cam.LineSelector.FromString(triggerLine);
-            cam.LineMode.FromString("Output");
-            cam.LineSource.FromString("ExposureActive");
-
-            cam.AcquisitionMode.FromString("Continuous");
-
-
-            if (Enable)
-                EnableMasterTriggers(true);
-        }
-        #endregion Sync Cameras
-
         #region private methods
-        // Note that "CurrentFrameID" has FirstFrameID subtracted out of it, and +1 added, so it is "one based"
-        // (i.e., there is no "frame 0"), so it can be directly compared to NumFramesGrabbed.
-        bool IsFirstFrame = true;
-        ulong FirstFrameID, CurrentFrameID;  // CurrentFrameID is based on the internal camera hardware frame counter.
-        ulong NumFramesGrabbed = 0;
-
-        const string triggerLine = "Line2";
-        const string strobeOutLine = "Line1";
-        
-
-        Vector2 maxROI_Offset, roiSize;
-        // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.
-        private void SetROI(Vector2 Offset)
-        {
-            Offset = Max(Vector2.Zero, Min(maxROI_Offset, Round(Offset / 4) * 4));
-            (cam.OffsetX.Value, cam.OffsetY.Value) = ((long)Offset.X, (long)Offset.Y);
-        }
-        Vector2 GetROI() => new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
-        Vector2 ToVector2(PointF P) => new Vector2(P.X, P.Y);
-
-        
-
         // Initialize camera parameters. This sets up the camera to be a "slave" of the
         // frame triggers. Later, we pick one camera to be the "master".
         private void InitParameters()
@@ -317,51 +251,71 @@ namespace SpinnakerInterface
         }
         private void InitParameters_TriggerSettings()
         {
-            //# Trigger Settings
-            cam.LineSelector.FromString(triggerLine);
-            try { cam.V3_3Enable.Value = false; } catch { }
-            cam.LineMode.FromString("Input");
-            cam.LineInverter.Value = false;
-            try { cam.LineInputFilterSelector.FromString("Deglitch"); } catch { }
-            cam.TriggerSelector.FromString("FrameStart");
-            cam.TriggerSource.FromString(triggerLine);
-            cam.TriggerActivation.FromString("RisingEdge");
-            try { cam.TriggerOverlap.FromString("ReadOut"); } catch { }
-
-            cam.TriggerMode.FromString("On");
-
-            //# MUST make sure all non-master cameras set strobeOutLine to high.
-            cam.LineSelector.FromString(strobeOutLine);
-            cam.LineInverter.Value = false;
-
-            //# For Firefly, set to Input. For Blackfly, this will be an error,
-            //# since the line is hard-wired as an output.        
-            try { cam.LineMode.FromString("Input"); } catch { }
-
-            try
+            switch (isMaster)
             {
-                //# For Blackfly, make sure the output is HIGH, so that only
-                //# the master is pulling the line low.
-                cam.LineSource.FromString("UserOutput3");
-                cam.UserOutputSelector.Value = 3;
-                cam.UserOutputValue.Value = true;
-            }
-            catch { }
+                case TriggerMode.Master:
+                    cam.LineSelector.FromString(TRIGGER_LINE);
+                    cam.LineMode.FromString("Output");
+                    cam.LineSource.FromString("ExposureActive");
 
-            if (IsMaster)
-            {
-                SetMaster();
-                EnableMasterTriggers(true);
+                    // Allow internal camera triggering, so this camera generates frame triggers.
+                    cam.TriggerMode.FromString("Off");
+                    break;
+                case TriggerMode.Slave:
+                    //# Trigger Settings
+                    cam.LineSelector.FromString(TRIGGER_LINE);
+                    try { cam.V3_3Enable.Value = false; } catch { }
+                    cam.LineMode.FromString("Input");
+                    cam.LineInverter.Value = false;
+                    try { cam.LineInputFilterSelector.FromString("Deglitch"); } catch { }
+
+                    cam.TriggerSource.FromString(TRIGGER_LINE);
+                    cam.TriggerSelector.FromString("FrameStart");
+                    cam.TriggerActivation.FromString("RisingEdge");
+                    try { cam.TriggerOverlap.FromString("ReadOut"); } catch { }
+                    cam.TriggerMode.FromString("On");
+
+                    //# MUST make sure all non-master cameras set strobeOutLine to high.
+                    cam.LineSelector.FromString(STROBE_OUT_LINE);
+                    cam.LineInverter.Value = false;
+
+                    //# For Firefly, set to Input. For Blackfly, this will be an error,
+                    //# since the line is hard-wired as an output.        
+                    try { cam.LineMode.FromString("Input"); } catch { }
+
+                    try
+                    {
+                        //# For Blackfly, make sure the output is HIGH, so that only
+                        //# the master is pulling the line low.
+                        cam.LineSource.FromString("UserOutput3");
+                        cam.UserOutputSelector.Value = 3;
+                        cam.UserOutputValue.Value = true;
+                    }
+                    catch { }
+
+                    break;
+                case TriggerMode.Default:
+                    // Allow internal camera triggering, so this camera generates frame triggers.
+                    cam.TriggerMode.FromString("Off");
+
+                    break;
+                default:
+                    break;
             }
+
+
+            // TODO:
+            // DO WE NEED THIS? cam.TriggerSource.FromString("Software");
         }
 
+        // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.
+        private void SetROI(Vector2 Offset)
+        {
+            Offset = Max(Vector2.Zero, Min(maxROI_Offset, Round(Offset / 4) * 4));
+            (cam.OffsetX.Value, cam.OffsetY.Value) = ((long)Offset.X, (long)Offset.Y);
+        }
+        private Vector2 GetROI() => new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
 
         #endregion private methods
-
-
-
-
-
-
     }
 }

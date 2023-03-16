@@ -63,10 +63,8 @@ namespace SpinnakerInterface
             }
             catch (Exception ex)
             {
-                if (cameraLeft != null || cameraRight != null)
-                {
-                    CameraEyeSpinnaker.EndSynchronizedAcquisition(cameraLeft,cameraRight);
-                }
+                cameraLeft?.Stop();
+                cameraRight?.Stop();
 
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }

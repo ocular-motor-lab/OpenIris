@@ -29,17 +29,34 @@ namespace SpinnakerInterface
             {
                 var cameraList = CameraEyeSpinnaker.FindCameras(Eye.Both, 2);
 
-                cameraLeft = new CameraEyeSpinnaker(
+                var camera1 = new CameraEyeSpinnaker(
                 whichEye: Eye.Left,
                 camera: cameraList[0],
                 frameRate: (double)Settings.FrameRate,
                 roi: new Rectangle { Width = 720, Height = 450 });
 
-                cameraRight = new CameraEyeSpinnaker(
+                var camera2 = new CameraEyeSpinnaker(
                 whichEye: Eye.Right,
                 camera: cameraList[1],
                 frameRate: (double)Settings.FrameRate,
                 roi: new Rectangle { Width = 720, Height = 450 });
+
+                if ( cameraList[0].DeviceSerialNumber == 22428697.ToString())
+                {
+                    cameraLeft = camera1;
+                    cameraRight = camera2;
+                }
+                else if(cameraList[1].DeviceSerialNumber == 22428697.ToString())
+                {
+                    cameraLeft = camera2;
+                    cameraRight = camera1;
+                }
+                else
+                {
+                    cameraLeft = camera1;
+                    cameraRight = camera2;
+                }
+
 
                 CameraEyeSpinnaker.BeginSynchronizedAcquisition(cameraLeft, cameraRight);
 

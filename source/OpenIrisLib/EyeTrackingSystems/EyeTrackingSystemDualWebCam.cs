@@ -15,14 +15,14 @@ namespace OpenIris
     /// <summary>
     /// Generic system with any two cameras.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Dual webcam", typeof(EyeTrackingSystemSettingsDualWebcam))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Dual webcam", typeof(EyeTrackingSystemSettingsDualWebcam))]
     public class EyeTrackingSystemDualWebCam : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye?> CreateCameras()
+        public override EyeCollection<CameraEye?> CreateAndStartCameras()
         {
             var cameraSettings = Settings as EyeTrackingSystemSettingsDualWebcam ?? throw new InvalidOperationException("null settings.");
 

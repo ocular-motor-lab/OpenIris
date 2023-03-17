@@ -14,20 +14,22 @@ namespace OpenIris
     /// <summary>
     /// Simulator of eye tracker from virtual eyeball.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("SimulationFakeEye")]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("SimulationFakeEye")]
     public class EyeTrackingSystemSimulationFakeEye : EyeTrackingSystemBase
     {
-        private OpenIris.EyeTrackingSystems.FakeEyeControlUI UIform = new OpenIris.EyeTrackingSystems.FakeEyeControlUI();
+        private EyeTrackingSystems.FakeEyeControlUI UIform = new EyeTrackingSystems.FakeEyeControlUI();
 
         /// <summary>
         /// Gets the cameras. In this case just one single camera.
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
-            var cameraLeft = new CameraEyeVirtualEye(Eye.Left, this.UIform);
+            var cameraLeft = new CameraEyeVirtualEye(Eye.Left, UIform);
+            cameraLeft.Start();
 
-            var cameraRight = new CameraEyeVirtualEye(Eye.Right, this.UIform);
+            var cameraRight = new CameraEyeVirtualEye(Eye.Right, UIform);
+            cameraRight.Start();
 
             return new EyeCollection<CameraEye>(cameraLeft, cameraRight);
         }
@@ -36,9 +38,9 @@ namespace OpenIris
         {
             get
             {
-                this.UIform.Show();
+                UIform.Show();
 
-                return this.UIform;
+                return UIform;
             }
         }
     }

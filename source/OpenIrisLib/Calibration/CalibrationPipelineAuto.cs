@@ -10,28 +10,13 @@ namespace OpenIris
 
     using System.ComponentModel.Composition;
 
-    [Export(typeof(ICalibrationPipeline)), PluginDescription("Auto", typeof(CalibrationSettings))]
-    public class CalibrationPipelineAuto : ICalibrationPipeline
+    [Export(typeof(CalibrationPipelineBase)), PluginDescription("Auto", typeof(CalibrationSettings))]
+    public class CalibrationPipelineAuto : CalibrationPipelineBase
     {
-        /// <summary>
-        /// Name of the plugin, gets set automatically.
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// Indicates weather the calibration was cancelled.
-        /// </summary>
-        public bool Cancelled { get; }
-
-        /// <summary>
-        /// User interface of the calibration.
-        /// </summary>
-        public CalibrationUIControl? GetCalibrationUI() => null;
-
         /// <summary>
         /// Process data towards setting a new physical model
         /// </summary>
-        public (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
+        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
         {
             if (imageEye is null) return (false, EyePhysicalModel.EmptyModel);
 
@@ -43,17 +28,13 @@ namespace OpenIris
         /// <summary>
         /// Process data for setting a new reference.
         /// </summary>
-        public (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        public override (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image)
         {
             if (image is null) return ( false, null);
 
             if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
 
             return (true, image);
-        }
-
-        public void Dispose()
-        {
         }
     }
 

@@ -17,7 +17,7 @@ namespace OpenIris
     /// <summary>
     /// Micromedical eye tracking system system.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Micromedical", typeof(EyeTrackingSystemSettingsMicromedical))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Micromedical", typeof(EyeTrackingSystemSettingsMicromedical))]
     public class EyeTrackingSystemMicromedical : EyeTrackingSystemBase
     {
         private HeadSensorTeensyMPU headSensor;
@@ -26,7 +26,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsMicromedical;
 
@@ -172,7 +172,7 @@ namespace OpenIris
     {
         public EyeTrackingSystemSettingsMicromedical()
         {
-            MmPerPix = 0.15;
+            PixPerMm = 7;
             DistanceCameraToEyeMm = 70;
             UseHeadSensor = true;
         }

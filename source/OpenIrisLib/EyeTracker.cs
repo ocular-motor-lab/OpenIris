@@ -72,7 +72,7 @@ namespace OpenIris
             {
                 var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
 
-                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"EyeTrackerLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
+                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
 
                 // Initialize the object that loads the different eye tracking system objects. It can
                 // load objects from new classes present in new dlls in the application folder.
@@ -112,7 +112,7 @@ namespace OpenIris
         /// <summary>
         /// Gets the Eye tracker system corresponding with the current hardware set up.
         /// </summary>
-        public IEyeTrackingSystem? EyeTrackingSystem { get; private set; }
+        public EyeTrackingSystemBase? EyeTrackingSystem { get; private set; }
 
         /// <summary>
         /// Gets the image grabber. In charge of getting images from cameras or videos.
@@ -229,14 +229,14 @@ namespace OpenIris
                 if (PlayingVideo)
                 {
                     EyeTrackingSystem = VideoPlayer!;
-                    ImageProcessor = new EyeTrackerProcessor( EyeTrackerProcessor.Mode.Offline, Settings.MaxNumberOfProcessingThreads);
+                    ImageProcessor = new EyeTrackerProcessor( EyeTrackerProcessor.Mode.Offline, EyeTrackingSystem, Settings.MaxNumberOfProcessingThreads);
                     ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(VideoPlayer!, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewforOffLine(EyeTrackingSystem);
                 }
                 else
                 {
                     EyeTrackingSystem = EyeTrackingSystemBase.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
-                    ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
+                    ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, EyeTrackingSystem, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
                     ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
                 }
@@ -247,14 +247,8 @@ namespace OpenIris
                     // The best way to signal we are already tracking is after we get the first image.
                     Tracking = true;
 
-                    // Prepare the images for processing depending on the system. For instance flipping,
-                    // cropping, splitting, increasing contrast, whatever ...
-                    grabbedImages = (EyeTrackingSystem is VideoPlayer)
-                        ? EyeTrackingSystem!.PreProcessImagesFromVideos(grabbedImages)
-                        : EyeTrackingSystem!.PreProcessImagesFromCameras(grabbedImages);
-
                     RecordingSession?.TryRecordImages(grabbedImages);
-                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.TrackingPipelineSettings));
+                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.EyeTrackingPipeline, Settings.TrackingPipelineSettings));
                 };
 
                 // Action for every time new images are processed
@@ -530,7 +524,7 @@ namespace OpenIris
 
             try
             {
-                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
                 {
 
                     var tempCalibration = await CalibrationSession.StartCalibratingEyeModel(Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
@@ -585,7 +579,7 @@ namespace OpenIris
 
             try
             {
-                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod))
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
                 {
                     Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
                 }

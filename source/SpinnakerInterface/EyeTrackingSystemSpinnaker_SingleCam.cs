@@ -6,6 +6,7 @@ using SpinnakerNET;
 using System.Windows.Forms;
 using System.Drawing;
 using System;
+using System.Collections.Generic;
 using Spinnaker;
 using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
@@ -14,60 +15,51 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {
-        protected Spinnaker_SingleCam camera = null;
-
-        public override EyeCollection<CameraEye?>? CreateCameras()
+        protected CameraEyeSpinnaker camera = null;
+        
+        public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
-            // Retrieve singleton reference to Spinnaker system object
-            ManagedSystem system = new ManagedSystem();
-
-            // Retrieve list of cameras from the system
-            var cam_list = system.GetCameras();
-
-            if (cam_list.Count < 1)
-            {
-                throw new Exception($"NEED AT LEAST ONE CAMERAS!! Found {cam_list.Count} FLIR Spinnaker compatible camera(s).");
-            }
-
-            Trace.WriteLine($"Found {cam_list.Count} cameras. Calling cam.Init()...");
-            
-            camera = new Spinnaker_SingleCam(Settings.Eye, cam_list[0]);
             try
             {
-                this.camera.Start();
+                var cameraList = CameraEyeSpinnaker.FindCameras(Settings.Eye, 1);
+
+                camera = new CameraEyeSpinnaker(
+                whichEye: Settings.Eye,
+                camera: cameraList[0],
+                frameRate: (double)Settings.FrameRate,
+                roi: new Rectangle { Width = 720, Height = 450 });
+
+                camera.Start();
             }
             catch (Exception ex)
             {
-                if (this.camera != null)
+                if (camera != null)
                 {
-                    this.camera.Stop();
+                   camera.Stop();
                 }
 
-                throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
+                throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }
 
             switch (settings.Eye)
             {
-                case Eye.Left:                    
-                    return new EyeCollection<CameraEye?>(this.camera,null);
+                case Eye.Left:
+                    return new EyeCollection<CameraEye?>(camera, null);
                 case Eye.Right:
                     return new EyeCollection<CameraEye?>(null, camera);
                 case Eye.Both:
                     return new EyeCollection<CameraEye?>(camera);
-                default:
-                    return new EyeCollection<CameraEye?>(this.camera);
+                default: return new EyeCollection<CameraEye?>(camera);
             }
-
-           
         }
 
-        public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)
+        public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
@@ -86,12 +78,6 @@ namespace SpinnakerInterface
                     return images;
             }
         }
-
-        public override EyeCollection<ImageEye> PreProcessImagesFromVideos(EyeCollection<ImageEye> images)
-        {
-            // Because only the right image has the timestamp in the bytes we copy the raw frame number to the left image
-            images[Eye.Left].TimeStamp.FrameNumberRaw = images[Eye.Right].TimeStamp.FrameNumberRaw;
-            return base.PreProcessImagesFromVideos(images);
-        }
     }
+
 }

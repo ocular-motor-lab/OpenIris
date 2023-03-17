@@ -5,14 +5,13 @@
 //-----------------------------------------------------------------------
 namespace OpenIris
 {
-    using Emgu.CV.Stitching;
 #nullable enable
 
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Diagnostics;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -54,6 +53,7 @@ namespace OpenIris
         private int outputNextExpectedNumber = 0;
         private bool started;
         private bool stopping;
+        private EyeTrackingSystemBase eyeTrackingsystem;
 
         /// <summary>
         /// Initializes an instance of the eyeTrackerProcessor class.
@@ -62,12 +62,14 @@ namespace OpenIris
         /// Value indicating weather frames can be dropped. This means the call to Process images
         /// will be blocking if the buffer is fulll.
         /// </param>
+        /// <param name="eyeTrackingsystem"></param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="maxNumberOfThreads">Maximum number of threads to run.</param>
-        public EyeTrackerProcessor(Mode processingMode, int maxNumberOfThreads = 1, int bufferSize = 1)
+        public EyeTrackerProcessor(Mode processingMode, EyeTrackingSystemBase eyeTrackingsystem, int maxNumberOfThreads = 1, int bufferSize = 1)
         {
             inputBufferSize = bufferSize;
             mode = processingMode;
+            this.eyeTrackingsystem = eyeTrackingsystem;
 
             numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, (int)Math.Round(Environment.ProcessorCount / 2.0 - 1)));
         }
@@ -80,7 +82,7 @@ namespace OpenIris
         /// <summary>
         /// User interface for the current pipeline. For each eye.
         /// </summary>
-        public (string name, EyeCollection<EyeTrackingPipelineUIControl?>? controls) PipelineUI { get; private set; }
+        public EyeCollection<EyeTrackingPipelineBase?>? PipelineForUI { get; private set; }
 
         /// <summary>
         /// Gets the total number of frames received.
@@ -118,8 +120,8 @@ namespace OpenIris
             if (started) throw new InvalidOperationException("Cannot start the processor again. Already running.");
             started = true;
 
-            List<Task>? processingTasks = new List<Task>();
-            TaskErrorHandler? errorHandler = new TaskErrorHandler(Stop);
+            List<Task>? processingTasks = new ();
+            TaskErrorHandler? errorHandler = new (Stop);
 
             try
             {
@@ -133,9 +135,9 @@ namespace OpenIris
                         //
                         // Not using a using statement here because the ProcessInputLoop will dispose
                         // of this events. Otherwise they get disposed before the WhenAll
-                        EyeCollection<AutoResetEvent?> newImagesEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
-                        EyeCollection<AutoResetEvent?> eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
-                        (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines = (string.Empty, null);
+                        var newImagesEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
+                        var eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
+                        EyeCollection<EyeTrackingPipelineBase?>?  pipelines = null;
                         EyeTrackerImagesAndData? currentImagesAndData = null;
 
                         processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Left, newImagesEvents, eyeDoneEvents),
@@ -223,7 +225,7 @@ namespace OpenIris
         /// </summary>
         private void ProcessLoop(
             ref EyeTrackerImagesAndData? currentImagesAndData, 
-            ref (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines,
+            ref EyeCollection<EyeTrackingPipelineBase?>? pipelines,
             EyeCollection<AutoResetEvent?> newImagesEvent, 
             EyeCollection<AutoResetEvent?> eyeDoneEvent)
         {
@@ -235,10 +237,14 @@ namespace OpenIris
             try
             {
                 // Keep processing images until the buffer is marked as complete and empty
-                using CancellationTokenSource? cancellation = new CancellationTokenSource();
+                using CancellationTokenSource? cancellation = new ();
                 foreach ((EyeTrackerImagesAndData imagesAndData, long orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                 {
                     UpdatePipeline(ref pipelines, imagesAndData);
+
+                    // Prepare the images for processing depending on the system. For instance flipping,
+                    // cropping, splitting, increasing contrast, whatever ...
+                    imagesAndData.UpdateImages(eyeTrackingsystem.PreProcessImages(imagesAndData.Images));
 
                     //
                     // Wait for left and right eye to process
@@ -250,9 +256,12 @@ namespace OpenIris
                     newImagesEvent[Eye.Left]?.Set();
                     newImagesEvent[Eye.Right]?.Set();
 
-                    // Wait for the left eye and right eye
-                    eyeDoneEvent[Eye.Left]?.WaitOne();
-                    eyeDoneEvent[Eye.Right]?.WaitOne();
+                    if (!stopping)
+                    {
+                        // Wait for the left eye and right eye
+                        eyeDoneEvent[Eye.Left]?.WaitOne();
+                        eyeDoneEvent[Eye.Right]?.WaitOne();
+                    }
 
                     //
                     // Propagate the processed images
@@ -315,38 +324,36 @@ namespace OpenIris
             }
         }
 
-        private void UpdatePipeline(ref (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines, EyeTrackerImagesAndData imagesAndData)
+        private void UpdatePipeline(ref EyeCollection<EyeTrackingPipelineBase?>? pipelines, EyeTrackerImagesAndData imagesAndData)
         {
             // 
             // Check if it is necessary to change the pipeline and the corresponding UI
             //
-            string currentPipelineName = imagesAndData.TrackingSettings.EyeTrackingPipelineName;
+            string currentPipelineName = imagesAndData.EyeTrackingPipelineName;
 
-            if (pipelines.name != currentPipelineName)
+            if (pipelines?[Eye.Left]?.Name != currentPipelineName || pipelines?[Eye.Right]?.Name != currentPipelineName)
             {
-                pipelines = (currentPipelineName, new EyeCollection<IEyeTrackingPipeline?>(
-                    EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(currentPipelineName),
-                    EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(currentPipelineName)));
+                pipelines = new EyeCollection<EyeTrackingPipelineBase?>(
+                    EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Left, imagesAndData.TrackingSettings),
+                    EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Right, imagesAndData.TrackingSettings));
 
                 // need this condition also because there may be many threads
                 // only one needs to change the UI but all of them need to change
                 // the pipeline
-                if (PipelineUI.name != currentPipelineName)
+                if (PipelineForUI?[Eye.Left]?.Name != currentPipelineName || PipelineForUI?[Eye.Right]?.Name != currentPipelineName)
                 {
-                    PipelineUI = (currentPipelineName, new EyeCollection<EyeTrackingPipelineUIControl?>(
-                        pipelines.implementation?[Eye.Left]?.GetPipelineUI(Eye.Left, currentPipelineName),
-                        pipelines.implementation?[Eye.Right]?.GetPipelineUI(Eye.Right, currentPipelineName)));
+                    PipelineForUI = pipelines;
                 }
             }
         }
 
         private void ProcessOneEyeLoop(
             ref EyeTrackerImagesAndData? imagesAndData, 
-            ref (string name, EyeCollection<IEyeTrackingPipeline?>? implementation) pipelines, Eye whichEye, 
+            ref EyeCollection<EyeTrackingPipelineBase?>?  pipelines, Eye whichEye, 
             EyeCollection<AutoResetEvent?> newImageEvents,
             EyeCollection<AutoResetEvent?> doneWithProcessingEvents)
         {
-            Thread.CurrentThread.Name = "EyeTracker:EyeProcessLoop";
+            Thread.CurrentThread.Name = "EyeTracker:EyeProcessLoop " + whichEye;
 
             while (!stopping)
             {
@@ -356,14 +363,19 @@ namespace OpenIris
                     newImageEvents[whichEye]?.WaitOne();
 
                     var image = imagesAndData?.Images[whichEye];
-                    var pipeline = pipelines.implementation?[whichEye];
+                    var pipeline = pipelines?[whichEye];
 
                     if (image is null) continue;
                     if (pipeline is null) continue;
 
                     EyeTrackerDebug.TrackTimeBeginPipeline(whichEye, image.TimeStamp);
-                    (image.EyeData, image.ImageTorsion) = pipeline.Process(image, imagesAndData!.Calibration.EyeCalibrationParameters[whichEye], imagesAndData.TrackingSettings);
+                    (image.EyeData, image.ImageTorsion) = pipeline.Process(image, imagesAndData!.Calibration.EyeCalibrationParameters[whichEye]);
                     EyeTrackerDebug.TrackTimeEndPipeline();
+                }
+                catch
+                {
+                    stopping = true;
+                    throw;
                 }
                 finally
                 {

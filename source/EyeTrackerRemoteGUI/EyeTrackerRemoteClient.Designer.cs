@@ -50,9 +50,9 @@
             this.labelDarkThresholdLeft = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.eyeTrackerImageEyeBoxRight = new OpenIris.UI.EyeTrackerImageEyeBox();
+            this.eyeTrackerImageEyeBoxRight = new OpenIris.UI.ImageEyeBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.eyeTrackerImageEyeBoxLeft = new OpenIris.UI.EyeTrackerImageEyeBox();
+            this.eyeTrackerImageEyeBoxLeft = new OpenIris.UI.ImageEyeBox();
             this.buttonDowndloadFile = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -381,8 +381,8 @@
         private System.Windows.Forms.Label labelError;
         private System.Windows.Forms.Label labelDataRight;
         private System.Windows.Forms.Label labelDataLeft;
-        private UI.EyeTrackerImageEyeBox eyeTrackerImageEyeBoxRight;
-        private UI.EyeTrackerImageEyeBox eyeTrackerImageEyeBoxLeft;
+        private UI.ImageEyeBox eyeTrackerImageEyeBoxRight;
+        private UI.ImageEyeBox eyeTrackerImageEyeBoxLeft;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelImageGrabbingStatus;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelTimestamp;

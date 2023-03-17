@@ -58,7 +58,7 @@ namespace OpenIris.ImageProcessing
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
 
-            var maxPupRad = (imageEye.WhichEye == Eye.Left) ? trackingSettings.IrisRadiusPixLeft : trackingSettings.IrisRadiusPixRight;
+            var maxPupRad = trackingSettings.MaxPupRadPix;
             var minPupArea = Math.PI * Math.Pow(trackingSettings.MinPupRadPix, 2);
             var thresholdDark = (imageEye.WhichEye == Eye.Left) ? trackingSettings.DarkThresholdLeftEye : trackingSettings.DarkThresholdRightEye;
             var imageSize = 200;

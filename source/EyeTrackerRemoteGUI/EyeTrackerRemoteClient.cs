@@ -76,7 +76,7 @@ namespace OpenIris
                                 settings.DarkThresholdLeftEye,
                                 settings.BrightThresholdLeftEye,
                                 settings.CroppingLeftEye, 
-                                settings.GetMmPerPix());
+                                settings.MmPerPix);
                         }
 
                         bitmap = imagesAndData.Image[Eye.Right];
@@ -90,7 +90,7 @@ namespace OpenIris
                                 settings.DarkThresholdRightEye,
                                 settings.BrightThresholdRightEye,
                                 settings.CroppingRightEye,
-                                settings.GetMmPerPix());
+                                settings.MmPerPix);
                         }
 
                         labelDarkThresholdLeft.Text = "Pupil threshokld: " + settings.DarkThresholdLeftEye;

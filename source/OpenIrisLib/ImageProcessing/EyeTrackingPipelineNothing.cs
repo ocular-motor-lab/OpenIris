@@ -9,49 +9,27 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Structure;
+    using OpenIris.UI;
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.Composition;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("Nothing", typeof(EyeTrackingPipelineSettings))]
-    public sealed class EyeTrackingPipelineNothing : IEyeTrackingPipeline, IDisposable
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("Nothing", typeof(EyeTrackingPipelineSettings))]
+    public sealed class EyeTrackingPipelineNothing : EyeTrackingPipelineBase, IDisposable
     {
-        /// <summary>
-        /// Name of the plugin, gets set automatically.
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// Disposes objects.
-        /// </summary>
-        public void Dispose()
-        {
-        }
-
         /// <summary>
         /// Process images.
         /// </summary>
         /// <param name="imageEye"></param>
         /// <param name="eyeCalibrationParameters"></param>
-        /// <param name="settings"></param>
         /// <returns></returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings settings)
+        public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
             return (new EyeData(imageEye, ProcessFrameResult.Good), null);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="whichEye"></param>
-        /// <param name="pipelineName"></param>
-        /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
-        {
-            return null;
         }
     }
 }

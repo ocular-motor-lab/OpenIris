@@ -37,8 +37,6 @@
             this.imageBoxRightEye = new Emgu.CV.UI.ImageBox();
             this.imageBoxLeftEye = new Emgu.CV.UI.ImageBox();
             this.buttonLeftBack = new System.Windows.Forms.Button();
-            this.imageBoxLeftEyeIm = new EyeTrackerImageEyeBox();
-            this.imageBoxRightEyeIm = new EyeTrackerImageEyeBox();
             this.buttonRightBack = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
@@ -46,8 +44,6 @@
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEye)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEye)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEyeIm)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEyeIm)).BeginInit();
             this.SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -75,7 +71,6 @@
             // 
             // panel2
             // 
-            this.panel2.Controls.Add(this.imageBoxLeftEyeIm);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(440, 247);
             this.panel2.Name = "panel2";
@@ -84,7 +79,6 @@
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.imageBoxRightEyeIm);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 247);
             this.panel1.Name = "panel1";
@@ -120,24 +114,6 @@
             this.buttonLeftBack.Text = "Back";
             this.buttonLeftBack.UseVisualStyleBackColor = true;
             // 
-            // imageBoxLeftEyeIm
-            // 
-            this.imageBoxLeftEyeIm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBoxLeftEyeIm.Location = new System.Drawing.Point(0, 0);
-            this.imageBoxLeftEyeIm.Name = "imageBoxLeftEyeIm";
-            this.imageBoxLeftEyeIm.Size = new System.Drawing.Size(432, 238);
-            this.imageBoxLeftEyeIm.TabIndex = 3;
-            this.imageBoxLeftEyeIm.TabStop = false;
-            // 
-            // imageBoxRightEyeIm
-            // 
-            this.imageBoxRightEyeIm.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBoxRightEyeIm.Location = new System.Drawing.Point(0, 0);
-            this.imageBoxRightEyeIm.Name = "imageBoxRightEyeIm";
-            this.imageBoxRightEyeIm.Size = new System.Drawing.Size(431, 238);
-            this.imageBoxRightEyeIm.TabIndex = 3;
-            this.imageBoxRightEyeIm.TabStop = false;
-            // 
             // buttonRightBack
             // 
             this.buttonRightBack.Location = new System.Drawing.Point(3, 491);
@@ -169,8 +145,6 @@
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEye)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEye)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEyeIm)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEyeIm)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -184,8 +158,6 @@
         private Emgu.CV.UI.ImageBox imageBoxLeftEye;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button buttonRightBack;
-        private EyeTrackerImageEyeBox imageBoxLeftEyeIm;
-        private EyeTrackerImageEyeBox imageBoxRightEyeIm;
         private System.Windows.Forms.Button buttonLeftBack;
     }
 }

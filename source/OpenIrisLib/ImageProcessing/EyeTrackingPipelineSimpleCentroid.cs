@@ -12,45 +12,28 @@ namespace OpenIris
     using System;
     using System.Drawing;
     using System.ComponentModel.Composition;
+    using System.Collections.Generic;
+    using OpenIris.UI;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimpleCentroid", typeof(EyeTrackingPipelinePupilCRSettings))]
-    public sealed class EyeTrackingPipelineSimpleCentroid : IEyeTrackingPipeline, IDisposable
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("SimpleCentroid", typeof(EyeTrackingPipelinePupilCRSettings))]
+    public sealed class EyeTrackingPipelineSimpleCentroid : EyeTrackingPipelineBase, IDisposable
     {
-        /// <summary>
-        /// Name of the plugin, gets set automatically.
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the ImageEyeProcess class.
-        /// </summary>
-        public EyeTrackingPipelineSimpleCentroid()
-        {
-        }
-
-        /// <summary>
-        /// Dispose objects.
-        /// </summary>
-        public void Dispose()
-        {
-        }
 
         /// <summary>
         /// Processes the current image to get the eye movement data.
         /// </summary>
         /// <param name="imageEye">Image from current frame.</param>
         /// <param name="eyeCalibrationParameters">Calibration info.</param>
-        /// <param name="trackingSetting">Configuration parameters.</param>
         /// <returns>The data obtained from processing the image.</returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSettings)
+        public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (eyeCalibrationParameters is null) throw new ArgumentNullException(nameof(eyeCalibrationParameters));
-            var settings = trackingSettings as EyeTrackingPipelinePupilCRSettings ?? throw new ArgumentNullException(nameof(trackingSettings));
+            var settings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new ArgumentNullException(nameof(Settings));
 
             // Copy the calibration variables just in case they change during the processing to avoid
             // inconsistencies The next frame will use the updated calibration
@@ -89,7 +72,7 @@ namespace OpenIris
             var eyeData = new EyeData(imageEye, ProcessFrameResult.Good)
             {
                 Pupil = pupil,
-                Iris = new IrisData( pupil.Center,  (float)(12.0f/trackingSettings.GetMmPerPix())),
+                Iris = new IrisData( pupil.Center,  (float)(12.0f/settings.MmPerPix)),
                 CornealReflections = null,
                 TorsionAngle = 0,
                 Eyelids = null,
@@ -98,16 +81,25 @@ namespace OpenIris
 
             return (eyeData, null);
         }
-        
+
         /// <summary>
-        /// Gets the current pipeline UI
+        /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
-        /// <param name="whichEye"></param>
-        /// <param name="pipelineName"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
+        public override List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList()
         {
-            return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye, pipelineName);
+            var theSettings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new InvalidOperationException("bad settings");
+
+            var list = new List<(string text, RangeDouble range, string SettingName)>();
+
+            var settingName = WhichEye switch
+            {
+                Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
+                Eye.Right => nameof(theSettings.DarkThresholdRightEye),
+            };
+            list.Add(("Pupil threshold", new RangeDouble(0, 255), settingName));
+
+            return list;
         }
     }
 

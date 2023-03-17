@@ -5,6 +5,7 @@
 //-----------------------------------------------------------------------
 namespace OpenIris.UI
 {
+    using Emgu.CV;
 #nullable enable
 
     using Emgu.CV.Structure;
@@ -12,10 +13,13 @@ namespace OpenIris.UI
     using OpenIris;
     using OpenIris.ImageGrabbing;
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Drawing;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using System.Windows.Forms;
+    using static System.Net.Mime.MediaTypeNames;
 
     /// <summary>
     /// Main graphical user interface of the eye tracker
@@ -25,13 +29,14 @@ namespace OpenIris.UI
         private static object _locker = new object();
 
         private readonly EyeTracker eyeTracker;
+        private readonly EyeTrackerUICommands eyeTrackerUICommands;
         private readonly Timer timerRefreshUI;
         private readonly LogTraceListener log;
 
-        private EyeCollection<ImageBox> imageBoxes;
+        private readonly EyeCollection<ImageBox> imageBoxes;
 
-        private (string name, CalibrationUIControl? control)? calibrationUI;
-        private (string name, EyeCollection<EyeTrackingPipelineUIControl?>? controls)? pipelineUI;
+        private (string name, ICalibrationUIControl? control)? calibrationUI;
+        private (string name, EyeCollection<EyeTrackingPipelineBase?>? pipelines)? pipelineUI;
 
         /// <summary>
         /// Initializes a new instance of the EyeTrackerGui class
@@ -45,15 +50,15 @@ namespace OpenIris.UI
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
 
             Exception? ex;
-            
+
             (eyeTracker, ex) = EyeTracker.Start();
-            
-            if ( ex is PluginManagerException) MessageBox.Show("Error initializing, trying safe mode (no plugins). " + ex.Message);
-            
+
+            if (ex is PluginManagerException) MessageBox.Show("Error initializing, trying safe mode (no plugins). " + ex.Message);
+
             // Check if settings changed need restarting
             eyeTracker.Settings.PropertyChanged += (o, e) =>
                 {
-                    var needsRestartingAttributes = typeof(EyeTrackerSettings).GetProperty(e.PropertyName)?.
+                    var needsRestartingAttributes = o.GetType().GetProperty(e.PropertyName)?.
                         GetCustomAttributes(typeof(NeedsRestartingAttribute), false) as NeedsRestartingAttribute[];
 
                     bool needsRestarting = needsRestartingAttributes?.Select(x => x.Value).SingleOrDefault() ?? false;
@@ -72,6 +77,8 @@ namespace OpenIris.UI
                         }
                     }
                 };
+
+            eyeTrackerUICommands = new EyeTrackerUICommands(eyeTracker);
 
             timerRefreshUI = new Timer(components)
             {
@@ -109,46 +116,47 @@ namespace OpenIris.UI
                 // Bind commands with UI items
                 //
 
-                eyeTracker.PlayVideoCommand.Bind(playVideoToolStripMenuItem);
-                eyeTracker.PlayVideoCommand.Bind(buttonPlayVideo);
-                eyeTracker.ProcessVideoCommand.Bind(processVideoToolStripMenuItem);
-                eyeTracker.ProcessVideoCommand.Bind(buttonProcessVideo);
-                eyeTracker.BatchProcessVideoCommand.Bind(batchAnalysisToolStripMenuItem);
+                eyeTrackerUICommands.PlayVideoCommand.Bind(playVideoToolStripMenuItem);
+                eyeTrackerUICommands.PlayVideoCommand.Bind(buttonPlayVideo);
+                eyeTrackerUICommands.ProcessVideoCommand.Bind(processVideoToolStripMenuItem);
+                eyeTrackerUICommands.ProcessVideoCommand.Bind(buttonProcessVideo);
+                eyeTrackerUICommands.BatchProcessVideoCommand.Bind(batchAnalysisToolStripMenuItem);
 
-                eyeTracker.StopCommand.Bind(stopToolStripMenuItem);
+                eyeTrackerUICommands.StopCommand.Bind(stopToolStripMenuItem);
 
-                eyeTracker.StartCalibrationCommand.Bind(calibrateToolStripMenuItem);
-                eyeTracker.CancelCalibrationCommand.Bind(cancelCalibrationToolStripMenuItem);
-                eyeTracker.StartCancelCalibrationCommand.Bind(buttonCalibrate);
-                eyeTracker.LoadCalibrationCommand.Bind(loadCalibrationToolStripMenuItem);
-                eyeTracker.SaveCalibrationCommand.Bind(saveCalibrationToolStripMenuItem);
-                eyeTracker.ResetReferenceCommand.Bind(buttonResetReference);
-                eyeTracker.ResetReferenceCommand.Bind(resetReferenceToolStripMenuItem);
-                eyeTracker.ResetCalibrationCommand.Bind(resetCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.StartCalibrationCommand.Bind(calibrateToolStripMenuItem);
+                eyeTrackerUICommands.CancelCalibrationCommand.Bind(cancelCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.StartCancelCalibrationCommand.Bind(buttonCalibrate);
+                eyeTrackerUICommands.LoadCalibrationCommand.Bind(loadCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.SaveCalibrationCommand.Bind(saveCalibrationToolStripMenuItem);
+                eyeTrackerUICommands.ResetReferenceCommand.Bind(buttonResetReference);
+                eyeTrackerUICommands.ResetReferenceCommand.Bind(resetReferenceToolStripMenuItem);
+                eyeTrackerUICommands.ResetCalibrationCommand.Bind(resetCalibrationToolStripMenuItem);
 
-                eyeTracker.StartStopRecordingCommand.Bind(startStopRecordingToolStripMenuItem);
-                eyeTracker.StartStopRecordingCommand.Bind(buttonRecord);
+                eyeTrackerUICommands.StartStopRecordingCommand.Bind(startStopRecordingToolStripMenuItem);
+                eyeTrackerUICommands.StartStopRecordingCommand.Bind(buttonRecord);
 
-                eyeTracker.StartTrackingCommand.Bind(startTrackingToolStripMenuItem);
-                eyeTracker.StartTrackingCommand.Bind(buttonStartTracking);
+                eyeTrackerUICommands.StartTrackingCommand.Bind(startTrackingToolStripMenuItem);
+                eyeTrackerUICommands.StartTrackingCommand.Bind(buttonStartTracking);
 
-                eyeTracker.EditSettingsCommand.Bind(configurationToolStripMenuItem);
+                eyeTrackerUICommands.EditSettingsCommand.Bind(configurationToolStripMenuItem);
 
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeRight);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveRightEyeLeft);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeUp);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeDown);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeRight);
-                eyeTracker.MoveCamerasCommand.Bind(buttonMoveLeftEyeLeft);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeRight);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeLeft);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeUp);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeDown);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeRight);
+                eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeLeft);
 
-                eyeTracker.CenterCamerasCommand.Bind(buttonCenterEyes);
+                eyeTrackerUICommands.CenterCamerasCommand.Bind(buttonCenterEyes);
 
-                eyeTracker.ChangeDataFolderCommand.Bind(buttonSelectFolder);
+                eyeTrackerUICommands.ChangeDataFolderCommand.Bind(buttonSelectFolder);
 
-                eyeTracker.TrimVideosCommand.Bind(trimVideosToolStripMenuItem);
-                eyeTracker.ConvertVideoToRGBCommand.Bind(convertVideoToRGBToolStripMenuItem);
+                eyeTrackerUICommands.TrimVideosCommand.Bind(trimVideosToolStripMenuItem);
+                eyeTrackerUICommands.ConvertVideoToRGBCommand.Bind(convertVideoToRGBToolStripMenuItem);
+                eyeTrackerUICommands.ConvertVideoToMp4.Bind(convertVideoToMP4ToolStripMenuItem); 
 
                 //
                 // Data Bindings with settings
@@ -251,7 +259,6 @@ namespace OpenIris.UI
                 tabPages.ResumeLayout();
             }
 
-
             if (!eyeTrackerTrace.Initialized)
             {
                 eyeTrackerTrace.Init(settings);
@@ -289,7 +296,7 @@ namespace OpenIris.UI
 
             // Calibration
 
-            if (eyeTracker.CancelCalibrationCommand.CanExecute())
+            if (eyeTrackerUICommands.CancelCalibrationCommand.CanExecute())
             {
                 buttonCalibrate.Text = "Cancel calibration";
                 buttonCalibrate.BackColor = Color.LightYellow;
@@ -306,9 +313,8 @@ namespace OpenIris.UI
                 // Calibration just started
 
                 calibrationUI = (eyeTracker.Settings.CalibrationMethod, eyeTracker.CalibrationSession?.GetCalibrationUI());
-                var calibrationControl = calibrationUI?.control;
 
-                if (calibrationControl != null)
+                if (calibrationUI?.control is UserControl calibrationControl)
                 {
                     calibrationControl.Dock = DockStyle.Fill;
                     calibrationControl.Location = new Point(0, 0);
@@ -370,7 +376,7 @@ namespace OpenIris.UI
 
                 if (!eyeTracker.Tracking) return;
 
-                var settings = eyeTracker.Settings;
+                var settings = eyeTracker.Settings.TrackingPipelineSettings;
                 if (settings is null) return;
 
                 var eyes = new Eye[] { Eye.Left, Eye.Right };
@@ -378,35 +384,101 @@ namespace OpenIris.UI
                 // Change the pipeline UIs if necessary
                 if (pipelineUI?.name != eyeTracker.Settings.EyeTrackingPipeline)
                 {
-                    foreach (var panel in panels)
+                    // Clear the two panels for quick settings
+                    foreach (var c in panels[Eye.Left].Controls )
                     {
-                        if (panel.Controls.Count > 0)
-                            panel.Controls.Clear();
+                        var table = c as TableLayoutPanel;
+                        table?.Dispose();
                     }
+                    foreach (var c in panels[Eye.Right].Controls)
+                    {
+                        var table = c as TableLayoutPanel;
+                        table?.Dispose();
+                    }
+                    panels[Eye.Left].Controls.Clear();
+                    panels[Eye.Right].Controls.Clear();
+                    // end clear the quick settings
 
-                    pipelineUI = eyeTracker.ImageProcessor?.PipelineUI;
+                    pipelineUI = (eyeTracker.Settings.EyeTrackingPipeline, eyeTracker.ImageProcessor?.PipelineForUI);
 
                     foreach (var eye in eyes)
                     {
-                        if (eye == eyeTracker.Settings.EyeTrackingSystemSettings.Eye |
-                            Eye.Both == eyeTracker.Settings.EyeTrackingSystemSettings.Eye )
-                        {
-                            var control = pipelineUI?.controls?[eye];
-                            if (control is null) continue;
+                        // Check if we are doing this eye
+                        if (eye != eyeTracker.Settings.EyeTrackingSystemSettings.Eye &&
+                            Eye.Both != eyeTracker.Settings.EyeTrackingSystemSettings.Eye)
+                            continue;
 
-                            control.Dock = DockStyle.Fill;
-                            control.Location = new Point(0, 0);
-                            control.Size = panels[eye].ClientSize;
-                            panels[eye].Controls.Add(control);
+                        var settingsList = pipelineUI?.pipelines?[eye]?.GetQuickSettingsList();
+                        if (settingsList is null) continue;
+
+                        var table = new TableLayoutPanel
+                        {
+                            RowCount = settingsList.Count,
+                            ColumnCount = 1,
+                            Height = settingsList.Count * 40,
+                            Dock = DockStyle.Top
+                        };
+                        table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+
+                        for (int i = 0; i < settingsList.Count; i++)
+                        {
+                            table.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
+
+                            var sliderPupil = new SliderTextControl
+                            {
+                                Text = settingsList[i].text,
+                                Range = settingsList[i].range,
+                                Dock = DockStyle.Fill,
+                            };
+                            sliderPupil.Bind(settings, settingsList[i].settingName);
+
+                            table.Controls.Add(sliderPupil, i, 0);
                         }
+
+                        panels[eye].Controls.Add(table);
                     }
+                }
+
+                // Update Torsion images
+                var imageBoxIris = new EyeCollection<ImageBox>(imageBoxIrisLeft, imageBoxIrisRight);
+                var imageBoxIrisReference = new EyeCollection<ImageBox>(imageBoxIrisRefeferenceLeft, imageBoxIrisRefeferenceRight);
+
+                foreach (var eye in eyes)
+                {
+                    Image<Gray, byte>? imageTorsion = null;
+                    Image<Gray, byte>? imageTorsionRef = null;
+
+                    // Torsion image
+                    var torsionImage = eyeTracker.LastImagesAndData?.Images[eye]?.ImageTorsion;
+                    if (torsionImage?.Size.Width > 4)
+                    {
+                        imageTorsion = new Image<Gray, byte>(torsionImage.Size.Height, torsionImage.Size.Width);
+                        CvInvoke.Transpose(torsionImage, imageTorsion);
+                    }
+
+                    // Torsion reference
+                    var torsionRef = eyeTracker.LastImagesAndData?.Calibration.EyeCalibrationParameters[eye]?.ImageTorsionReference;
+                    if (torsionRef?.Size.Width > 4)
+                    {
+                        imageTorsionRef = new Image<Gray, byte>(torsionRef.Size.Height, torsionRef.Size.Width);
+                        CvInvoke.Transpose(torsionRef, imageTorsionRef);
+                    }
+
+                    imageBoxIris[eye].Image = imageTorsion;
+                    imageBoxIrisReference[eye].Image = imageTorsionRef;
                 }
 
                 // Update pipeline UIs
                 foreach (var eye in eyes)
                 {
-                    pipelineUI?.controls?[eye]?.UpdatePipelineUI(eyeTracker.LastImagesAndData);
-                    pipelineUI?.controls?[eye]?.UpdatePipelineEyeImage(imageBoxes[eye], eyeTracker.LastImagesAndData);
+                    if (eyeTracker.LastImagesAndData != null)
+                    {
+                        imageBoxes[eye].Image = pipelineUI?.pipelines?[eye]?.UpdatePipelineEyeImage(eye, eyeTracker.LastImagesAndData);
+                    }
+                    else
+                    {
+                      //  imageBoxes[eye].Image = null;
+                    }
                 }
             }
             finally
@@ -579,7 +651,7 @@ namespace OpenIris.UI
 
         private void EyeTrackerGUI_FormClosing(object sender, FormClosingEventArgs e)
         {
-            var stillRecording = eyeTracker.StopRecordingCommand.CanExecute();
+            var stillRecording = eyeTrackerUICommands.StopRecordingCommand.CanExecute();
             bool CanFinish = !stillRecording;
 
             try

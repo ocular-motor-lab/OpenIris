@@ -31,24 +31,31 @@ namespace SpinnakerInterface
 
         public static Spinnaker_SingleCam camera = null;
 
-        public Spinnaker_SingleCam(Eye whichEye, IManagedCamera CAM)
+        public Spinnaker_SingleCam(Eye whichEye, IManagedCamera CAM, double frameRate)
         {
             this.cam = CAM;
             cam.Init();
             CamModelName = cam.DeviceModelName.Value;
             WhichEye = whichEye;
-            
+            FrameRate = frameRate;
+
+        }
+
+        public override void Start()
+        {
+            if (cam == null) { return; }
+
             //to check if the cam feature changed:
             //var nodemap = cam.GetNodeMap();
             //IEnum iGainAuto = nodemap.GetNode<IEnum>("GainAuto");
-            
+
             cam.AcquisitionMode.FromString("Continuous");
             cam.AcquisitionFrameRateEnable.FromString("True");
-            
+
             cam.OffsetX.FromString("0");
             cam.OffsetY.FromString("0");
 
-            switch (whichEye)
+            switch (WhichEye)
             {
                 case (Eye.Both):
                     cam.Width.FromString("720");//max is 720
@@ -64,23 +71,24 @@ namespace SpinnakerInterface
             cam.GainAuto.FromString("Off");
             cam.ExposureAuto.FromString("Off");
 
-            cam.ExposureTime.FromString("1676");
             cam.Gain.FromString("9");
-            cam.AcquisitionFrameRate.FromString("500");
-        }
+            cam.AcquisitionFrameRate.Value = FrameRate;
 
-        public override void Start()
-        {
-            if(cam==null) { return; }
+            //# Set to 500uSec less than frame interval.
+            cam.AutoExposureExposureTimeUpperLimit.Value = 1e6 / FrameRate - 500;
+            //#cam.AutoExposureExposureTimeUpperLimit.SetValue(1e6/FRAME_RATE - 2000)
 
-            FrameRate = 100;
+            cam.ExposureTime.Value = cam.AutoExposureExposureTimeUpperLimit.Value - 100;
 
             cam.BeginAcquisition();
         }
 
         public override void Stop()
         {
-            cam.EndAcquisition();
+            if (cam.IsStreaming())
+            {
+                cam.EndAcquisition();
+            }
         }
 
         protected override ImageEye GrabImageFromCamera()
@@ -110,11 +118,11 @@ namespace SpinnakerInterface
 
                     // Build the new timestamp
                     var timestamp = new ImageEyeTimestamp
-                    {
-                        FrameNumber = CurrentFrameID,
-                        FrameNumberRaw = RawFrameID,
-                        Seconds = rawImage.TimeStamp / 1e9
-                    };
+                    (
+                        seconds: rawImage.TimeStamp / 1e9,
+                        frameNumber: CurrentFrameID,
+                        frameNumberRaw: RawFrameID
+                    );
                     return new ImageEye(
                                      (int)rawImage.Width,
                                      (int)rawImage.Height,
@@ -138,4 +146,5 @@ namespace SpinnakerInterface
             }
         }
     }
+
 }

@@ -15,14 +15,14 @@ namespace OpenIris
     /// <summary>
     /// Micromedical system.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystemAttribute("Micromedical200Hz", typeof(EyeTrackingSystemSettingsMicromedical))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystemAttribute("Micromedical200Hz", typeof(EyeTrackingSystemSettingsMicromedical))]
     public class EyeTrackingSystemMicromedical200Hz : EyeTrackingSystemMicromedical
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsMicromedical;
 

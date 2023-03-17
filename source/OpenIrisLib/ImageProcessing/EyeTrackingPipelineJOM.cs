@@ -14,13 +14,17 @@ namespace OpenIris
     using System.ComponentModel;
     using System.ComponentModel.Composition;
     using OpenIris.ImageProcessing;
+    using System.Windows.Forms;
+    using System.Collections.Generic;
+    using Emgu.CV.UI;
+    using OpenIris.UI;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("JOM", typeof(EyeTrackingPipelineJOMSettings))]
-    public sealed class EyeTrackingPipelineJOM : IEyeTrackingPipeline, IDisposable
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("JOM", typeof(EyeTrackingPipelineJOMSettings))]
+    public sealed class EyeTrackingPipelineJOM : EyeTrackingPipelineBase, IDisposable
     {
         private readonly PupilTracking pupilTracker;
         private readonly CornealReflectionTracking cornealReflectionTracker;
@@ -31,14 +35,9 @@ namespace OpenIris
         private readonly IrisTracker irisTracker;
 
         /// <summary>
-        /// Name of the plugin, gets set automatically.
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the ImageEyeProcess class.
         /// </summary>
-        public EyeTrackingPipelineJOM()
+        private EyeTrackingPipelineJOM()
         {
             pupilTracker = new PupilTracking();
             cornealReflectionTracker = new CornealReflectionTracking();
@@ -52,10 +51,11 @@ namespace OpenIris
         /// <summary>
         /// Dispose objects.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             pupilTracker.Dispose();
             cornealReflectionTracker.Dispose();
+            base.Dispose();
         }
 
         /// <summary>
@@ -65,11 +65,11 @@ namespace OpenIris
         /// <param name="eyeCalibrationParameters">Calibration info.</param>
         /// <param name="trackingSetting">Configuration parameters.</param>
         /// <returns>The data obtained from processing the image.</returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSetting)
+        public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
             if (eyeCalibrationParameters is null) throw new ArgumentNullException(nameof(eyeCalibrationParameters));
-            var settings = trackingSetting as EyeTrackingPipelineJOMSettings ?? throw new ArgumentNullException(nameof(trackingSetting));
+            var settings = Settings as EyeTrackingPipelineJOMSettings ?? throw new ArgumentNullException(nameof(Settings));
 
             // Copy the calibration variables just in case they change during the processing to avoid
             // inconsistencies The next frame will use the updated calibration
@@ -134,14 +134,37 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Gets the current pipeline UI
+        /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
-        /// <param name="whichEye"></param>
-        /// <param name="pipelineName"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
+        public override List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList()
         {
-            return new UI.EyeTrackingPipelineJOMQuickSettings(whichEye, pipelineName);
+            var theSettings = Settings as EyeTrackingPipelineJOMSettings ?? throw new InvalidOperationException("bad settings");
+
+            return WhichEye switch
+            {
+                Eye.Left => new List<(string text, RangeDouble range, string SettingName)>
+                    {
+                        ("Pupil threshold (px)",    new RangeDouble(0, 255),                        nameof(theSettings.DarkThresholdLeftEye)),
+                        ("CR threshold (px)",       new RangeDouble(0, 255),                        nameof(theSettings.BrightThresholdLeftEye)),
+                        ("Iris radius (px)",        new RangeDouble(0, theSettings.MaxIrisRadPixd), nameof(theSettings.IrisRadiusPixLeft)),
+                        ("Min Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinPupRadmm)),
+                        ("Max Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxPupRadmm)),
+                        ("Min CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinCRRadmm)),
+                        ("Max CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxCRRadmm)),
+                    },
+                Eye.Right => new List<(string text, RangeDouble range, string SettingName)>
+                    {
+                        ("Pupil threshold (px)",    new RangeDouble(0, 255),                        nameof(theSettings.DarkThresholdRightEye)),
+                        ("CR threshold (px)",       new RangeDouble(0, 255),                        nameof(theSettings.BrightThresholdRightEye)),
+                        ("Iris radius (px)",        new RangeDouble(0, theSettings.MaxIrisRadPixd), nameof(theSettings.IrisRadiusPixRight)),
+                        ("Min Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinPupRadmm)),
+                        ("Max Pup radius (mm)",     new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxPupRadmm)),
+                        ("Min CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MinCRRadmm)),
+                        ("Max CR radius (mm)",      new RangeDouble(0, theSettings.MaxIrisRadmm),   nameof(theSettings.MaxCRRadmm)),
+                    },
+                _ => throw new Exception("Wrong eye."),
+            };
         }
     }
 
@@ -164,7 +187,7 @@ namespace OpenIris
         [Category("Pupil tracking settings"), Description("Method to track the pupil.")]
         public PupilTracking.PupilTrackingMethod PupilTrackingMethod { get => pupilTrackingMethod; set => SetProperty(ref pupilTrackingMethod, value, nameof(PupilTrackingMethod)); }
         private PupilTracking.PupilTrackingMethod pupilTrackingMethod = PupilTracking.PupilTrackingMethod.Blob;
-        
+
         [Category("Pupil tracking settings"), Description("Method to track the position.")]
         public PositionTrackerEllipseFitting.PositionTrackingMethod PositionTrackingMethod { get => positionTrackingMethod; set => SetProperty(ref positionTrackingMethod, value, nameof(PositionTrackingMethod)); }
         private PositionTrackerEllipseFitting.PositionTrackingMethod positionTrackingMethod = PositionTrackerEllipseFitting.PositionTrackingMethod.EllipseFitting;
@@ -183,7 +206,7 @@ namespace OpenIris
 
         [Category("EyeLid tracking settings"), Description("Method to track the EyeLid.")]
         public EyeLidTracking.EyeLidTrackingMethod EyelidTrackingMethod { get => eyelidTrackingMethod; set => SetProperty(ref eyelidTrackingMethod, value, nameof(EyelidTrackingMethod)); }
-        private EyeLidTracking.EyeLidTrackingMethod eyelidTrackingMethod = EyeLidTracking.EyeLidTrackingMethod.HoughLines;
+        private EyeLidTracking.EyeLidTrackingMethod eyelidTrackingMethod = EyeLidTracking.EyeLidTrackingMethod.None;
 
         #endregion EyeLid tracking settings
 
@@ -192,19 +215,29 @@ namespace OpenIris
         [Category("Torsion settings"), Description("Should we calculate torsion.")]
         public bool CalculateTorsion { get => calculateTorsion; set => SetProperty(ref calculateTorsion, value, nameof(CalculateTorsion)); }
         private bool calculateTorsion = true;
-        
+
         [Category("Torsion settings"), Description("Current radius of the left iris.")]
-        public double IrisRadiusPixLeft { get => irisRadiusPixLeft; set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, this.MaxIrisRadPixd), nameof(IrisRadiusPixLeft)); }
+        public double IrisRadiusPixLeft
+        {
+            get => irisRadiusPixLeft;
+
+            set => SetProperty(ref irisRadiusPixLeft, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixLeft));
+        }
         private double irisRadiusPixLeft = 80;
 
         [Category("Torsion settings"), Description("Current radius of the right iris.")]
-        public double IrisRadiusPixRight { get => irisRadiusPixRight; set => SetProperty(ref irisRadiusPixRight, Math.Min(value, this.MaxIrisRadPixd), nameof(IrisRadiusPixRight)); }
+        public double IrisRadiusPixRight
+        {
+            get => irisRadiusPixRight;
+            set => SetProperty(ref irisRadiusPixRight, Math.Min(value, MaxIrisRadPixd), nameof(IrisRadiusPixRight));
+        }
         private double irisRadiusPixRight = 80;
 
-        [Browsable(false)]
-        public int MaxIrisRadPixd { get { return (int)Math.Ceiling(this.maxIrisRadmm / this.GetMmPerPix()); } }
+        // [Browsable(false)]
+        public int MaxIrisRadPixd { get { return (int)Math.Ceiling(maxIrisRadmm / MmPerPix); } }
 
         [Category("Torsion settings"), Description("Maximum radius of the iris in milimiters.")]
+        [NeedsRestarting]
         public double MaxIrisRadmm { get => maxIrisRadmm; set => SetProperty(ref maxIrisRadmm, value, nameof(MaxIrisRadmm)); }
         private double maxIrisRadmm = 15;
 

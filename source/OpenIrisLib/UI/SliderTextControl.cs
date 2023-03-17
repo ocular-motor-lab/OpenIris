@@ -9,20 +9,22 @@ namespace OpenIris.UI
 
     using System;
     using System.ComponentModel;
+    using System.Runtime;
     using System.Windows.Forms;
 
     /// <summary>
     /// User control that contains a text label, a slider and a text box. The slider and the text box are.
     /// Coordinated to as they represent the same value all the time.
     /// </summary>
-    public partial class SliderTextControl : UserControl
+    public partial class SliderTextControl : UserControl, IDisposable
     {
         /// <summary>
         /// Value represented in the slider and the text box.
         /// </summary>
-        private int sliderValue;
-
-        private Range range;
+        private double sliderValue;
+        private RangeDouble range;
+        private INotifyPropertyChanged? settingsForBinding;
+        private string? settingNameForBinding;
 
         /// <summary>
         /// Initializes a new instance of the SliderTextControl class.
@@ -31,16 +33,68 @@ namespace OpenIris.UI
         {
             InitializeComponent();
 
-            this.sliderValue = 0;
+            sliderValue = 0;
 
-            this.EnabledChanged += SliderTextControl_EnabledChanged;
+            EnabledChanged += SliderTextControl_EnabledChanged;
+        }
+
+        /// <summary>
+        /// Binds this slider with a particular setting.
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <param name="settingName"></param>
+        public void Bind(INotifyPropertyChanged settings, string settingName )
+        {
+            Value = Convert.ToDouble(settings.GetType().GetProperty(settingName)?.GetValue(settings));
+            ValueChanged += (o, e) =>
+            {
+                var propInfo = settings.GetType().GetProperty(settingName);
+                propInfo?.SetValue(settings, Convert.ChangeType(Value, propInfo.PropertyType));
+            };
+
+            settingsForBinding = settings;
+            settingNameForBinding = settingName;
+            settings.PropertyChanged += settingsChangedHandler;
+        }
+
+        /// <summary>
+        /// Handles the change of the bind setting.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void settingsChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == settingNameForBinding)
+            {
+                Value = Convert.ToDouble(settingsForBinding?.GetType().GetProperty(settingNameForBinding)?.GetValue(settingsForBinding));
+            }
+        }
+
+
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            // This is VERY important so old sliders do not keep messing around with the setting
+            if (settingsForBinding is not null)
+            {
+                settingsForBinding.PropertyChanged -= settingsChangedHandler;
+            }
+
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         void SliderTextControl_EnabledChanged(object sender, EventArgs e)
         {
-            this.label.Enabled = this.Enabled;
-            this.trackBar.Enabled = this.Enabled;
-            this.numericUpDown1.Enabled = this.Enabled;
+            label.Enabled = Enabled;
+            trackBar.Enabled = Enabled;
+            numericUpDown1.Enabled = Enabled;
         }
 
         /// <summary>
@@ -69,7 +123,7 @@ namespace OpenIris.UI
         /// </summary>
         [Browsable(true)]
         [Description("Range of values allowed."), Category("Data")]
-        public Range Range
+        public RangeDouble Range
         {
             get
             {
@@ -79,11 +133,18 @@ namespace OpenIris.UI
             {
                 range = value;
 
-                trackBar.Minimum = (int)range.Begin;
-                trackBar.Maximum = (int)range.End;
+                trackBar.Minimum = 0;
+                trackBar.Maximum = 100;
 
-                numericUpDown1.Minimum = (int)range.Begin;
-                numericUpDown1.Maximum = (int)range.End;
+                numericUpDown1.Minimum = (decimal)range.Begin;
+                numericUpDown1.Maximum = (decimal)range.End;
+
+                numericUpDown1.DecimalPlaces = Range.End switch
+                {
+                    < 1 => 2,
+                    < 20 => 1,
+                    _ => 0,
+                };
             }
         }
 
@@ -92,7 +153,7 @@ namespace OpenIris.UI
         /// </summary>
         [Browsable(true)]
         [Description("Current value."), Category("Data")]  
-        public int Value
+        public double Value
         {
             get { return sliderValue; }
             set
@@ -105,18 +166,18 @@ namespace OpenIris.UI
                     {
                         if ( value > range.End )
                         {
-                            value = (int)range.End;
+                            value = range.End;
                         }
                         if ( value < range.Begin)
                         {
-                            value = (int)range.Begin;
+                            value = range.Begin;
                         }
                     }
 
                     sliderValue = value;
 
-                    trackBar.Value = sliderValue;
-                    numericUpDown1.Value = sliderValue;
+                    trackBar.Value = (int)Math.Max(0, Math.Min(100, Math.Round((sliderValue - Range.Begin) *100.0 / (Range.End - Range.Begin))));
+                    numericUpDown1.Value = (decimal)sliderValue;
 
                     if (EnableValueChangedEvent)
                     {
@@ -132,17 +193,17 @@ namespace OpenIris.UI
         /// <param name="e">Event parameters.</param>
         protected void OnValueChanged(EventArgs e)
         {
-            this.ValueChanged?.Invoke(this, e);
+            ValueChanged?.Invoke(this, e);
         }
 
         private void trackBar_Scroll(object sender, EventArgs e)
         {
-            this.Value = this.trackBar.Value;
+            Value = trackBar.Value / 100.0 * (Range.End - Range.Begin) + Range.Begin;
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            this.Value = (int)this.numericUpDown1.Value;
+            Value = (double)numericUpDown1.Value;
         }
     }
 }

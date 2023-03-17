@@ -25,14 +25,14 @@ namespace OpenIris
     /// <summary>
     /// Micromedical eye tracking system system.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Interacoustics", typeof(EyeTrackingSystemSettingsInteracoustics))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Interacoustics", typeof(EyeTrackingSystemSettingsInteracoustics))]
     public class EyeTrackingSystemInteracoustics : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsInteracoustics;
 
@@ -200,7 +200,7 @@ namespace OpenIris
     {
         public EyeTrackingSystemSettingsInteracoustics()
         {
-            MmPerPix = 0.15;
+            PixPerMm = 6;
             DistanceCameraToEyeMm = 70;
             AutoExposure = false;
         }

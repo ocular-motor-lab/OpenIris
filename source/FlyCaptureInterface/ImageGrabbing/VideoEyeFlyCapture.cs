@@ -142,10 +142,7 @@ namespace OpenIris.ImageGrabbing
             var frameCounter = BitConverter.ToUInt32(frameCounterBytes, 0);
 
             // Create the EyeTrackerTimestamp
-            ImageEyeTimestamp eyeTrackerTimeStamp = new ImageEyeTimestamp();
-            eyeTrackerTimeStamp.Seconds = seconds;
-            eyeTrackerTimeStamp.FrameNumber = (ulong)frameCounter;
-            eyeTrackerTimeStamp.FrameNumberRaw = (ulong)frameCounter;
+            ImageEyeTimestamp eyeTrackerTimeStamp = new ImageEyeTimestamp(seconds, frameCounter, frameCounter);
 
             return eyeTrackerTimeStamp;
         }

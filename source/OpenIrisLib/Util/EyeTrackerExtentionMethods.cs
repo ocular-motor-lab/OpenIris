@@ -11,6 +11,7 @@ namespace OpenIris
     using Emgu.CV.Structure;
     using System;
     using System.Drawing;
+    using System.Numerics;
 
     /// <summary>
     /// Extension methods
@@ -31,8 +32,6 @@ namespace OpenIris
         /// <returns></returns>
         public static Size GetFrameSize(this EyeCollection<ImageEye?> images)
         {
-            if (images is null) throw new ArgumentNullException(nameof(images));
-
             return images[0]?.Size ?? images[1]?.Size ?? throw new InvalidOperationException("No images");
         }
 
@@ -43,8 +42,6 @@ namespace OpenIris
         /// <returns></returns>
         public static Size GetFrameSize(this EyeCollection<(Eye, Image<Gray, byte>?)> images)
         {
-            if (images is null) throw new ArgumentNullException(nameof(images));
-
             return images[0].Item2?.Size ?? images[1].Item2?.Size ?? throw new InvalidOperationException("No images");
         }
 
@@ -55,9 +52,13 @@ namespace OpenIris
         /// <returns></returns>
         public static long GetFrameNumber(this EyeCollection<ImageEye?> images)
         {
-            if (images is null) throw new ArgumentNullException(nameof(images));
-
             return (long)(images[0]?.TimeStamp.FrameNumber ?? images[1]?.TimeStamp.FrameNumber ?? throw new InvalidOperationException("No images"));
         }
+
+
+        public static Vector2 Round(Vector2 V) => new Vector2((float)Math.Round(V.X), (float)Math.Round(V.Y));
+        public static Vector2 Max(Vector2 V1, Vector2 V2) => Vector2.Max(V1, V2);
+        public static Vector2 Min(Vector2 V1, Vector2 V2) => Vector2.Min(V1, V2);
+        public static Vector2 ToVector2(PointF P) => new Vector2(P.X, P.Y);
     }
 }

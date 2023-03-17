@@ -13,7 +13,7 @@ namespace OpenIris
     /// <summary>
     /// Labyrinth system.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("LabyrinthJOM", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("LabyrinthJOM", typeof(EyeTrackingSystemSettings))]
     public class EyeTrackingSystemLabyrinth : EyeTrackingSystemBase
     {
         private CameraEyeFlyCapture camera;
@@ -22,7 +22,7 @@ namespace OpenIris
         /// Gets the cameras. In this case just one single camera.
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
 
             this.camera = new CameraEyeFlyCapture(Eye.Both, Settings.FrameRate, new Rectangle(16 - 16, 250, 1264, 350));
@@ -38,7 +38,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="images">Raw image from the camera.</param>
         /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)
+        public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
         {
             ImageEye imageLeft = null;
             ImageEye imageRight = null;

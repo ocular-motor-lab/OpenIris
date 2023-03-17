@@ -11,7 +11,7 @@ namespace OpenIris.ImageGrabbing
     /// This camera actually uses a video but it does behave like a camera in most senses
     /// and it is very useful to debug.
     /// </summary>
-    public sealed class CameraEyeVideoSimulation : CameraEye, IDisposable
+    public sealed class CameraEyeVideoSimulation : CameraEye
     { 
         private readonly VideoEye videoEye;    
         private long numberFramesGrabbed;
@@ -31,14 +31,6 @@ namespace OpenIris.ImageGrabbing
             FrameSize = videoEye.FrameSize;
             CameraOrientation = videoEye.CameraOrientation;
         }
-        
-        /// <summary>
-        /// Disposes reserouces.
-        /// </summary>
-        public void Dispose()
-        {
-            videoEye?.Dispose();
-        }
 
         /// <summary>
         /// Gets the number of frames of the video.
@@ -54,17 +46,22 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// Starts the camera.
         /// </summary>
-        public override void Start()
-        {
-            videoEye.Start();
-        }
+        public override void Start() => videoEye.Start();
 
         /// <summary>
         /// Stops the camera
         /// </summary>
-        public override void Stop()
+        public override void Stop() => videoEye.Stop();
+
+        /// <summary>
+        /// Disposes reserouces.
+        /// </summary>
+        protected override void Dispose(bool disposing)
         {
-            videoEye.Stop();
+            if (disposing)
+            {
+                videoEye?.Dispose();
+            }
         }
 
         /// <summary>
@@ -74,7 +71,8 @@ namespace OpenIris.ImageGrabbing
         protected override ImageEye GrabImageFromCamera()
         {
             // If reached the end of the video loop
-            if (videoEye.LastFrameNumber >= LoopAtFrame) videoEye.Scroll(0);
+            if (videoEye.LastFrameNumber >= LoopAtFrame) 
+                videoEye.Scroll(1);
 
             ImageEye image = videoEye.GrabImageEyeFromVideo();
             numberFramesGrabbed++;
@@ -86,7 +84,6 @@ namespace OpenIris.ImageGrabbing
             var newTimeStamp = image.TimeStamp;
             newTimeStamp.FrameNumber = (ulong)numberFramesGrabbed;
             image.TimeStamp = newTimeStamp;
-
 
             return image;
         }

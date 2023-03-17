@@ -12,11 +12,11 @@ using System.Windows.Forms;
 
 namespace SpinnakerInterface
 {
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Spinnaker Test", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Test", typeof(EyeTrackingSystemSettings))]
 
     class SpinnakerTestSystem : EyeTrackingSystemBase
     {
-        public override EyeCollection<CameraEye> CreateCameras()
+        public override EyeCollection<CameraEye> CreateAndStartCameras()
         {
             var CAMLIST = SpinnakerCameraEye.EnumerateCameras();
             if (CAMLIST == null) return null;

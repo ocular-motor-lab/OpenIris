@@ -1,6 +1,5 @@
-﻿
-//-----------------------------------------------------------------------
-// <copyright file="IEyeTrackingPipeline.cs">
+﻿//-----------------------------------------------------------------------
+// <copyright file="EyeTrackingPipelineBase.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -9,34 +8,106 @@ namespace OpenIris
 #nullable enable
 
     using Emgu.CV;
+    using Emgu.CV.Cvb;
     using Emgu.CV.Structure;
     using System;
-    using System.Linq;
-    using System.Drawing;
     using System.ComponentModel;
+    using System.Drawing;
+    using System.Linq;
+    using System.Collections.Generic;
+    using OpenIris.UI;
     using System.Runtime.Serialization;
     using System.Xml.Serialization;
 
     /// <summary>
-    /// Interface for all eye tracking pipelines that process images to get data.
+    /// Base class for all eye tracking pipelines that process images to get data.
     /// </summary>
-    public interface IEyeTrackingPipeline
+    public abstract class EyeTrackingPipelineBase : IDisposable
     {
         /// <summary>
-        /// Process the images to get data.
+        /// Name of the pipeline.
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Which eye is this pipeline for.
+        /// </summary>
+        public Eye WhichEye { get; private set; }
+
+        /// <summary>
+        /// Settings for the pipeline processing.
+        /// </summary>
+        public EyeTrackingPipelineSettings Settings { get; private set; }
+
+        /// <summary>
+        /// Initializes an instance.
+        /// </summary>
+        protected EyeTrackingPipelineBase()
+        {
+            Settings = new EyeTrackingPipelineSettings();
+            Name = string.Empty;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="name">Name of the pipeline.</param>
+        /// <param name="eye">Which eye is the pipeline for.</param>
+        /// <param name="settings">Settings of the pipeline.</param>
+        /// <returns>The system.</returns>
+        public static EyeTrackingPipelineBase Create(string name, Eye eye, EyeTrackingPipelineSettings? settings = null)
+        {
+            var pipeline = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.Create(name)
+                ?? throw new OpenIrisException("Bad system");
+            settings ??= EyeTrackerPluginManager.EyeTrackingPipelineFactory?.GetDefaultSettings(name) as EyeTrackingPipelineSettings
+                ?? throw new OpenIrisException("Bad settings");
+
+            pipeline.Name = name;
+            pipeline.WhichEye = eye;
+            pipeline.Settings = settings;
+
+            return pipeline;
+        }
+
+        /// <summary>
+        /// Disposes objects.
+        /// </summary>
+        public virtual void Dispose()
+        {
+        }
+
+        /// <summary>
+        /// Process images.
         /// </summary>
         /// <param name="imageEye"></param>
         /// <param name="eyeCalibrationParameters"></param>
-        /// <param name="trackingSettings"></param>
         /// <returns></returns>
-        (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings trackingSettings);
+        public abstract (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters);
 
         /// <summary>
-        /// Get the UI to change parameters of the eye tracking pipeline.
+        /// Updates the image of the eye on the setup tab.
         /// </summary>
-        /// <param name="whichEye"></param>
+        /// <param name="whichEye">Which eye to draw.</param>
+        /// <param name="dataAndImages">Data of the corresponding image.</param>
+        /// <returns>The new image with all the overlay of the data.</returns>
+        public virtual IInputArray? UpdatePipelineEyeImage(Eye whichEye, EyeTrackerImagesAndData dataAndImages)
+        {
+            if (dataAndImages is null) return null;
+
+            return ImageEyeBox.DrawAllData(
+                                    dataAndImages.Images[whichEye],
+                                    dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
+                                    dataAndImages.TrackingSettings);
+        }
+
+        /// <summary>
+        /// Get the list of tracking settings that will be shown as sliders in the setup UI.
+        /// </summary>
         /// <returns></returns>
-        EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string name);
+        public virtual List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList()
+        {
+            return null;
+        }
     }
 
     /// <summary>
@@ -55,20 +126,6 @@ namespace OpenIris
         public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingPipelineSettings))).ToArray();
 
         /// <summary>
-        /// Initializes the settings.
-        /// </summary>
-        public EyeTrackingPipelineSettings()
-        {
-            EyeTrackingPipelineName = "JOM";
-        }
-
-        /// <summary>
-        /// Name of the pipeline will be automatically set.
-        /// </summary>
-        [Browsable(false)]
-        public string EyeTrackingPipelineName { get; set; }
-
-        /// <summary>
         /// Gets or sets the minimum radius of the pupil. This is a bit complicated. 
         /// The mm per pixel is a setting that depends on the eye tracking system, resolution of the cameras and distance to 
         /// the eyes. Whenever the eye tracking system is changed it will also change this setting. That way all the settings
@@ -78,7 +135,7 @@ namespace OpenIris
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]
-        public Func<double> GetMmPerPix { get; set; } = () => 0.1;
+        public double MmPerPix { get; set; } = 0.1;
 
         /// <summary>
         /// Gets or sets the left part to the frame that is not processed. Right, top, left, bottom.

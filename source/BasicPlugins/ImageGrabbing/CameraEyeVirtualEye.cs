@@ -34,6 +34,7 @@ namespace OpenIris.ImageGrabbing
         {
             WhichEye = whichEye;
             FrameSize = new Size(400, 400);
+            FrameRate = 50;
             UI = controller;
             initialTime = DateTime.Now;
 
@@ -126,16 +127,16 @@ namespace OpenIris.ImageGrabbing
             image.Draw(new LineSegment2D(new Point(0, (int)pupilCenter.Y - 200), new Point(400, (int)pupilCenter.Y - 200)), new Gray(80), 40);
 
             ImageEyeTimestamp t = new ImageEyeTimestamp
-            {
-                FrameNumber = (ulong)numberFramesGrabbed,
-                FrameNumberRaw = (ulong)numberFramesGrabbed,
-                Seconds = (DateTime.Now - initialTime).TotalSeconds,
-            };
+            (
+                seconds: (DateTime.Now - initialTime).TotalSeconds,
+                frameNumber : (ulong)numberFramesGrabbed,
+                frameNumberRaw: (ulong)numberFramesGrabbed
+            );
 
             numberFramesGrabbed++;
             timeLastImage = t.DateTimeGrabbed;
 
-            System.Threading.Thread.Sleep((int)Math.Max(0, 10 - (t.DateTimeGrabbed - timeLastImage).TotalMilliseconds));
+            System.Threading.Thread.Sleep(5);
             var newImage = new ImageEye(image, WhichEye, t, null);
             return newImage;
         }

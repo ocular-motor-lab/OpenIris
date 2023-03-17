@@ -40,12 +40,15 @@ namespace OpenIris.ImageGrabbing
             FrameRate = capture.GetCaptureProperty(Emgu.CV.CvEnum.CapProp.Fps);
         }
 
-        /// <summary>
-        /// Disposes reserouces.
-        /// </summary>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            capture.Dispose();
+            if (disposing)
+            {
+                capture.Stop();
+                capture.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -71,11 +74,10 @@ namespace OpenIris.ImageGrabbing
         protected override ImageEye GrabImageFromCamera()
         {
             // Set up the timestamp for the image
-            ImageEyeTimestamp timestamp = new ImageEyeTimestamp
-            {
-                FrameNumber = (ulong)numberFramesGabbed++,
-                Seconds = EyeTrackerDebug.TimeElapsed.Milliseconds / 1000
-            };
+            ImageEyeTimestamp timestamp = new ImageEyeTimestamp(
+                EyeTrackerDebug.TimeElapsed.Milliseconds / 1000,
+                (ulong)numberFramesGabbed++,
+                (ulong)numberFramesGabbed);
 
             // Retrieve the new frame
             var tempImage = capture.QueryFrame().ToImage<Gray, byte>();

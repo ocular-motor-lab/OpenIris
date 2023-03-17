@@ -16,14 +16,14 @@ namespace OpenIris
     /// <summary>
     /// Generic system with any one camera.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Single webcam", typeof(EyeTrackingSystemSettingsWebCam), VideoEyeConfiguration.SingleVideoOneEye)]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Single webcam", typeof(EyeTrackingSystemSettingsWebCam), VideoEyeConfiguration.SingleVideoOneEye)]
     public class EyeTrackingSystemSingleWebCam : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye?> CreateCameras()
+        public override EyeCollection<CameraEye?> CreateAndStartCameras()
         {
             var cameraSettings = Settings as EyeTrackingSystemSettingsWebCam
                 ?? throw new InvalidOperationException("Wrong type of settings;");
@@ -49,20 +49,7 @@ namespace OpenIris
         /// This method would be where the image gets split into two.</remarks>
         /// <param name="images">Images captured from the cameras.</param>
         /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye?> PreProcessImagesFromVideos(EyeCollection<ImageEye?> images)
-        {
-            return PreProcessImagesFromCameras(images);
-        }
-
-        /// <summary>
-        /// Prepares images for processing. Split, rotate, etc. 
-        /// </summary>
-        /// <remarks>An specific implementation of ImageEyeGrabber can optionally override this 
-        /// method to prepare the images. For instance, if a system has only one camera capturing both eyes.
-        /// This method would be where the image gets split into two.</remarks>
-        /// <param name="images">Images captured from the cameras.</param>
-        /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye?> PreProcessImagesFromCameras(EyeCollection<ImageEye?>  images)
+        public override EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?>  images)
         {
             if (images.Count == 1 && images[0]?.WhichEye == Eye.Both)
             {

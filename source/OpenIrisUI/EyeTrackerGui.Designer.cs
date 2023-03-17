@@ -90,12 +90,6 @@ namespace OpenIris.UI
             this.buttonProcessVideo = new System.Windows.Forms.Button();
             this.tabSetup = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.panelPipelineQuickSettingsLeftEye = new System.Windows.Forms.Panel();
-            this.imageBoxLeftEye = new Emgu.CV.UI.ImageBox();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.panelPipelineQuickSettingsRightEye = new System.Windows.Forms.Panel();
-            this.imageBoxRightEye = new Emgu.CV.UI.ImageBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.textBoxSession = new System.Windows.Forms.TextBox();
@@ -118,6 +112,19 @@ namespace OpenIris.UI
             this.buttonMoveRightEyeLeft = new System.Windows.Forms.Button();
             this.buttonCalibrate = new System.Windows.Forms.Button();
             this.buttonRecord = new System.Windows.Forms.Button();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
+            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+            this.imageBoxIrisLeft = new Emgu.CV.UI.ImageBox();
+            this.imageBoxIrisRefeferenceLeft = new Emgu.CV.UI.ImageBox();
+            this.imageBoxLeftEye = new Emgu.CV.UI.ImageBox();
+            this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
+            this.imageBoxIrisRight = new Emgu.CV.UI.ImageBox();
+            this.imageBoxIrisRefeferenceRight = new Emgu.CV.UI.ImageBox();
+            this.imageBoxRightEye = new Emgu.CV.UI.ImageBox();
+            this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
+            this.panelPipelineQuickSettingsRightEye = new System.Windows.Forms.Panel();
+            this.panelPipelineQuickSettingsLeftEye = new System.Windows.Forms.Panel();
             this.tabCalibration = new System.Windows.Forms.TabPage();
             this.tabViewer = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -138,6 +145,7 @@ namespace OpenIris.UI
             this.panelPlayer = new System.Windows.Forms.Panel();
             this.videoPlayerUI = new OpenIris.UI.VideoPlayerUI();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.convertVideoToMP4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStripMainMenu.SuspendLayout();
             this.tabPages.SuspendLayout();
@@ -146,15 +154,25 @@ namespace OpenIris.UI
             this.panel5.SuspendLayout();
             this.tabSetup.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
-            this.panel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEye)).BeginInit();
-            this.panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEye)).BeginInit();
             this.panel1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panelCameraControl.SuspendLayout();
             this.groupBoxCameraPosition.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).BeginInit();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
+            this.tableLayoutPanel2.SuspendLayout();
+            this.tableLayoutPanel6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisLeft)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRefeferenceLeft)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEye)).BeginInit();
+            this.tableLayoutPanel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRight)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRefeferenceRight)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEye)).BeginInit();
+            this.tableLayoutPanel3.SuspendLayout();
             this.tabViewer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -381,6 +399,7 @@ namespace OpenIris.UI
             this.openSoundRecorderToolStripMenuItem,
             this.openLogFolderToolStripMenuItem,
             this.batchAnalysisToolStripMenuItem,
+            this.convertVideoToMP4ToolStripMenuItem,
             this.convertVideoToRGBToolStripMenuItem,
             this.showIPNetworkInfoToolStripMenuItem,
             this.trimVideosToolStripMenuItem});
@@ -410,7 +429,7 @@ namespace OpenIris.UI
             // 
             this.convertVideoToRGBToolStripMenuItem.Name = "convertVideoToRGBToolStripMenuItem";
             this.convertVideoToRGBToolStripMenuItem.Size = new System.Drawing.Size(290, 34);
-            this.convertVideoToRGBToolStripMenuItem.Text = "ConvertVideoToRGB";
+            this.convertVideoToRGBToolStripMenuItem.Text = "Convert video to RGB";
             // 
             // showIPNetworkInfoToolStripMenuItem
             // 
@@ -435,7 +454,7 @@ namespace OpenIris.UI
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(164, 34);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.aboutToolStripMenuItem.Text = "About";
             // 
             // systemToolStripMenuItem
@@ -509,7 +528,7 @@ namespace OpenIris.UI
             this.panel5.Controls.Add(this.label5);
             this.panel5.Controls.Add(this.buttonPlayVideo);
             this.panel5.Controls.Add(this.buttonProcessVideo);
-            this.panel5.Location = new System.Drawing.Point(640, 223);
+            this.panel5.Location = new System.Drawing.Point(640, 222);
             this.panel5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel5.Name = "panel5";
             this.panel5.Size = new System.Drawing.Size(420, 361);
@@ -573,106 +592,27 @@ namespace OpenIris.UI
             this.tabSetup.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabSetup.Name = "tabSetup";
             this.tabSetup.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabSetup.Size = new System.Drawing.Size(1652, 923);
+            this.tabSetup.Size = new System.Drawing.Size(1652, 928);
             this.tabSetup.TabIndex = 0;
             this.tabSetup.Text = "Set up";
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.BackColor = System.Drawing.SystemColors.Control;
-            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 402F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 452F));
-            this.tableLayoutPanel1.Controls.Add(this.panel3, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.panel2, 1, 0);
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.splitContainer2, 1, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 5);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 912F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 912F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1644, 913);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1644, 918);
             this.tableLayoutPanel1.TabIndex = 28;
-            // 
-            // panel3
-            // 
-            this.panel3.Controls.Add(this.panelPipelineQuickSettingsLeftEye);
-            this.panel3.Controls.Add(this.imageBoxLeftEye);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(1027, 5);
-            this.panel3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(613, 903);
-            this.panel3.TabIndex = 41;
-            // 
-            // panelPipelineQuickSettingsLeftEye
-            // 
-            this.panelPipelineQuickSettingsLeftEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelPipelineQuickSettingsLeftEye.Location = new System.Drawing.Point(6, 575);
-            this.panelPipelineQuickSettingsLeftEye.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.panelPipelineQuickSettingsLeftEye.Name = "panelPipelineQuickSettingsLeftEye";
-            this.panelPipelineQuickSettingsLeftEye.Size = new System.Drawing.Size(605, 349);
-            this.panelPipelineQuickSettingsLeftEye.TabIndex = 32;
-            // 
-            // imageBoxLeftEye
-            // 
-            this.imageBoxLeftEye.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.imageBoxLeftEye.BackColor = System.Drawing.SystemColors.Control;
-            this.imageBoxLeftEye.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
-            this.imageBoxLeftEye.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
-            this.imageBoxLeftEye.Location = new System.Drawing.Point(6, 5);
-            this.imageBoxLeftEye.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.imageBoxLeftEye.Name = "imageBoxLeftEye";
-            this.imageBoxLeftEye.Size = new System.Drawing.Size(605, 560);
-            this.imageBoxLeftEye.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.imageBoxLeftEye.TabIndex = 29;
-            this.imageBoxLeftEye.TabStop = false;
-            // 
-            // panel2
-            // 
-            this.panel2.BackColor = System.Drawing.SystemColors.Control;
-            this.panel2.Controls.Add(this.panelPipelineQuickSettingsRightEye);
-            this.panel2.Controls.Add(this.imageBoxRightEye);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(406, 5);
-            this.panel2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(613, 903);
-            this.panel2.TabIndex = 41;
-            // 
-            // panelPipelineQuickSettingsRightEye
-            // 
-            this.panelPipelineQuickSettingsRightEye.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelPipelineQuickSettingsRightEye.Location = new System.Drawing.Point(9, 575);
-            this.panelPipelineQuickSettingsRightEye.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.panelPipelineQuickSettingsRightEye.Name = "panelPipelineQuickSettingsRightEye";
-            this.panelPipelineQuickSettingsRightEye.Size = new System.Drawing.Size(606, 349);
-            this.panelPipelineQuickSettingsRightEye.TabIndex = 31;
-            // 
-            // imageBoxRightEye
-            // 
-            this.imageBoxRightEye.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.imageBoxRightEye.BackColor = System.Drawing.SystemColors.Control;
-            this.imageBoxRightEye.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
-            this.imageBoxRightEye.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
-            this.imageBoxRightEye.Location = new System.Drawing.Point(9, 5);
-            this.imageBoxRightEye.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.imageBoxRightEye.Name = "imageBoxRightEye";
-            this.imageBoxRightEye.Size = new System.Drawing.Size(606, 560);
-            this.imageBoxRightEye.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.imageBoxRightEye.TabIndex = 30;
-            this.imageBoxRightEye.TabStop = false;
             // 
             // panel1
             // 
@@ -687,7 +627,7 @@ namespace OpenIris.UI
             this.panel1.Location = new System.Drawing.Point(4, 5);
             this.panel1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(394, 903);
+            this.panel1.Size = new System.Drawing.Size(394, 908);
             this.panel1.TabIndex = 27;
             // 
             // groupBox2
@@ -771,7 +711,7 @@ namespace OpenIris.UI
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(383, 307);
+            this.richTextBox1.Size = new System.Drawing.Size(383, 357);
             this.richTextBox1.TabIndex = 37;
             this.richTextBox1.Text = "";
             this.richTextBox1.WordWrap = false;
@@ -951,6 +891,196 @@ namespace OpenIris.UI
             this.buttonRecord.Text = "Start recording";
             this.buttonRecord.UseVisualStyleBackColor = true;
             // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.Location = new System.Drawing.Point(405, 2);
+            this.splitContainer2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.tableLayoutPanel2);
+            this.splitContainer2.Panel1MinSize = 200;
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.tableLayoutPanel3);
+            this.splitContainer2.Panel2MinSize = 200;
+            this.splitContainer2.Size = new System.Drawing.Size(1236, 914);
+            this.splitContainer2.SplitterDistance = 591;
+            this.splitContainer2.TabIndex = 28;
+            // 
+            // tableLayoutPanel2
+            // 
+            this.tableLayoutPanel2.BackColor = System.Drawing.Color.Black;
+            this.tableLayoutPanel2.ColumnCount = 2;
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel6, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel4, 0, 0);
+            this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            this.tableLayoutPanel2.RowCount = 1;
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1236, 591);
+            this.tableLayoutPanel2.TabIndex = 0;
+            // 
+            // tableLayoutPanel6
+            // 
+            this.tableLayoutPanel6.ColumnCount = 1;
+            this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel6.Controls.Add(this.imageBoxIrisLeft, 0, 2);
+            this.tableLayoutPanel6.Controls.Add(this.imageBoxIrisRefeferenceLeft, 0, 1);
+            this.tableLayoutPanel6.Controls.Add(this.imageBoxLeftEye, 0, 0);
+            this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel6.Location = new System.Drawing.Point(621, 4);
+            this.tableLayoutPanel6.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tableLayoutPanel6.Name = "tableLayoutPanel6";
+            this.tableLayoutPanel6.RowCount = 3;
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(612, 583);
+            this.tableLayoutPanel6.TabIndex = 1;
+            // 
+            // imageBoxIrisLeft
+            // 
+            this.imageBoxIrisLeft.BackColor = System.Drawing.Color.Black;
+            this.imageBoxIrisLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imageBoxIrisLeft.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
+            this.imageBoxIrisLeft.Location = new System.Drawing.Point(4, 528);
+            this.imageBoxIrisLeft.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.imageBoxIrisLeft.Name = "imageBoxIrisLeft";
+            this.imageBoxIrisLeft.Size = new System.Drawing.Size(604, 50);
+            this.imageBoxIrisLeft.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.imageBoxIrisLeft.TabIndex = 38;
+            this.imageBoxIrisLeft.TabStop = false;
+            // 
+            // imageBoxIrisRefeferenceLeft
+            // 
+            this.imageBoxIrisRefeferenceLeft.BackColor = System.Drawing.Color.Black;
+            this.imageBoxIrisRefeferenceLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imageBoxIrisRefeferenceLeft.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
+            this.imageBoxIrisRefeferenceLeft.Location = new System.Drawing.Point(4, 468);
+            this.imageBoxIrisRefeferenceLeft.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.imageBoxIrisRefeferenceLeft.Name = "imageBoxIrisRefeferenceLeft";
+            this.imageBoxIrisRefeferenceLeft.Size = new System.Drawing.Size(604, 50);
+            this.imageBoxIrisRefeferenceLeft.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.imageBoxIrisRefeferenceLeft.TabIndex = 37;
+            this.imageBoxIrisRefeferenceLeft.TabStop = false;
+            // 
+            // imageBoxLeftEye
+            // 
+            this.imageBoxLeftEye.BackColor = System.Drawing.Color.Black;
+            this.imageBoxLeftEye.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imageBoxLeftEye.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
+            this.imageBoxLeftEye.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
+            this.imageBoxLeftEye.Location = new System.Drawing.Point(4, 5);
+            this.imageBoxLeftEye.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.imageBoxLeftEye.Name = "imageBoxLeftEye";
+            this.imageBoxLeftEye.Size = new System.Drawing.Size(604, 453);
+            this.imageBoxLeftEye.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.imageBoxLeftEye.TabIndex = 29;
+            this.imageBoxLeftEye.TabStop = false;
+            // 
+            // tableLayoutPanel4
+            // 
+            this.tableLayoutPanel4.ColumnCount = 1;
+            this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.Controls.Add(this.imageBoxIrisRight, 0, 2);
+            this.tableLayoutPanel4.Controls.Add(this.imageBoxIrisRefeferenceRight, 0, 1);
+            this.tableLayoutPanel4.Controls.Add(this.imageBoxRightEye, 0, 0);
+            this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 4);
+            this.tableLayoutPanel4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.RowCount = 3;
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 60F));
+            this.tableLayoutPanel4.Size = new System.Drawing.Size(612, 583);
+            this.tableLayoutPanel4.TabIndex = 0;
+            // 
+            // imageBoxIrisRight
+            // 
+            this.imageBoxIrisRight.BackColor = System.Drawing.Color.Black;
+            this.imageBoxIrisRight.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imageBoxIrisRight.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
+            this.imageBoxIrisRight.Location = new System.Drawing.Point(4, 528);
+            this.imageBoxIrisRight.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.imageBoxIrisRight.Name = "imageBoxIrisRight";
+            this.imageBoxIrisRight.Size = new System.Drawing.Size(604, 50);
+            this.imageBoxIrisRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.imageBoxIrisRight.TabIndex = 38;
+            this.imageBoxIrisRight.TabStop = false;
+            // 
+            // imageBoxIrisRefeferenceRight
+            // 
+            this.imageBoxIrisRefeferenceRight.BackColor = System.Drawing.Color.Black;
+            this.imageBoxIrisRefeferenceRight.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imageBoxIrisRefeferenceRight.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
+            this.imageBoxIrisRefeferenceRight.Location = new System.Drawing.Point(4, 468);
+            this.imageBoxIrisRefeferenceRight.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.imageBoxIrisRefeferenceRight.Name = "imageBoxIrisRefeferenceRight";
+            this.imageBoxIrisRefeferenceRight.Size = new System.Drawing.Size(604, 50);
+            this.imageBoxIrisRefeferenceRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.imageBoxIrisRefeferenceRight.TabIndex = 37;
+            this.imageBoxIrisRefeferenceRight.TabStop = false;
+            // 
+            // imageBoxRightEye
+            // 
+            this.imageBoxRightEye.BackColor = System.Drawing.Color.Black;
+            this.imageBoxRightEye.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.imageBoxRightEye.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.RightClickMenu;
+            this.imageBoxRightEye.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
+            this.imageBoxRightEye.Location = new System.Drawing.Point(4, 5);
+            this.imageBoxRightEye.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.imageBoxRightEye.Name = "imageBoxRightEye";
+            this.imageBoxRightEye.Size = new System.Drawing.Size(604, 453);
+            this.imageBoxRightEye.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.imageBoxRightEye.TabIndex = 30;
+            this.imageBoxRightEye.TabStop = false;
+            // 
+            // tableLayoutPanel3
+            // 
+            this.tableLayoutPanel3.ColumnCount = 2;
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.Controls.Add(this.panelPipelineQuickSettingsRightEye, 0, 0);
+            this.tableLayoutPanel3.Controls.Add(this.panelPipelineQuickSettingsLeftEye, 1, 0);
+            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tableLayoutPanel3.Name = "tableLayoutPanel3";
+            this.tableLayoutPanel3.RowCount = 1;
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(1236, 319);
+            this.tableLayoutPanel3.TabIndex = 1;
+            // 
+            // panelPipelineQuickSettingsRightEye
+            // 
+            this.panelPipelineQuickSettingsRightEye.AutoScroll = true;
+            this.panelPipelineQuickSettingsRightEye.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelPipelineQuickSettingsRightEye.Location = new System.Drawing.Point(3, 2);
+            this.panelPipelineQuickSettingsRightEye.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.panelPipelineQuickSettingsRightEye.Name = "panelPipelineQuickSettingsRightEye";
+            this.panelPipelineQuickSettingsRightEye.Size = new System.Drawing.Size(612, 315);
+            this.panelPipelineQuickSettingsRightEye.TabIndex = 31;
+            // 
+            // panelPipelineQuickSettingsLeftEye
+            // 
+            this.panelPipelineQuickSettingsLeftEye.AutoScroll = true;
+            this.panelPipelineQuickSettingsLeftEye.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelPipelineQuickSettingsLeftEye.Location = new System.Drawing.Point(621, 2);
+            this.panelPipelineQuickSettingsLeftEye.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.panelPipelineQuickSettingsLeftEye.Name = "panelPipelineQuickSettingsLeftEye";
+            this.panelPipelineQuickSettingsLeftEye.Size = new System.Drawing.Size(612, 315);
+            this.panelPipelineQuickSettingsLeftEye.TabIndex = 32;
+            // 
             // tabCalibration
             // 
             this.tabCalibration.ImageIndex = 2;
@@ -958,7 +1088,7 @@ namespace OpenIris.UI
             this.tabCalibration.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabCalibration.Name = "tabCalibration";
             this.tabCalibration.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabCalibration.Size = new System.Drawing.Size(1652, 923);
+            this.tabCalibration.Size = new System.Drawing.Size(1652, 928);
             this.tabCalibration.TabIndex = 4;
             this.tabCalibration.Text = "Calibration";
             this.tabCalibration.UseVisualStyleBackColor = true;
@@ -972,7 +1102,7 @@ namespace OpenIris.UI
             this.tabViewer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabViewer.Name = "tabViewer";
             this.tabViewer.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabViewer.Size = new System.Drawing.Size(1652, 923);
+            this.tabViewer.Size = new System.Drawing.Size(1652, 928);
             this.tabViewer.TabIndex = 1;
             this.tabViewer.Text = "Viewer";
             // 
@@ -991,8 +1121,8 @@ namespace OpenIris.UI
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.eyeTrackerTrace);
-            this.splitContainer1.Size = new System.Drawing.Size(1644, 913);
-            this.splitContainer1.SplitterDistance = 207;
+            this.splitContainer1.Size = new System.Drawing.Size(1644, 918);
+            this.splitContainer1.SplitterDistance = 204;
             this.splitContainer1.SplitterWidth = 6;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -1011,7 +1141,7 @@ namespace OpenIris.UI
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(1644, 207);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(1644, 204);
             this.tableLayoutPanel5.TabIndex = 37;
             // 
             // eyeTrackerImageEyeBoxLeftEyeSmall
@@ -1021,7 +1151,7 @@ namespace OpenIris.UI
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Location = new System.Drawing.Point(661, 5);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Name = "eyeTrackerImageEyeBoxLeftEyeSmall";
-            this.eyeTrackerImageEyeBoxLeftEyeSmall.Size = new System.Drawing.Size(649, 197);
+            this.eyeTrackerImageEyeBoxLeftEyeSmall.Size = new System.Drawing.Size(649, 194);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.eyeTrackerImageEyeBoxLeftEyeSmall.TabIndex = 34;
             this.eyeTrackerImageEyeBoxLeftEyeSmall.TabStop = false;
@@ -1033,7 +1163,7 @@ namespace OpenIris.UI
             this.eyeTrackerImageEyeBoxRightEyeSmall.Location = new System.Drawing.Point(4, 5);
             this.eyeTrackerImageEyeBoxRightEyeSmall.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.eyeTrackerImageEyeBoxRightEyeSmall.Name = "eyeTrackerImageEyeBoxRightEyeSmall";
-            this.eyeTrackerImageEyeBoxRightEyeSmall.Size = new System.Drawing.Size(649, 197);
+            this.eyeTrackerImageEyeBoxRightEyeSmall.Size = new System.Drawing.Size(649, 194);
             this.eyeTrackerImageEyeBoxRightEyeSmall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.eyeTrackerImageEyeBoxRightEyeSmall.TabIndex = 0;
             this.eyeTrackerImageEyeBoxRightEyeSmall.TabStop = false;
@@ -1045,7 +1175,7 @@ namespace OpenIris.UI
             this.panelHeadViewer.Location = new System.Drawing.Point(1318, 5);
             this.panelHeadViewer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelHeadViewer.Name = "panelHeadViewer";
-            this.panelHeadViewer.Size = new System.Drawing.Size(322, 197);
+            this.panelHeadViewer.Size = new System.Drawing.Size(322, 194);
             this.panelHeadViewer.TabIndex = 35;
             // 
             // labelHeadData
@@ -1065,7 +1195,7 @@ namespace OpenIris.UI
             this.eyeTrackerTrace.Location = new System.Drawing.Point(0, 0);
             this.eyeTrackerTrace.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
             this.eyeTrackerTrace.Name = "eyeTrackerTrace";
-            this.eyeTrackerTrace.Size = new System.Drawing.Size(1644, 700);
+            this.eyeTrackerTrace.Size = new System.Drawing.Size(1644, 708);
             this.eyeTrackerTrace.TabIndex = 0;
             // 
             // tabDebug
@@ -1075,7 +1205,7 @@ namespace OpenIris.UI
             this.tabDebug.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabDebug.Name = "tabDebug";
             this.tabDebug.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabDebug.Size = new System.Drawing.Size(1652, 923);
+            this.tabDebug.Size = new System.Drawing.Size(1652, 928);
             this.tabDebug.TabIndex = 2;
             this.tabDebug.Text = "Debug";
             this.tabDebug.UseVisualStyleBackColor = true;
@@ -1086,7 +1216,7 @@ namespace OpenIris.UI
             this.panel6.Location = new System.Drawing.Point(4, 5);
             this.panel6.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(1644, 913);
+            this.panel6.Size = new System.Drawing.Size(1644, 918);
             this.panel6.TabIndex = 0;
             // 
             // tabTiming
@@ -1097,7 +1227,7 @@ namespace OpenIris.UI
             this.tabTiming.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabTiming.Name = "tabTiming";
             this.tabTiming.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabTiming.Size = new System.Drawing.Size(1652, 923);
+            this.tabTiming.Size = new System.Drawing.Size(1652, 928);
             this.tabTiming.TabIndex = 3;
             this.tabTiming.Text = "Timing";
             this.tabTiming.UseVisualStyleBackColor = true;
@@ -1131,7 +1261,7 @@ namespace OpenIris.UI
             this.tabPageLog.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPageLog.Name = "tabPageLog";
             this.tabPageLog.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.tabPageLog.Size = new System.Drawing.Size(1652, 923);
+            this.tabPageLog.Size = new System.Drawing.Size(1652, 928);
             this.tabPageLog.TabIndex = 5;
             this.tabPageLog.Text = "Log";
             this.tabPageLog.UseVisualStyleBackColor = true;
@@ -1144,7 +1274,7 @@ namespace OpenIris.UI
             this.richTextBoxLogLarge.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.richTextBoxLogLarge.Name = "richTextBoxLogLarge";
             this.richTextBoxLogLarge.ReadOnly = true;
-            this.richTextBoxLogLarge.Size = new System.Drawing.Size(1644, 913);
+            this.richTextBoxLogLarge.Size = new System.Drawing.Size(1644, 918);
             this.richTextBoxLogLarge.TabIndex = 0;
             this.richTextBoxLogLarge.Text = "";
             this.richTextBoxLogLarge.WordWrap = false;
@@ -1189,6 +1319,12 @@ namespace OpenIris.UI
             this.panel4.Size = new System.Drawing.Size(1660, 1011);
             this.panel4.TabIndex = 29;
             // 
+            // convertVideoToMP4ToolStripMenuItem
+            // 
+            this.convertVideoToMP4ToolStripMenuItem.Name = "convertVideoToMP4ToolStripMenuItem";
+            this.convertVideoToMP4ToolStripMenuItem.Size = new System.Drawing.Size(290, 34);
+            this.convertVideoToMP4ToolStripMenuItem.Text = "Convert video to MP4";
+            // 
             // EyeTrackerGui
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -1200,7 +1336,7 @@ namespace OpenIris.UI
             this.DoubleBuffered = true;
             this.MainMenuStrip = this.menuStripMainMenu;
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.MinimumSize = new System.Drawing.Size(942, 687);
+            this.MinimumSize = new System.Drawing.Size(941, 685);
             this.Name = "EyeTrackerGui";
             this.Text = "EyeTracker";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.EyeTrackerGUI_FormClosing);
@@ -1215,16 +1351,26 @@ namespace OpenIris.UI
             this.panel5.PerformLayout();
             this.tabSetup.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
-            this.panel3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEye)).EndInit();
-            this.panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEye)).EndInit();
             this.panel1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.panelCameraControl.ResumeLayout(false);
             this.groupBoxCameraPosition.ResumeLayout(false);
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
+            this.splitContainer2.ResumeLayout(false);
+            this.tableLayoutPanel2.ResumeLayout(false);
+            this.tableLayoutPanel6.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisLeft)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRefeferenceLeft)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxLeftEye)).EndInit();
+            this.tableLayoutPanel4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRight)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxIrisRefeferenceRight)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.imageBoxRightEye)).EndInit();
+            this.tableLayoutPanel3.ResumeLayout(false);
             this.tabViewer.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
@@ -1301,8 +1447,6 @@ namespace OpenIris.UI
         private System.Windows.Forms.ToolStripMenuItem showIPNetworkInfoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
-        private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.TabPage tabPageStart;
         private System.Windows.Forms.Button buttonStartTracking;
         private System.Windows.Forms.Button buttonProcessVideo;
@@ -1344,5 +1488,15 @@ namespace OpenIris.UI
         private System.Windows.Forms.ComboBox systemComboBox;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.LinkLabel linkLabelDataFolder2;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
+        private Emgu.CV.UI.ImageBox imageBoxIrisRefeferenceRight;
+        private Emgu.CV.UI.ImageBox imageBoxIrisRight;
+        private Emgu.CV.UI.ImageBox imageBoxIrisRefeferenceLeft;
+        private Emgu.CV.UI.ImageBox imageBoxIrisLeft;
+        private System.Windows.Forms.ToolStripMenuItem convertVideoToMP4ToolStripMenuItem;
     }
 }

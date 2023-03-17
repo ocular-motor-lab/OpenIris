@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using OpenIris.ImageProcessing;
+using OpenIris.UI;
 
 namespace SimpleEyeTrackerUI
 {
@@ -33,18 +34,12 @@ namespace SimpleEyeTrackerUI
             this.video = new VideoEye(Eye.Left, this.fileName);
 
             //======================================================================================
-            // Initialize eye tracker.
-            //======================================================================================
-            EyeTrackerPluginManager.Init(true);
-            this.imageProcessor = new EyeTrackingPipelineJOM();
-
-            //======================================================================================
             // Initialize settings.
             //======================================================================================
 
             // Some can go with default values. Others need to be set depending on the resolution and
             // brightnessof the image
-            this.settings = new EyeTrackingPipelineJOMSettings
+            var settings = new EyeTrackingPipelineJOMSettings
             {
 
                 // Select the specific algorithms to be used for each processing step.
@@ -72,7 +67,7 @@ namespace SimpleEyeTrackerUI
                 // mm per pixels in the image. Not critical for tracking to have a very precise value,
                 // just ballpark. Only used to transform minimum and maximum sizes from mm to pix that
                 // way only one setting needs to be changed when changing the eye tracker system.
-                GetMmPerPix = ()=>0.15,
+                MmPerPix = 0.15,
 
                 // Minimum size of the pupil in mm. Useful when identifying blobs.
                 MinPupRadmm = 1,
@@ -81,6 +76,12 @@ namespace SimpleEyeTrackerUI
                 // Maximum torsion allowed
                 MaxTorsion = 25
             };
+
+            //======================================================================================
+            // Initialize eye tracker.
+            //======================================================================================
+            EyeTrackerPluginManager.Init(true);
+            this.imageProcessor = EyeTrackingPipelineBase.Create("JOM", Eye.Left, settings) as EyeTrackingPipelineJOM;
 
             //======================================================================================
             // Initialize calibration.
@@ -94,7 +95,7 @@ namespace SimpleEyeTrackerUI
             this.calibration.SetEyeModel(new EyePhysicalModel(new PointF(175, 100), 160));
 
             var imageEye = this.video.GrabImageEye();
-            (imageEye.EyeData, imageEye.ImageTorsion) = this.imageProcessor.Process(imageEye, this.calibration, this.settings);
+            (imageEye.EyeData, imageEye.ImageTorsion) = this.imageProcessor.Process(imageEye, this.calibration);
 
             // Get the torsion reference image
             this.calibration.SetReference(imageEye);
@@ -117,7 +118,7 @@ namespace SimpleEyeTrackerUI
 
             // Complete procesing of the image, pupil, eyelids, torsion.The object processedImageEye
             // will contain the raw image but also the data obtained after the processing
-            (rawImageEye.EyeData, rawImageEye.ImageTorsion) = this.imageProcessor.Process(rawImageEye, this.calibration, this.settings);
+            (rawImageEye.EyeData, rawImageEye.ImageTorsion) = this.imageProcessor.Process(rawImageEye, this.calibration);
 
             //======================================================================================
             // Processing: Option 2 only eyelids, mask and torsion (asuming pupil position has been
@@ -176,7 +177,7 @@ namespace SimpleEyeTrackerUI
             // Update frame counter in UI
             toolStripTextBox1.Text = $"{this.video.LastFrameNumber}/{this.video.NumberOfFrames} frames";
 
-            var imageForDisplay = ImageEyeDrawing.DrawAllData(rawImageEye, this.calibration, this.settings);
+            var imageForDisplay = ImageEyeBox.DrawAllData(rawImageEye, this.calibration, this.settings);
 
             this.imageBoxEye.Image = imageForDisplay;
         }

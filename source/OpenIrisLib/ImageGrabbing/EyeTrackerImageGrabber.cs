@@ -27,17 +27,18 @@ namespace OpenIris
     /// </summary>
     public sealed class EyeTrackerImageGrabber
     {
+        private readonly int numberOfImageSources;
+        private readonly VideoPlayer? videoPlayer;
+        private readonly int bufferSize;
+
         private CancellationTokenSource? cancellation;
 
         private EyeCollection<IImageEyeSource?>? imageSources;
-        private int numberOfImageSources;
         private BlockingCollection<ImageEye>? cameraBuffer;
         private EyeCollection<Queue<ImageEye>?>? cameraQueues;
-        private readonly VideoPlayer? videoPlayer;
         private (double TimeStamp, long FrameCounter) lastCheckGrabbing;
         private bool started;
         private bool stopping;
-        private int bufferSize;
 
         /// <summary>
         /// 
@@ -63,9 +64,9 @@ namespace OpenIris
         /// <param name="bufferSize"></param>
         /// <returns></returns>
         /// <exception cref="OpenIrisException"></exception>
-        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(IEyeTrackingSystem eyeTrackingSystem, int bufferSize = 100)
+        internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(EyeTrackingSystemBase eyeTrackingSystem, int bufferSize = 100)
         {
-               var newSources = await Task.Run(() => eyeTrackingSystem.CreateCameras().Select(c => c as IImageEyeSource))
+               var newSources = await Task.Run(() => eyeTrackingSystem.CreateAndStartCameras().Select(c => c as IImageEyeSource))
                 ?? throw new OpenIrisException("No cameras started.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
@@ -82,44 +83,16 @@ namespace OpenIris
         private EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, int bufferSize = 100, Eye whichEye = Eye.Both)
         {
             // Check if the sources are videos and get the video player
-            videoPlayer = (sources.FirstOrDefault(s=>s is VideoEye) as VideoEye)?.VideoPlayer;
+            videoPlayer = (sources.FirstOrDefault(s => s is VideoEye) as VideoEye)?.VideoPlayer;
 
             imageSources = sources;
 
             this.bufferSize = bufferSize;
 
-            if (sources.Count == 2)
-            {
-                // TODO: this may not be a good idea for systems with two cameras
-                // where one may be master and the other slave. Not sure how to deal
-                // with it
-
-                // Dispose the sources we don't need
-                if (whichEye == Eye.Left)
-                {
-                    imageSources[Eye.Right]?.Stop();
-                    (imageSources[Eye.Right] as IDisposable)?.Dispose();
-                    
-                    imageSources = new EyeCollection<IImageEyeSource?>(imageSources[Eye.Left], null);
-                }
-
-                if (whichEye == Eye.Right)
-                {
-                    imageSources[Eye.Left]?.Stop();
-                    (imageSources[Eye.Left] as IDisposable)?.Dispose();
-
-                    imageSources = new EyeCollection<IImageEyeSource?>(null, imageSources[Eye.Right]);
-                }
-            }
-
-            numberOfImageSources = imageSources.Count(c => (c != null));
-
-            if (numberOfImageSources > 1)
-            {
-                // Check same frame rate and frame size
-                FrameSize = CheckFrameSize(imageSources);
-                FrameRate = CheckFrameRate(imageSources);
-            }
+            // Check same frame rate and frame size
+            numberOfImageSources = CheckNumberOfSources(imageSources, whichEye);
+            FrameSize = CheckFrameSize(imageSources);
+            FrameRate = CheckFrameRate(imageSources);
         }
 
         /// <summary>
@@ -229,7 +202,7 @@ namespace OpenIris
                     imageSources?.ForEach(source => source?.Stop());
 
                     // wait for the camera threads if necessary
-                    await (cameraTasks ?? Task.CompletedTask);
+                    if (cameraTasks is not null) await cameraTasks;
 
                     errorHandler.CheckForErrors();
                 }
@@ -243,7 +216,7 @@ namespace OpenIris
 
                 cancellation = null;
 
-                imageSources?.ForEach(source => (source as IDisposable)?.Dispose());
+                imageSources?.ForEach(source => source?.Dispose());
                 imageSources = null;
             }
         }
@@ -477,6 +450,36 @@ namespace OpenIris
 
             return frameRates.Average();
         }
+
+        private static int CheckNumberOfSources(EyeCollection<IImageEyeSource?> sources, Eye whichEyes)
+        {
+            var numberOfSources = 0;
+            switch (whichEyes)
+            {
+                case Eye.Left:
+                    if (sources.Count != 2 || sources[Eye.Left] == null || sources[Eye.Right] != null )
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    numberOfSources = 1;
+                    break;
+                case Eye.Right:
+                    if (sources.Count != 2 || sources[Eye.Right] == null || sources[Eye.Left] != null)
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    numberOfSources = 1;
+                    break;
+                case Eye.Both:
+                    if (sources.Count == 1 && sources[Eye.Both] == null)
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    if (sources.Count == 2 && (sources[Eye.Left] == null || sources[Eye.Right] == null))
+                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    numberOfSources = sources.Count;
+                    break;
+                default:
+                    throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+            }
+
+            return numberOfSources;
+        }
+
 
         /// <summary>
         /// Checks if the frame size of all the sources is the same.

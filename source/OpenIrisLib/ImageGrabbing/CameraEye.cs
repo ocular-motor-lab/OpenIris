@@ -15,15 +15,7 @@ namespace OpenIris.ImageGrabbing
     /// be accessed using openCV.</remarks>
     public abstract class CameraEye : IImageEyeSource
     {
-        /// <summary>
-        /// Gets left or right eye (or both).
-        /// </summary>
-        public Eye WhichEye { get; set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the camera is upside down, rotated or mirrored.
-        /// </summary>
-        public CameraOrientation CameraOrientation { get; set; }
+        private bool disposedValue;
 
         /// <summary>
         /// Gets the frame rate of the camera.
@@ -34,6 +26,16 @@ namespace OpenIris.ImageGrabbing
         /// Frame size of the camera.
         /// </summary>
         public Size FrameSize { get; protected set; }
+
+        /// <summary>
+        /// Gets left or right eye (or both).
+        /// </summary>
+        public Eye WhichEye { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the camera is upside down, rotated or mirrored.
+        /// </summary>
+        public CameraOrientation CameraOrientation { get; set; }
 
         /// <summary>
         /// Last frame number captured.
@@ -51,7 +53,7 @@ namespace OpenIris.ImageGrabbing
         public abstract void Start();
 
         /// <summary>
-        /// Overrides the StopCapture method.
+        /// Finish grabbing images from the camera and free resources.
         /// </summary>
         public abstract void Stop();
 
@@ -60,6 +62,13 @@ namespace OpenIris.ImageGrabbing
         /// </summary>
         /// <returns>Image grabbed.</returns>
         protected abstract ImageEye GrabImageFromCamera();
+
+        /// <summary>
+        /// Gets the current time in the camera. Not all cameras will implement this feature
+        /// Needs to be fast and not interfere with the image transmission. 
+        /// </summary>
+        /// <returns>The current time in the camera.</returns>
+        public virtual double GetCameraTime() => double.NaN;
 
         /// <summary>
         /// Retrieves an image from the camera buffer.
@@ -71,6 +80,7 @@ namespace OpenIris.ImageGrabbing
             var image = GrabImageFromCamera();
 
             image.TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+            image.TimeStamp.DateTimeGrabbed = DateTime.Now;
 
             if (image is null) return null;
 
@@ -84,6 +94,25 @@ namespace OpenIris.ImageGrabbing
             image.CorrectOrientation(CameraOrientation);
 
             return image;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

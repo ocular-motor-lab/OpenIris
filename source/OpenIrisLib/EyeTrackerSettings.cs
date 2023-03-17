@@ -11,6 +11,8 @@ namespace OpenIris
     using System.ComponentModel;
     using System.Xml;
     using System.Xml.Serialization;
+    using System.Collections;
+    using System.Linq;
 
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -51,6 +53,59 @@ namespace OpenIris
             LastVideoFolder = "";
         }
 
+        /// <summary>
+        /// This collection holds the settings for all the eye tracking systems and will be serialized
+        /// into the XML file.
+        /// </summary>
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> AllEyeTrackerSystemSettings
+        {
+            get => allEyeTrackerSystemsSettings;
+            set
+            {
+                SetPropertyArray(ref allEyeTrackerSystemsSettings, value, nameof(AllEyeTrackerSystemSettings));
+
+                // TODO: very ugly line to just make sure the settings are updated properly
+                // Need to set the mm per pixel for the tracking settings
+                foreach (var set in value)
+                {
+                    set.Value.MmPerPixChanged += (o, e) =>
+                    {
+                        if (EyeTrackerSystem == set.Key)
+                        {
+                            foreach (var t in AllTrackingPipelinesSettings.Values)
+                            {
+                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
+                            }
+                        }
+                    };
+                }
+            }
+        }
+        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;
+
+        /// <summary>
+        /// This collection holds the settings for all the eye tracking pipelines and will be serialized
+        /// into the XML file.
+        /// </summary>
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> AllTrackingPipelinesSettings
+        {
+            get => allEyeTrackingPipelinesSettings;
+            set => SetPropertyArray(ref allEyeTrackingPipelinesSettings, value, nameof(AllTrackingPipelinesSettings));
+        }
+
+        private EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> allEyeTrackingPipelinesSettings;
+
+        /// <summary>
+        /// This collection holds the settings for all the calibrations and will be serialized
+        /// into the XML file.
+        /// </summary>
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<CalibrationSettings> AllCalibrationImplementations { get => allCalibrationImplementations; set => SetPropertyArray(ref allCalibrationImplementations, value, nameof(AllCalibrationImplementations)); }
+        private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
+
+
         #region A) Choose an eye tracking system plugin"
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
@@ -70,7 +125,14 @@ namespace OpenIris
 
                     AllEyeTrackerSystemSettings.Add(value, eyeTrackerSystemSettings);
 
-                    AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingSystemSettings));
+                    AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    AllEyeTrackerSystemSettings[value].MmPerPixChanged += (o, e) =>
+                    {
+                        foreach (var t in AllTrackingPipelinesSettings.Values)
+                        {
+                            t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
+                        }
+                    };
                 }
 
                 if (value != eyeTrackerSystem)
@@ -82,12 +144,9 @@ namespace OpenIris
 
                 // TODO: very ugly line to just make sure the settings are updated properly
                 // Need to set the mm per pixel for the tracking settings
-                // Updated on 2/10/23. A little less ugly but still not great. 
-                // at least fixed the problem of updating the mmperpix in pipeline when 
-                // it gets updated on the system settings. 
                 foreach (var t in AllTrackingPipelinesSettings.Values)
                 {
-                    t.GetMmPerPix = ()=> EyeTrackingSystemSettings.MmPerPix;
+                    t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
                 }
             }
         }
@@ -103,38 +162,16 @@ namespace OpenIris
         [NeedsRestarting(true)]
         public EyeTrackingSystemSettings EyeTrackingSystemSettings => AllEyeTrackerSystemSettings[eyeTrackerSystem];
 
-        /// <summary>
-        /// This collection holds the settings for all the eye tracking pipelines and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> AllTrackingPipelinesSettings
-        {
-            get => allEyeTrackingPipelinesSettings;
-            set
-            {
-                if (value is null) return;
-
-                foreach (var v in value.Values)
-                {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingPipelineSettings));
-                }
-
-                allEyeTrackingPipelinesSettings = value;
-            }
-        }
-        private EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> allEyeTrackingPipelinesSettings;
 
         #endregion A) Choose an eye tracking system"
 
         #region B) Choose a tracking pipeline plugin
 
         [Category("B) Choose a tracking pipeline"), Description("Tracking pipeline. What pipeline for tracking position, torsion etc you want to use?")]
-        [TypeConverter(typeof(PluginListTypeConverter<IEyeTrackingPipeline>))]
+        [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingPipelineBase>))]
         public string EyeTrackingPipeline
         {
-            get { TrackingPipelineSettings.EyeTrackingPipelineName = eyeTrackingPipeline; return eyeTrackingPipeline; }
+            get { return eyeTrackingPipeline; }
             set
             {
                 // If the dictionary does not contain the settings for the current eye tracking
@@ -143,13 +180,12 @@ namespace OpenIris
                 {
                     var trackingSettings = (EyeTrackingPipelineSettings?)EyeTrackerPluginManager.EyeTrackingPipelineFactory?.GetDefaultSettings(value)
                         ?? throw new InvalidOperationException("Bad EyeTrackingPipelineFactory");
-                    trackingSettings.EyeTrackingPipelineName = value;
 
                     AllTrackingPipelinesSettings.Add(value, trackingSettings);
 
                     AllTrackingPipelinesSettings[value].PropertyChanged += (o, e) =>
                     {
-                        OnPropertyChanged(o, nameof(TrackingPipelineSettings));
+                        OnPropertyChanged(o, e.PropertyName);
                     };
                 }
 
@@ -157,35 +193,12 @@ namespace OpenIris
                 {
                     eyeTrackingPipeline = value;
 
-
                     OnPropertyChanged(this, nameof(EyeTrackingPipeline));
                 }
             }
         }
         private string eyeTrackingPipeline = "JOM";
 
-        /// <summary>
-        /// This collection holds the settings for all the eye tracking systems and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> AllEyeTrackerSystemSettings 
-        {
-            get => allEyeTrackerSystemsSettings;
-            set
-            {
-                if (value is null) return;
-
-                foreach (var v in value.Values)
-                {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(EyeTrackingSystemSettings));
-                }
-
-                allEyeTrackerSystemsSettings = value;
-            }
-        }
-        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;
         /// <summary>
         /// This property will return the settings for the current pipeline. It will show in the UI but it
         /// will not be serialized.
@@ -198,8 +211,9 @@ namespace OpenIris
 
         #region C) Choose a calibration method plugin
 
+
         [Category("C) Choose a calibration method"), Description("Calibration method")]
-        [TypeConverter(typeof(PluginListTypeConverter<CalibrationSession>))]
+        [TypeConverter(typeof(PluginListTypeConverter<CalibrationPipelineBase>))]
         public string CalibrationMethod
         {
             get { return calibrationMethod; }
@@ -216,7 +230,7 @@ namespace OpenIris
 
                     AllCalibrationImplementations[value].PropertyChanged += (o, e) =>
                     {
-                        OnPropertyChanged(o, nameof(CalibrationSettings));
+                        OnPropertyChanged(o, e.PropertyName);
                     };
                 }
 
@@ -228,29 +242,6 @@ namespace OpenIris
             }
         }
         private string calibrationMethod = "Auto"; // Default value
-
-        /// <summary>
-        /// This collection holds the settings for all the calibrations and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<CalibrationSettings> AllCalibrationImplementations
-        {
-            get => allCalibrationImplementations;
-            set
-            {
-                if (value is null) return;
-
-                foreach (var v in value.Values)
-                {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, nameof(CalibrationSettings));
-                }
-
-                allCalibrationImplementations = value;
-            }
-        }
-        private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
 
 
         /// <summary>
@@ -268,7 +259,7 @@ namespace OpenIris
         [Category("D) General settings"), Description("Maximum number of processing threads.")]
         [NeedsRestarting(true)]
         public int MaxNumberOfProcessingThreads { get => maxNumberOfProcessingThreads; set => SetProperty(ref maxNumberOfProcessingThreads, value, nameof(MaxNumberOfProcessingThreads)); }
-        private int maxNumberOfProcessingThreads = 10; // Default value
+        private int maxNumberOfProcessingThreads = 5; // Default value
 
         [Category("D) General settings"), Description("Value indicating where debuging images should be shown")]
         public bool Debug { get => debug; set => SetProperty(ref debug, value, nameof(Debug)); }
@@ -458,6 +449,30 @@ namespace OpenIris
             {
                 field = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            }
+        }
+
+        /// <summary>
+        /// https://www.danrigby.com/2012/01/08/inotifypropertychanged-the-anders-hejlsberg-way/
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="field"></param>
+        /// <param name="value"></param>
+        /// <param name="name"></param>
+        protected void SetPropertyArray<T>(ref EyeTrackerSettingsDictionary<T> field, EyeTrackerSettingsDictionary<T> value, string name)
+            where T : EyeTrackerSettingsBase
+        {
+            if (field != value)
+            {
+                field = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+                foreach (var v in value.Values)
+                {
+                    // make sure the property changes propagate
+                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                }
             }
         }
 

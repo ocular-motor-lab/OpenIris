@@ -23,7 +23,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisRuleSet>..\CodeAnalysisRules.ruleset</CodeAnalysisRuleSet>
     <NullableContextOptions>enable</NullableContextOptions>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
@@ -33,18 +33,18 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <Optimize>true</Optimize>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <OutputPath>..\..\bin\x64\Debug\</OutputPath>
     <DocumentationFile>..\..\bin\x64\Debug\OpenIrisLib.xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Emgu.CV.UI, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
@@ -59,6 +59,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Web" />
@@ -68,20 +69,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Calibration\CalibrationPipelineManual.cs" />
+    <Compile Include="Calibration\CalibrationPipelineBase.cs" />
     <Compile Include="Calibration\CalibrationPipelineAuto.cs" />
     <Compile Include="Calibration\EyeCalibration.cs" />
     <Compile Include="Calibration\CalibrationParameters.cs" />
-    <Compile Include="Calibration\CalibrationPipelineManual.cs">
+    <Compile Include="Calibration\CalibrationPipelineManualUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Calibration\CalibrationPipelineManual.Designer.cs">
-      <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
+    <Compile Include="Calibration\CalibrationPipelineManualUI.Designer.cs">
+      <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
-    <Compile Include="EyeTrackingSystems\IEyeTrackingSystem.cs" />
     <Compile Include="HeadTracking\HeadTracker.cs" />
-    <Compile Include="Calibration\ICalibrationPipeline.cs" />
-    <Compile Include="ImageProcessing\IEyeTrackingPipeline.cs" />
+    <Compile Include="ImageProcessing\EyeTrackingPipelineBase.cs" />
     <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />
@@ -96,15 +97,7 @@
     <Compile Include="UI\DebugImagesPanel.Designer.cs">
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\EyeTrackingPipelinePupilCRQuickSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\EyeTrackingPipelinePupilCRQuickSettings.Designer.cs">
-      <DependentUpon>EyeTrackingPipelinePupilCRQuickSettings.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Calibration\CalibrationUIControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="Calibration\CalibrationUIControl.cs" />
     <Compile Include="EyeTrackerData\DataBuffer.cs" />
     <Compile Include="EyeTrackerData\CornealReflectionData.cs" />
     <Compile Include="EyeTrackingSystems\EyeTrackingSystemDualWebCam.cs" />
@@ -118,25 +111,11 @@
     <Compile Include="ImageProcessing\PupilTracking.cs" />
     <Compile Include="ImageProcessing\TorsionTracking.cs" />
     <Compile Include="RemoteServices\IEyeTrackerWebService.cs" />
-    <Compile Include="UI\EyeTrackerUICommand.cs" />
-    <Compile Include="UI\ImageEyeDrawing.cs" />
-    <Compile Include="UI\EyeTrackingPipelineUIControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\MultiScrollerPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\MultiScrollerPanel.Designer.cs">
-      <DependentUpon>MultiScrollerPanel.cs</DependentUpon>
-    </Compile>
     <Compile Include="UI\ProgressBarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\ProgressBarDialog.Designer.cs">
       <DependentUpon>ProgressBarDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\QuickSettingsScroll.cs">
-      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Util\VideoTools.cs" />
     <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
@@ -160,12 +139,6 @@
     <Compile Include="EyeTrackerData\PupilData.cs" />
     <Compile Include="Util\EyeCollection.cs" />
     <Compile Include="ImageGrabbing\IMovableImageEyeSource.cs" />
-    <Compile Include="UI\ImageGrabberUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\ImageGrabberUI.Designer.cs">
-      <DependentUpon>ImageGrabberUI.cs</DependentUpon>
-    </Compile>
     <Compile Include="EyeTrackerData\Eye.cs" />
     <Compile Include="Util\EyeTrackerLog.cs" />
     <Compile Include="Util\SoundRecorder.cs" />
@@ -179,27 +152,14 @@
     <Compile Include="UI\BatchAnalysis.Designer.cs">
       <DependentUpon>BatchAnalysis.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\GeneralForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\GeneralForm.Designer.cs">
-      <DependentUpon>GeneralForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\NamespaceDoc.cs" />
     <Compile Include="EyeTracker.cs" />
     <Compile Include="EyeTrackerData\ImageEyeTimestamp.cs" />
     <Compile Include="Util\EyeTrackerDebug.cs" />
-    <Compile Include="UI\EyeTrackerImageEyeBox.cs">
+    <Compile Include="UI\ImageEyeBox.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UI\EyeTrackerImageEyeBox.Designer.cs">
-      <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\EyeTrackingPipelineJOMQuickSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\EyeTrackingPipelineJOMQuickSettings.Designer.cs">
-      <DependentUpon>EyeTrackingPipelineJOMQuickSettings.cs</DependentUpon>
+    <Compile Include="UI\ImageEyeBox.Designer.cs">
+      <DependentUpon>ImageEyeBox.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\EyeTrackerSettingsForm.cs">
       <SubType>Form</SubType>
@@ -248,42 +208,27 @@
     <Compile Include="ImageGrabbing\VideoPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Calibration\CalibrationPipelineManual.resx">
-      <DependentUpon>CalibrationPipelineManual.cs</DependentUpon>
+    <EmbeddedResource Include="Calibration\CalibrationPipelineManualUI.resx">
+      <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\DebugImagesPanel.resx">
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\EyeTrackingPipelinePupilCRQuickSettings.resx">
-      <DependentUpon>EyeTrackingPipelinePupilCRQuickSettings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\ImageGrabberUI.resx">
-      <DependentUpon>ImageGrabberUI.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\BatchAnalysis.resx">
       <DependentUpon>BatchAnalysis.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\EyeTrackerImageEyeBox.resx">
-      <DependentUpon>EyeTrackerImageEyeBox.cs</DependentUpon>
+    <EmbeddedResource Include="UI\ImageEyeBox.resx">
+      <DependentUpon>ImageEyeBox.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\EyeTrackingPipelineJOMQuickSettings.resx">
-      <DependentUpon>EyeTrackingPipelineJOMQuickSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackerSettingsForm.resx">
       <DependentUpon>EyeTrackerSettingsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\EyeTrackerTrace.resx">
       <DependentUpon>EyeTrackerTrace.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\GeneralForm.resx">
-      <DependentUpon>GeneralForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\MultiScrollerPanel.resx">
-      <DependentUpon>MultiScrollerPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\ProgressBarDialog.resx">
       <DependentUpon>ProgressBarDialog.cs</DependentUpon>
@@ -301,6 +246,7 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="app.config" />
+    <None Include="OpenIrisClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

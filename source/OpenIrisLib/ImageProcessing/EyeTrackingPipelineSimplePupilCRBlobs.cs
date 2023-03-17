@@ -17,29 +17,28 @@ namespace OpenIris
     using System.ComponentModel.Composition;
     using System.Drawing;
     using System.Linq;
+    using System.Collections.Generic;
+    using OpenIris.UI;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye
     /// position and the torsion angle.
     /// </summary>
-    [Export(typeof(IEyeTrackingPipeline)), PluginDescriptionAttribute("SimplePupilCRBlobs", typeof(EyeTrackingPipelinePupilCRSettings))]
-    public sealed class EyeTrackingPipelineSimplePupilCRBlobs : IEyeTrackingPipeline, IDisposable
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("SimplePupilCRBlobs", typeof(EyeTrackingPipelinePupilCRSettings))]
+    public sealed class EyeTrackingPipelineSimplePupilCRBlobs : EyeTrackingPipelineBase
     {
-        /// <summary>
-        /// Name of the plugin, gets set automatically.
-        /// </summary>
-        public string? Name { get; set; }
-
         private readonly CvBlobDetector detector = new CvBlobDetector();
         private readonly CvBlobs blobs = new CvBlobs();
 
         /// <summary>
         /// Disposes objects.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             detector.Dispose();
             blobs.Dispose();
+
+            base.Dispose();
         }
 
         /// <summary>
@@ -47,14 +46,13 @@ namespace OpenIris
         /// </summary>
         /// <param name="imageEye"></param>
         /// <param name="eyeCalibrationParameters"></param>
-        /// <param name="settings"></param>
         /// <returns></returns>
-        public (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters, EyeTrackingPipelineSettings settings)
+        public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
-            var trackingSettings = settings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong type of settings");
+            var trackingSettings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new Exception("Wrong type of settings");
 
             // Cropping rectangle and eye ROI (minimum size 20x20 pix)
-            var eyeROI = imageEye.WhichEye == Eye.Left ? settings.CroppingLeftEye : settings.CroppingRightEye;
+            var eyeROI = imageEye.WhichEye == Eye.Left ? Settings.CroppingLeftEye : Settings.CroppingRightEye;
             eyeROI = new Rectangle(
                 new Point(eyeROI.Left, eyeROI.Top),
                 new Size((imageEye.Size.Width - eyeROI.Left - eyeROI.Width), (imageEye.Size.Height - eyeROI.Top - eyeROI.Height)));
@@ -75,7 +73,7 @@ namespace OpenIris
             {
                 FilterByArea = true,
                 MinArea = (float)(Math.PI * Math.Pow(trackingSettings.MinPupRadPix * scaleDownX, 2)),
-                MaxArea = (float)(Math.PI * Math.Pow(12 / trackingSettings.GetMmPerPix() * scaleDownX, 2)),
+                MaxArea = (float)(Math.PI * Math.Pow(12 / trackingSettings.MmPerPix * scaleDownX, 2)),
                 FilterByCircularity = false,
                 FilterByConvexity = false,
                 FilterByInertia = false,
@@ -110,7 +108,7 @@ namespace OpenIris
                 WhichEye = imageEye.WhichEye,
                 Timestamp = imageEye.TimeStamp,
                 Pupil = pupil,
-                Iris = new IrisData(pupil.Center, (float)(12 / trackingSettings.GetMmPerPix())),
+                Iris = new IrisData(pupil.Center, (float)(12 / trackingSettings.MmPerPix)),
                 CornealReflections = null,
                 TorsionAngle = 0.0,
                 Eyelids = new EyelidData(),
@@ -123,14 +121,30 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// 
+        /// Get the list of tracking settings that will be shown as sliders in the setup UI.
         /// </summary>
-        /// <param name="whichEye"></param>
-        /// <param name="pipelineName"></param>
         /// <returns></returns>
-        public EyeTrackingPipelineUIControl? GetPipelineUI(Eye whichEye, string pipelineName)
+        public override List<(string text, RangeDouble range, string settingName)>? GetQuickSettingsList()
         {
-            return new UI.EyeTrackingPipelinePupilCRQuickSettings(whichEye, pipelineName);
+            var theSettings = Settings as EyeTrackingPipelinePupilCRSettings ?? throw new InvalidOperationException("bad settings");
+
+            var list = new List<(string text, RangeDouble range, string SettingName)>();
+
+            var settingName = WhichEye switch
+            {
+                Eye.Left => nameof(theSettings.DarkThresholdLeftEye),
+                Eye.Right => nameof(theSettings.DarkThresholdRightEye),
+            };
+            list.Add(("Pupil threshold", new RangeDouble(0, 255), settingName));
+
+            settingName = WhichEye switch
+            {
+                Eye.Left => nameof(theSettings.BrightThresholdLeftEye),
+                Eye.Right => nameof(theSettings.BrightThresholdRightEye),
+            };
+            list.Add(("CR threshold", new RangeDouble(0, 255), settingName));
+
+            return list;
         }
     }
 
@@ -163,17 +177,25 @@ namespace OpenIris
         private int thresholdBrightRightEye = 250;
 
         [Browsable(false)]
-        public double MinPupRadPix { get { return this.minPupRadmm / this.GetMmPerPix(); } }
+        public double MinPupRadPix { get { return minPupRadmm / MmPerPix; } }
 
         [Category("Pupil tracking settings"), Description("Minimum radius of the pupil in mms.")]
         public double MinPupRadmm { get => minPupRadmm; set => SetProperty(ref minPupRadmm, value, nameof(MinPupRadmm)); }
         private double minPupRadmm = 1;
 
         [Browsable(false)]
-        public double MinCRRadPix { get { return this.minCRRadmm / this.GetMmPerPix(); } }
+        public double MaxPupRadPix { get { return maxPupRadmm / MmPerPix; } }
+
+        [Category("Pupil tracking settings"), Description("Maximum radius of the pupil in mms.")]
+        public double MaxPupRadmm { get => maxPupRadmm; set => SetProperty(ref maxPupRadmm, value, nameof(MaxPupRadmm)); }
+        private double maxPupRadmm = 15;
+
 
         [Browsable(false)]
-        public double MaxCRRadPix { get { return this.maxCRRadmm / this.GetMmPerPix(); } }
+        public double MinCRRadPix { get { return minCRRadmm / MmPerPix; } }
+
+        [Browsable(false)]
+        public double MaxCRRadPix { get { return maxCRRadmm / MmPerPix; } }
 
         [Category("Corneal Reflection tracking settings"), Description("Minimum radius of the CR in mmms.")]
         public double MinCRRadmm { get => minCRRadmm; set => SetProperty(ref minCRRadmm, value, nameof(MinCRRadmm)); }

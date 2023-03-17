@@ -16,7 +16,7 @@ namespace OpenIris.ImageGrabbing
     /// <summary>
     /// Class to control a point grey camera in the context of eye tracking.
     /// </summary>
-    public partial class CameraEyeFlyCapture : CameraEye, IMovableImageEyeSource, IDisposable
+    public partial class CameraEyeFlyCapture : CameraEye, IMovableImageEyeSource
     {
         public enum CameraPixelFormat { Raw8, Mono8 }
         public enum GPIOMode { input, output, strobe }
@@ -45,12 +45,12 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// First timestamp
         /// </summary>
-        private ImageEyeTimestamp firstTimeStamp = new ImageEyeTimestamp();
+        private ImageEyeTimestamp firstTimeStamp = ImageEyeTimestamp.Empty;
 
         /// <summary>
         /// Timestamp of the last frame.
         /// </summary>
-        private ImageEyeTimestamp lastTimeStamp = new ImageEyeTimestamp();
+        private ImageEyeTimestamp lastTimeStamp = ImageEyeTimestamp.Empty;
 
         /// <summary>
         /// Last frame rate requested to the camera.
@@ -115,21 +115,12 @@ namespace OpenIris.ImageGrabbing
         /// Disposes resources.
         /// </summary>
         /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 camera.Dispose();
             }
-        }
-
-        /// <summary>
-        /// Disposes resources.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         #endregion constructor
@@ -147,26 +138,26 @@ namespace OpenIris.ImageGrabbing
                 var ndrops = (long)(lastTimeStamp.FrameNumberRaw - firstTimeStamp.FrameNumberRaw + 1) - numberFramesGrabbed;
 
                 string s = string.Empty;
-                s = s + "cycles128sec".PadLeft(30) + " : " + cycles128sec.ToString() + "\r\n";
+                s += "cycles128sec".PadLeft(30) + " : " + cycles128sec.ToString() + "\r\n";
 
-                s = s + "firstSeconds".PadLeft(30) + " : " + firstTimeStamp.ToString() + "\r\n";
-                s = s + "lastSeconds".PadLeft(30) + " : " + lastTimeStamp.Seconds.ToString() + "\r\n";
+                s += "firstSeconds".PadLeft(30) + " : " + firstTimeStamp.ToString() + "\r\n";
+                s += "lastSeconds".PadLeft(30) + " : " + lastTimeStamp.Seconds.ToString() + "\r\n";
 
-                s = s + "firstRawFrameNumber".PadLeft(30) + " : " + firstTimeStamp.FrameNumberRaw.ToString() + "\r\n";
-                s = s + "lastRawFrameNumber".PadLeft(30) + " : " + lastTimeStamp.FrameNumberRaw.ToString() + "\r\n";
-                s = s + "\r\n";
-                s = s + "FramesCounter".PadLeft(30) + " : " + numberFramesGrabbed.ToString() + "\r\n";
-                s = s + "DroppedFramesCounter".PadLeft(30) + " : " + ndrops.ToString() + "\r\n";
-                s = s + "\r\n";
+                s += "firstRawFrameNumber".PadLeft(30) + " : " + firstTimeStamp.FrameNumberRaw.ToString() + "\r\n";
+                s += "lastRawFrameNumber".PadLeft(30) + " : " + lastTimeStamp.FrameNumberRaw.ToString() + "\r\n";
+                s += "\r\n";
+                s += "FramesCounter".PadLeft(30) + " : " + numberFramesGrabbed.ToString() + "\r\n";
+                s += "DroppedFramesCounter".PadLeft(30) + " : " + ndrops.ToString() + "\r\n";
+                s += "\r\n";
 
                 var delay = (lastTimeStamp.Seconds - firstTimeStamp.Seconds) - ((lastTimeStamp.FrameNumberRaw - firstTimeStamp.FrameNumberRaw) / RequestedFrameRate);
 
-                s = s + "delay".PadLeft(30) + " : " + string.Format("{000:0000.0000}", delay) + "\r\n";
+                s += "delay".PadLeft(30) + " : " + string.Format("{000:0000.0000}", delay) + "\r\n";
 
-                s = s + "lastFreq".PadLeft(30) + " : " + lastFrameRateRequested.ToString() + "\r\n";
-                s = s + "reportedFrameRate".PadLeft(30) + " : " + FrameRate.ToString() + "\r\n";
+                s += "lastFreq".PadLeft(30) + " : " + lastFrameRateRequested.ToString() + "\r\n";
+                s += "reportedFrameRate".PadLeft(30) + " : " + FrameRate.ToString() + "\r\n";
 
-                s = s + "\r\n";
+                s += "\r\n";
 
                 return s;
             }
@@ -275,7 +266,7 @@ namespace OpenIris.ImageGrabbing
         /// </summary>
         public override void Stop()
         {
-            if (camera == null) return;
+            if (camera == null || stopping is true) return;
 
             try
             {
@@ -313,11 +304,11 @@ namespace OpenIris.ImageGrabbing
                 if (lastRawTimeStamp.cycleSeconds > rawImage.timeStamp.cycleSeconds) cycles128sec++;
 
                 var timestamp = new ImageEyeTimestamp
-                {
-                    Seconds = GetTimestampSeconds(rawImage.timeStamp),
-                    FrameNumber = rawImage.imageMetadata.embeddedFrameCounter - firstTimeStamp.FrameNumberRaw,
-                    FrameNumberRaw = rawImage.imageMetadata.embeddedFrameCounter
-                };
+                (
+                    seconds : GetTimestampSeconds(rawImage.timeStamp),
+                    frameNumber : rawImage.imageMetadata.embeddedFrameCounter - firstTimeStamp.FrameNumberRaw,
+                    frameNumberRaw : rawImage.imageMetadata.embeddedFrameCounter
+                );
 
                 // If it is the first frame save some info
                 if (numberFramesGrabbed == 1)
@@ -337,7 +328,7 @@ namespace OpenIris.ImageGrabbing
 
                 unsafe
                 {
-                    //// TODO: make sure this is ok memorywise. I am afraid the rawImage object 
+                    //// This seems ok so far memorywise. I am afraid the rawImage object 
                     //// may be disposed and mess up with the image object
                     //// I actually don't understand very well why this works and never crashes. 
                     //// RawImage is inside a using so it should get disposed.
@@ -469,7 +460,6 @@ namespace OpenIris.ImageGrabbing
 
             Point roiOrigin;
 
-            // TODO: Deal with rotation
             // Round the center to a multiple of 4
             if (CameraOrientation.IsUpsideDown())
             {

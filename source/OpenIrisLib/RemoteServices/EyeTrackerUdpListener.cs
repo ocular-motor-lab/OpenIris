@@ -69,9 +69,10 @@ namespace OpenIris
         public void Stop()
         {
             server.Close();
-            //Task.WaitAll(task);
-            task.Dispose();
+            var tempTask = task;
             task = null;
+            tempTask?.Wait();
+            tempTask?.Dispose();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -83,18 +84,9 @@ namespace OpenIris
                     task.Dispose();
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~EyeTrackerTcpListener()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

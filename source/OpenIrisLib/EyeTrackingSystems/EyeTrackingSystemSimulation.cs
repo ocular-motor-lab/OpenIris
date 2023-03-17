@@ -8,21 +8,20 @@ namespace OpenIris
 #nullable enable
 
     using System;
-    using System.ComponentModel;
     using System.ComponentModel.Composition;
     using OpenIris.ImageGrabbing;
 
     /// <summary>
     /// Simulator of eye tracker from videos.
     /// </summary>
-    [Export(typeof(IEyeTrackingSystem)), PluginDescriptionEyeTrackingSystem("Simulation", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Simulation", typeof(EyeTrackingSystemSettings))]
     public class EyeTrackingSystemSimulation : EyeTrackingSystemBase
     {
         /// <summary>
         /// Gets the cameras. In this case just one single camera.
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye?> CreateCameras()
+        public override EyeCollection<CameraEye?> CreateAndStartCameras()
         {
             string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             var fileNames = new string[]
@@ -41,7 +40,12 @@ namespace OpenIris
             cameraLeft.LoopAtFrame = loopAtFrame;
             cameraRight.LoopAtFrame = loopAtFrame;
 
-            return new EyeCollection<CameraEye?>(cameraLeft, cameraRight);
+            return Settings.Eye switch
+            {
+                Eye.Both => new EyeCollection<CameraEye?>(cameraLeft, cameraRight),
+                Eye.Left => new EyeCollection<CameraEye?>(cameraLeft, null),
+                Eye.Right => new EyeCollection<CameraEye?>(null, cameraRight),
+            };
         }
     }
 

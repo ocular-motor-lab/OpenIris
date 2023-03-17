@@ -82,6 +82,7 @@ namespace SpinnakerInterface
             FrameSize = roi.Size;
 
             isMaster = TriggerMode.Default;
+            cam.Init();
         }
 
         #endregion constructor
@@ -90,8 +91,6 @@ namespace SpinnakerInterface
 
         public override void Start()
         {
-            cam.Init();
-
             InitParameters();
 
             InitParameters_TriggerSettings();

@@ -330,5 +330,13 @@ namespace OpenIris
         /// Gets the tracking settings at the time the images were processed.
         /// </summary>
         public EyeTrackingPipelineSettings TrackingSettings { get; set; }
+
+        /// <summary>
+        /// Update the images.
+        /// </summary>
+        public void UpdateImages(EyeCollection<ImageEye?> images)
+        {
+            Images = images;
+        }
     }
 }

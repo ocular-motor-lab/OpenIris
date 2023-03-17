@@ -229,14 +229,14 @@ namespace OpenIris
                 if (PlayingVideo)
                 {
                     EyeTrackingSystem = VideoPlayer!;
-                    ImageProcessor = new EyeTrackerProcessor( EyeTrackerProcessor.Mode.Offline, Settings.MaxNumberOfProcessingThreads);
+                    ImageProcessor = new EyeTrackerProcessor( EyeTrackerProcessor.Mode.Offline, EyeTrackingSystem, Settings.MaxNumberOfProcessingThreads);
                     ImageGrabber = EyeTrackerImageGrabber.CreateNewForVideos(VideoPlayer!, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewforOffLine(EyeTrackingSystem);
                 }
                 else
                 {
                     EyeTrackingSystem = EyeTrackingSystemBase.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
-                    ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
+                    ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, EyeTrackingSystem, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
                     ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize);
                     HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
                 }
@@ -246,12 +246,6 @@ namespace OpenIris
                 {
                     // The best way to signal we are already tracking is after we get the first image.
                     Tracking = true;
-
-                    // Prepare the images for processing depending on the system. For instance flipping,
-                    // cropping, splitting, increasing contrast, whatever ...
-                    grabbedImages = (EyeTrackingSystem is VideoPlayer)
-                        ? EyeTrackingSystem!.PreProcessImagesFromVideos(grabbedImages)
-                        : EyeTrackingSystem!.PreProcessImagesFromCameras(grabbedImages);
 
                     RecordingSession?.TryRecordImages(grabbedImages);
                     ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.EyeTrackingPipeline, Settings.TrackingPipelineSettings));

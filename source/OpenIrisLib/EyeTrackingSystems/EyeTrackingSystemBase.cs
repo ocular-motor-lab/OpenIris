@@ -123,17 +123,7 @@ namespace OpenIris
         /// This method would be where the image gets split into two.</remarks>
         /// <param name="images">Images captured from the cameras.</param>
         /// <returns>Images prepared for processing.</returns>
-        public virtual EyeCollection<ImageEye?> PreProcessImagesFromCameras(EyeCollection<ImageEye?> images) => images;
-
-        /// <summary>
-        /// Prepares images for processing. Split, rotate, etc. 
-        /// </summary>
-        /// <remarks>An specific implementation of ImageEyeGrabber can optionally override this 
-        /// method to prepare the images. For instance, if a system has only one camera capturing both eyes.
-        /// This method would be where the image gets split into two.</remarks>
-        /// <param name="images">Images captured from the cameras.</param>
-        /// <returns>Images prepared for processing.</returns>
-        public virtual EyeCollection<ImageEye?> PreProcessImagesFromVideos(EyeCollection<ImageEye?> images) => images;
+        public virtual EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?> images) => images;
 
         /// <summary>
         /// Method to extract additional data that should be saved to the data file. 

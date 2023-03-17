@@ -40,11 +40,11 @@ namespace OpenIris
         /// </summary>
         /// <param name="images">Raw image from the camera.</param>
         /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye?> PreProcessImagesFromCameras(EyeCollection<ImageEye?>  images)
+        public override EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?>  images)
         {
-            var imageLeft = images[Eye.Both].Copy(new Rectangle(400, 0, 400, 300));
+            var imageLeft = images[Eye.Both]?.Copy(new Rectangle(400, 0, 400, 300));
             imageLeft.WhichEye = Eye.Left;
-            var imageRight = images[Eye.Both].Copy(new Rectangle(0, 0, 400, 300));
+            var imageRight = images[Eye.Both]?.Copy(new Rectangle(0, 0, 400, 300));
             imageRight.WhichEye = Eye.Right;
 
             return new EyeCollection<ImageEye?>(imageLeft, imageRight);

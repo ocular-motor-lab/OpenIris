@@ -68,7 +68,7 @@ namespace SpinnakerInterface
            
         }
 
-        public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)
+        public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
@@ -86,13 +86,6 @@ namespace SpinnakerInterface
                 default:
                     return images;
             }
-        }
-
-        public override EyeCollection<ImageEye> PreProcessImagesFromVideos(EyeCollection<ImageEye> images)
-        {
-            // Because only the right image has the timestamp in the bytes we copy the raw frame number to the left image
-            images[Eye.Left].TimeStamp.FrameNumberRaw = images[Eye.Right].TimeStamp.FrameNumberRaw;
-            return base.PreProcessImagesFromVideos(images);
         }
     }
 }

@@ -80,44 +80,46 @@ namespace OpenIris
         /// </summary>
         /// <param name="images">Raw image from the camera.</param>
         /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye?> PreProcessImagesFromCameras(EyeCollection<ImageEye?> images)
+        public override EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?> images)
         {
-            var settings = Settings as EyeTrackerSystemSettingsRemoteGrasshopper ??
-                 throw new InvalidOperationException("Wrong settings.");
-
-            var imageBothEyes = images[Eye.Both] ?? throw new InvalidOperationException("No image for both eyes");
-
-            var roiLeft = new Rectangle(1160, 0, 760, imageBothEyes.Size.Height);
-            var roiRight = new Rectangle(0, 0, 760, imageBothEyes.Size.Height);
-
-            switch (settings.Eye)
+            if (images.Count == 1)
             {
-                case Eye.Left:
-                    var imageLeft = imageBothEyes.Copy(roiLeft);
-                    imageLeft.WhichEye = Eye.Left;
-                    return new EyeCollection<ImageEye?>(imageLeft, null);
-                case Eye.Right:
-                    var imageRight = imageBothEyes.Copy(roiRight);
-                    imageRight.WhichEye = Eye.Right;
-                    return new EyeCollection<ImageEye?>(null, imageRight);
-                case Eye.Both:
-                    imageLeft = imageBothEyes.Copy(roiLeft);
-                    imageLeft.WhichEye = Eye.Left;
-                    imageRight = imageBothEyes.Copy(roiRight);
-                    imageRight.WhichEye = Eye.Right;
-                    return new EyeCollection<ImageEye?>(imageLeft, imageRight);
-                default:
-                    return images;
+                var settings = Settings as EyeTrackerSystemSettingsRemoteGrasshopper ??
+                     throw new InvalidOperationException("Wrong settings.");
+
+                var imageBothEyes = images[Eye.Both] ?? throw new InvalidOperationException("No image for both eyes");
+
+                var roiLeft = new Rectangle(1160, 0, 760, imageBothEyes.Size.Height);
+                var roiRight = new Rectangle(0, 0, 760, imageBothEyes.Size.Height);
+
+                switch (settings.Eye)
+                {
+                    case Eye.Left:
+                        var imageLeft = imageBothEyes.Copy(roiLeft);
+                        imageLeft.WhichEye = Eye.Left;
+                        return new EyeCollection<ImageEye?>(imageLeft, null);
+                    case Eye.Right:
+                        var imageRight = imageBothEyes.Copy(roiRight);
+                        imageRight.WhichEye = Eye.Right;
+                        return new EyeCollection<ImageEye?>(null, imageRight);
+                    case Eye.Both:
+                        imageLeft = imageBothEyes.Copy(roiLeft);
+                        imageLeft.WhichEye = Eye.Left;
+                        imageRight = imageBothEyes.Copy(roiRight);
+                        imageRight.WhichEye = Eye.Right;
+                        return new EyeCollection<ImageEye?>(imageLeft, imageRight);
+                    default:
+                        return images;
+                }
             }
-        }
+            else
+            {
+                if (images[Eye.Left] is null || images[Eye.Right] is null) throw new InvalidOperationException("Images cannot be null.");
 
-        public override EyeCollection<ImageEye?> PreProcessImagesFromVideos(EyeCollection<ImageEye?> images)
-        {
-            if (images[Eye.Left] is null || images[Eye.Right] is null) throw new InvalidOperationException("Images cannot be null.");
-
-            // Because only the right image has the timestamp in the bytes we copy the raw frame number to the left image
-            images[Eye.Left]!.TimeStamp.FrameNumberRaw = images[Eye.Right]!.TimeStamp.FrameNumberRaw;
-            return base.PreProcessImagesFromVideos(images);
+                // Because only the right image has the timestamp in the bytes we copy the raw frame number to the left image
+                images[Eye.Left]!.TimeStamp.FrameNumberRaw = images[Eye.Right]!.TimeStamp.FrameNumberRaw;
+                return base.PreProcessImages(images);
+            }
         }
 
         /// <summary>

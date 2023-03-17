@@ -348,7 +348,7 @@ namespace OpenIris
                         scrolling = (false, 0);
                     }
 
-                    var grabbedImages = eyeTrackingSystem.PreProcessImagesFromVideos(images);
+                    var grabbedImages = eyeTrackingSystem.PreProcessImages(images);
                     ImagesGrabbed?.Invoke(this, grabbedImages);
 
 

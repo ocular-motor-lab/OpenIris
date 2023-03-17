@@ -38,7 +38,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="images">Raw image from the camera.</param>
         /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye> PreProcessImagesFromCameras(EyeCollection<ImageEye> images)
+        public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
         {
             ImageEye imageLeft = null;
             ImageEye imageRight = null;

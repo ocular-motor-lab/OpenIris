@@ -53,6 +53,7 @@ namespace OpenIris
         private int outputNextExpectedNumber = 0;
         private bool started;
         private bool stopping;
+        private EyeTrackingSystemBase eyeTrackingsystem;
 
         /// <summary>
         /// Initializes an instance of the eyeTrackerProcessor class.
@@ -61,12 +62,14 @@ namespace OpenIris
         /// Value indicating weather frames can be dropped. This means the call to Process images
         /// will be blocking if the buffer is fulll.
         /// </param>
+        /// <param name="eyeTrackingsystem"></param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="maxNumberOfThreads">Maximum number of threads to run.</param>
-        public EyeTrackerProcessor(Mode processingMode, int maxNumberOfThreads = 1, int bufferSize = 1)
+        public EyeTrackerProcessor(Mode processingMode, EyeTrackingSystemBase eyeTrackingsystem, int maxNumberOfThreads = 1, int bufferSize = 1)
         {
             inputBufferSize = bufferSize;
             mode = processingMode;
+            this.eyeTrackingsystem = eyeTrackingsystem;
 
             numberOfThreads = Math.Min(maxNumberOfThreads, Math.Max(1, (int)Math.Round(Environment.ProcessorCount / 2.0 - 1)));
         }
@@ -238,6 +241,10 @@ namespace OpenIris
                 foreach ((EyeTrackerImagesAndData imagesAndData, long orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                 {
                     UpdatePipeline(ref pipelines, imagesAndData);
+
+                    // Prepare the images for processing depending on the system. For instance flipping,
+                    // cropping, splitting, increasing contrast, whatever ...
+                    imagesAndData.UpdateImages(eyeTrackingsystem.PreProcessImages(imagesAndData.Images));
 
                     //
                     // Wait for left and right eye to process

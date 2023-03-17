@@ -55,8 +55,8 @@ namespace SpinnakerInterface
             CAMLIST.Add(new SpinnakerCameraEye(cam_list[0], Eye.Left));
             CAMLIST.Add(new SpinnakerCameraEye(cam_list[1], Eye.Right));
 
-            //JOM CAMLIST[0].CameraOrientation = CameraOrientation.Rotated180;
-            //JOM CAMLIST[1].CameraOrientation = CameraOrientation.Rotated180;
+            //JOM camList[0].CameraOrientation = CameraOrientation.Rotated180;
+            //JOM camList[1].CameraOrientation = CameraOrientation.Rotated180;
 
             // Pick one of the cameras (MUST be a Blackfly) to be the MASTER.
             MASTERCAM = null;
@@ -92,7 +92,7 @@ namespace SpinnakerInterface
             MASTERCAM.cam.BeginAcquisition();
             MASTERCAM.EnableMasterTriggers(true);
 
-            //foreach (var CAM in CAMLIST) CAM.AutoExposureOnce();
+            //foreach (var CAM in camList) CAM.AutoExposureOnce();
         }
 
         // =========================================================================================
@@ -186,7 +186,7 @@ namespace SpinnakerInterface
         Vector2 Max(Vector2 V1, Vector2 V2) => Vector2.Max(V1, V2);
         Vector2 Min(Vector2 V1, Vector2 V2) => Vector2.Min(V1, V2);
 
-        // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and ROI_OFFSET_MAX.
+        // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.
         void SetROI(Vector2 Offset)
         {
             Offset = Max(Vector2.Zero, Min(ROI_OFFSET_MAX, Round(Offset / 4) * 4));
@@ -275,7 +275,7 @@ namespace SpinnakerInterface
             cam.TriggerMode.FromString("On");
             //cam.TriggerMode.FromString("Off");
 
-            //# MUST make sure all non-master cameras set STROBE_OUT_LINE to high.
+            //# MUST make sure all non-master cameras set strobeOutLine to high.
             cam.LineSelector.FromString(STROBE_OUT_LINE);
             cam.LineInverter.Value = false;
 

@@ -145,6 +145,7 @@ namespace OpenIris.UI
             this.panelPlayer = new System.Windows.Forms.Panel();
             this.videoPlayerUI = new OpenIris.UI.VideoPlayerUI();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.convertVideoToMP4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.menuStripMainMenu.SuspendLayout();
             this.tabPages.SuspendLayout();
@@ -398,6 +399,7 @@ namespace OpenIris.UI
             this.openSoundRecorderToolStripMenuItem,
             this.openLogFolderToolStripMenuItem,
             this.batchAnalysisToolStripMenuItem,
+            this.convertVideoToMP4ToolStripMenuItem,
             this.convertVideoToRGBToolStripMenuItem,
             this.showIPNetworkInfoToolStripMenuItem,
             this.trimVideosToolStripMenuItem});
@@ -427,7 +429,7 @@ namespace OpenIris.UI
             // 
             this.convertVideoToRGBToolStripMenuItem.Name = "convertVideoToRGBToolStripMenuItem";
             this.convertVideoToRGBToolStripMenuItem.Size = new System.Drawing.Size(290, 34);
-            this.convertVideoToRGBToolStripMenuItem.Text = "ConvertVideoToRGB";
+            this.convertVideoToRGBToolStripMenuItem.Text = "Convert video to RGB";
             // 
             // showIPNetworkInfoToolStripMenuItem
             // 
@@ -452,7 +454,7 @@ namespace OpenIris.UI
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(164, 34);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.aboutToolStripMenuItem.Text = "About";
             // 
             // systemToolStripMenuItem
@@ -1120,7 +1122,7 @@ namespace OpenIris.UI
             // 
             this.splitContainer1.Panel2.Controls.Add(this.eyeTrackerTrace);
             this.splitContainer1.Size = new System.Drawing.Size(1644, 918);
-            this.splitContainer1.SplitterDistance = 205;
+            this.splitContainer1.SplitterDistance = 204;
             this.splitContainer1.SplitterWidth = 6;
             this.splitContainer1.TabIndex = 0;
             // 
@@ -1139,7 +1141,7 @@ namespace OpenIris.UI
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
             this.tableLayoutPanel5.RowCount = 1;
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel5.Size = new System.Drawing.Size(1644, 205);
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(1644, 204);
             this.tableLayoutPanel5.TabIndex = 37;
             // 
             // eyeTrackerImageEyeBoxLeftEyeSmall
@@ -1149,7 +1151,7 @@ namespace OpenIris.UI
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Location = new System.Drawing.Point(661, 5);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.Name = "eyeTrackerImageEyeBoxLeftEyeSmall";
-            this.eyeTrackerImageEyeBoxLeftEyeSmall.Size = new System.Drawing.Size(649, 195);
+            this.eyeTrackerImageEyeBoxLeftEyeSmall.Size = new System.Drawing.Size(649, 194);
             this.eyeTrackerImageEyeBoxLeftEyeSmall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.eyeTrackerImageEyeBoxLeftEyeSmall.TabIndex = 34;
             this.eyeTrackerImageEyeBoxLeftEyeSmall.TabStop = false;
@@ -1161,7 +1163,7 @@ namespace OpenIris.UI
             this.eyeTrackerImageEyeBoxRightEyeSmall.Location = new System.Drawing.Point(4, 5);
             this.eyeTrackerImageEyeBoxRightEyeSmall.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.eyeTrackerImageEyeBoxRightEyeSmall.Name = "eyeTrackerImageEyeBoxRightEyeSmall";
-            this.eyeTrackerImageEyeBoxRightEyeSmall.Size = new System.Drawing.Size(649, 195);
+            this.eyeTrackerImageEyeBoxRightEyeSmall.Size = new System.Drawing.Size(649, 194);
             this.eyeTrackerImageEyeBoxRightEyeSmall.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.eyeTrackerImageEyeBoxRightEyeSmall.TabIndex = 0;
             this.eyeTrackerImageEyeBoxRightEyeSmall.TabStop = false;
@@ -1173,7 +1175,7 @@ namespace OpenIris.UI
             this.panelHeadViewer.Location = new System.Drawing.Point(1318, 5);
             this.panelHeadViewer.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.panelHeadViewer.Name = "panelHeadViewer";
-            this.panelHeadViewer.Size = new System.Drawing.Size(322, 195);
+            this.panelHeadViewer.Size = new System.Drawing.Size(322, 194);
             this.panelHeadViewer.TabIndex = 35;
             // 
             // labelHeadData
@@ -1193,7 +1195,7 @@ namespace OpenIris.UI
             this.eyeTrackerTrace.Location = new System.Drawing.Point(0, 0);
             this.eyeTrackerTrace.Margin = new System.Windows.Forms.Padding(6, 8, 6, 8);
             this.eyeTrackerTrace.Name = "eyeTrackerTrace";
-            this.eyeTrackerTrace.Size = new System.Drawing.Size(1644, 707);
+            this.eyeTrackerTrace.Size = new System.Drawing.Size(1644, 708);
             this.eyeTrackerTrace.TabIndex = 0;
             // 
             // tabDebug
@@ -1316,6 +1318,12 @@ namespace OpenIris.UI
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(1660, 1011);
             this.panel4.TabIndex = 29;
+            // 
+            // convertVideoToMP4ToolStripMenuItem
+            // 
+            this.convertVideoToMP4ToolStripMenuItem.Name = "convertVideoToMP4ToolStripMenuItem";
+            this.convertVideoToMP4ToolStripMenuItem.Size = new System.Drawing.Size(290, 34);
+            this.convertVideoToMP4ToolStripMenuItem.Text = "Convert video to MP4";
             // 
             // EyeTrackerGui
             // 
@@ -1489,5 +1497,6 @@ namespace OpenIris.UI
         private Emgu.CV.UI.ImageBox imageBoxIrisRight;
         private Emgu.CV.UI.ImageBox imageBoxIrisRefeferenceLeft;
         private Emgu.CV.UI.ImageBox imageBoxIrisLeft;
+        private System.Windows.Forms.ToolStripMenuItem convertVideoToMP4ToolStripMenuItem;
     }
 }

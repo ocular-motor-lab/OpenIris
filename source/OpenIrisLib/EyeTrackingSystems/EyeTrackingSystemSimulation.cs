@@ -40,7 +40,12 @@ namespace OpenIris
             cameraLeft.LoopAtFrame = loopAtFrame;
             cameraRight.LoopAtFrame = loopAtFrame;
 
-            return new EyeCollection<CameraEye?>(cameraLeft, cameraRight);
+            return Settings.Eye switch
+            {
+                Eye.Both => new EyeCollection<CameraEye?>(cameraLeft, cameraRight),
+                Eye.Left => new EyeCollection<CameraEye?>(cameraLeft, null),
+                Eye.Right => new EyeCollection<CameraEye?>(null, cameraRight),
+            };
         }
     }
 

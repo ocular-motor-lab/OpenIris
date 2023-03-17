@@ -76,9 +76,10 @@ namespace OpenIris.ImageGrabbing
 
             // Build the timestamp
             // Set up the timestamp for the image
-            ImageEyeTimestamp timestamp = new ImageEyeTimestamp();
-            timestamp.FrameNumber = (ulong)numberFramesGrabbed++;
-            timestamp.Seconds = timecounter.ElapsedMilliseconds / 1000;
+            ImageEyeTimestamp timestamp = new ImageEyeTimestamp(
+                seconds: timecounter.ElapsedMilliseconds / 1000,
+                frameNumber: (ulong)numberFramesGrabbed++,
+                frameNumberRaw: (ulong)numberFramesGrabbed);
 
             var bitmap = lastBitmap;
             lastBitmap = null;

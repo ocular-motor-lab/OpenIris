@@ -48,7 +48,7 @@ namespace OpenIris.ImageGrabbing
                 capture.Dispose();
             }
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -74,11 +74,10 @@ namespace OpenIris.ImageGrabbing
         protected override ImageEye GrabImageFromCamera()
         {
             // Set up the timestamp for the image
-            ImageEyeTimestamp timestamp = new ImageEyeTimestamp
-            {
-                FrameNumber = (ulong)numberFramesGabbed++,
-                Seconds = EyeTrackerDebug.TimeElapsed.Milliseconds / 1000
-            };
+            ImageEyeTimestamp timestamp = new ImageEyeTimestamp(
+                EyeTrackerDebug.TimeElapsed.Milliseconds / 1000,
+                (ulong)numberFramesGabbed++,
+                (ulong)numberFramesGabbed);
 
             // Retrieve the new frame
             var tempImage = capture.QueryFrame().ToImage<Gray, byte>();

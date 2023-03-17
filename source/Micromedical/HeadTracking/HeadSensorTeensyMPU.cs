@@ -122,10 +122,11 @@ namespace OpenIris
                 return new HeadData
                 {
                     TimeStamp = new ImageEyeTimestamp
-                    {
-                        FrameNumberRaw = FrameCount,
-                        FrameNumber = FrameCount - initialSensorFrameNumber + initialCameraFrameNumber
-                    },
+                    (
+                        seconds: 0.0,
+                        frameNumber: FrameCount - initialSensorFrameNumber + initialCameraFrameNumber,
+                        frameNumberRaw: FrameCount
+                    ),
 
                     GyroX = (double)SensorData[3] / short.MaxValue * 500.0,
                     GyroY = (double)SensorData[4] / short.MaxValue * 500.0,

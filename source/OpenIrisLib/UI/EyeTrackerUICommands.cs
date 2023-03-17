@@ -14,7 +14,6 @@ namespace OpenIris
     using System;
     using System.Threading.Tasks;
     using System.Windows.Forms;
-    using System.CodeDom.Compiler;
     using System.Collections.Generic;
     using System.Windows.Input;
 
@@ -49,6 +48,7 @@ namespace OpenIris
         public EyeTrackerUICommand ChangeDataFolderCommand;
         public EyeTrackerUICommand TrimVideosCommand;
         public EyeTrackerUICommand ConvertVideoToRGBCommand;
+        public EyeTrackerUICommand ConvertVideoToMp4;
 
         public EyeTrackerUICommands(EyeTracker eyeTracker)
         {
@@ -220,7 +220,11 @@ namespace OpenIris
                 canExecute: () => true);
 
             ConvertVideoToRGBCommand = new EyeTrackerUICommand(
-                execute: _ => VideoTools.ConvertVideoToRGBCommandExecute(),
+                execute: _ => VideoTools.ConvertVideoToRGB(),
+                canExecute: () => true);
+
+            ConvertVideoToMp4 = new EyeTrackerUICommand(
+                execute: _ => VideoTools.ConvertToMP4(),
                 canExecute: () => true);
         }
 

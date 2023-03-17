@@ -118,11 +118,11 @@ namespace SpinnakerInterface
 
                     // Build the new timestamp
                     var timestamp = new ImageEyeTimestamp
-                    {
-                        FrameNumber = CurrentFrameID,
-                        FrameNumberRaw = RawFrameID,
-                        Seconds = rawImage.TimeStamp / 1e9
-                    };
+                    (
+                        seconds: rawImage.TimeStamp / 1e9,
+                        frameNumber: CurrentFrameID,
+                        frameNumberRaw: RawFrameID
+                    );
                     return new ImageEye(
                                      (int)rawImage.Width,
                                      (int)rawImage.Height,

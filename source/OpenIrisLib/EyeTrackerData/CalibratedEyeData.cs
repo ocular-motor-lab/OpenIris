@@ -169,8 +169,12 @@ namespace OpenIris
 
     /// <summary>
     /// Calibrated head data. Calculated from the raw data using the HeadCalibration.
-    /// TODO: define reference frames unanbiguosly
-    /// TODO: MOVE TO 4D MATRICES "transforms"
+    /// Coordinate conventions according to Fetter and Haslwanter 1998: 
+    /// When the head is in its reference position, upright and facing straight 
+    /// ahead – the x-axis points forward, the y-axis left along the interaural 
+    /// line, and the z axis points up.
+    /// According to the right hand rule the positive rotation directions in this 
+    /// coordinate system are clockwise, down, and left(as seen from the subject’s viewpoint)
     /// </summary>
     public struct CalibratedHeadData : IEquatable<CalibratedHeadData>
     {

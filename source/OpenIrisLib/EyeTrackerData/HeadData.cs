@@ -22,7 +22,7 @@ namespace OpenIris
         /// <summary>
         /// Timestamp of the head data.
         /// </summary>
-        public ImageEyeTimestamp TimeStamp { get; set; } = new ImageEyeTimestamp();
+        public ImageEyeTimestamp TimeStamp { get; set; } = ImageEyeTimestamp.Empty;
 
         public double AccelerometerX { get; set; }
         public double AccelerometerY { get; set; }

@@ -45,12 +45,12 @@ namespace OpenIris.ImageGrabbing
         /// <summary>
         /// First timestamp
         /// </summary>
-        private ImageEyeTimestamp firstTimeStamp = new ImageEyeTimestamp();
+        private ImageEyeTimestamp firstTimeStamp = ImageEyeTimestamp.Empty;
 
         /// <summary>
         /// Timestamp of the last frame.
         /// </summary>
-        private ImageEyeTimestamp lastTimeStamp = new ImageEyeTimestamp();
+        private ImageEyeTimestamp lastTimeStamp = ImageEyeTimestamp.Empty;
 
         /// <summary>
         /// Last frame rate requested to the camera.
@@ -304,11 +304,11 @@ namespace OpenIris.ImageGrabbing
                 if (lastRawTimeStamp.cycleSeconds > rawImage.timeStamp.cycleSeconds) cycles128sec++;
 
                 var timestamp = new ImageEyeTimestamp
-                {
-                    Seconds = GetTimestampSeconds(rawImage.timeStamp),
-                    FrameNumber = rawImage.imageMetadata.embeddedFrameCounter - firstTimeStamp.FrameNumberRaw,
-                    FrameNumberRaw = rawImage.imageMetadata.embeddedFrameCounter
-                };
+                (
+                    seconds : GetTimestampSeconds(rawImage.timeStamp),
+                    frameNumber : rawImage.imageMetadata.embeddedFrameCounter - firstTimeStamp.FrameNumberRaw,
+                    frameNumberRaw : rawImage.imageMetadata.embeddedFrameCounter
+                );
 
                 // If it is the first frame save some info
                 if (numberFramesGrabbed == 1)
@@ -328,7 +328,7 @@ namespace OpenIris.ImageGrabbing
 
                 unsafe
                 {
-                    //// TODO: make sure this is ok memorywise. I am afraid the rawImage object 
+                    //// This seems ok so far memorywise. I am afraid the rawImage object 
                     //// may be disposed and mess up with the image object
                     //// I actually don't understand very well why this works and never crashes. 
                     //// RawImage is inside a using so it should get disposed.
@@ -460,7 +460,6 @@ namespace OpenIris.ImageGrabbing
 
             Point roiOrigin;
 
-            // TODO: Deal with rotation
             // Round the center to a multiple of 4
             if (CameraOrientation.IsUpsideDown())
             {

@@ -160,12 +160,10 @@ namespace OpenIris.ImageGrabbing
         public virtual ImageEye GrabImageEyeFromVideo()
         {
             // Set up the timestamp for the image
-            var timestamp = new ImageEyeTimestamp
-            {
-                FrameNumber = (ulong)Video.GetCaptureProperty(CapProp.PosFrames),
-                FrameNumberRaw = (ulong)Video.GetCaptureProperty(CapProp.PosFrames),
-                Seconds = Video.GetCaptureProperty(CapProp.PosMsec) / 1000
-            };
+            var timestamp = new ImageEyeTimestamp(
+                seconds: Video.GetCaptureProperty(CapProp.PosMsec) / 1000,
+                frameNumber: (ulong)Video.GetCaptureProperty(CapProp.PosFrames),
+                frameNumberRaw: (ulong)Video.GetCaptureProperty(CapProp.PosFrames));
 
             // Retrieve the new frame
             var grayImage = Video.QueryFrame().ToImage<Gray, byte>();

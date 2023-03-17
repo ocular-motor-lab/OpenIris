@@ -80,6 +80,7 @@ namespace OpenIris.ImageGrabbing
             var image = GrabImageFromCamera();
 
             image.TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+            image.TimeStamp.DateTimeGrabbed = DateTime.Now;
 
             if (image is null) return null;
 
@@ -103,18 +104,9 @@ namespace OpenIris.ImageGrabbing
                 {
                 }
 
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
                 disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~CameraEye()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

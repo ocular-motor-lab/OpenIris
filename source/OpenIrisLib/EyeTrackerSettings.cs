@@ -63,22 +63,16 @@ namespace OpenIris
             get => allEyeTrackerSystemsSettings;
             set
             {
-                allEyeTrackerSystemsSettings = value;
+                SetPropertyArray(ref allEyeTrackerSystemsSettings, value, nameof(AllEyeTrackerSystemSettings));
 
-                foreach (var v in value.Values)
-                {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
-                }
-
+                // TODO: very ugly line to just make sure the settings are updated properly
+                // Need to set the mm per pixel for the tracking settings
                 foreach (var set in value)
                 {
                     set.Value.MmPerPixChanged += (o, e) =>
                     {
                         if (EyeTrackerSystem == set.Key)
                         {
-                            // TODO: very ugly line to just make sure the settings are updated properly
-                            // Need to set the mm per pixel for the tracking settings
                             foreach (var t in AllTrackingPipelinesSettings.Values)
                             {
                                 t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;

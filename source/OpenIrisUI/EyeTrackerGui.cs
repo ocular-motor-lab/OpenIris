@@ -17,6 +17,7 @@ namespace OpenIris.UI
     using System.Diagnostics;
     using System.Drawing;
     using System.Linq;
+    using System.Runtime;
     using System.Text.RegularExpressions;
     using System.Windows.Forms;
     using static System.Net.Mime.MediaTypeNames;
@@ -211,9 +212,11 @@ namespace OpenIris.UI
 
             try
             {
+                // Update what tabs are visible
+
                 tabPages.SuspendLayout();
 
-                if (eyeTracker.NotStarted)
+                if (eyeTracker.Tracking is false)
                 {
                     if (tabPages.TabPages.Contains(tabSetup))
                     {
@@ -225,7 +228,7 @@ namespace OpenIris.UI
 
                         tabPages.SelectedTab = tabPageStart;
                         systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
-
+                        systemComboBox.Enabled = eyeTracker.NotStarted;
                         pipelineUI = null;
                     }
                 }
@@ -267,78 +270,18 @@ namespace OpenIris.UI
             // Eye tracking pipeline settings
             tabSetup.Enabled = eyeTracker.Tracking;
 
-            // Player
-            panelPlayer.Visible = eyeTracker.PlayingVideo;
-            panelPlayer.Enabled = eyeTracker.PlayingVideo && !eyeTracker.PostProcessing;
-
             // Menu Configuration
             configurationToolStripMenuItem.Enabled = eyeTracker.Tracking || eyeTracker.NotStarted;
 
-            // Record buttons
-            if (eyeTracker.RecordingSession?.Stopping ?? false)
-            {
-                startStopRecordingToolStripMenuItem.Text = "Stop recording";
-                buttonRecord.Text = "WAIT, closing files";
-                buttonRecord.BackColor = Color.Salmon;
-            }
-            else if (eyeTracker.Recording)
-            {
-                startStopRecordingToolStripMenuItem.Text = "Stop recording";
-                buttonRecord.Text = "Stop recording";
-                buttonRecord.BackColor = Color.Salmon;
-            }
-            else
-            {
-                startStopRecordingToolStripMenuItem.Text = "Start recording";
-                buttonRecord.Text = "Start recording";
-                buttonRecord.BackColor = SystemColors.Control;
-            }
-
-            // Calibration
-
-            if (eyeTrackerUICommands.CancelCalibrationCommand.CanExecute())
-            {
-                buttonCalibrate.Text = "Cancel calibration";
-                buttonCalibrate.BackColor = Color.LightYellow;
-            }
-            else
-            {
-                buttonCalibrate.Text = "Calibrate";
-                buttonCalibrate.BackColor = SystemColors.Control;
-            }
-
-            // Update calibration UI
-            if (eyeTracker.Calibrating && !tabPages.Contains(tabCalibration))
-            {
-                // Calibration just started
-
-                calibrationUI = (eyeTracker.Settings.CalibrationMethod, eyeTracker.CalibrationSession?.GetCalibrationUI());
-
-                if (calibrationUI?.control is UserControl calibrationControl)
-                {
-                    calibrationControl.Dock = DockStyle.Fill;
-                    calibrationControl.Location = new Point(0, 0);
-                    calibrationControl.Size = tabCalibration.ClientSize;
-                    tabCalibration.Controls.Add(calibrationControl);
-
-                    tabPages.TabPages.Add(tabCalibration);
-                    tabPages.SelectTab(tabCalibration);
-                }
-            }
-
-            if (!eyeTracker.Calibrating && tabPages.Contains(tabCalibration))
-            {
-                tabCalibration.Controls.Clear();
-                tabPages.TabPages.Remove(tabCalibration);
-                tabPages.SelectTab(0);
-                calibrationUI = (string.Empty, null);
-            }
-
+            // Player
+            panelPlayer.Visible = eyeTracker.PlayingVideo;
+            panelPlayer.Enabled = eyeTracker.PlayingVideo && !eyeTracker.PostProcessing;
             if (eyeTracker.VideoPlayer != null)
             {
                 videoPlayerUI.Update(eyeTracker.VideoPlayer);
             }
 
+            // Eye tracking system menu items
             if (eyeTracker.EyeTrackingSystem != null)
             {
                 if (systemToolStripMenuItem.Tag == null || systemToolStripMenuItem.Tag != eyeTracker.EyeTrackingSystem)
@@ -362,6 +305,15 @@ namespace OpenIris.UI
                 systemToolStripMenuItem.Visible = false;
             }
         }
+        private void UpdateTabStart()
+        {
+            if (eyeTracker.Tracking is false)
+            {
+                systemComboBox.SelectedIndex = systemComboBox.FindStringExact(eyeTracker.Settings.EyeTrackerSystem);
+                systemComboBox.Enabled = eyeTracker.NotStarted;
+                pipelineUI = null;
+            }
+        }
 
         private void UpdateTabSetup()
         {
@@ -371,6 +323,39 @@ namespace OpenIris.UI
             {
                 tabSetup.SuspendLayout();
 
+                // Record buttons
+                if (eyeTracker.RecordingSession?.Stopping ?? false)
+                {
+                    startStopRecordingToolStripMenuItem.Text = "Stop recording";
+                    buttonRecord.Text = "WAIT, closing files";
+                    buttonRecord.BackColor = Color.Salmon;
+                }
+                else if (eyeTracker.Recording)
+                {
+                    startStopRecordingToolStripMenuItem.Text = "Stop recording";
+                    buttonRecord.Text = "Stop recording";
+                    buttonRecord.BackColor = Color.Salmon;
+                }
+                else
+                {
+                    startStopRecordingToolStripMenuItem.Text = "Start recording";
+                    buttonRecord.Text = "Start recording";
+                    buttonRecord.BackColor = SystemColors.Control;
+                }
+
+                // Calibration
+                if (eyeTrackerUICommands.CancelCalibrationCommand.CanExecute())
+                {
+                    buttonCalibrate.Text = "Cancel calibration";
+                    buttonCalibrate.BackColor = Color.LightYellow;
+                }
+                else
+                {
+                    buttonCalibrate.Text = "Calibrate";
+                    buttonCalibrate.BackColor = SystemColors.Control;
+                }
+
+                // Pipeline quick settings
                 panels[Eye.Left].SuspendLayout();
                 panels[Eye.Right].SuspendLayout();
 
@@ -493,6 +478,33 @@ namespace OpenIris.UI
 
         private void UpdateTabCalibration()
         {
+            // Update calibration UI
+            if (eyeTracker.Calibrating && !tabPages.Contains(tabCalibration))
+            {
+                // Calibration just started
+
+                calibrationUI = (eyeTracker.Settings.CalibrationMethod, eyeTracker.CalibrationSession?.GetCalibrationUI());
+
+                if (calibrationUI?.control is UserControl calibrationControl)
+                {
+                    calibrationControl.Dock = DockStyle.Fill;
+                    calibrationControl.Location = new Point(0, 0);
+                    calibrationControl.Size = tabCalibration.ClientSize;
+                    tabCalibration.Controls.Add(calibrationControl);
+
+                    tabPages.TabPages.Add(tabCalibration);
+                    tabPages.SelectTab(tabCalibration);
+                }
+            }
+
+            if (!eyeTracker.Calibrating && tabPages.Contains(tabCalibration))
+            {
+                tabCalibration.Controls.Clear();
+                tabPages.TabPages.Remove(tabCalibration);
+                tabPages.SelectTab(0);
+                calibrationUI = (string.Empty, null);
+            }
+
             calibrationUI?.control?.UpdateUI();
         }
 
@@ -608,6 +620,10 @@ namespace OpenIris.UI
 
                 switch (tabPages.SelectedTab.Name)
                 {
+                    case "tabStart":
+                        UpdateTabStart();
+                        break;
+
                     case ("tabSetup"):
                         UpdateTabSetup();
                         break;

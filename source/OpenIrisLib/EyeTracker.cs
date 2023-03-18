@@ -34,9 +34,6 @@ namespace OpenIris
         {
             DataBuffer = new EyeTrackerDataBuffer();
             Calibration = CalibrationParameters.Default;
-
-            // TODO: this is a bit ugly, but I don't want to make this nullable.
-            // I also don't want to load it in the statuc constructor.
             Settings = new EyeTrackerSettings(true); 
         }
 
@@ -45,19 +42,7 @@ namespace OpenIris
         /// </summary>
         public static (EyeTracker eyeTracker, Exception? ex) Start()
         {
-            if (eyeTracker.initialized is false)
-            {
-                try
-                {
-                    eyeTracker = new EyeTracker();
-                    eyeTracker.Init();
-                }
-                catch (PluginManagerException ex)
-                {
-                    eyeTracker.Init(safeMode: true);
-                    eyeTracker.startupException = ex;
-                }
-            }
+            eyeTracker.Init();
 
             return (eyeTracker, eyeTracker.startupException);
         }
@@ -65,18 +50,27 @@ namespace OpenIris
         /// <summary>
         /// Initializes an instance of the EyeTracker class.
         /// </summary>
-        /// <param name="safeMode">True activates safe mode by not using external plugins.</param>
-        private void Init(bool safeMode = false)
+        private void Init()
         {
+            if (initialized) return;
+
             try
             {
                 var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
 
                 EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
 
-                // Initialize the object that loads the different eye tracking system objects. It can
-                // load objects from new classes present in new dlls in the application folder.
-                EyeTrackerPluginManager.Init(safeMode);
+                try
+                {
+                    // Initialize the object that loads the different eye tracking system objects. It can
+                    // load objects from new classes present in new dlls in the application folder.
+                    EyeTrackerPluginManager.Init(false);
+                }
+                catch (PluginManagerException ex)
+                {
+                    EyeTrackerPluginManager.Init(safeMode: true);
+                    eyeTracker.startupException = ex;
+                }
 
                 // Load settings. Needs to happen after the plugins have been initialized to properly
                 // load the settings of each plugin
@@ -440,7 +434,7 @@ namespace OpenIris
                     SaveProcessedVideo = options.SaveProcessedVideo,
                     WhichEye = options.WhichEye,
 
-                    AddCross = true,
+                    AddPupilCross = true,
                     IncreaseContrast = false,
                     AddEyelids = false,
                 };
@@ -624,7 +618,7 @@ namespace OpenIris
 
             var currentFrameNumber = ImageGrabber.CurrentFrameNumber;
 
-            RecordingSession?.TryRecordEvent(new EyeTrackerEvent(eventMessage, currentFrameNumber, data));
+            RecordingSession?.TryRecordEvent(eventMessage, currentFrameNumber, data);
 
             return currentFrameNumber;
         }

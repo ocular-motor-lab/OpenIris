@@ -7,15 +7,15 @@ namespace OpenIris
 {
 #nullable enable
 
-    using System;
-    using System.Linq;
-    using System.Diagnostics;
-    using System.Drawing;
-    using System.IO;
-    using System.Threading.Tasks;
     using Emgu.CV;
     using Emgu.CV.Structure;
     using OpenIris.UI;
+    using System;
+    using System.Diagnostics;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Class that controls data and video recording. The object has to take care of syncronizing all
@@ -126,7 +126,7 @@ namespace OpenIris
         /// </summary>
         public string RecordingStatus
         {
-            get => $"Recording {TimeRecorded.ToString(@"hh\:mm\:ss\.f")} "+
+            get => $"Recording {TimeRecorded:hh\\:mm\\:ss\\.f} "+
                 $"[Video drops:{NumberFramesDroppedInVideo}, Data drops:{NumberFramesDroppedInDataFile}]";
         }
 
@@ -302,18 +302,21 @@ namespace OpenIris
             return processedFramesRecorder.TryAdd(newDataAndImages, newDataAndImages.FrameNumber);
         }
 
+
         /// <summary>
         /// Records new event.
         /// </summary>
-        /// <param name="eyeTrackerEvent">Info about the event.</param>
+        /// <param name="eventMessage"></param>
+        /// <param name="frameNumber"></param>
+        /// <param name="data"></param>
         /// <returns>True if it could be added to the buffer.</returns>
-        internal bool TryRecordEvent(EyeTrackerEvent eyeTrackerEvent)
+        internal bool TryRecordEvent(string eventMessage, long frameNumber, object? data = null)
         {
             if (eventRecorder is null) throw new InvalidOperationException("Recorder not ready.");
 
-            if (RangeToRecord.DoesNotContain(eyeTrackerEvent.FrameNumber)) return false;
+            if (RangeToRecord.DoesNotContain(frameNumber)) return false;
             
-            return eventRecorder.TryAdd(eyeTrackerEvent, eyeTrackerEvent.FrameNumber);
+            return eventRecorder.TryAdd(new EyeTrackerEvent(eventMessage, frameNumber, data), frameNumber);
         }
 
         private bool RecordGrabbedImages(EyeCollection<(Eye Eye, Image<Gray, byte>? Image)> imagesEye)
@@ -326,9 +329,7 @@ namespace OpenIris
             // up time of the consumer is fast and it can receive items in the queue very quickly.
             // Also, it allows for reading the frame size directly from the images, no need to pass
             // it as a parameter.
-            if (rawVideoWriters is null)
-            {
-                rawVideoWriters = new EyeCollection<VideoWriter?>(
+            rawVideoWriters ??= new EyeCollection<VideoWriter?>(
                     imagesEye.Select(im => (im.Image is null) ? null :
                         new VideoWriter(
                            fileName: DataFileName.Replace(".txt", "-" + im.Eye + ".avi"),
@@ -336,7 +337,6 @@ namespace OpenIris
                            fps: options.FrameRate / options.DecimateRatioRawVideo,
                            size: imagesEye.GetFrameSize(),
                            isColor: false)).ToArray());
-            }
 
             // Record the images
             foreach ((var whichEye, var image) in imagesEye)
@@ -350,110 +350,80 @@ namespace OpenIris
 
         private bool RecordDataAndProcessedImages(EyeTrackerImagesAndData dataAndImages)
         {
-            if (dataAndImages == null) throw new ArgumentNullException(nameof(dataAndImages));
-
             //
             // Save the data to text file
             // 
-
-            if (dataAndImages.Data != null)
+            if (dataFile is null)
             {
-                // Open the data file
-                if (dataFile is null)
-                {
-                    dataFile = new StreamWriter(DataFileName);
-                    dataFile.WriteLine(EyeTrackerData.GetStringHeader());
-                }
-
-                dataFile.WriteLine(dataAndImages.Data.GetStringLine());
+                // Open the file and write the header the first time
+                dataFile = new StreamWriter(DataFileName);
+                dataFile.WriteLine(EyeTrackerData.GetStringHeader());
             }
+
+            dataFile.WriteLine(dataAndImages.Data?.GetStringLine() ?? string.Empty);
 
             //
             // Save the images to a video file with data overlay
             // 
 
-            var images = dataAndImages.Images ?? new EyeCollection<ImageEye?>(null, null);
+           // var images = dataAndImages.Images ?? new EyeCollection<ImageEye?>(null, null);
+            var processedVideoOptions = options as ProcessedRecordingOptions;
 
-            if (options is ProcessedRecordingOptions processedVideoOptions)
+            if (processedVideoOptions?.SaveProcessedVideo is true)
             {
-                // Open the video files
-                if (processedVideoOptions.SaveProcessedVideo)
+                // Open the video
+                processedVideoWriter ??= new VideoWriter(
+                            fileName: DataFileName.Replace(".txt", ".avi"),
+                            compressionCode: 0,
+                            fps: options.FrameRate,
+                            size: dataAndImages.Images.GetFrameSize(),
+                            isColor: true);
+
+                // Save the processed video
+                var imagesColor = dataAndImages.Images
+                    .Where(im => im is not null)
+                    .Where(im => processedVideoOptions.WhichEye == Eye.Both || im!.WhichEye == processedVideoOptions.WhichEye)
+                    .Select(im => (Image: im!.Image.Convert<Bgr, byte>(), im!.EyeData)).ToArray();
+                foreach ((var imageColor, var eyeData) in imagesColor)
                 {
-                    if (processedVideoWriter is null)
-                    {
-                        processedVideoWriter = new VideoWriter(
-                                fileName: DataFileName.Replace(".txt", ".avi"),
-                                compressionCode: 0,
-                                fps: options.FrameRate,
-                                size: images.GetFrameSize(),
-                                isColor: true);
-                    }
+                    if (processedVideoOptions.IncreaseContrast) imageColor._EqualizeHist();
 
-                    // Save the processed video
-                    if (processedVideoWriter != null)
-                    {
-                        var imagesColor = new EyeCollection<Image<Bgr, byte>?>(Enumerable.Repeat<Image<Bgr, byte>?>(null, images.Count));
-                        foreach (var image in images)
-                        {
-                            if (image is null) continue;
+                    if (eyeData is null) continue;
 
-                            var imageColor = image.Image.Convert<Bgr, byte>();
-                            var eyeModel = dataAndImages.Calibration.EyeCalibrationParameters[image.WhichEye].EyePhysicalModel;
-
-                            if (processedVideoOptions.IncreaseContrast) imageColor._EqualizeHist();
-
-                            if (image.EyeData is null) continue;
-
-                            if (processedVideoOptions.AddCross) ImageEyeBox.DrawCross(imageColor, image.EyeData);
-                            if (processedVideoOptions.AddEyelids) ImageEyeBox.DrawEyelids(imageColor, image.EyeData, eyeModel);
-                        }
-
-                        using var imageForVideo = (processedVideoOptions.WhichEye, images.Count) switch
-                        {
-                            (Eye.Left, 2) => imagesColor[Eye.Left],
-                            (Eye.Right, 2) => imagesColor[Eye.Right],
-                            (Eye.Both, 2) => CombineImages(imagesColor[Eye.Left], imagesColor[Eye.Right]),
-
-                            (_, _) => throw new InvalidOperationException("Invalid option"),
-                        };
-
-                        if (imageForVideo != null) processedVideoWriter.Write(imageForVideo.Mat);
-                    }
+                    var eyeModel = dataAndImages.Calibration.EyeCalibrationParameters[eyeData.WhichEye].EyePhysicalModel;
+                    if (processedVideoOptions.AddPupilCross) ImageEyeBox.DrawCross(imageColor, eyeData);
+                    if (processedVideoOptions.AddCRCross) ImageEyeBox.DrawCR(imageColor, eyeData);
+                    if (processedVideoOptions.AddEyelids) ImageEyeBox.DrawEyelids(imageColor, eyeData, eyeModel);
                 }
-            }
 
+                using var imageForVideo = imagesColor.Count() switch
+                {
+                    1 => imagesColor[0].Image,
+                    2 => CombineImages(imagesColor[0].Image, imagesColor[1].Image),
+                    _ => throw new InvalidOperationException("Invalid option"),
+                };
+
+                processedVideoWriter.Write(imageForVideo.Mat);
+            }
             return true;
         }
 
         private bool RecordEvent(EyeTrackerEvent eyeTrackerEvent)
         {
             // The first time open the file
-            if (eventFile is null)
-            {
-                eventFile = new StreamWriter(DataFileName.Replace(".txt", "-events.txt"));
-            }
+            eventFile ??= new StreamWriter(DataFileName.Replace(".txt", "-events.txt"));
 
-            if (eventFile != null && eyeTrackerEvent != null)
-            {
-                eventFile.WriteLine(eyeTrackerEvent.GetStringLine());
-                return true;
-            }
-
-            return false;
+            eventFile.WriteLine(eyeTrackerEvent?.GetStringLine() ?? string.Empty);
+            return true;
         }
 
-        private static Image<Bgr, byte> CombineImages(Image<Bgr, byte>? imageLeft, Image<Bgr, byte>? imageRight)
+        private static Image<Bgr, byte> CombineImages(Image<Bgr, byte> imageLeft, Image<Bgr, byte> imageRight)
         {
-            if (imageLeft is null || imageRight is null) throw new InvalidOperationException("Images cannot be null");
+            var combinedSize = new Size(imageLeft.Size.Width * 2, imageLeft.Size.Height);
+            var imgBoth = new Image<Bgr, byte>(combinedSize);
 
-            var imgBoth = new Image<Bgr, byte>(new Size(imageLeft.Size.Width * 2, imageLeft.Size.Height));
-
-            imgBoth.ROI = new Rectangle(imageLeft.Width, 0, imageLeft.Size.Width, imageLeft.Size.Height);
-            imageLeft.CopyTo(imgBoth);
-
-            imgBoth.ROI = imageRight.ROI;
-            imageRight.CopyTo(imgBoth);
-            imgBoth.ROI = new Rectangle();
+            imageLeft.CopyTo(imgBoth, new Rectangle(imageLeft.Width, 0, imageLeft.Size.Width, imageLeft.Size.Height));
+            imageRight.CopyTo(imgBoth, imageRight.ROI);
 
             return imgBoth;
         }
@@ -494,7 +464,8 @@ namespace OpenIris
         public bool SaveProcessedVideo { get; set; }
         public Eye WhichEye { get; set; }
         public bool IncreaseContrast { get; set; }
-        public bool AddCross { get; set; }
+        public bool AddPupilCross { get; set; }
+        public bool AddCRCross { get; set; }
         public bool AddEyelids { get; set; }
     }
 }

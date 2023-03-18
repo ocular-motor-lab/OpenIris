@@ -60,5 +60,18 @@ namespace OpenIris
         public static Vector2 Max(Vector2 V1, Vector2 V2) => Vector2.Max(V1, V2);
         public static Vector2 Min(Vector2 V1, Vector2 V2) => Vector2.Min(V1, V2);
         public static Vector2 ToVector2(PointF P) => new Vector2(P.X, P.Y);
+
+        /// <summary>
+        /// Copies an image into a portion of another image.
+        /// </summary>
+        /// <param name="origin">Origin image.</param>
+        /// <param name="destination">Destination image.</param>
+        /// <param name="ROI">Region where to copy the image in the destination.</param>
+        public static void CopyTo(this Image<Bgr, Byte> origin, Image<Bgr, Byte> destination, Rectangle ROI)
+        {
+            destination.ROI = ROI;
+            origin.CopyTo(destination);
+            destination.ROI = new Rectangle();
+        }
     }
 }

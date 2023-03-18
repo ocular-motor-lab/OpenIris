@@ -15,7 +15,6 @@ namespace OpenIris
     using System.Diagnostics;
     using System.Threading;
     using static OpenIris.EyeTracker;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Class with diagnostic information about the eye tracker. Timing, errors, etc.
@@ -31,7 +30,6 @@ namespace OpenIris
 
             deltaTimes = new ConcurrentDictionary<string, (long, double)>();
             previousPeriods = new (string, double,  double, double)[numberOfTables];
-            threadToFrameNumber = new Dictionary<int, ulong>(numberOfTables);
             stopWatch = Stopwatch.StartNew();
             Images = new ConcurrentDictionary<string, EyeCollection<Image<Bgr, byte>?>>();
         }
@@ -51,11 +49,6 @@ namespace OpenIris
         /// the last message tracked, the time it happened, and the time of the begining of the frame.
         /// </summary>
         private static readonly (string periodName, double beginTime,  double endTime, double frameStartTime)[] previousPeriods;
-
-        /// <summary>
-        /// Table to convert from threadID to frame ID (which will be the frame number modules some ammount).
-        /// </summary>
-        private static readonly Dictionary<int, ulong> threadToFrameNumber;
 
         /// <summary>
         /// Collection of debug images with a name associated to them.
@@ -150,7 +143,7 @@ namespace OpenIris
                     periodName: timePeriodName,
                     beginTime: previousPeriods[ID].endTime,
                     endTime: EyeTrackerDebug.TimeElapsed.TotalMilliseconds,
-                    frameStartTime: previousPeriods[ID].frameStartTime);
+                    previousPeriods[ID].frameStartTime);
 
                 var deltaTime = newPeriod.endTime - newPeriod.beginTime;
                 var deltaMessage = String.Format("{0,-23} -> {1,23}", previousPeriods[ID].periodName, timePeriodName);

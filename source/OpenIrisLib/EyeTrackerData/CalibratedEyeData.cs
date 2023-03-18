@@ -111,8 +111,7 @@ namespace OpenIris
         /// <returns></returns>
         public override bool Equals(object obj)
         {
-            if (!(obj is CalibratedEyeData))
-                return false;
+            if (obj is not CalibratedEyeData) return false;
 
             return Equals((CalibratedEyeData)obj);
         }
@@ -124,17 +123,17 @@ namespace OpenIris
         /// <returns>True if they are equal.</returns>
         public bool Equals(CalibratedEyeData other)
         {
-            if (this.HorizontalPosition != other.HorizontalPosition)
+            if (HorizontalPosition != other.HorizontalPosition)
             {
                 return false;
             }
 
-            if (this.VerticalPosition != other.VerticalPosition)
+            if (VerticalPosition != other.VerticalPosition)
             {
                 return false;
             }
 
-            if (this.PupilArea != other.PupilArea)
+            if (PupilArea != other.PupilArea)
             {
                 return false;
             }
@@ -173,7 +172,7 @@ namespace OpenIris
     /// When the head is in its reference position, upright and facing straight 
     /// ahead – the x-axis points forward, the y-axis left along the interaural 
     /// line, and the z axis points up.
-    /// According to the right hand rule the positive rotation directions in this 
+    /// According to the right hand rule the positive rotation directions in this 
     /// coordinate system are clockwise, down, and left(as seen from the subject’s viewpoint)
     /// </summary>
     public struct CalibratedHeadData : IEquatable<CalibratedHeadData>

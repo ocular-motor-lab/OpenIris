@@ -246,7 +246,6 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="app.config" />
-    <None Include="OpenIrisClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -19,7 +19,7 @@ namespace SpinnakerInterface
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {
-        protected CameraEyeSpinnaker camera = null;
+        protected CameraEyeSpinnaker? camera = null;
         
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {

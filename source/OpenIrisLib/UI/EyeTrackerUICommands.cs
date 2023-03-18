@@ -29,23 +29,29 @@ namespace OpenIris
     {
         public EyeTrackerUICommand StartTrackingCommand;
         public EyeTrackerUICommand StopCommand;
+
         public EyeTrackerUICommand PlayVideoCommand;
         public EyeTrackerUICommand ProcessVideoCommand;
         public EyeTrackerUICommand BatchProcessVideoCommand;
+
         public EyeTrackerUICommand StartRecordingCommand;
         public EyeTrackerUICommand StopRecordingCommand;
         public EyeTrackerUICommand StartStopRecordingCommand;
+
         public EyeTrackerUICommand StartCalibrationCommand;
         public EyeTrackerUICommand CancelCalibrationCommand;
+        public EyeTrackerUICommand StartCancelCalibrationCommand;
         public EyeTrackerUICommand ResetCalibrationCommand;
         public EyeTrackerUICommand ResetReferenceCommand;
         public EyeTrackerUICommand LoadCalibrationCommand;
         public EyeTrackerUICommand SaveCalibrationCommand;
-        public EyeTrackerUICommand EditSettingsCommand;
-        public EyeTrackerUICommand StartCancelCalibrationCommand;
+
         public EyeTrackerUICommand CenterCamerasCommand;
         public EyeTrackerUICommand MoveCamerasCommand;
+
+        public EyeTrackerUICommand EditSettingsCommand;
         public EyeTrackerUICommand ChangeDataFolderCommand;
+
         public EyeTrackerUICommand TrimVideosCommand;
         public EyeTrackerUICommand ConvertVideoToRGBCommand;
         public EyeTrackerUICommand ConvertVideoToMp4;

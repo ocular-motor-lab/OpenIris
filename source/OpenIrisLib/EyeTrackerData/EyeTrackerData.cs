@@ -291,6 +291,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="images">Images for the current frame.</param>
         /// <param name="calibration">Calibration used to processed this images.</param>
+        /// <param name="pipelineName">Name of the processing pipeline to use.</param>
         /// <param name="trackingSettings">Tracking settings used to process this image.</param>
         public EyeTrackerImagesAndData(EyeCollection<ImageEye?> images, CalibrationParameters calibration, string pipelineName, EyeTrackingPipelineSettings trackingSettings)
         {

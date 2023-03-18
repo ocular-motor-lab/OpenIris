@@ -16,7 +16,7 @@ namespace OpenIris
         /// <summary>
         /// Empty timestamp
         /// </summary>
-        public static ImageEyeTimestamp Empty = new ImageEyeTimestamp(0, 0, 0);
+        public static ImageEyeTimestamp Empty = new(0, 0, 0);
 
         /// <summary>
         /// Initializes a new instance of timestamp.
@@ -48,12 +48,9 @@ namespace OpenIris
         /// <param name="seconds">Timestamp in seconds from the camera clock ideally.</param>
         /// <param name="frameNumber"> Main frame number, starts at 1 when camera is started. 
         /// Needs to match between cameras</param>
-        /// It starts at some arbitrary number. Does not need to match the other camera</param>
         public ImageEyeTimestamp(double seconds, ulong frameNumber)
+            :this(seconds, frameNumber, frameNumber)
         {
-            Seconds = seconds;
-            FrameNumber = frameNumber;
-            FrameNumberRaw = frameNumber;
         }
 
         /// <summary>   
@@ -130,7 +127,7 @@ namespace OpenIris
                 return false;
             }
 
-            if (!(obj is ImageEyeTimestamp))
+            if (obj is not ImageEyeTimestamp)
             {
                 return false;
             }

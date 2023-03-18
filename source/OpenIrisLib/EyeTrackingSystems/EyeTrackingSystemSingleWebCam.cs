@@ -38,6 +38,7 @@ namespace OpenIris
                 Eye.Both => new EyeCollection<CameraEye?>(camera),
                 Eye.Left => new EyeCollection<CameraEye?>(camera, null),
                 Eye.Right => new EyeCollection<CameraEye?>(null, camera),
+                _ => throw new NotImplementedException(),
             };
         }
 

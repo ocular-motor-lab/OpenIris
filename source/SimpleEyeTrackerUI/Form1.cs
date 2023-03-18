@@ -11,7 +11,6 @@ namespace SimpleEyeTrackerUI
 {
     public partial class Form1 : Form
     {
-        private string fileName;
         private VideoEye video;
 
         private EyeTrackingPipelineJOM imageProcessor;
@@ -30,8 +29,8 @@ namespace SimpleEyeTrackerUI
             //======================================================================================
             // Initialize video capture.
             //======================================================================================
-            this.fileName = "JorgeLeft.avi";
-            this.video = new VideoEye(Eye.Left, this.fileName);
+            var fileName = "JorgeLeft.avi";
+            video = new VideoEye(Eye.Left, fileName);
 
             //======================================================================================
             // Initialize settings.
@@ -41,7 +40,6 @@ namespace SimpleEyeTrackerUI
             // brightnessof the image
             var settings = new EyeTrackingPipelineJOMSettings
             {
-
                 // Select the specific algorithms to be used for each processing step.
 
                 // This is the rough finding of the pupil. Options are: "Blob" and "Centroid"
@@ -81,7 +79,7 @@ namespace SimpleEyeTrackerUI
             // Initialize eye tracker.
             //======================================================================================
             EyeTrackerPluginManager.Init(true);
-            this.imageProcessor = EyeTrackingPipelineBase.Create("JOM", Eye.Left, settings) as EyeTrackingPipelineJOM;
+            imageProcessor = EyeTrackingPipelineBase.Create("JOM", Eye.Left, settings) as EyeTrackingPipelineJOM;
 
             //======================================================================================
             // Initialize calibration.
@@ -91,20 +89,20 @@ namespace SimpleEyeTrackerUI
             // globe with no distorsion. So the only parameters are radius and center (in pixels of
             // the video frame). 2) the reference image for torision and reference (zero) eye
             // position. For that it is necessary to process at least one image.
-            this.calibration = new EyeCalibration(Eye.Left);
-            this.calibration.SetEyeModel(new EyePhysicalModel(new PointF(175, 100), 160));
+            calibration = new EyeCalibration(Eye.Left);
+            calibration.SetEyeModel(new EyePhysicalModel(new PointF(175, 100), 160));
 
-            var imageEye = this.video.GrabImageEye();
+            var imageEye = video.GrabImageEye();
             (imageEye.EyeData, imageEye.ImageTorsion) = this.imageProcessor.Process(imageEye, this.calibration);
 
             // Get the torsion reference image
-            this.calibration.SetReference(imageEye);
+            calibration.SetReference(imageEye);
 
             // Start UI updating timer
-            this.timer = new Timer();
-            this.timer.Interval = 30;
-            this.timer.Tick += Timer_Tick;
-            this.timer.Start();
+            timer = new Timer();
+            timer.Interval = 30;
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
 
         private void Timer_Tick(object sender, System.EventArgs e)
@@ -159,12 +157,12 @@ namespace SimpleEyeTrackerUI
             mask = new Image<Gray, byte>(rawImageEye.Size);
             var torsionAngle2 = torsionMethod.CalculateTorsionAngle(
                 rawImageEye,
-                this.calibration.EyePhysicalModel,
-                this.calibration.ImageTorsionReference,
+                calibration.EyePhysicalModel,
+                calibration.ImageTorsionReference,
                 mask,
                 rawImageEye.EyeData.Pupil,
                 rawImageEye.EyeData.Iris,
-                this.settings,
+                settings,
                 out imageTorsion,
                 out dataQuality
                 );
@@ -175,22 +173,22 @@ namespace SimpleEyeTrackerUI
             //======================================================================================
             
             // Update frame counter in UI
-            toolStripTextBox1.Text = $"{this.video.LastFrameNumber}/{this.video.NumberOfFrames} frames";
+            toolStripTextBox1.Text = $"{video.LastFrameNumber}/{video.NumberOfFrames} frames";
 
-            var imageForDisplay = ImageEyeBox.DrawAllData(rawImageEye, this.calibration, this.settings);
+            var imageForDisplay = ImageEyeBox.DrawAllData(rawImageEye, calibration, settings);
 
-            this.imageBoxEye.Image = imageForDisplay;
+            imageBoxEye.Image = imageForDisplay;
         }
 
         private void restartToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            this.video?.Scroll(1);
+            video?.Scroll(1);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            this.video?.Dispose();
-            this.timer?.Dispose();
+            video?.Dispose();
+            timer?.Dispose();
         }
     }
 }

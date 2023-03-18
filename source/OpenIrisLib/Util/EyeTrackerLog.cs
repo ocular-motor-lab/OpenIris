@@ -34,6 +34,9 @@ namespace OpenIris
            return new EyeTrackerLog(path);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public override void Close()
         {
             if (Trace.Listeners.Contains(this))

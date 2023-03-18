@@ -31,24 +31,19 @@ namespace OpenIris
         /// <summary>
         /// Initializes a new instance of the EyeTrackerSettings class.
         /// </summary>
-        public EyeTrackerSettings()
+        public EyeTrackerSettings(bool safeMode = false)
         {
             allEyeTrackerSystemsSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
             allEyeTrackingPipelinesSettings = new EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings>();
             allCalibrationImplementations = new EyeTrackerSettingsDictionary<CalibrationSettings>();
-            EyeTrackingPipeline = eyeTrackingPipeline;
-            EyeTrackerSystem = eyeTrackerSystem;
-            CalibrationMethod = calibrationMethod;
 
-            LastVideoEyeTrackerSystem = "";
-            LastVideoFolder = "";
-        }
+            if (safeMode is false)
+            {
+                EyeTrackingPipeline = eyeTrackingPipeline;
+                EyeTrackerSystem = eyeTrackerSystem;
+                CalibrationMethod = calibrationMethod;
+            }
 
-        public EyeTrackerSettings(bool safeMode)
-        {
-            allEyeTrackerSystemsSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
-            allEyeTrackingPipelinesSettings = new EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings>();
-            allCalibrationImplementations = new EyeTrackerSettingsDictionary<CalibrationSettings>();
             LastVideoEyeTrackerSystem = "";
             LastVideoFolder = "";
         }
@@ -456,7 +451,6 @@ namespace OpenIris
         /// https://www.danrigby.com/2012/01/08/inotifypropertychanged-the-anders-hejlsberg-way/
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <typeparam name="T2"></typeparam>
         /// <param name="field"></param>
         /// <param name="value"></param>
         /// <param name="name"></param>

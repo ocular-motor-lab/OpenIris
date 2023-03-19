@@ -63,7 +63,7 @@ namespace OpenIris
         /// <summary>
         /// Gets or sets the raw data from the head sensor.
         /// </summary>
-        public HeadData HeadDataRaw { get; set; }
+        public HeadData? HeadDataRaw { get; set; }
 
         /// <summary>
         /// Gets or sets the calibrated head data.

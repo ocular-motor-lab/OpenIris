@@ -46,14 +46,16 @@ namespace OpenIris
         }
 
         private readonly Mode mode;
+        private bool started;
+        private bool stopping;
+
         private readonly int numberOfThreads;
         private readonly int inputBufferSize;
+        private readonly EyeTrackingSystemBase eyeTrackingsystem;
+
         private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
         private ConcurrentDictionary<long, EyeTrackerImagesAndData>? outputWaitingList;
         private int outputNextExpectedNumber = 0;
-        private bool started;
-        private bool stopping;
-        private EyeTrackingSystemBase eyeTrackingsystem;
 
         /// <summary>
         /// Initializes an instance of the eyeTrackerProcessor class.
@@ -120,8 +122,8 @@ namespace OpenIris
             if (started) throw new InvalidOperationException("Cannot start the processor again. Already running.");
             started = true;
 
-            List<Task>? processingTasks = new ();
-            TaskErrorHandler? errorHandler = new (Stop);
+            var processingTasks = new List<Task>();
+            var errorHandler = new TaskErrorHandler(Stop);
 
             try
             {
@@ -135,22 +137,22 @@ namespace OpenIris
                         //
                         // Not using a using statement here because the ProcessInputLoop will dispose
                         // of this events. Otherwise they get disposed before the WhenAll
-                        var newImagesEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
-                        var eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new AutoResetEvent(false), new AutoResetEvent(false));
+                        var newImagesEvents = new EyeCollection<AutoResetEvent?>(new(false), new(false));
+                        var eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new(false), new(false));
                         EyeCollection<EyeTrackingPipelineBase?>?  pipelines = null;
                         EyeTrackerImagesAndData? currentImagesAndData = null;
 
-                        processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Left, newImagesEvents, eyeDoneEvents),
-                            TaskCreationOptions.LongRunning)
-                            .ContinueWith(errorHandler.HandleError));
+                        processingTasks.Add(Task.Factory.StartNew(
+                            () => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Left, newImagesEvents, eyeDoneEvents),
+                            TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError));
 
-                        processingTasks.Add(Task.Factory.StartNew(() => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Right, newImagesEvents, eyeDoneEvents),
-                            TaskCreationOptions.LongRunning)
-                            .ContinueWith(errorHandler.HandleError));
+                        processingTasks.Add(Task.Factory.StartNew(
+                            () => ProcessOneEyeLoop(ref currentImagesAndData, ref pipelines, Eye.Right, newImagesEvents, eyeDoneEvents),
+                            TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError));
 
-                        processingTasks.Add(Task.Factory.StartNew(() => ProcessLoop(ref currentImagesAndData, ref pipelines, newImagesEvents, eyeDoneEvents),
-                            TaskCreationOptions.LongRunning)
-                            .ContinueWith(errorHandler.HandleError));
+                        processingTasks.Add(Task.Factory.StartNew(
+                            () => ProcessLoop(ref currentImagesAndData, ref pipelines, newImagesEvents, eyeDoneEvents),
+                            TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError));
                     }
 
                     await Task.WhenAll(processingTasks);
@@ -160,7 +162,7 @@ namespace OpenIris
             }
             finally
             {
-                processingTasks?.ForEach(t => t?.Dispose());
+                processingTasks.ForEach(t => t?.Dispose());
                 inputBuffer = null;
                 outputWaitingList = null;
             }

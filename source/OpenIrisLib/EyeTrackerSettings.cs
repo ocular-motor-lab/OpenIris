@@ -389,6 +389,5 @@ namespace OpenIris
         private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
 
         #endregion
-
     }
 }

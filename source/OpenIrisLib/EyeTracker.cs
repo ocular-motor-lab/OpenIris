@@ -12,6 +12,7 @@ namespace OpenIris
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -19,7 +20,7 @@ namespace OpenIris
     /// </summary>
     public sealed partial class EyeTracker : IDisposable
     {
-        private static EyeTracker eyeTracker = new EyeTracker();
+        private static readonly EyeTracker eyeTracker = new();
         private PluginManagerException? startupException;
         private bool initialized;
         
@@ -42,24 +43,14 @@ namespace OpenIris
         /// </summary>
         public static (EyeTracker eyeTracker, Exception? ex) Start()
         {
-            eyeTracker.Init();
-
-            return (eyeTracker, eyeTracker.startupException);
-        }
-
-        /// <summary>
-        /// Initializes an instance of the EyeTracker class.
-        /// </summary>
-        private void Init()
-        {
-            if (initialized) return;
+            if (eyeTracker.initialized) return (eyeTracker, eyeTracker.startupException);
 
             try
             {
                 var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
 
-                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
-
+                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, 
+                    $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
                 try
                 {
                     // Initialize the object that loads the different eye tracking system objects. It can
@@ -74,22 +65,24 @@ namespace OpenIris
 
                 // Load settings. Needs to happen after the plugins have been initialized to properly
                 // load the settings of each plugin
-                Settings = EyeTrackerSettings.Load();
+                eyeTracker.Settings = EyeTrackerSettings.Load();
 
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
-                EyeTrackerRemoteServices.Start(this);
+                EyeTrackerRemoteServices.Start(eyeTracker);
 
-                initialized = true;
+                eyeTracker.initialized = true;
 
-                Trace.WriteLine($"Eye tracker initializing complete in {(EyeTrackerDebug.TimeElapsed-t1).TotalSeconds} seconds.");
+                Trace.WriteLine($"Eye tracker initializing complete in {(EyeTrackerDebug.TimeElapsed - t1).TotalSeconds} seconds.");
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
-                Dispose();
+                eyeTracker.Dispose();
                 throw;
             }
+
+            return (eyeTracker, eyeTracker.startupException);
         }
 
         /// <summary>
@@ -251,12 +244,16 @@ namespace OpenIris
                     // After an image is processed we collected additional data into a common 
                     // structure and we save it in the data buffer. Each eye tracking system can 
                     // also post process the entire data frame
-                    processedImages.Data = new EyeTrackerData();
-                    processedImages.Data.EyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData); ;
-                    processedImages.Data.HeadDataRaw = HeadTracker?.GetHeadDataCorrespondingToImages(processedImages.Images) ?? new HeadData();
-                    processedImages.Data.EyeDataCalibrated = Calibration?.GetCalibratedEyeData(processedImages.Data.EyeDataRaw);
-                    processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw);
-                    processedImages.Data.FrameRate = ImageGrabber!.FrameRate;
+                    var eyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData);
+                    var headDataRaw = HeadTracker?.GetHeadDataCorrespondingToImages(processedImages.Images);
+                    processedImages.Data = new()
+                    {
+                        EyeDataRaw = eyeDataRaw,
+                        HeadDataRaw = headDataRaw,
+                        EyeDataCalibrated = Calibration?.GetCalibratedEyeData(eyeDataRaw),
+                        HeadDataCalibrated = Calibration?.GetCalibratedHeadData(headDataRaw),
+                        FrameRate = ImageGrabber!.FrameRate
+                    };
 
                     LastImagesAndData = EyeTrackingSystem!.PostProcessImagesAndData(processedImages);
 

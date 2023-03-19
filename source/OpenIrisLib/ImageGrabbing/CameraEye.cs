@@ -15,8 +15,6 @@ namespace OpenIris.ImageGrabbing
     /// be accessed using openCV.</remarks>
     public abstract class CameraEye : IImageEyeSource
     {
-        private bool disposedValue;
-
         /// <summary>
         /// Gets the frame rate of the camera.
         /// </summary>
@@ -98,14 +96,6 @@ namespace OpenIris.ImageGrabbing
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                }
-
-                disposedValue = true;
-            }
         }
 
         public void Dispose()

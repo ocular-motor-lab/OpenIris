@@ -123,9 +123,6 @@
     <Compile Include="Util\OpenIrisException.cs" />
     <Compile Include="Util\Consumer.cs" />
     <Compile Include="Calibration\CalibrationSession.cs" />
-    <Compile Include="EyeTrackerData\ExtraData.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="Calibration\EyePhysicalModel.cs" />
     <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
     <Compile Include="ImageGrabbing\EyeTrackerImageGrabber.cs" />

@@ -84,7 +84,7 @@ namespace OpenIris
         /// <summary>
         /// Gets the total time since the recording started.
         /// </summary>
-        public TimeSpan TimeRecorded => !Stopping ? DateTime.Now - TimeRecordingStarted : TimeRecordingStopped - TimeRecordingStarted;
+        public TimeSpan TimeRecorded => (!Stopping ? DateTime.Now : TimeRecordingStopped) - TimeRecordingStarted;
 
         /// <summary>
         /// Gets a value indicating weather the recording is stopping.

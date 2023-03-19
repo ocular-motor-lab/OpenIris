@@ -63,9 +63,7 @@ namespace OpenIris
                     {
                         // If the eye tracking system has an specific, UI open it.
                         using var trackingTask = eyeTracker.StartTracking();
-
-                        using Form? eyeTrackingSystemUI = eyeTracker.EyeTrackingSystem?.OpenEyeTrackingSystemUI;
-
+                        using var eyeTrackingSystemUI = eyeTracker.EyeTrackingSystem?.OpenEyeTrackingSystemUI;
                         await trackingTask;
                     },
                     canExecute: () => eyeTracker.NotStarted);

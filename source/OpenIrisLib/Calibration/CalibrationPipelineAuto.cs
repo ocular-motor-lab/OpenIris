@@ -16,7 +16,7 @@ namespace OpenIris
         /// <summary>
         /// Process data towards setting a new physical model
         /// </summary>
-        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
+        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(ImageEye imageEye, EyeTrackingPipelineSettings processingSettings)
         {
             if (imageEye is null) return (false, EyePhysicalModel.EmptyModel);
 
@@ -28,7 +28,7 @@ namespace OpenIris
         /// <summary>
         /// Process data for setting a new reference.
         /// </summary>
-        public override (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        public override (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
             if (image is null) return ( false, null);
 

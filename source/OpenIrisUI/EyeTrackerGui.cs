@@ -50,11 +50,19 @@ namespace OpenIris.UI
 
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
 
-            Exception? ex;
-
-            (eyeTracker, ex) = EyeTracker.Start();
-
-            if (ex is PluginManagerException) MessageBox.Show("Error initializing, trying safe mode (no plugins). " + ex.Message);
+            try
+            {
+                eyeTracker = EyeTracker.Create();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(
+                              "Error:" + ex.Message,
+                              "Error starting the system. See log file.",
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Close();
+                return;
+            }
 
             // Check if settings changed need restarting
             eyeTracker.Settings.PropertyChanged += (o, e) =>

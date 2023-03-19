@@ -34,6 +34,11 @@ namespace OpenIris
             Images = new ConcurrentDictionary<string, EyeCollection<Image<Bgr, byte>?>>();
         }
 
+        public static void Init()
+        {
+
+        }
+
         /// <summary>
         /// Stopwatch to measure the time it takes to process.
         /// </summary>

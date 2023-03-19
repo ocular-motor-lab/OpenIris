@@ -4,6 +4,8 @@
 //-----------------------------------------------------------------------
 namespace OpenIris
 {
+# nullable enable
+
     using System;
     using System.Collections.Concurrent;
     using System.Diagnostics;
@@ -16,17 +18,18 @@ namespace OpenIris
     /// just the one with the error. 
     /// 
     /// Typical pattern:
+    /// <code>
     /// 
     ///   var errorHandler = new TaskErrorHandler(this.StopTrackingAsync);
     ///   await Task.WhenAll(
     ///      this.imageProcessor.Start().ContinueWith(errorHandler.HandleError),
     ///      this.imageGrabber.StartAsync().ContinueWith(errorHandler.HandleError));
     ///   await errorHandler.CheckForErrors();
-    ///
+    ///</code>
     /// </summary>
     class TaskErrorHandler
     {
-        private readonly object stoppingLock;
+        private readonly object singleActionLock;
 
         private readonly Action actionWhenError;
         private readonly ConcurrentBag<Exception> exceptions;
@@ -40,9 +43,8 @@ namespace OpenIris
         public TaskErrorHandler(Action actionWhenError)
         {
             this.actionWhenError = actionWhenError;
-
             exceptions = new ConcurrentBag<Exception>();
-            stoppingLock = new object();
+            singleActionLock = new object();
         }
 
         /// <summary>
@@ -51,19 +53,20 @@ namespace OpenIris
         /// <param name="task">Task that preceded the call to this method.</param>
         public void HandleError(Task task)
         {
-            if (!task.IsFaulted) return;
+            if (task.IsFaulted is false) return;
 
             exceptions.Add(task.Exception);
+            Trace.WriteLine("ERROR: " + task.Exception.InnerException.Message);
 
-            lock (stoppingLock)
+            // Make sure the action only gets ran once even if multiple
+            // exceptions occur.
+            lock (singleActionLock)
             {
-                if (actionWhenError != null && !runningAction)
-                {
-                    Trace.WriteLine("ERROR: " + task.Exception.InnerException.Message);
-                    runningAction = true;
-                    actionWhenError();
-                }
+                if (runningAction) return;
+                runningAction = true;
             }
+
+            actionWhenError();
         }
 
         /// <summary>

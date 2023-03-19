@@ -268,25 +268,8 @@ namespace OpenIris
     /// </summary>
     public enum VideoEyeConfiguration
     {
-        /// <summary>
-        /// No videos.
-        /// </summary>
-        None,
-
-        /// <summary>
-        /// One video for both eyes.
-        /// </summary>
-        SingleVideoTwoEyes,
-
-        /// <summary>
-        /// One video for only one eye.
-        /// </summary>
-        SingleVideoOneEye,
-
-        /// <summary>
-        /// Two videos, one for each eye.
-        /// </summary>
-        TwoVideosTwoEyes,
+        OneVideo,
+        TwoVideos,
     }
 
     /// <summary>
@@ -316,7 +299,7 @@ namespace OpenIris
         /// <param name="name"></param>
         /// <param name="settingsType"></param>
         /// <param name="videoConfiguration"></param>
-        public PluginDescriptionEyeTrackingSystemAttribute(string name, Type settingsType, VideoEyeConfiguration videoConfiguration = VideoEyeConfiguration.TwoVideosTwoEyes)
+        public PluginDescriptionEyeTrackingSystemAttribute(string name, Type settingsType, VideoEyeConfiguration videoConfiguration = VideoEyeConfiguration.TwoVideos)
             : base(typeof(IEyeTrackerPluginMetadata))
         {
             Name = name;
@@ -329,7 +312,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="name"></param>
         public PluginDescriptionEyeTrackingSystemAttribute(string name)
-            : this(name, typeof(EyeTrackingSystemSettings), VideoEyeConfiguration.TwoVideosTwoEyes)
+            : this(name, typeof(EyeTrackingSystemSettings), VideoEyeConfiguration.TwoVideos)
         {
         }
 

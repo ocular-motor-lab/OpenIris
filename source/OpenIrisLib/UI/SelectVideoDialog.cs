@@ -134,13 +134,12 @@ namespace OpenIris.UI
                 case Mode.Processing:
                     switch (GetEyeTrackingSystemMetadata().VideoConfiguration)
                     {
-                        case VideoEyeConfiguration.TwoVideosTwoEyes:
+                        case VideoEyeConfiguration.TwoVideos:
                             var video1 = file1TextBox.Text.Length >0 ? file1TextBox.Text : null;
                             var video2 = file2TextBox.Text.Length >0 ? file2TextBox.Text : null;
                             return new EyeCollection<string?>(video1, video2);
 
-                        case VideoEyeConfiguration.SingleVideoTwoEyes:
-                        case VideoEyeConfiguration.SingleVideoOneEye:
+                        case VideoEyeConfiguration.OneVideo:
                             return new EyeCollection<string?>(file1TextBox.Text);
                     }
                     break;
@@ -352,13 +351,12 @@ namespace OpenIris.UI
             {
                 switch (eyeTrackingsystem.VideoConfiguration)
                 {
-                    case VideoEyeConfiguration.TwoVideosTwoEyes:
+                    case VideoEyeConfiguration.TwoVideos:
                         panelVideo2.Visible = true;
                         labelVideo1.Text = "Left eye video file";
                         labelVideo2.Text = "Right eye video file";
                         break;
-                    case VideoEyeConfiguration.SingleVideoOneEye:
-                    case VideoEyeConfiguration.SingleVideoTwoEyes:
+                    case VideoEyeConfiguration.OneVideo:
                         panelVideo2.Visible = false;
                         labelVideo1.Text = "Video video file";
                         break;

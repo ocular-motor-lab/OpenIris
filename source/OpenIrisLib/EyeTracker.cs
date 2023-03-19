@@ -20,9 +20,7 @@ namespace OpenIris
     /// </summary>
     public sealed partial class EyeTracker : IDisposable
     {
-        private static readonly EyeTracker eyeTracker = new();
-        private PluginManagerException? startupException;
-        private bool initialized;
+        private static EyeTracker? eyeTracker;
         
         /// <summary>
         /// Constructor for EyeTracker. 
@@ -35,21 +33,12 @@ namespace OpenIris
         {
             DataBuffer = new EyeTrackerDataBuffer();
             Calibration = CalibrationParameters.Default;
-            Settings = new EyeTrackerSettings(true); 
-        }
-
-        /// <summary>
-        /// Initializes an instance of the EyeTracker class.
-        /// </summary>
-        public static (EyeTracker eyeTracker, Exception? ex) Start()
-        {
-            if (eyeTracker.initialized) return (eyeTracker, eyeTracker.startupException);
 
             try
             {
-                var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
+                EyeTrackerDebug.Init();
 
-                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, 
+                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                     $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
                 try
                 {
@@ -59,30 +48,35 @@ namespace OpenIris
                 }
                 catch (PluginManagerException ex)
                 {
+                    Trace.WriteLine("ERROR loading plugins :" + ex.Message);
+                    Trace.WriteLine("ERROR loading plugins : going into safe mode.");
                     EyeTrackerPluginManager.Init(safeMode: true);
-                    eyeTracker.startupException = ex;
                 }
 
                 // Load settings. Needs to happen after the plugins have been initialized to properly
                 // load the settings of each plugin
-                eyeTracker.Settings = EyeTrackerSettings.Load();
+                Settings = EyeTrackerSettings.Load();
 
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
-                EyeTrackerRemoteServices.Start(eyeTracker);
-
-                eyeTracker.initialized = true;
-
-                Trace.WriteLine($"Eye tracker initializing complete in {(EyeTrackerDebug.TimeElapsed - t1).TotalSeconds} seconds.");
+                EyeTrackerRemoteServices.Start(this);
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex);
-                eyeTracker.Dispose();
+                Dispose();
                 throw;
             }
+        }
 
-            return (eyeTracker, eyeTracker.startupException);
+        /// <summary>
+        /// Initializes an instance of the EyeTracker class.
+        /// </summary>
+        public static EyeTracker Create()
+        {
+            eyeTracker ??= new EyeTracker();
+
+            return eyeTracker;
         }
 
         /// <summary>

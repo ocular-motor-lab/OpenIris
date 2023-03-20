@@ -36,7 +36,7 @@ namespace OpenIris
 
         public static void Init()
         {
-
+            // This is called to force the initiaization of the static constructor
         }
 
         /// <summary>

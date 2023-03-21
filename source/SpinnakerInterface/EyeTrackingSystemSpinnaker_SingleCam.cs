@@ -17,12 +17,12 @@ using System.ComponentModel;
 namespace SpinnakerInterface
 {
 #nullable enable
-
     [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera", typeof(EyeTrackingSystemSettingsSpinnaker))]
+
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {
-        protected CameraEyeSpinnaker camera = null;
+        protected CameraEyeSpinnaker? camera = null;
         
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {

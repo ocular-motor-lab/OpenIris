@@ -261,24 +261,22 @@ namespace OpenIris
         /// </summary>
         /// <param name="headData">Head data.</param>
         /// <returns>Calibrated data.</returns>
-        public CalibratedHeadData GetCalibratedHeadData(HeadData headData)
+        public CalibratedHeadData GetCalibratedHeadData(HeadData? headData)
         {
-            var data = new CalibratedHeadData();
+            if (headData is null) return new CalibratedHeadData();
 
-            if (headData != null)
+            return new CalibratedHeadData
             {
-                data.XAcceleration = headData.AccelerometerX;
-                data.YAcceleration = headData.AccelerometerY;
-                data.ZAcceleration = headData.AccelerometerZ;
-                data.Roll = Math.Atan2(-headData.AccelerometerZ, -headData.AccelerometerX) * 180.0 / Math.PI;
-                data.Pitch = Math.Atan2(headData.AccelerometerY, -headData.AccelerometerX) * 180.0 / Math.PI;
-                data.Yaw = Math.Atan2(-headData.AccelerometerZ, headData.AccelerometerY) * 180.0 / Math.PI;
-                data.YawVelocity = headData.GyroX;
-                data.PitchVelocity = headData.GyroY;
-                data.RollVelocity = headData.GyroZ;
-            }
-
-            return data;
+                XAcceleration = headData.AccelerometerX,
+                YAcceleration = headData.AccelerometerY,
+                ZAcceleration = headData.AccelerometerZ,
+                Roll = Math.Atan2(-headData.AccelerometerZ, -headData.AccelerometerX) * 180.0 / Math.PI,
+                Pitch = Math.Atan2(headData.AccelerometerY, -headData.AccelerometerX) * 180.0 / Math.PI,
+                Yaw = Math.Atan2(-headData.AccelerometerZ, headData.AccelerometerY) * 180.0 / Math.PI,
+                YawVelocity = headData.GyroX,
+                PitchVelocity = headData.GyroY,
+                RollVelocity = headData.GyroZ
+            };
         }
 
 

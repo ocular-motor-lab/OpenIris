@@ -5,107 +5,23 @@
 //-----------------------------------------------------------------------
 namespace OpenIris
 {
-    using System;
-    using System.IO;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Xml;
-    using System.Xml.Serialization;
-    using System.Collections;
-    using System.Linq;
-
 #nullable enable
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-    //
-    // TODO: consider using ApplicateSettingsBase. I tried but I could not get it to serialized properly.
-    //
+    using System;
+    using System.IO;
+    using System.ComponentModel;
+    using System.Xml;
+    using System.Xml.Serialization;
+
 
     /// <summary>
     /// Class containing all the settings of the eye tracker. It can be linked to a property grid to
     /// offer a nice gui.
     /// </summary>
     [Serializable]
-    public sealed class EyeTrackerSettings : EyeTrackerSettingsXml
+    public sealed class EyeTrackerSettings : EyeTrackerSettingsBase
     {
-        /// <summary>
-        /// Initializes a new instance of the EyeTrackerSettings class.
-        /// </summary>
-        public EyeTrackerSettings()
-        {
-            allEyeTrackerSystemsSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
-            allEyeTrackingPipelinesSettings = new EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings>();
-            allCalibrationImplementations = new EyeTrackerSettingsDictionary<CalibrationSettings>();
-            EyeTrackingPipeline = eyeTrackingPipeline;
-            EyeTrackerSystem = eyeTrackerSystem;
-            CalibrationMethod = calibrationMethod;
-
-            LastVideoEyeTrackerSystem = "";
-            LastVideoFolder = "";
-        }
-
-        public EyeTrackerSettings(bool safeMode)
-        {
-            allEyeTrackerSystemsSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
-            allEyeTrackingPipelinesSettings = new EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings>();
-            allCalibrationImplementations = new EyeTrackerSettingsDictionary<CalibrationSettings>();
-            LastVideoEyeTrackerSystem = "";
-            LastVideoFolder = "";
-        }
-
-        /// <summary>
-        /// This collection holds the settings for all the eye tracking systems and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> AllEyeTrackerSystemSettings
-        {
-            get => allEyeTrackerSystemsSettings;
-            set
-            {
-                SetPropertyArray(ref allEyeTrackerSystemsSettings, value, nameof(AllEyeTrackerSystemSettings));
-
-                // TODO: very ugly line to just make sure the settings are updated properly
-                // Need to set the mm per pixel for the tracking settings
-                foreach (var set in value)
-                {
-                    set.Value.MmPerPixChanged += (o, e) =>
-                    {
-                        if (EyeTrackerSystem == set.Key)
-                        {
-                            foreach (var t in AllTrackingPipelinesSettings.Values)
-                            {
-                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
-                            }
-                        }
-                    };
-                }
-            }
-        }
-        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;
-
-        /// <summary>
-        /// This collection holds the settings for all the eye tracking pipelines and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> AllTrackingPipelinesSettings
-        {
-            get => allEyeTrackingPipelinesSettings;
-            set => SetPropertyArray(ref allEyeTrackingPipelinesSettings, value, nameof(AllTrackingPipelinesSettings));
-        }
-
-        private EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> allEyeTrackingPipelinesSettings;
-
-        /// <summary>
-        /// This collection holds the settings for all the calibrations and will be serialized
-        /// into the XML file.
-        /// </summary>
-        [Browsable(false)]
-        public EyeTrackerSettingsDictionary<CalibrationSettings> AllCalibrationImplementations { get => allCalibrationImplementations; set => SetPropertyArray(ref allCalibrationImplementations, value, nameof(AllCalibrationImplementations)); }
-        private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
-
-
         #region A) Choose an eye tracking system plugin"
 
         [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
@@ -259,7 +175,7 @@ namespace OpenIris
         [Category("D) General settings"), Description("Maximum number of processing threads.")]
         [NeedsRestarting(true)]
         public int MaxNumberOfProcessingThreads { get => maxNumberOfProcessingThreads; set => SetProperty(ref maxNumberOfProcessingThreads, value, nameof(MaxNumberOfProcessingThreads)); }
-        private int maxNumberOfProcessingThreads = 5; // Default value
+        private int maxNumberOfProcessingThreads = 1; // Default value
 
         [Category("D) General settings"), Description("Value indicating where debuging images should be shown")]
         public bool Debug { get => debug; set => SetProperty(ref debug, value, nameof(Debug)); }
@@ -331,63 +247,55 @@ namespace OpenIris
 
         #endregion
 
+        #region Setting loading and saving, including plugin settings
+
+        /// <summary>
+        /// Path of the file.
+        /// </summary>
+        private string settingsPath = "";
+
+        public EyeTrackerSettings()
+            : this(false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the EyeTrackerSettings class.
+        /// </summary>
+        public EyeTrackerSettings(bool safeMode = false)
+        {
+            allEyeTrackerSystemsSettings = new EyeTrackerSettingsDictionary<EyeTrackingSystemSettings>();
+            allEyeTrackingPipelinesSettings = new EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings>();
+            allCalibrationImplementations = new EyeTrackerSettingsDictionary<CalibrationSettings>();
+
+            if (safeMode is false)
+            {
+                EyeTrackingPipeline = eyeTrackingPipeline;
+                EyeTrackerSystem = eyeTrackerSystem;
+                CalibrationMethod = calibrationMethod;
+            }
+
+            LastVideoEyeTrackerSystem = string.Empty;
+            LastVideoFolder = string.Empty;
+        }
+
+
         /// <summary>
         /// Tries to load the settings from disk. If not possible loads the default settings
         /// </summary>
         public static EyeTrackerSettings Load()
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "EyeTrackerSettings.xml");
+            var settingsFileName = Path.Combine(Directory.GetCurrentDirectory(), "EyeTrackerSettings.xml");
 
-            return Load(typeof(EyeTrackerSettings), filePath) as EyeTrackerSettings ??
-                new EyeTrackerSettings { SettingsPath = filePath };
-        }
-    }
-
-    /// <summary>
-    /// Attribute used to indicate if a given settings requires the eye tracker to restart to take effect.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public class NeedsRestartingAttribute : Attribute
-    {
-        /// <summary>
-        /// Gets a value indicating whether the changed property requires restarting to take effect.
-        /// </summary>
-        public bool Value { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the NeedsRestarting class.
-        /// </summary>
-        /// <param name="needsRestarting">
-        /// Value indicating whether the changed property requires restarting to take effect.
-        /// </param>
-        public NeedsRestartingAttribute(bool needsRestarting = true)
-        {
-            Value = needsRestarting;
-        }
-    }
-
-    [Serializable]
-    public class EyeTrackerSettingsXml : EyeTrackerSettingsBase
-    {
-        /// <summary>
-        /// Path of the file.
-        /// </summary>
-        protected string SettingsPath { get; set; } = "";
-
-        /// <summary>
-        /// Tries to load the settings from disk. If not possible loads the default settings
-        /// </summary>
-        public static EyeTrackerSettingsXml? Load(Type type, string settingsFileName)
-        {
             try
             {
-                var reader = new XmlSerializer(type, EyeTrackerPluginManager.ExtraSettingsTypesForXML?.ToArray());
+                var reader = new XmlSerializer(typeof(EyeTrackerSettings), EyeTrackerPluginManager.ExtraSettingsTypesForXML?.ToArray());
 
                 using var file = new StreamReader(settingsFileName);
                 using var xmlreader = XmlReader.Create(file);
 
-                var settings = (EyeTrackerSettingsXml)reader.Deserialize(xmlreader);
-                settings.SettingsPath = settingsFileName;
+                var settings = (EyeTrackerSettings)reader.Deserialize(xmlreader);
+                settings.settingsPath = settingsFileName;
                 return settings;
             }
             catch (IOException ex)
@@ -399,16 +307,15 @@ namespace OpenIris
                 System.Diagnostics.Trace.WriteLine("Error loading settings going to defaults. " + ex);
             }
 
-            return null;
+            return new EyeTrackerSettings { settingsPath = settingsFileName };
         }
-
 
         /// <summary>
         /// Saves the current settings to disk on the same path it was loaded.
         /// </summary>
         public void Save()
         {
-            Save(SettingsPath);
+            Save(settingsPath);
         }
 
         /// <summary>
@@ -428,63 +335,59 @@ namespace OpenIris
                 System.Diagnostics.Trace.WriteLine("Error saving settings file. " + ex);
             }
         }
-    }
-
-    [Serializable]
-    public class EyeTrackerSettingsBase : INotifyPropertyChanged
-    {
-        [field: NonSerialized]
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
-        /// https://www.danrigby.com/2012/01/08/inotifypropertychanged-the-anders-hejlsberg-way/
+        /// This collection holds the settings for all the eye tracking systems and will be serialized
+        /// into the XML file.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="field"></param>
-        /// <param name="value"></param>
-        /// <param name="name"></param>
-        protected void SetProperty<T>(ref T field, T value, string name)
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> AllEyeTrackerSystemSettings
         {
-            if (!EqualityComparer<T>.Default.Equals(field, value))
+            get => allEyeTrackerSystemsSettings;
+            set
             {
-                field = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-            }
-        }
+                SetPropertyArray(ref allEyeTrackerSystemsSettings, value, nameof(AllEyeTrackerSystemSettings));
 
-        /// <summary>
-        /// https://www.danrigby.com/2012/01/08/inotifypropertychanged-the-anders-hejlsberg-way/
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="T2"></typeparam>
-        /// <param name="field"></param>
-        /// <param name="value"></param>
-        /// <param name="name"></param>
-        protected void SetPropertyArray<T>(ref EyeTrackerSettingsDictionary<T> field, EyeTrackerSettingsDictionary<T> value, string name)
-            where T : EyeTrackerSettingsBase
-        {
-            if (field != value)
-            {
-                field = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-                foreach (var v in value.Values)
+                // TODO: very ugly line to just make sure the settings are updated properly
+                // Need to set the mm per pixel for the tracking settings
+                foreach (var set in value)
                 {
-                    // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    set.Value.MmPerPixChanged += (o, e) =>
+                    {
+                        if (EyeTrackerSystem == set.Key)
+                        {
+                            foreach (var t in AllTrackingPipelinesSettings.Values)
+                            {
+                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
+                            }
+                        }
+                    };
                 }
             }
         }
+        private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;
 
         /// <summary>
-        /// Raises the PropertyChange event
+        /// This collection holds the settings for all the eye tracking pipelines and will be serialized
+        /// into the XML file.
         /// </summary>
-        /// <param name="o">The object.</param>
-        /// <param name="name">Event parameters</param>
-        public void OnPropertyChanged(object o, string name)
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> AllTrackingPipelinesSettings
         {
-            // Save thesettings everytime something changes
-            PropertyChanged?.Invoke(o, new PropertyChangedEventArgs(name));
+            get => allEyeTrackingPipelinesSettings;
+            set => SetPropertyArray(ref allEyeTrackingPipelinesSettings, value, nameof(AllTrackingPipelinesSettings));
         }
+
+        private EyeTrackerSettingsDictionary<EyeTrackingPipelineSettings> allEyeTrackingPipelinesSettings;
+
+        /// <summary>
+        /// This collection holds the settings for all the calibrations and will be serialized
+        /// into the XML file.
+        /// </summary>
+        [Browsable(false)]
+        public EyeTrackerSettingsDictionary<CalibrationSettings> AllCalibrationImplementations { get => allCalibrationImplementations; set => SetPropertyArray(ref allCalibrationImplementations, value, nameof(AllCalibrationImplementations)); }
+        private EyeTrackerSettingsDictionary<CalibrationSettings> allCalibrationImplementations;
+
+        #endregion
     }
 }

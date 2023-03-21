@@ -12,7 +12,8 @@ using System.Windows.Forms;
 
 namespace SpinnakerInterface
 {
-    //[Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Test", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Dale", typeof(EyeTrackingSystemSettings))]
+
 
     class SpinnakerTestSystem : EyeTrackingSystemBase
     {

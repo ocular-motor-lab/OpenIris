@@ -30,11 +30,15 @@ namespace OpenIris
                     currentPath + @"\JorgeRight.avi"
                 };
 
-            var cameraLeft = new CameraEyeVideoSimulation(Eye.Left, fileNames[(int)Eye.Left], Settings.FrameRate);
-            cameraLeft.CameraOrientation = CameraOrientation.UprightMirrored;
+            var cameraLeft = new CameraEyeVideoSimulation(Eye.Left, fileNames[(int)Eye.Left], Settings.FrameRate)
+            {
+                CameraOrientation = CameraOrientation.UprightMirrored
+            };
 
-            var cameraRight = new CameraEyeVideoSimulation(Eye.Right, fileNames[(int)Eye.Right], Settings.FrameRate);
-            cameraRight.CameraOrientation = CameraOrientation.UprightMirrored;
+            var cameraRight = new CameraEyeVideoSimulation(Eye.Right, fileNames[(int)Eye.Right], Settings.FrameRate)
+            {
+                CameraOrientation = CameraOrientation.UprightMirrored
+            };
 
             long loopAtFrame = Math.Min(cameraLeft.NumberOfFrames - 1, cameraRight.NumberOfFrames - 1);
             cameraLeft.LoopAtFrame = loopAtFrame;
@@ -45,6 +49,7 @@ namespace OpenIris
                 Eye.Both => new EyeCollection<CameraEye?>(cameraLeft, cameraRight),
                 Eye.Left => new EyeCollection<CameraEye?>(cameraLeft, null),
                 Eye.Right => new EyeCollection<CameraEye?>(null, cameraRight),
+                _ => throw new NotImplementedException(),
             };
         }
     }

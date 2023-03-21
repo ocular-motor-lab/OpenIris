@@ -413,6 +413,16 @@ namespace OpenIris
                     $"{leftData.Timestamp.FrameNumberRaw};{leftData.Timestamp.Seconds};{leftData.Pupil.Center.X};{leftData.Pupil.Center.Y};" +
                     $"{rightData.Timestamp.FrameNumberRaw};{rightData.Timestamp.Seconds};{rightData.Pupil.Center.X};{rightData.Pupil.Center.Y};";
                     return Encoding.ASCII.GetBytes(eyedatamsg);
+
+                case "WAITFORDATA":
+                    eyedata = WaitForNewData();
+                    leftData = eyedata?[Eye.Left] ?? new EyeData();
+                    rightData = eyedata?[Eye.Left] ?? new EyeData();
+                    eyedatamsg =
+                    $"{leftData.Timestamp.FrameNumberRaw};{leftData.Timestamp.Seconds};{leftData.Pupil.Center.X};{leftData.Pupil.Center.Y};" +
+                    $"{rightData.Timestamp.FrameNumberRaw};{rightData.Timestamp.Seconds};{rightData.Pupil.Center.X};{rightData.Pupil.Center.Y};";
+                    return Encoding.ASCII.GetBytes(eyedatamsg);
+
                 case "RECORDEVENT":
                     var frameNumber = RecordEvent(msg[1]);
                     return Encoding.ASCII.GetBytes(frameNumber.ToString());

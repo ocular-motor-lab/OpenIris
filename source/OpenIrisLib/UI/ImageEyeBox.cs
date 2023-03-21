@@ -5,6 +5,8 @@
 //-----------------------------------------------------------------------
 namespace OpenIris.UI
 {
+#nullable enable
+
     using System;
     using System.Drawing;
     using System.Windows.Forms;
@@ -37,12 +39,13 @@ namespace OpenIris.UI
         /// <param name="mmPerPix">Resolution of the image in mm per pix.</param>
         public void UpdateImageEyeBox(ImageEye imageEye, EyePhysicalModel eyeGlobe, int thresholdDark, int threshdoldBright, Rectangle croppingBox, double mmPerPix)
         {
-            if (imageEye != null)
+            if (imageEye is not null)
             {
                 imageBoxEye.SuspendLayout();
                 // Draw image of the eye with tracking information
                 var image = imageEye.Image.Convert<Bgr, byte>();
-                ImageEyeBox.DrawAllData(image, imageEye.EyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingBox, mmPerPix);
+                var eyeData = imageEye.EyeData ?? new EyeData();
+                ImageEyeBox.DrawAllData(image, eyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingBox, mmPerPix);
 
                 imageBoxEye.Image = image;
                 imageBoxEye.ResumeLayout();
@@ -54,18 +57,16 @@ namespace OpenIris.UI
         /// Updates the image in the control.
         /// </summary>
         /// <param name="imageEye">New image to draw.</param>
-        public void UpdateImageEyeBox(ImageEye imageEye)
+        public void UpdateImageEyeBox(ImageEye? imageEye)
         {
-            if (imageEye != null)
-            {
-                imageBoxEye.SuspendLayout();
+            if (imageEye is null) return;
+         
+            imageBoxEye.SuspendLayout();
 
-                Image<Bgr, byte> imageEyeColor = imageEye.Image.Convert<Bgr, byte>();
+            Image<Bgr, byte> imageEyeColor = imageEye.Image.Convert<Bgr, byte>();
+            imageBoxEye.Image = imageEyeColor;
 
-                imageBoxEye.Image = imageEyeColor;
-
-                imageBoxEye.ResumeLayout();
-            }
+            imageBoxEye.ResumeLayout();
         }
 
 
@@ -111,6 +112,7 @@ namespace OpenIris.UI
             if (imageEye == null) return null;
 
             var image = imageEye.Image.Convert<Bgr, byte>();
+            var eyeData = imageEye.EyeData ?? new EyeData();
 
             var trackingSettings = settings as EyeTrackingPipelinePupilCRSettings;
             var thresholdDark = (imageEye.WhichEye == Eye.Left) ? trackingSettings?.DarkThresholdLeftEye ?? 0 : trackingSettings?.DarkThresholdRightEye ?? 0;
@@ -118,7 +120,7 @@ namespace OpenIris.UI
 
             var croppingRectangle = (imageEye.WhichEye == Eye.Left) ? settings.CroppingLeftEye : settings.CroppingRightEye;
 
-            DrawAllData(image, imageEye.EyeData, calibrationParameters.EyePhysicalModel, thresholdDark, threshdoldBright, croppingRectangle, settings.MmPerPix);
+            DrawAllData(image, eyeData, calibrationParameters.EyePhysicalModel, thresholdDark, threshdoldBright, croppingRectangle, settings.MmPerPix);
             return image;
         }
 
@@ -131,6 +133,7 @@ namespace OpenIris.UI
         /// <param name="thresholdDark"></param>
         /// <param name="threshdoldBright"></param>
         /// <param name="croppingRectangle"></param>
+        /// <param name="mmPerPix"></param>
         public static void DrawAllData(Image<Bgr, byte>? image, EyeData data, EyePhysicalModel eyeGlobe, double thresholdDark, double threshdoldBright, Rectangle croppingRectangle, double mmPerPix)
         {
             if (image is null) return;
@@ -161,6 +164,11 @@ namespace OpenIris.UI
             ImageEyeBox.DrawMMScale(image, mmPerPix);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="data"></param>
         public static void DrawCross(Image<Bgr, byte> image, EyeData data)
         {
             if (data is null || image is null || data.Pupil.IsEmpty) return;
@@ -195,6 +203,12 @@ namespace OpenIris.UI
                     Emgu.CV.CvEnum.LineType.AntiAlias);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="thresholdDark"></param>
+        /// <param name="threshdoldBright"></param>
         public static void DrawThresdholds(Image<Bgr, byte> image, double thresholdDark, double threshdoldBright)
         {
             var imageThreshold1 = image.Convert<Gray, byte>().ThresholdBinary(new Gray(threshdoldBright), new Gray(255));
@@ -205,6 +219,12 @@ namespace OpenIris.UI
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="data"></param>
+        /// <param name="eyeModel"></param>
         public static void DrawEyelids(Image<Bgr, byte> image, EyeData data, EyePhysicalModel eyeModel)
         {
             if (data is null || image is null || data.Eyelids is null) return;
@@ -261,6 +281,11 @@ namespace OpenIris.UI
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="data"></param>
         public static void DrawPupil(Image<Bgr, byte> image, EyeData data)
         {
             if (data is null || image is null || data.Pupil.IsEmpty) return;
@@ -269,6 +294,11 @@ namespace OpenIris.UI
             CvInvoke.Ellipse(image, new RotatedRect(data.Pupil.Center, data.Pupil.Size, data.Pupil.Angle), (new Bgr(Color.RoyalBlue)).MCvScalar, 1, Emgu.CV.CvEnum.LineType.AntiAlias);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="data"></param>
         public static void DrawCR(Image<Bgr, byte> image, EyeData data)
         {
             if (data is null || image is null) return;
@@ -356,7 +386,7 @@ namespace OpenIris.UI
                 // var p2 = q.RotatePoint(p);
                 double xx = 2.0 * ((t8 + t10) * x + (t6 - t4) * y + (t3 + t7) * z) + x;
                 double yy = 2.0 * ((t4 + t6) * x + (t5 + t10) * y + (t9 - t2) * z) + y;
-                double zz = 2.0 * ((t7 - t3) * x + (t2 + t9) * y + (t5 + t8) * z) + z;
+                //double zz = 2.0 * ((t7 - t3) * x + (t2 + t9) * y + (t5 + t8) * z) + z;
 
                 point.X = (int)Math.Round(xx + eyeModel.Center.X);
                 point.Y = (int)Math.Round(yy + eyeModel.Center.Y);
@@ -365,6 +395,11 @@ namespace OpenIris.UI
             return point;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="croppingRectangle"></param>
         public static void DrawCroppingBox(Image<Bgr, byte> image, Rectangle croppingRectangle)
         {
             // Draw cropping box
@@ -381,11 +416,17 @@ namespace OpenIris.UI
             image.Draw("ROI", new Point(croppingRectangle.Left + 5, croppingRectangle.Top + 20), Emgu.CV.CvEnum.FontFace.HersheyPlain, 1, new Bgr(Color.DarkRed), 1);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="globe"></param>
+        /// <param name="detailed"></param>
         public static void DrawEyeGlobe(Image<Bgr, byte> image, EyePhysicalModel globe, bool detailed)
         {
             if (detailed)
             {
-                for (int i = 0; i <= 90; i = i + 10)
+                for (int i = 0; i <= 90; i += 10)
                 {
                     var circle = new CircleF(globe.Center, (float)((1 / (1 + (1 - Math.Cos(i / 180 * Math.PI)) / 2)) * Math.Sin(i / 90.0 * (Math.PI / 2.0)) * globe.Radius));
                     image.Draw(circle, new Bgr(Color.White), 1);
@@ -398,6 +439,11 @@ namespace OpenIris.UI
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="mmPerPix"></param>
         public static void DrawMMScale(Image<Bgr, byte> image, double mmPerPix)
         {
             CvInvoke.PutText(image, "10mm", new Point(2, image.Size.Height - 10), Emgu.CV.CvEnum.FontFace.HersheyPlain, 0.6, new Bgr(Color.White).MCvScalar);

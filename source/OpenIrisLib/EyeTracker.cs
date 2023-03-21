@@ -12,6 +12,7 @@ namespace OpenIris
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -19,9 +20,7 @@ namespace OpenIris
     /// </summary>
     public sealed partial class EyeTracker : IDisposable
     {
-        private static EyeTracker eyeTracker = new EyeTracker();
-        private PluginManagerException? startupException;
-        private bool initialized;
+        private static EyeTracker? eyeTracker;
         
         /// <summary>
         /// Constructor for EyeTracker. 
@@ -35,48 +34,24 @@ namespace OpenIris
             DataBuffer = new EyeTrackerDataBuffer();
             Calibration = CalibrationParameters.Default;
 
-            // TODO: this is a bit ugly, but I don't want to make this nullable.
-            // I also don't want to load it in the statuc constructor.
-            Settings = new EyeTrackerSettings(true); 
-        }
-
-        /// <summary>
-        /// Initializes an instance of the EyeTracker class.
-        /// </summary>
-        public static (EyeTracker eyeTracker, Exception? ex) Start()
-        {
-            if (eyeTracker.initialized is false)
+            try
             {
+                EyeTrackerDebug.Init();
+
+                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                    $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
                 try
                 {
-                    eyeTracker = new EyeTracker();
-                    eyeTracker.Init();
+                    // Initialize the object that loads the different eye tracking system objects. It can
+                    // load objects from new classes present in new dlls in the application folder.
+                    EyeTrackerPluginManager.Init(false);
                 }
                 catch (PluginManagerException ex)
                 {
-                    eyeTracker.Init(safeMode: true);
-                    eyeTracker.startupException = ex;
+                    Trace.WriteLine("ERROR loading plugins :" + ex.Message);
+                    Trace.WriteLine("ERROR loading plugins : going into safe mode.");
+                    EyeTrackerPluginManager.Init(safeMode: true);
                 }
-            }
-
-            return (eyeTracker, eyeTracker.startupException);
-        }
-
-        /// <summary>
-        /// Initializes an instance of the EyeTracker class.
-        /// </summary>
-        /// <param name="safeMode">True activates safe mode by not using external plugins.</param>
-        private void Init(bool safeMode = false)
-        {
-            try
-            {
-                var t1 = EyeTrackerDebug.TimeElapsed; // This is here to also force an initialization of static Debug class
-
-                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
-
-                // Initialize the object that loads the different eye tracking system objects. It can
-                // load objects from new classes present in new dlls in the application folder.
-                EyeTrackerPluginManager.Init(safeMode);
 
                 // Load settings. Needs to happen after the plugins have been initialized to properly
                 // load the settings of each plugin
@@ -85,10 +60,6 @@ namespace OpenIris
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
                 EyeTrackerRemoteServices.Start(this);
-
-                initialized = true;
-
-                Trace.WriteLine($"Eye tracker initializing complete in {(EyeTrackerDebug.TimeElapsed-t1).TotalSeconds} seconds.");
             }
             catch (Exception ex)
             {
@@ -96,6 +67,16 @@ namespace OpenIris
                 Dispose();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Initializes an instance of the EyeTracker class.
+        /// </summary>
+        public static EyeTracker Create()
+        {
+            eyeTracker ??= new EyeTracker();
+
+            return eyeTracker;
         }
 
         /// <summary>
@@ -257,12 +238,16 @@ namespace OpenIris
                     // After an image is processed we collected additional data into a common 
                     // structure and we save it in the data buffer. Each eye tracking system can 
                     // also post process the entire data frame
-                    processedImages.Data = new EyeTrackerData();
-                    processedImages.Data.EyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData); ;
-                    processedImages.Data.HeadDataRaw = HeadTracker?.GetHeadDataCorrespondingToImages(processedImages.Images) ?? new HeadData();
-                    processedImages.Data.EyeDataCalibrated = Calibration?.GetCalibratedEyeData(processedImages.Data.EyeDataRaw);
-                    processedImages.Data.HeadDataCalibrated = Calibration?.GetCalibratedHeadData(processedImages.Data.HeadDataRaw);
-                    processedImages.Data.FrameRate = ImageGrabber!.FrameRate;
+                    var eyeDataRaw = new EyeCollection<EyeData?>(processedImages.Images[Eye.Left]?.EyeData, processedImages.Images[Eye.Right]?.EyeData);
+                    var headDataRaw = HeadTracker?.GetHeadDataCorrespondingToImages(processedImages.Images);
+                    processedImages.Data = new()
+                    {
+                        EyeDataRaw = eyeDataRaw,
+                        HeadDataRaw = headDataRaw,
+                        EyeDataCalibrated = Calibration?.GetCalibratedEyeData(eyeDataRaw),
+                        HeadDataCalibrated = Calibration?.GetCalibratedHeadData(headDataRaw),
+                        FrameRate = ImageGrabber!.FrameRate
+                    };
 
                     LastImagesAndData = EyeTrackingSystem!.PostProcessImagesAndData(processedImages);
 
@@ -440,7 +425,7 @@ namespace OpenIris
                     SaveProcessedVideo = options.SaveProcessedVideo,
                     WhichEye = options.WhichEye,
 
-                    AddCross = true,
+                    AddPupilCross = true,
                     IncreaseContrast = false,
                     AddEyelids = false,
                 };
@@ -624,7 +609,7 @@ namespace OpenIris
 
             var currentFrameNumber = ImageGrabber.CurrentFrameNumber;
 
-            RecordingSession?.TryRecordEvent(new EyeTrackerEvent(eventMessage, currentFrameNumber, data));
+            RecordingSession?.TryRecordEvent(eventMessage, currentFrameNumber, data);
 
             return currentFrameNumber;
         }

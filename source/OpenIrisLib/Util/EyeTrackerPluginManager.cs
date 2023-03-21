@@ -157,9 +157,8 @@ namespace OpenIris
                 lock (this)
                 {
                     // Find a factory by its name
-                    var newPluginObject = ClassFactories.First(x => x.Metadata.Name == name)?.CreateExport().Value ??
-                        throw new PluginManagerException($"Plugin '{name}' not found.");
-                    return newPluginObject;
+                    return ClassFactories.First(x => x.Metadata.Name == name)?.CreateExport().Value ??
+                         throw new PluginManagerException($"Plugin '{name}' not found.");
                 }
             }
             catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentNullException)
@@ -196,11 +195,12 @@ namespace OpenIris
         /// <summary>
         /// Gets the default settings for the plugin given the system object
         /// </summary>
-        /// <param name="name">Name of the factory. Must match Metadata.Name.</param>
+        /// <param name="system">Name of the factory. Must match Metadata.Name.</param>
         /// <returns></returns>
         public EyeTrackerSettingsBase GetDefaultSettings(EyeTrackingSystemBase system)
         {
-            var systemName = (Attribute.GetCustomAttribute(system.GetType(), typeof(PluginDescriptionEyeTrackingSystemAttribute)) as PluginDescriptionEyeTrackingSystemAttribute)?.Name ?? String.Empty;
+            var systemAttribute = Attribute.GetCustomAttribute(system.GetType(), typeof(PluginDescriptionEyeTrackingSystemAttribute)) as PluginDescriptionEyeTrackingSystemAttribute;
+            var systemName = systemAttribute?.Name ?? String.Empty;
 
             return GetDefaultSettings(systemName);
         }
@@ -246,9 +246,8 @@ namespace OpenIris
         public PluginDescriptionAttribute(string name, Type typeOfSettings)
             : base(typeof(IEyeTrackerPluginMetadata))
         {
-            this.Name = name;
-            this.SettingsType = typeOfSettings;
-
+            Name = name;
+            SettingsType = typeOfSettings;
         }
     }
 
@@ -269,25 +268,8 @@ namespace OpenIris
     /// </summary>
     public enum VideoEyeConfiguration
     {
-        /// <summary>
-        /// No videos.
-        /// </summary>
-        None,
-
-        /// <summary>
-        /// One video for both eyes.
-        /// </summary>
-        SingleVideoTwoEyes,
-
-        /// <summary>
-        /// One video for only one eye.
-        /// </summary>
-        SingleVideoOneEye,
-
-        /// <summary>
-        /// Two videos, one for each eye.
-        /// </summary>
-        TwoVideosTwoEyes,
+        OneVideo,
+        TwoVideos,
     }
 
     /// <summary>
@@ -317,12 +299,12 @@ namespace OpenIris
         /// <param name="name"></param>
         /// <param name="settingsType"></param>
         /// <param name="videoConfiguration"></param>
-        public PluginDescriptionEyeTrackingSystemAttribute(string name, Type settingsType, VideoEyeConfiguration videoConfiguration = VideoEyeConfiguration.TwoVideosTwoEyes)
+        public PluginDescriptionEyeTrackingSystemAttribute(string name, Type settingsType, VideoEyeConfiguration videoConfiguration = VideoEyeConfiguration.TwoVideos)
             : base(typeof(IEyeTrackerPluginMetadata))
         {
-            this.Name = name;
-            this.VideoConfiguration = videoConfiguration;
-            this.SettingsType = settingsType;
+            Name = name;
+            VideoConfiguration = videoConfiguration;
+            SettingsType = settingsType;
         }
 
         /// <summary>
@@ -330,7 +312,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="name"></param>
         public PluginDescriptionEyeTrackingSystemAttribute(string name)
-            : this(name, typeof(EyeTrackingSystemSettings), VideoEyeConfiguration.TwoVideosTwoEyes)
+            : this(name, typeof(EyeTrackingSystemSettings), VideoEyeConfiguration.TwoVideos)
         {
         }
 
@@ -338,10 +320,7 @@ namespace OpenIris
         /// 
         /// </summary>
         /// <returns></returns>
-        public override string ToString()
-        {
-            return this.Name;
-        }
+        public override string ToString() => Name;
     }
 
     /// <summary>
@@ -402,13 +381,13 @@ namespace OpenIris
         {
             var classesAvailable = typeof(T) switch
             {
-                Type _ when typeof(T) == typeof(EyeTrackingSystemBase) => EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(x => x.Name),
-                Type _ when typeof(T) == typeof(CalibrationPipelineBase) => EyeTrackerPluginManager.CalibrationPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
-                Type _ when typeof(T) == typeof(EyeTrackingPipelineBase) => EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(x => x.Name),
+                Type _ when typeof(T) == typeof(EyeTrackingSystemBase) => EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable,
+                Type _ when typeof(T) == typeof(CalibrationPipelineBase) => EyeTrackerPluginManager.CalibrationPipelineFactory?.ClassesAvaiable,
+                Type _ when typeof(T) == typeof(EyeTrackingPipelineBase) => EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable,
                 _ => null,
             } ?? throw new InvalidOperationException("Wrong type");
 
-            return new StandardValuesCollection(classesAvailable.OrderBy(x => x).ToList());
+            return new StandardValuesCollection(classesAvailable.Select(x => x.Name).OrderBy(x => x).ToList());
         }
     }
 }

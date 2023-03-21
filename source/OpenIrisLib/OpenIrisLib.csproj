@@ -81,6 +81,7 @@
       <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
+    <Compile Include="Util\EyeTrackerSettingsBase.cs" />
     <Compile Include="HeadTracking\HeadTracker.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineBase.cs" />
     <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
@@ -122,9 +123,6 @@
     <Compile Include="Util\OpenIrisException.cs" />
     <Compile Include="Util\Consumer.cs" />
     <Compile Include="Calibration\CalibrationSession.cs" />
-    <Compile Include="EyeTrackerData\ExtraData.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="Calibration\EyePhysicalModel.cs" />
     <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
     <Compile Include="ImageGrabbing\EyeTrackerImageGrabber.cs" />
@@ -246,7 +244,6 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="app.config" />
-    <None Include="OpenIrisClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

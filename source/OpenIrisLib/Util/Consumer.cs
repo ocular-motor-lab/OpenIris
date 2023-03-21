@@ -19,7 +19,7 @@ namespace OpenIris
     public class Consumer<T> : IDisposable
     {
         private readonly Func<T, bool> consumeItem;
-        private BlockingCollection<T>? buffer;
+        private readonly BlockingCollection<T> buffer;
         private long lastItemNumberToConsume;
         private bool started;
 
@@ -36,6 +36,7 @@ namespace OpenIris
             buffer = (bufferSize > 0) ? new BlockingCollection<T>(bufferSize) : new BlockingCollection<T>();
             consumeItem = consumeItemFunction;
             lastItemNumberToConsume = long.MaxValue;
+            FirstItemAdded = -1;
         }
 
         /// <summary>
@@ -75,26 +76,18 @@ namespace OpenIris
         public async Task Start()
         {
             if (started) throw new InvalidOperationException("Consumer already started.");
-            if ( buffer is null) throw new InvalidOperationException("Buffer not ready.");
             started = true;
 
-            try
-            {
-                using var cancellation = new CancellationTokenSource();
-                using var consumerTask = Task.Factory.StartNew(() =>
+            using var cancellation = new CancellationTokenSource();
+            using var consumerTask = Task.Factory.StartNew(() =>
+              {
+                  foreach (T item in buffer.GetConsumingEnumerable(cancellation.Token))
                   {
-                      foreach (T item in buffer.GetConsumingEnumerable(cancellation.Token))
-                      {
-                          if (consumeItem(item)) ConsumedCount++;
-                      }
-                  }, TaskCreationOptions.LongRunning);
+                      if (consumeItem(item)) ConsumedCount++;
+                  }
+              }, TaskCreationOptions.LongRunning);
 
-                await consumerTask;
-            }
-            finally
-            {
-                buffer = null;
-            }
+            await consumerTask;
         }
 
         /// <summary>
@@ -120,7 +113,7 @@ namespace OpenIris
             // Save the number of frame that should be the last to be consumed. For processing videos
             // this will be the last frame of the video or of the range that is being postprocessed.
             // For cameras this will be the current frame at the time the stop recording is received.
-            this.lastItemNumberToConsume = lastItemToConsume;
+            lastItemNumberToConsume = lastItemToConsume;
 
             // If the last item added is the same as the desired last item to consume we can mark the
             // buffer as completed and the consumer loop will stop when it finishes consuming the items.
@@ -147,27 +140,27 @@ namespace OpenIris
         /// <returns>True if the item could be added.</returns>
         public bool TryAdd(T item, long itemNumber)
         {
-            if (buffer is null) throw new InvalidOperationException("Buffer is not initialized yet.");
-
             TryAddedCount++;
-
             var itemAdded = false;
 
-            if (itemNumber <= lastItemNumberToConsume && !buffer.IsAddingCompleted)
+            if (buffer.IsAddingCompleted is false)
             {
-                itemAdded = buffer.TryAdd(item);
-            }
+                if (itemNumber <= lastItemNumberToConsume)
+                {
+                    itemAdded = buffer.TryAdd(item);
+                }
 
-            // If the frame number is equal or past the number of the last frame that should be
-            // consumed then complete adding to the buffer.
-            if (itemNumber >= lastItemNumberToConsume && !buffer.IsAddingCompleted)
-            {
-                buffer.CompleteAdding();
+                // If the frame number is equal or past the number of the last frame that should be
+                // consumed then complete adding to the buffer.
+                if (itemNumber >= lastItemNumberToConsume)
+                {
+                    buffer.CompleteAdding();
+                }
             }
 
             if (itemAdded)
             {
-                if (AddedCount == 0) FirstItemAdded = itemNumber;
+                if (FirstItemAdded < 0) FirstItemAdded = itemNumber;
                 LastItemAdded = itemNumber;
                 AddedCount++;
             }
@@ -185,7 +178,6 @@ namespace OpenIris
         public void Dispose()
         {
             buffer?.Dispose();
-            buffer = null;
         }
     }
 }

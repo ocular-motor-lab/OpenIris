@@ -85,7 +85,7 @@ namespace OpenIris
                                  if (image is null) continue;
                                  if (hasModel[image.WhichEye]) continue;
 
-                                 (hasModel[image.WhichEye], eyeModels[image.WhichEye]) = calibrationPipeline.ProcessForEyeModel(processingSettings, image);
+                                 (hasModel[image.WhichEye], eyeModels[image.WhichEye]) = calibrationPipeline.ProcessForEyeModel(image, processingSettings);
                              }
 
                              if (hasModel[Eye.Left] && hasModel[Eye.Right]) break;
@@ -177,7 +177,7 @@ namespace OpenIris
                                         tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].SetEyeModel(model);
                                     }
 
-                                    (hasReference[imageEye.WhichEye], eyeReferences[imageEye.WhichEye]) = calibrationPipeline.ProcessForReference(tempCalibration, settings, imageEye);
+                                    (hasReference[imageEye.WhichEye], eyeReferences[imageEye.WhichEye]) = calibrationPipeline.ProcessForReference(imageEye, tempCalibration, settings);
                                 }
 
                                 if (hasReference[Eye.Left] && hasReference[Eye.Right]) break;

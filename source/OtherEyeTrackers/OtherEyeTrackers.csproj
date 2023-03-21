@@ -52,6 +52,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EyeTrackingSystems\EyeTrackingSystemLabyrinth.cs" />
+    <Compile Include="HeadTracking\HeadSensorLabyrinthJOM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="EyeTrackingSystems\EyeTrackingSystemEyeBrain.cs" />
     <Compile Include="EyeTrackingSystems\EyeTrackingSystemEyeSeeCam.cs" />

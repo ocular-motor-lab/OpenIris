@@ -23,7 +23,6 @@ namespace OpenIris
         private VideoPlayerState state;
 
         private readonly EyeTrackingSystemBase eyeTrackingSystem;
-        private readonly EyeTrackingSystemSettings eyeTrackingSystemSettings;
         private Timer? frameRateTimer;
         private ulong lastFrameNumber;
         private (bool isOn, ulong frameNumber) scrolling;
@@ -83,9 +82,6 @@ namespace OpenIris
         /// <returns>New ImageGrabberVideoFile object.</returns>
         private VideoPlayer(EyeTrackingSystemBase system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
         {
-            eyeTrackingSystemSettings = (EyeTrackingSystemSettings?)EyeTrackerPluginManager.EyeTrackingsyStemFactory?.GetDefaultSettings(system)
-                ?? throw new InvalidOperationException("No EyeTrackingsyStemFactory");
-
             eyeTrackingSystem = system;
 
             // Check that all the video files exist
@@ -423,6 +419,7 @@ namespace OpenIris
                     (_, null) => Eye.Left,
                     (_, _) => Eye.Both,
                 },
+                _ => throw new NotImplementedException(),
             };
         }
 

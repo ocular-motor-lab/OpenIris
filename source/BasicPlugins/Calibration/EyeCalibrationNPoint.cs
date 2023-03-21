@@ -48,7 +48,7 @@ namespace OpenIris.Calibration
             eyeModels = new EyeCollection<EyePhysicalModel> { leftEye, rightEye };
         }
 
-        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(EyeTrackingPipelineSettings processingSettings, ImageEye imageEye)
+        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(ImageEye imageEye, EyeTrackingPipelineSettings processingSettings)
         {
             PupilPositions[imageEye.WhichEye].Add(imageEye.EyeData.Pupil.Center);
 
@@ -72,7 +72,7 @@ namespace OpenIris.Calibration
             return (true, EyePhysicalModel.EmptyModel);
         }
 
-        public override (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image)
+        public override (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
             CalibrationUI = null;
 

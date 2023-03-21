@@ -124,6 +124,7 @@ namespace OpenIris
 
         /// <summary>
         /// Or when there are mirrors.
+        /// </summary>
         /// <param name="cameraOrientation">Orientation of the camera reltive to the eye.</param>
         /// <returns>The new images with the correct orientation.</returns>
         public void CorrectOrientation(CameraOrientation cameraOrientation)

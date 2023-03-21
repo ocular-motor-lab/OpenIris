@@ -22,20 +22,27 @@ namespace VideoPlayer
             InitializeComponent();
         }
 
-        OpenIris.VideoPlayer videoPlayer;
-        private EyeTrackerSettings settings;
+        private OpenIris.VideoPlayer? videoPlayer;
+        private EyeTrackerSettings? settings;
+        private EyeCollection<ImageEye?>? images;
 
         private void Form1_Load(object sender, EventArgs e)
         {
             try
             {
-                this.settings = EyeTrackerSettings.Load();
+                settings = EyeTrackerSettings.Load();
 
                 var timer = new Timer();
                 timer.Interval = 30;
-                timer.Tick += Timer_Tick;
-                timer.Start();
+                timer.Tick += (o, e) =>
+                {
+                    if (videoPlayer is null) return;
 
+                    eyeTrackerImageEyeBox1.UpdateImageEyeBox(images?[Eye.Right]);
+                    eyeTrackerImageEyeBox2.UpdateImageEyeBox(images?[Eye.Left]);
+                    videoPlayerUI1?.Update(videoPlayer);
+                };
+                timer.Start();
             }
             catch (Exception ex)
             {
@@ -43,41 +50,19 @@ namespace VideoPlayer
             }
         }
 
-        void Timer_Tick(object sender, EventArgs e)
-        {
-            if (this.images != null)
-            {
-                this.eyeTrackerImageEyeBox1.UpdateImageEyeBox(this.images[Eye.Right]);
-                this.eyeTrackerImageEyeBox2.UpdateImageEyeBox(this.images[Eye.Left]);
-            };
-
-            if (this.videoPlayer != null)
-            {
-                this.videoPlayerUI1.Update(this.videoPlayer);
-            }
-        }
-
-        EyeCollection<ImageEye> images;
-
-        void VideoPlayer_ImagesGrabbed(object sender, EyeCollection<ImageEye?> e)
-        {
-            this.images = e;
-        }
-        
         private void ButtonOpen_Click(object sender, EventArgs e)
         {
-            var options = SelectVideoDialog.SelectVideo(this.settings, SelectVideoDialog.Mode.Simple);
-            
-            if (options is null)
-            {
-                return;
-            }
+            if (settings is null) throw new InvalidOperationException("Null settings");
+
+            var options = SelectVideoDialog.SelectVideo(settings, SelectVideoDialog.Mode.Simple);
+
+            if (options is null) return;
 
             // Initialize the video grabbing
-            this.videoPlayer = new OpenIris.VideoPlayer(options?.VideoFileNames[Eye.Left], options?.VideoFileNames[Eye.Right]);
-            this.videoPlayer.ImagesGrabbed += VideoPlayer_ImagesGrabbed;
+            videoPlayer = new OpenIris.VideoPlayer(options?.VideoFileNames[Eye.Left], options?.VideoFileNames[Eye.Right]);
+            videoPlayer.ImagesGrabbed += (_, e) => images = e;
 
-            this.videoPlayer.Play();
+            videoPlayer.Play();
         }
     }
 }

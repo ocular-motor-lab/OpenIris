@@ -65,19 +65,19 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// User interface of the calibration.
-        /// </summary>
-        public virtual ICalibrationUIControl? GetCalibrationUI() => null;
-
-        /// <summary>
         /// Process data towards setting a new physical model
         /// </summary>
-        public abstract (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(EyeTrackingPipelineSettings processingSettings, ImageEye imageEye);
+        public abstract (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(ImageEye imageEye, EyeTrackingPipelineSettings processingSettings);
 
         /// <summary>
         /// Process data for setting a new reference.
         /// </summary>
-        public abstract (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings, ImageEye image);
+        public abstract (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings);
+
+        /// <summary>
+        /// User interface of the calibration.
+        /// </summary>
+        public virtual ICalibrationUIControl? GetCalibrationUI() => null;
 
         public virtual void Dispose()
         {

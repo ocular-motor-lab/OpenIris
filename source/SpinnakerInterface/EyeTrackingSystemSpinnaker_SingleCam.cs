@@ -10,12 +10,15 @@ using System.Collections.Generic;
 using Spinnaker;
 using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
+using OpenIris.ImageProcessing;
+using static OpenIris.ImageProcessing.PupilTracking;
+using System.ComponentModel;
 
 namespace SpinnakerInterface
 {
 #nullable enable
 
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera - RS Test", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera", typeof(EyeTrackingSystemSettingsSpinnaker))]
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
     {
@@ -23,7 +26,7 @@ namespace SpinnakerInterface
         
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
-            var settings = Settings as EyeTrackingSystemSettings;
+            var settings = Settings as EyeTrackingSystemSettingsSpinnaker;
 
             try
             {
@@ -61,7 +64,7 @@ namespace SpinnakerInterface
 
         public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
         {
-            var settings = Settings as EyeTrackingSystemSettings;
+            var settings = Settings as EyeTrackingSystemSettingsSpinnaker;
 
             switch (settings.Eye)
             {
@@ -80,4 +83,26 @@ namespace SpinnakerInterface
         }
     }
 
+    public class EyeTrackingSystemSettingsSpinnaker : EyeTrackingSystemSettings
+    {
+        public EyeTrackingSystemSettingsSpinnaker()
+        {
+            PixPerMm = 7;
+            DistanceCameraToEyeMm = 70;
+            Eye = Eye.Both;
+        }
+
+        [Category("Camera properties"), Description("Gain")]
+        public float Gain { get => this.gain; set => SetProperty(ref gain, value, nameof(Gain)); }
+        private float gain = 9;
+
+        [Category("Camera properties"), Description("SerialNumberCamera")]
+        public uint SerialNumberCamera { get => this.serialNumberCamera; set => SetProperty(ref serialNumberCamera, value, nameof(SerialNumberCamera)); }
+        private uint serialNumberCamera = 22428697;
+
+    }
 }
+
+
+
+

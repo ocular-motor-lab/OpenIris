@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
@@ -38,26 +40,43 @@ namespace SpinnakerInterface
 
         #region Static Methods
 
-        public static List<IManagedCamera> FindCameras(Eye whichEye, int numberOfCameras)
+        public static List<IManagedCamera> FindCameras(int numberOfRequiredCameras, Eye whichEye, string? leftEyeCamSerialNum, string? rightEyeCamSerialNum)
         {
-            // TODO: add optional search by serial number string
-
             // Retrieve singleton reference to Spinnaker system object
             ManagedSystem system = new ManagedSystem();
 
             // Retrieve list of cameras from the system
             var camList_ = system.GetCameras();
+            if(numberOfRequiredCameras > camList_.Count)
+                throw new Exception($"Need at least {numberOfRequiredCameras} camera(s). {camList_.Count} FLIR Spinnaker compatible camera(s) found.");
 
-            switch (whichEye, numberOfCameras, camList_.Count)
+            // output found cameras
+            List<IManagedCamera> foundCameras = new List<IManagedCamera>();
+
+            // if the selected serial number didn't found use the default cameras' indices (0 for left, 1 for right)
+            if (leftEyeCamSerialNum != null && camList_.GetBySerial(leftEyeCamSerialNum) == null)
             {
-                case (Eye.Both, 1, 1):
-                    return camList_;
-                case (Eye.Both, 2, 2):
-                    return camList_;
-                case (_, 1, 1) when whichEye == Eye.Left | whichEye == Eye.Right:
-                    return camList_;
+                MessageBox.Show($"Warning: Didn't find (left) camera with selected serial number of: {leftEyeCamSerialNum}");
+                leftEyeCamSerialNum = null;
+            }
+            if (rightEyeCamSerialNum != null && camList_.GetBySerial(rightEyeCamSerialNum) == null)
+            {
+                MessageBox.Show($"Warning: Didn't find right camera with selected serial number of: {rightEyeCamSerialNum}");
+                rightEyeCamSerialNum = null;
+            }
+
+            // Assign the correct camera to whichEye
+            switch (whichEye, numberOfRequiredCameras)
+            {
+                case (Eye.Both,2):
+                    foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
+                    foundCameras.Add(rightEyeCamSerialNum == null ? camList_[1] : camList_.GetBySerial(rightEyeCamSerialNum));
+                    return foundCameras;
+                case (_,1):
+                    foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
+                    return foundCameras;
                 default:
-                    throw new Exception($"Need exactly {numberOfCameras} camera(s). {camList_.Count} FLIR Spinnaker compatible camera(s) found.");
+                    throw new Exception($"Error: Dual camera selected for tracking single eye. For tracking single eye, please use Spinnaker Single Camera.");
             }
         }
 

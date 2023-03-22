@@ -17,7 +17,7 @@ using System.ComponentModel;
 namespace SpinnakerInterface
 {
 #nullable enable
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera", typeof(EyeTrackingSystemSettingsSpinnaker))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera", typeof(EyeTrackingSystemSettingsSpinnaker_SingleCam))]
 
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
@@ -26,17 +26,19 @@ namespace SpinnakerInterface
         
         public override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
-            var settings = Settings as EyeTrackingSystemSettingsSpinnaker;
+            var settings = Settings as EyeTrackingSystemSettingsSpinnaker_SingleCam;
 
             try
             {
-                var cameraList = CameraEyeSpinnaker.FindCameras(Settings.Eye, 1);
+                var cameraList = CameraEyeSpinnaker.FindCameras(1, settings.Eye, settings.SerialNumberCamera, null);
 
                 camera = new CameraEyeSpinnaker(
                 whichEye: Settings.Eye,
                 camera: cameraList[0],
                 frameRate: (double)Settings.FrameRate,
                 roi: new Rectangle { Width = 720, Height = 450 });
+
+                settings.SerialNumberCamera = cameraList[0].DeviceSerialNumber.ToString();
 
                 camera.Start();
             }
@@ -64,7 +66,7 @@ namespace SpinnakerInterface
 
         public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
         {
-            var settings = Settings as EyeTrackingSystemSettingsSpinnaker;
+            var settings = Settings as EyeTrackingSystemSettingsSpinnaker_SingleCam;
 
             switch (settings.Eye)
             {
@@ -83,23 +85,22 @@ namespace SpinnakerInterface
         }
     }
 
-    public class EyeTrackingSystemSettingsSpinnaker : EyeTrackingSystemSettings
+    public class EyeTrackingSystemSettingsSpinnaker_SingleCam : EyeTrackingSystemSettings
     {
-        public EyeTrackingSystemSettingsSpinnaker()
+        public EyeTrackingSystemSettingsSpinnaker_SingleCam()
         {
             PixPerMm = 7;
             DistanceCameraToEyeMm = 70;
             Eye = Eye.Both;
         }
 
+        [Category("Camera properties"), Description("LeftEyeCameraSerialNumber")]
+        public string SerialNumberCamera { get => this.serialNumberCamera; set => SetProperty(ref serialNumberCamera, value, nameof(SerialNumberCamera)); }
+        private string serialNumberCamera = null;
+
         [Category("Camera properties"), Description("Gain")]
         public float Gain { get => this.gain; set => SetProperty(ref gain, value, nameof(Gain)); }
         private float gain = 9;
-
-        [Category("Camera properties"), Description("SerialNumberCamera")]
-        public uint SerialNumberCamera { get => this.serialNumberCamera; set => SetProperty(ref serialNumberCamera, value, nameof(SerialNumberCamera)); }
-        private uint serialNumberCamera = 22428697;
-
     }
 }
 

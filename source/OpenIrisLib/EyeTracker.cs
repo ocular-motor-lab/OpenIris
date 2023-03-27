@@ -228,7 +228,7 @@ namespace OpenIris
                     // The best way to signal we are already tracking is after we get the first image.
                     Tracking = true;
 
-                    RecordingSession?.TryRecordImages(grabbedImages);
+                    RecordingSession?.TryRecordImages(grabbedImages, ImageGrabber.FrameRate);
                     ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.EyeTrackingPipeline, Settings.TrackingPipelineSettings));
                 };
 
@@ -255,7 +255,7 @@ namespace OpenIris
 
                     // Then we try to record the data and images (usually only in postprocessing)
                     // and we also pass it to the calibration manager.
-                    RecordingSession?.TryRecordImagesAndData(LastImagesAndData);
+                    RecordingSession?.TryRecordImagesAndData(LastImagesAndData, ImageGrabber.FrameRate);
                     CalibrationSession?.ProcessNewDataAndImages(LastImagesAndData);
 
                     UpdateStats(processedImages);
@@ -416,9 +416,9 @@ namespace OpenIris
             {
                 PostProcessing = true;
 
-                var optionsProcessedVideo = new ProcessedRecordingOptions
+                // Start recording (important to initialize before the playing, so all frames are recorded).
+                RecordingSession = new RecordingSession(new ProcessedRecordingOptions
                 {
-                    FrameRate = ImageGrabber?.FrameRate ?? 30.0,
                     SessionName = Path.GetFileNameWithoutExtension(options.GetProcessedFileName()) + "-PostProc",
                     DataFolder = Settings.DataFolder,
                     SaveRawVideo = false,
@@ -428,11 +428,10 @@ namespace OpenIris
                     AddPupilCross = true,
                     IncreaseContrast = false,
                     AddEyelids = false,
-                };
+                });
+                using var recordingTask = RecordingSession.Start(Calibration, Settings);
 
-                // Start recording (important to initialize before the playing, so all frames are recorded).
                 // Play video and wait until it finishes. This will also start the tracking
-                using var recordingTask = StartRecording();
                 using var playingVideoTask = PlayVideo(options);
 
                 if (VideoPlayer is null) throw new InvalidOperationException("Video Player failed");
@@ -449,6 +448,7 @@ namespace OpenIris
             finally
             {
                 PostProcessing = false;
+                RecordingSession = null;
             }
         }
 
@@ -463,24 +463,14 @@ namespace OpenIris
 
             try
             {
-                var recordingOptions = new RecordingOptions()
+                RecordingSession = new RecordingSession(new()
                 {
                     SessionName = Settings.SessionName,
                     SaveRawVideo = Settings.RecordVideo,
                     DecimateRatioRawVideo = Settings.DecimateVideoRatio,
-                    DataFolder = Settings.DataFolder,
-                    FrameRate = ImageGrabber?.FrameRate ?? 0.0,
-                };
-
-                RecordingSession = new RecordingSession(recordingOptions);
-                Settings.LastRecordedFile = RecordingSession.DataFileName;
-
+                    DataFolder = Settings.DataFolder
+                });
                 await RecordingSession.Start(Calibration, Settings);
-            }
-            catch
-            {
-                RecordingSession?.Stop();
-                throw;
             }
             finally
             {

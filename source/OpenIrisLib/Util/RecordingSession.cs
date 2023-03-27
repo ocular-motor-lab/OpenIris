@@ -15,6 +15,7 @@ namespace OpenIris
     using System.Drawing;
     using System.IO;
     using System.Linq;
+    using System.Runtime;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -33,8 +34,8 @@ namespace OpenIris
     {
         private readonly RecordingOptions options;
 
-        private readonly Consumer<EyeCollection<(Eye, Image<Gray, byte>?)>> rawFramesRecorder;
-        private readonly Consumer<EyeTrackerImagesAndData> processedFramesRecorder;
+        private readonly Consumer<(EyeCollection<(Eye whichEye, Image<Gray, byte>? image)> images, double frameRate)> rawFramesRecorder;
+        private readonly Consumer<(EyeTrackerImagesAndData images,double frameRate)> processedFramesRecorder;
         private readonly Consumer<EyeTrackerEvent> eventRecorder;
 
         private EyeCollection<VideoWriter?>? rawVideoWriters;
@@ -61,9 +62,9 @@ namespace OpenIris
             DataFileName = Path.Combine(options.DataFolder, session, session + ".txt");
 
             // Initialize consumers early so items can be added to the queue as soon as possible
-            rawFramesRecorder = new Consumer<EyeCollection<(Eye, Image<Gray, byte>?)>>(RecordGrabbedImages, 1000);
-            processedFramesRecorder = new Consumer<EyeTrackerImagesAndData>(RecordDataAndProcessedImages, 1000);
-            eventRecorder = new Consumer<EyeTrackerEvent>(RecordEvent, 1000);
+            rawFramesRecorder = new (RecordGrabbedImages, 1000);
+            processedFramesRecorder = new (RecordDataAndProcessedImages, 1000);
+            eventRecorder = new (RecordEvent, 1000);
         }
 
         /// <summary>
@@ -140,6 +141,8 @@ namespace OpenIris
             if (started) throw new InvalidOperationException("Cannot start a new recording. Another recording is in process.");
             started = true;
 
+            settings.LastRecordedFile = DataFileName;
+
             // RangeToRecord will keep track fo the range of frame numbers that need to be recorded.
             // Initially is unknown. As soon as the first image frame comes that will be the begining
             // of the range the end of the range might be the last image frame recorded at the time
@@ -174,6 +177,11 @@ namespace OpenIris
                 Trace.WriteLine($"RawFramesRecorder -> ({rawFramesRecorder.TryAddedCount} >> {rawFramesRecorder.AddedCount} >> {rawFramesRecorder.ConsumedCount})");
                 Trace.WriteLine($"ProcessedFramesRecorder -> ({processedFramesRecorder.TryAddedCount} >> {processedFramesRecorder.AddedCount} >> {processedFramesRecorder.ConsumedCount})");
                 Trace.WriteLine($"EventRecorder -> ({eventRecorder.TryAddedCount} >> {eventRecorder.AddedCount} >> {eventRecorder.ConsumedCount})");
+            }
+            catch
+            {
+                Stop();
+                throw;
             }
             finally
             {
@@ -254,9 +262,10 @@ namespace OpenIris
         /// <summary>
         /// Records new raw frames. If buffer is full it will drop the frame.
         /// </summary>
-        /// <param name="images">Frames to be recorded</param>
+        /// <param name="images">Frames to be recorded.</param>
+        /// <param name="frameRate">Frame rate of the image grabber.</param>
         /// <returns>True if the frames were recording, false if dropped.</returns>
-        internal bool TryRecordImages(EyeCollection<ImageEye?> images)
+        internal bool TryRecordImages(EyeCollection<ImageEye?> images, double frameRate)
         {
             if (rawFramesRecorder is null) throw new InvalidOperationException("Recorder not ready.");
 
@@ -285,21 +294,22 @@ namespace OpenIris
                 _ => throw new InvalidOperationException("Wrong number of images to record"),
             };
 
-            return rawFramesRecorder.TryAdd(imagesCopy, frameNumber);
+            return rawFramesRecorder.TryAdd((imagesCopy, frameRate), frameNumber);
         }
 
         /// <summary>
         /// Records new processed images.
         /// </summary>
         /// <param name="newDataAndImages">Processed images to be saved.</param>
+        /// <param name="frameRate">Frame rate of the image grabber.</param>
         /// <returns>True if the frames were recording, false if dropped.</returns>
-        internal bool TryRecordImagesAndData(EyeTrackerImagesAndData newDataAndImages)
+        internal bool TryRecordImagesAndData(EyeTrackerImagesAndData newDataAndImages, double frameRate)
         {
             if (processedFramesRecorder is null) throw new InvalidOperationException("Recorder not ready.");
 
             if (RangeToRecord.DoesNotContain(newDataAndImages.FrameNumber)) return false;
             
-            return processedFramesRecorder.TryAdd(newDataAndImages, newDataAndImages.FrameNumber);
+            return processedFramesRecorder.TryAdd((newDataAndImages, frameRate), newDataAndImages.FrameNumber);
         }
 
 
@@ -319,9 +329,9 @@ namespace OpenIris
             return eventRecorder.TryAdd(new EyeTrackerEvent(eventMessage, frameNumber, data), frameNumber);
         }
 
-        private bool RecordGrabbedImages(EyeCollection<(Eye Eye, Image<Gray, byte>? Image)> imagesEye)
+        private bool RecordGrabbedImages((EyeCollection<(Eye Eye, Image<Gray, byte>? Image)> images, double frameRate) imagesEye)
         {
-            if (imagesEye == null) throw new ArgumentNullException(nameof(imagesEye));
+            if (imagesEye.images == null) throw new ArgumentNullException(nameof(imagesEye));
 
             if (!options.SaveRawVideo) return false;
             
@@ -330,16 +340,16 @@ namespace OpenIris
             // Also, it allows for reading the frame size directly from the images, no need to pass
             // it as a parameter.
             rawVideoWriters ??= new EyeCollection<VideoWriter?>(
-                    imagesEye.Select(im => (im.Image is null) ? null :
+                    imagesEye.images.Select(im => (im.Image is null) ? null :
                         new VideoWriter(
                            fileName: DataFileName.Replace(".txt", "-" + im.Eye + ".avi"),
                            compressionCode: 0,
-                           fps: options.FrameRate / options.DecimateRatioRawVideo,
-                           size: imagesEye.GetFrameSize(),
+                           fps: imagesEye.frameRate / options.DecimateRatioRawVideo,
+                           size: imagesEye.images.GetFrameSize(),
                            isColor: false)).ToArray());
 
             // Record the images
-            foreach ((var whichEye, var image) in imagesEye)
+            foreach ((var whichEye, var image) in imagesEye.images)
             {
                 if (image is null) continue;
 
@@ -348,7 +358,7 @@ namespace OpenIris
             return true;
         }
 
-        private bool RecordDataAndProcessedImages(EyeTrackerImagesAndData dataAndImages)
+        private bool RecordDataAndProcessedImages((EyeTrackerImagesAndData dataAndImages, double frameRate) images)
         {
             //
             // Save the data to text file
@@ -360,7 +370,7 @@ namespace OpenIris
                 dataFile.WriteLine(EyeTrackerData.GetStringHeader());
             }
 
-            dataFile.WriteLine(dataAndImages.Data?.GetStringLine() ?? string.Empty);
+            dataFile.WriteLine(images.dataAndImages.Data?.GetStringLine() ?? string.Empty);
 
             //
             // Save the images to a video file with data overlay
@@ -375,12 +385,12 @@ namespace OpenIris
                 processedVideoWriter ??= new VideoWriter(
                             fileName: DataFileName.Replace(".txt", ".avi"),
                             compressionCode: 0,
-                            fps: options.FrameRate,
-                            size: dataAndImages.Images.GetFrameSize(),
+                            fps: images.frameRate,
+                            size: images.dataAndImages.Images.GetFrameSize(),
                             isColor: true);
 
                 // Save the processed video
-                var imagesColor = dataAndImages.Images
+                var imagesColor = images.dataAndImages.Images
                     .Where(im => im is not null)
                     .Where(im => processedVideoOptions.WhichEye == Eye.Both || im!.WhichEye == processedVideoOptions.WhichEye)
                     .Select(im => (Image: im!.Image.Convert<Bgr, byte>(), im!.EyeData)).ToArray();
@@ -390,7 +400,7 @@ namespace OpenIris
 
                     if (eyeData is null) continue;
 
-                    var eyeModel = dataAndImages.Calibration.EyeCalibrationParameters[eyeData.WhichEye].EyePhysicalModel;
+                    var eyeModel = images.dataAndImages.Calibration.EyeCalibrationParameters[eyeData.WhichEye].EyePhysicalModel;
                     if (processedVideoOptions.AddPupilCross) ImageEyeBox.DrawCross(imageColor, eyeData);
                     if (processedVideoOptions.AddCRCross) ImageEyeBox.DrawCR(imageColor, eyeData);
                     if (processedVideoOptions.AddEyelids) ImageEyeBox.DrawEyelids(imageColor, eyeData, eyeModel);
@@ -455,8 +465,6 @@ namespace OpenIris
         public string? DataFolder { get; set; }
         public bool SaveRawVideo { get; set; }
         public int DecimateRatioRawVideo { get; set; } = 1;
-
-        public double FrameRate { get; set; }
     }
 
     public class ProcessedRecordingOptions : RecordingOptions

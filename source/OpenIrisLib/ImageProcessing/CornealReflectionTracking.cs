@@ -188,16 +188,16 @@ namespace OpenIris.ImageProcessing
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // -- Thresholding -- Get the binary image with the dark pixels
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
-            var imgTemp = imageEye.Image.Copy(irisROI).SmoothBlur(blurSize, blurSize);
+            blurSize = blurSize == 1 ? 2 : blurSize;
+            var imgTemp = imageEye.Image.Copy(irisROI).SmoothBlur(blurSize, blurSize, true);
             var imgPupilBinary = imgTemp.ThresholdBinary(new Gray(threshold), new Gray(255));
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // --  Morphological erosion and dilation --
             // Optimize the blobs by removing small white or black spots
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(5, 5), new Point(-1,-1));
+            var kernelSize = blurSize * 2 + 1;
+            var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(kernelSize,kernelSize), new Point(-1,-1));
             var center = new Point(-1, -1);
             var one = new MCvScalar(1);
 

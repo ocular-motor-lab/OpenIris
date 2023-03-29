@@ -114,12 +114,22 @@ namespace OpenIris
         public Image<Gray, byte>? ImageTorsion { get; set; }
 
         /// <summary>
-        /// Creates a copy of the image.
+        /// Creates a copy of the portion of an image.
         /// </summary>
+        /// <param name="roi">ROI of the portion.</param>
         /// <returns>The copy.</returns>
         public ImageEye Copy(Rectangle roi)
         {
             return new ImageEye(Image.Copy(roi), WhichEye, TimeStamp, ImageSourceData);
+        }
+
+        /// <summary>
+        /// Creates a copy of the image.
+        /// </summary>
+        /// <returns>The copy.</returns>
+        public ImageEye Copy()
+        {
+            return new ImageEye(Image.Copy(), WhichEye, TimeStamp, ImageSourceData);
         }
 
         /// <summary>

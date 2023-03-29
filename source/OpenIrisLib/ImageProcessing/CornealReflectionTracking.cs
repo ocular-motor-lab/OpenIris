@@ -7,6 +7,7 @@ namespace OpenIris.ImageProcessing
 {
     using System;
     using System.Drawing;
+    using System.Linq;
     using Emgu.CV;
     using Emgu.CV.Cvb;
     using Emgu.CV.CvEnum;
@@ -196,7 +197,7 @@ namespace OpenIris.ImageProcessing
             // Optimize the blobs by removing small white or black spots
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(5, 5), new Point(1, 1));
+            var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(5, 5), new Point(-1,-1));
             var center = new Point(-1, -1);
             var one = new MCvScalar(1);
 
@@ -237,10 +238,10 @@ namespace OpenIris.ImageProcessing
                 var contour = blob.GetContour();
 
                 // the score is the ration between area and perimeter
-                var score = blob.Area * blob.Area / (double)(blob.BoundingBox.Width * blob.BoundingBox.Height);
+                var score = blob.Area / (double)(blob.BoundingBox.Width * blob.BoundingBox.Height);
 
-
-                if (score > 0.1 && crs.Count < 5)
+                //score it based on a perfect circle within a square +- 0.1 
+                if (score > 0.68 && score < 0.88) 
                 {
                     crs.Add(new CornealReflectionData(
                         new PointF(blob.Centroid.X + irisROI.X, blob.Centroid.Y + irisROI.Y),
@@ -251,7 +252,7 @@ namespace OpenIris.ImageProcessing
 
             // Sort the blobs by distance to the pupil
             crs.Sort((x, y) => Math.Sqrt(Math.Pow(pupilAprox.Center.X - x.Center.X, 2) + Math.Pow(pupilAprox.Center.Y - x.Center.Y, 2)).CompareTo(Math.Sqrt(Math.Pow(pupilAprox.Center.X - y.Center.X, 2) + Math.Pow(pupilAprox.Center.Y - y.Center.Y, 2))));
-
+            
             if (EyeTracker.DEBUG)
             {
                 var imgDebug = imgPupilBinary.Convert<Bgr, byte>();
@@ -263,7 +264,7 @@ namespace OpenIris.ImageProcessing
                 EyeTrackerDebug.AddImage("CR", imageEye.WhichEye, imgDebug);
             }
 
-            return crs.ToArray();
+            return crs.Take(5).ToArray();
         }
 
         /// <summary>

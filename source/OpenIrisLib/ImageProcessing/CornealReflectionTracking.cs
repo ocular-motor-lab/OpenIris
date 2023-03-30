@@ -47,7 +47,6 @@ namespace OpenIris.ImageProcessing
         /// </summary>
         /// <param name="imageEye">The image of the eye.</param>
         /// <param name="pupilAprox">Current position of the pupil.</param>
-        /// <param name="referencePupil">Position of the pupil in the reference image.</param>
         /// <param name="trackingSettings">Settings for tracking.</param>
         /// <returns></returns>
         public CornealReflectionData[] FindCornealReflections(ImageEye imageEye, PupilData pupilAprox, EyeTrackingPipelineJOMSettings trackingSettings)

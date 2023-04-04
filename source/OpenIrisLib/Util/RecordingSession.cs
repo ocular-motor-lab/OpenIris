@@ -15,7 +15,6 @@ namespace OpenIris
     using System.Drawing;
     using System.IO;
     using System.Linq;
-    using System.Runtime;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -34,8 +33,8 @@ namespace OpenIris
     {
         private readonly RecordingOptions options;
 
-        private readonly Consumer<(EyeCollection<(Eye whichEye, Image<Gray, byte>? image)> images, double frameRate)> rawFramesRecorder;
-        private readonly Consumer<(EyeTrackerImagesAndData images,double frameRate)> processedFramesRecorder;
+        private readonly Consumer<(EyeCollection<ImageEye?> images, double frameRate)> rawFramesRecorder;
+        private readonly Consumer<(EyeTrackerImagesAndData images, double frameRate)> processedFramesRecorder;
         private readonly Consumer<EyeTrackerEvent> eventRecorder;
 
         private EyeCollection<VideoWriter?>? rawVideoWriters;
@@ -284,15 +283,7 @@ namespace OpenIris
 
             // Copy the images to avoid memory conflicts
             // with other threads working with the same images
-            var imagesCopy = images.Count switch
-            {
-                1 => new EyeCollection<(Eye, Image<Gray, byte>?)>(
-                    (Eye.Both, images[Eye.Both]?.Image?.Copy())),
-                2 => new EyeCollection<(Eye, Image<Gray, byte>?)>(
-                    (Eye.Left, images[Eye.Left]?.Image?.Copy()),
-                    (Eye.Right, images[Eye.Right]?.Image?.Copy())),
-                _ => throw new InvalidOperationException("Wrong number of images to record"),
-            };
+            EyeCollection<ImageEye?> imagesCopy = new(images.Select(im => im?.Copy()));
 
             return rawFramesRecorder.TryAdd((imagesCopy, frameRate), frameNumber);
         }
@@ -329,7 +320,7 @@ namespace OpenIris
             return eventRecorder.TryAdd(new EyeTrackerEvent(eventMessage, frameNumber, data), frameNumber);
         }
 
-        private bool RecordGrabbedImages((EyeCollection<(Eye Eye, Image<Gray, byte>? Image)> images, double frameRate) imagesEye)
+        private bool RecordGrabbedImages((EyeCollection<ImageEye?> images, double frameRate) imagesEye)
         {
             if (imagesEye.images == null) throw new ArgumentNullException(nameof(imagesEye));
 
@@ -340,20 +331,20 @@ namespace OpenIris
             // Also, it allows for reading the frame size directly from the images, no need to pass
             // it as a parameter.
             rawVideoWriters ??= new EyeCollection<VideoWriter?>(
-                    imagesEye.images.Select(im => (im.Image is null) ? null :
+                    imagesEye.images.Select(im => (im is null) ? null :
                         new VideoWriter(
-                           fileName: DataFileName.Replace(".txt", "-" + im.Eye + ".avi"),
+                           fileName: DataFileName.Replace(".txt", "-" + im.WhichEye + ".avi"),
                            compressionCode: 0,
                            fps: imagesEye.frameRate / options.DecimateRatioRawVideo,
                            size: imagesEye.images.GetFrameSize(),
                            isColor: false)).ToArray());
 
             // Record the images
-            foreach ((var whichEye, var image) in imagesEye.images)
+            foreach (var image in imagesEye.images)
             {
                 if (image is null) continue;
 
-                rawVideoWriters[whichEye]?.Write(image.Mat);
+                rawVideoWriters[image.WhichEye]?.Write(image.Image.Mat);
             }
             return true;
         }

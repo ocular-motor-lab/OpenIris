@@ -15,7 +15,7 @@ namespace OpenIris
 
     /// <summary>
     /// </summary>
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("RemoteGrasshoppercs", typeof(EyeTrackerSystemSettingsRemoteGrasshopper))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("RemoteGrasshoppercs", typeof(EyeTrackerSystemSettingsRemoteGrasshopper), VideoEyeConfiguration.OneVideo)]
     public class EyeTrackingSystemRemoteGrasshoppercs : EyeTrackingSystemBase
     {
         protected CameraEyeFlyCapture? camera = null;

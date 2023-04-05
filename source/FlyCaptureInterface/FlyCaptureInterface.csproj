@@ -43,6 +43,7 @@
       <HintPath>.\FlyCapture2Managed_v140.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
@@ -56,6 +57,7 @@
     <Compile Include="ImageGrabbing\CameraEyeFlyCapture.cs" />
     <Compile Include="ImageGrabbing\CameraEyeFlyCaptureStrobe.cs" />
     <Compile Include="ImageGrabbing\CameraEyeFlyCaptureSerialCom.cs" />
+    <Compile Include="ImageGrabbing\EyeTrackingSystemFlyCapture_SingleCam.cs" />
     <Compile Include="ImageGrabbing\VideoEyeFlyCapture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -7,8 +7,8 @@
     <ProjectGuid>{8AF6AA0E-D508-4727-B081-6D88BE7E85FE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EyeTrackerRemoteGUI</RootNamespace>
-    <AssemblyName>EyeTrackerRemoteGUI</AssemblyName>
+    <RootNamespace>OpenIrisRemoteGUI</RootNamespace>
+    <AssemblyName>OpenIrisRemoteGUI</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
@@ -38,7 +38,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\..\bin\x64\Debug\EyeTrackerRemoteGUI.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisRemoteGUI.xml</DocumentationFile>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>

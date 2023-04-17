@@ -8,8 +8,8 @@
     <ProjectGuid>{51505035-780E-4732-96B1-455085715C38}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EyeTrackerClient</RootNamespace>
-    <AssemblyName>EyeTrackerClient</AssemblyName>
+    <RootNamespace>OpenIrisClient</RootNamespace>
+    <AssemblyName>OpenIrisClient</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -24,7 +24,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <DocumentationFile>..\..\bin\x64\Debug\EyeTrackerClient.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisClient.xml</DocumentationFile>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">

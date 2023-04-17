@@ -7,8 +7,8 @@
     <ProjectGuid>{CCA5E468-60BC-45AA-BF20-AAAC7B2ABD27}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EyeTrackerRemoteClient</RootNamespace>
-    <AssemblyName>EyeTrackerRemoteClient</AssemblyName>
+    <RootNamespace>OpenIrisRemoteClient</RootNamespace>
+    <AssemblyName>OpenIrisRemoteClient</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -23,7 +23,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\..\bin\x64\Debug\EyeTrackerRemoteClient.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisRemoteClient.xml</DocumentationFile>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">

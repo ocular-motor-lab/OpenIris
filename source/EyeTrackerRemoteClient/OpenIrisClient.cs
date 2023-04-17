@@ -17,11 +17,11 @@ namespace OpenIris
     /// <summary>
     /// Creates a client that can control remotely (or locally from a different program) the eye tracker.
     /// </summary>
-    public class EyeTrackerClient
+    public class OpenIrisClient
     {
         private readonly IEyeTrackerService proxy;
 
-        public EyeTrackerClient(string hostname, int port)
+        public OpenIrisClient(string hostname, int port)
         {
             var binding = new NetTcpBinding();
             binding.MaxReceivedMessageSize = 2147483647;

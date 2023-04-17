@@ -64,16 +64,16 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EyeTrackerRemoteClient.cs">
+    <Compile Include="OpenIrisRemoteClient.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EyeTrackerRemoteClient.Designer.cs">
-      <DependentUpon>EyeTrackerRemoteClient.cs</DependentUpon>
+    <Compile Include="OpenIrisRemoteClient.Designer.cs">
+      <DependentUpon>OpenIrisRemoteClient.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="EyeTrackerRemoteClient.resx">
-      <DependentUpon>EyeTrackerRemoteClient.cs</DependentUpon>
+    <EmbeddedResource Include="OpenIrisRemoteClient.resx">
+      <DependentUpon>OpenIrisRemoteClient.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -100,9 +100,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EyeTrackerRemoteClient\EyeTrackerRemoteClient.csproj">
+    <ProjectReference Include="..\EyeTrackerRemoteClient\OpenIrisRemoteClient.csproj">
       <Project>{cca5e468-60bc-45aa-bf20-aaac7b2abd27}</Project>
-      <Name>EyeTrackerRemoteClient</Name>
+      <Name>OpenIrisRemoteClient</Name>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">

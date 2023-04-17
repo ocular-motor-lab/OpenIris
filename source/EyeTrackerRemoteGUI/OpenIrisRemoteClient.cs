@@ -11,7 +11,7 @@ namespace OpenIris
     /// </summary>
     public partial class Form1 : Form
     {
-        private EyeTrackerClient? eyeTracker;
+        private OpenIrisClient? eyeTracker;
         private readonly Timer updateTimer;
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace OpenIris
 
                 string hostname = textBoxIP.Text;
                 int port = 9000;
-                eyeTracker = new EyeTrackerClient(hostname, port);
+                eyeTracker = new OpenIrisClient(hostname, port);
 
                 labelError.Text = string.Empty;
             }

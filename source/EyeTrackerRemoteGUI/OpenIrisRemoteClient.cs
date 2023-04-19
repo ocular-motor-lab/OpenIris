@@ -11,7 +11,7 @@ namespace OpenIris
     /// </summary>
     public partial class Form1 : Form
     {
-        private EyeTrackerClient? eyeTracker;
+        private OpenIrisClient? eyeTracker;
         private readonly Timer updateTimer;
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace OpenIris
         {
             updateTimer.Enabled = true;
 
-            textBoxIP.Text = EyeTrackerRemoteGUI.Properties.Settings.Default.LastIP;
+            textBoxIP.Text = OpenIrisRemoteGUI.Properties.Settings.Default.LastIP;
         }
 
         void updateTimer_Tick(object sender, EventArgs e)
@@ -137,12 +137,12 @@ namespace OpenIris
         {
             try
             {
-                EyeTrackerRemoteGUI.Properties.Settings.Default.LastIP = textBoxIP.Text;
-                EyeTrackerRemoteGUI.Properties.Settings.Default.Save();
+                OpenIrisRemoteGUI.Properties.Settings.Default.LastIP = textBoxIP.Text;
+                OpenIrisRemoteGUI.Properties.Settings.Default.Save();
 
                 string hostname = textBoxIP.Text;
                 int port = 9000;
-                eyeTracker = new EyeTrackerClient(hostname, port);
+                eyeTracker = new OpenIrisClient(hostname, port);
 
                 labelError.Text = string.Empty;
             }

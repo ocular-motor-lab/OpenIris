@@ -8,7 +8,7 @@
         {
             string hostname = "localhost";
             int port = 9000;
-            var e = new EyeTrackerClient(hostname, port);
+            var e = new OpenIrisClient(hostname, port);
 
             Console.Title = "Hello WCF Client Console Application";
 

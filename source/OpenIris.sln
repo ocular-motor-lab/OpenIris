@@ -11,15 +11,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIris", "OpenIrisUI\Open
 		{11B9A0EA-7C00-4F7E-8601-0B45EE20D406} = {11B9A0EA-7C00-4F7E-8601-0B45EE20D406}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeTrackerRemoteConsole", "EyeTrackerClientConsole\EyeTrackerRemoteConsole.csproj", "{51505035-780E-4732-96B1-455085715C38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisRemoteConsole", "EyeTrackerClientConsole\OpenIrisRemoteConsole.csproj", "{51505035-780E-4732-96B1-455085715C38}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubjectiveTracker", "SubjectiveEyeTracker\SubjectiveTracker.csproj", "{2BA5EA85-11F0-47B3-AD99-A9455AC1C458}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisLib", "OpenIrisLib\OpenIrisLib.csproj", "{ED3AD445-A2FD-41C2-A77C-CE0C22B08192}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeTrackerRemoteGUI", "EyeTrackerRemoteGUI\EyeTrackerRemoteGUI.csproj", "{8AF6AA0E-D508-4727-B081-6D88BE7E85FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisRemoteGUI", "EyeTrackerRemoteGUI\OpenIrisRemoteGUI.csproj", "{8AF6AA0E-D508-4727-B081-6D88BE7E85FE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeTrackerRemoteClient", "EyeTrackerRemoteClient\EyeTrackerRemoteClient.csproj", "{CCA5E468-60BC-45AA-BF20-AAAC7B2ABD27}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisRemoteClient", "EyeTrackerRemoteClient\OpenIrisRemoteClient.csproj", "{CCA5E468-60BC-45AA-BF20-AAAC7B2ABD27}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Micromedical", "Micromedical\Micromedical.csproj", "{11B9A0EA-7C00-4F7E-8601-0B45EE20D406}"
 	ProjectSection(ProjectDependencies) = postProject

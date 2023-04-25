@@ -100,7 +100,7 @@ namespace OpenIris
             EyeTrackerDebug.TrackProcessingTime("FindEyeLids");
 
             // 3 - Corneal reflection tracker
-            var cornealReflections = cornealReflectionTracker.FindCornealReflections(imageEye, pupilAprox, referencePupil, settings);
+            var cornealReflections = cornealReflectionTracker.FindCornealReflections(imageEye, pupilAprox, settings);
             EyeTrackerDebug.TrackProcessingTime("FindCRs");
 
             // 4 - Mask of reflections and eyelids

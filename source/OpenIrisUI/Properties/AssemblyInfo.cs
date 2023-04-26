@@ -37,4 +37,4 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyFileVersion("1.0.*")]
 
 //must be left as a token to be found and replace during pre-build event
-[assembly: AssemblyInformationalVersion("$version$")]
+[assembly: AssemblyInformationalVersion("testTag-6-g32ad281-dirty")]

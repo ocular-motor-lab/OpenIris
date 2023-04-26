@@ -67,9 +67,11 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>for /F "tokens=*" %25%25a in ('git describe --always --dirty --tags') do set gitVersion=%25%25a
+    <PreBuildEvent>set \p var=powershell -Command "(gcm "git" -ErrorAction SilentlyContinue)" -eq $null
+if $var$==0 (
+for /F "tokens=*" %25%25a in ('git describe --always --dirty --tags') do set gitVersion=%25%25a
 powershell -Command "(gc $(ProjectDir)\Properties\AssemblyInfo.cs) -replace 'AssemblyInformationalVersion\(\".*?\"\)', 'AssemblyInformationalVersion(\"%25gitVersion%25\")' | Out-File -encoding UTF8 $(ProjectDir)\Properties\AssemblyInfo.cs"
-</PreBuildEvent>
+)</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>

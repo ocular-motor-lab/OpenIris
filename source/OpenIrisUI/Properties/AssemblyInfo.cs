@@ -38,3 +38,4 @@ using System.Runtime.InteropServices;
 
 //must be left as a token to be found and replace during pre-build event
 [assembly: AssemblyInformationalVersion("testTag-8-gb24e67a")]
+

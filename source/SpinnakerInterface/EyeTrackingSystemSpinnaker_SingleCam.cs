@@ -35,9 +35,10 @@ namespace SpinnakerInterface
                 camera = new CameraEyeSpinnaker(
                 whichEye: Settings.Eye,
                 camera: cameraList[0],
-                frameRate: (double)Settings.FrameRate,
+                frameRate: (double)settings.FrameRate,
+                gain: (int)settings.Gain,
                 roi: new Rectangle { Width = 720, Height = 450 });
-
+                
                 settings.SerialNumberCamera = cameraList[0].DeviceSerialNumber.ToString();
 
                 camera.Start();
@@ -97,7 +98,7 @@ namespace SpinnakerInterface
         [Category("Camera properties"), Description("LeftEyeCameraSerialNumber")]
         public string SerialNumberCamera { get => this.serialNumberCamera; set => SetProperty(ref serialNumberCamera, value, nameof(SerialNumberCamera)); }
         private string serialNumberCamera = null;
-
+        [NeedsRestarting]
         [Category("Camera properties"), Description("Gain")]
         public float Gain { get => this.gain; set => SetProperty(ref gain, value, nameof(Gain)); }
         private float gain = 9;

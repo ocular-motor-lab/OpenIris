@@ -47,7 +47,7 @@ namespace SpinnakerInterface
 
             // Retrieve list of cameras from the system
             var camList_ = system.GetCameras();
-            if(numberOfRequiredCameras > camList_.Count)
+            if (numberOfRequiredCameras > camList_.Count)
                 throw new Exception($"Need at least {numberOfRequiredCameras} camera(s). {camList_.Count} FLIR Spinnaker compatible camera(s) found.");
 
             // output found cameras
@@ -68,11 +68,11 @@ namespace SpinnakerInterface
             // Assign the correct camera to whichEye
             switch (whichEye, numberOfRequiredCameras)
             {
-                case (Eye.Both,2):
+                case (Eye.Both, 2):
                     foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
                     foundCameras.Add(rightEyeCamSerialNum == null ? camList_[1] : camList_.GetBySerial(rightEyeCamSerialNum));
                     return foundCameras;
-                case (_,1):
+                case (_, 1):
                     foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
                     return foundCameras;
                 default:
@@ -92,12 +92,14 @@ namespace SpinnakerInterface
         #endregion Static Methods
 
         #region constructor
-        public CameraEyeSpinnaker(Eye whichEye, IManagedCamera camera, double frameRate, Rectangle roi)
+        private int Gain{get;set; }
+        public CameraEyeSpinnaker(Eye whichEye, IManagedCamera camera, double frameRate, int gain, Rectangle roi)
         {
             cam = camera;
 
             WhichEye = whichEye;
             FrameRate = frameRate;
+            Gain = gain;
             FrameSize = roi.Size;
 
             isMaster = TriggerMode.Default;
@@ -255,7 +257,7 @@ namespace SpinnakerInterface
 
             //# Gain settings.
             cam.GainAuto.FromString("Off");
-            cam.Gain.Value = 9;
+            cam.Gain.Value = Gain;
             //# Exposure settings.
             cam.ExposureAuto.FromString("Off");
 

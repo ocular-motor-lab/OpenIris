@@ -77,6 +77,9 @@
     <OutputPath>..\..\bin\x64\Debug\</OutputPath>
     <DocumentationFile>..\..\bin\x64\Debug\OpenIris.xml</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Emgu.CV.UI, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
       <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.UI.dll</HintPath>
@@ -185,6 +188,13 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PreBuildEvent>set \p var=powershell -Command "(gcm "git" -ErrorAction SilentlyContinue)" -eq $null
+if $var$==0 (
+for /F "tokens=*" %25%25a in ('git describe --always --dirty --tags') do set gitVersion=%25%25a
+powershell -Command "(gc $(ProjectDir)\Properties\AssemblyInfo.cs) -replace 'AssemblyInformationalVersion\(\".*?\"\)', 'AssemblyInformationalVersion(\"%25gitVersion%25\")' | Out-File -encoding UTF8 $(ProjectDir)\Properties\AssemblyInfo.cs"
+)</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

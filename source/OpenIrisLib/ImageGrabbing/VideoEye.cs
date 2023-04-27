@@ -106,6 +106,9 @@ namespace OpenIris.ImageGrabbing
             {
                 var image = GrabImageEyeFromVideo();
 
+                image.TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
+                image.TimeStamp.DateTimeGrabbed = DateTime.Now;
+
                 if (image == null) return null;
 
                 if (LastFrameNumber > (long)image.TimeStamp.FrameNumber)

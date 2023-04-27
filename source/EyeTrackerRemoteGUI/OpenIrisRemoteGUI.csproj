@@ -7,8 +7,8 @@
     <ProjectGuid>{8AF6AA0E-D508-4727-B081-6D88BE7E85FE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EyeTrackerRemoteGUI</RootNamespace>
-    <AssemblyName>EyeTrackerRemoteGUI</AssemblyName>
+    <RootNamespace>OpenIrisRemoteGUI</RootNamespace>
+    <AssemblyName>OpenIrisRemoteGUI</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
@@ -38,7 +38,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\..\bin\x64\Debug\EyeTrackerRemoteGUI.XML</DocumentationFile>
+    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisRemoteGUI.xml</DocumentationFile>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -64,16 +64,16 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EyeTrackerRemoteClient.cs">
+    <Compile Include="OpenIrisRemoteClient.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EyeTrackerRemoteClient.Designer.cs">
-      <DependentUpon>EyeTrackerRemoteClient.cs</DependentUpon>
+    <Compile Include="OpenIrisRemoteClient.Designer.cs">
+      <DependentUpon>OpenIrisRemoteClient.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="EyeTrackerRemoteClient.resx">
-      <DependentUpon>EyeTrackerRemoteClient.cs</DependentUpon>
+    <EmbeddedResource Include="OpenIrisRemoteClient.resx">
+      <DependentUpon>OpenIrisRemoteClient.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -100,9 +100,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EyeTrackerRemoteClient\EyeTrackerRemoteClient.csproj">
+    <ProjectReference Include="..\EyeTrackerRemoteClient\OpenIrisRemoteClient.csproj">
       <Project>{cca5e468-60bc-45aa-bf20-aaac7b2abd27}</Project>
-      <Name>EyeTrackerRemoteClient</Name>
+      <Name>OpenIrisRemoteClient</Name>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </ProjectReference>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">

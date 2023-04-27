@@ -178,7 +178,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>git restore $(ProjectDir)\Properties\AssemblyInfo.cs</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets" Condition="Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -188,8 +189,11 @@
     <Error Condition="!Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets'))" />
   </Target>
   <PropertyGroup>
-    <PreBuildEvent>for /F "tokens=*" %25%25a in ('git describe --always --dirty --tags') do set gitVersion=%25%25a
-powershell -Command "(gc $(ProjectDir)\Properties\AssemblyInfo.cs) -replace '\$version\$', '%25gitVersion%25' | Out-File -encoding UTF8 $(ProjectDir)\Properties\AssemblyInfo.cs"</PreBuildEvent>
+    <PreBuildEvent>set \p var=powershell -Command "(gcm "git" -ErrorAction SilentlyContinue)" -eq $null
+if $var$==0 (
+for /F "tokens=*" %25%25a in ('git describe --always --dirty --tags') do set gitVersion=%25%25a
+powershell -Command "(gc $(ProjectDir)\Properties\AssemblyInfo.cs) -replace 'AssemblyInformationalVersion\(\".*?\"\)', 'AssemblyInformationalVersion(\"%25gitVersion%25\")' | Out-File -encoding UTF8 $(ProjectDir)\Properties\AssemblyInfo.cs"
+)</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

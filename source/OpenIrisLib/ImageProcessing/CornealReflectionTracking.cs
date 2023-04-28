@@ -26,7 +26,7 @@ namespace OpenIris.ImageProcessing
         {
             /// <summary>
             /// Do not track the corneal reflections.
-            /// </summary>
+            /// </summary> 
             None,
 
             /// <summary>

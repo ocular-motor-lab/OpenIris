@@ -35,4 +35,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.0.0")]
 // [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: AssemblyInformationalVersion("testTag-8-gb24e67a-dirty")]
+//[assembly: AssemblyInformationalVersion("testTag-8-gb24e67a-dirty")]

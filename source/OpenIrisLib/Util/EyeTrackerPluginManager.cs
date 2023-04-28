@@ -30,7 +30,7 @@ namespace OpenIris
         {
             try
             {
-                var pluginFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+                var pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
 
                 // An aggregate catalog that combines multiple catalogs
                 // Adds all the parts found in all assemblies in the same directory as the executing program

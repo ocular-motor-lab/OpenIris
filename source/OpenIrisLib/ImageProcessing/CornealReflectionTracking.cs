@@ -267,8 +267,8 @@ namespace OpenIris.ImageProcessing
 
                 if (scaleFactor_findCenter == 1)
                 {
-                    //score it based on a perfect circle within a square +- 0.1 
-                    if (score > 0.68 && score < 0.88)
+                    //score it based on a perfect circle within a square +- 0.13 
+                    if (score > 0.65 && score < 0.91)
                     {
                         crs.Add(new CornealReflectionData(
                             new PointF((int)Math.Round(blob.Centroid.X / scaleFactor_findBlob) + irisROI.X, (int)Math.Round(blob.Centroid.Y / scaleFactor_findBlob) + irisROI.Y),

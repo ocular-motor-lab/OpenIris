@@ -200,22 +200,6 @@ namespace OpenIris
         public CornealReflectionTracking.CornealReflectionTrackingMethod CornealReflectionTrackingMethod { get => cornealReflectionTrackingMethod; set => SetProperty(ref cornealReflectionTrackingMethod, value, nameof(CornealReflectionTrackingMethod)); }
         private CornealReflectionTracking.CornealReflectionTrackingMethod cornealReflectionTrackingMethod = CornealReflectionTracking.CornealReflectionTrackingMethod.Blob;
 
-        [Category("Corneal Reflection tracking settings"), Description("Resize Rate - Find CR Blob.")]
-        public double ResizeRate_findCRBlob { get => resizeRate_findCRBlob; set => SetProperty(ref resizeRate_findCRBlob, value, nameof(ResizeRate_findCRBlob)); }
-        private double resizeRate_findCRBlob = 1.0;
-
-        [Category("Corneal Reflection tracking settings"), Description("Resize Rate - Find CR Center.")]
-        public double ResizeRate_findCRCenter { get => resizeRate_findCRCenter; set => SetProperty(ref resizeRate_findCRCenter, value, nameof(ResizeRate_findCRCenter)); }
-        private double resizeRate_findCRCenter = 1.0;
-
-        [Category("Corneal Reflection tracking settings"), Description("Open Image.")]
-        public bool OpenImage { get => openImage; set => SetProperty(ref openImage, value, nameof(OpenImage)); }
-        private bool openImage = false;
-
-        [Category("Corneal Reflection tracking settings"), Description("Close Image.")]
-        public bool CloseImage { get => closeImage; set => SetProperty(ref closeImage, value, nameof(CloseImage)); }
-        private bool closeImage = false;
-
         #endregion corneal reflection tracking settings
 
         #region EyeLid tracking settings

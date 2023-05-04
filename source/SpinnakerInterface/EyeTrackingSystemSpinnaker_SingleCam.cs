@@ -95,9 +95,11 @@ namespace SpinnakerInterface
             Eye = Eye.Both;
         }
 
-        [Category("Camera properties"), Description("LeftEyeCameraSerialNumber")]
+        [NeedsRestarting]
+        [Category("Camera properties"), Description("BothEye - CameraSerialNumber")]
         public string SerialNumberCamera { get => this.serialNumberCamera; set => SetProperty(ref serialNumberCamera, value, nameof(SerialNumberCamera)); }
         private string serialNumberCamera = null;
+        
         [NeedsRestarting]
         [Category("Camera properties"), Description("Gain")]
         public float Gain { get => this.gain; set => SetProperty(ref gain, value, nameof(Gain)); }

@@ -13,6 +13,7 @@ namespace OpenIris
     using System.Drawing;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -38,7 +39,7 @@ namespace OpenIris
             {
                 EyeTrackerDebug.Init();
 
-                EyeTrackerLog.Create(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                EyeTrackerLog.Create(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
                     $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
                 try
                 {
@@ -87,7 +88,7 @@ namespace OpenIris
             // Stop everything just in case
             StopTracking();
             EyeTrackerRemoteServices.StopService();
-            Settings.Save();
+            Settings?.Save();
         }
 
         /// <summary>

@@ -198,9 +198,6 @@ namespace OpenIris
                         GrabLoop, 
                         TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError);
 
-                    // Stop the image sources from capturing more images.
-                    imageSources?.ForEach(source => source?.Stop());
-
                     // wait for the camera threads if necessary
                     if (cameraTasks is not null) await cameraTasks;
 
@@ -216,7 +213,6 @@ namespace OpenIris
 
                 cancellation = null;
 
-                imageSources?.ForEach(source => source?.Dispose());
                 imageSources = null;
             }
         }

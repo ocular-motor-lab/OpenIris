@@ -115,7 +115,7 @@ namespace SpinnakerInterface
             InitParameters();
 
             InitParameters_TriggerSettings();
-
+            
             cam.BeginAcquisition();
         }
 

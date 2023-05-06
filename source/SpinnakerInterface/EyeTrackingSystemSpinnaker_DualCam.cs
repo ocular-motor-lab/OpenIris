@@ -61,8 +61,18 @@ namespace SpinnakerInterface
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }  
         }
-       
+
+        public override void Dispose()
+        {
+            leftEyeCamera?.Stop();
+            leftEyeCamera?.Dispose();
+
+            rightEyeCamera?.Stop();
+            rightEyeCamera?.Dispose();
+        }
     }
+
+
     public class EyeTrackingSystemSettingsSpinnaker_DualCam : EyeTrackingSystemSettings
     {
         public EyeTrackingSystemSettingsSpinnaker_DualCam()

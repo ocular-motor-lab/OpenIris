@@ -7,7 +7,6 @@ namespace OpenIris
 {
     using System;
     using System.Drawing;
-    using Emgu.CV.Structure;
 
     /// <summary>
     /// Data structure containing the geometric properties of the measured pupil.
@@ -49,16 +48,6 @@ namespace OpenIris
             this.Center = center;
             this.Size = size;
             this.Angle = angle;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the Ellipse class from a PupilData object.
-        /// </summary>
-        /// <param name="pupilData">Pupil Data.</param>
-        /// <returns>New Ellipse object.</returns>
-        public static implicit operator Ellipse(PupilData pupilData)
-        {
-            return new Ellipse(pupilData.Center, pupilData.Size, pupilData.Angle);
         }
     }
 }

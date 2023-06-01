@@ -63,17 +63,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Initializes a new instance of the EyeData class.
-        /// </summary>
-        public EyeData(ImageEye imageEye, ProcessFrameResult result)
-        {
-            WhichEye = imageEye.WhichEye;
-            Timestamp = imageEye.TimeStamp;
-            ImageSize = imageEye.Size;
-            ProcessFrameResult = result;
-        }
-
-        /// <summary>
         /// Gets or sets left or right eye.
         /// </summary>
         public Eye WhichEye { get; set; }

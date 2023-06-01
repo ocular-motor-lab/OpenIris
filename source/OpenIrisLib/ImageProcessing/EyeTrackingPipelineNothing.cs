@@ -29,7 +29,13 @@ namespace OpenIris
         /// <returns></returns>
         public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
-            return (new EyeData(imageEye, ProcessFrameResult.Good), null);
+            return (new EyeData()
+            {
+                WhichEye = imageEye.WhichEye,
+                Timestamp = imageEye.TimeStamp,
+                ImageSize = imageEye.Size,
+                ProcessFrameResult = ProcessFrameResult.Good,
+            }, null);
         }
     }
 }

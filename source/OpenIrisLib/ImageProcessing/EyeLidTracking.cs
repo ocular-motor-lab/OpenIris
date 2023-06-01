@@ -303,8 +303,13 @@ namespace OpenIris.ImageProcessing
                 }
 
                 var imageDebugParabola = imageEye.Image.Convert<Bgr, byte>();
-                EyeData data = new EyeData(imageEye, ProcessFrameResult.Good)
+                EyeData data = new EyeData()
                 {
+                    WhichEye = imageEye.WhichEye,
+                    Timestamp = imageEye.TimeStamp,
+                    ImageSize = imageEye.Size,
+                    ProcessFrameResult = ProcessFrameResult.Good,
+
                     Pupil = new PupilData(pupil.Center, new SizeF(), 0),
                     Iris = new IrisData(pupil.Center, eyeGlobe.Radius / 2.0f),
                     Eyelids = eyelidData,

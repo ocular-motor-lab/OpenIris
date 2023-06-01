@@ -38,35 +38,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Conversion from IrisData to CircleF.
-        /// </summary>
-        /// <param name="irisData">Iris Data.</param>
-        /// <returns>New CircleF.</returns>
-        public static implicit operator CircleF(IrisData irisData)
-        {
-            return irisData.ToCircleF();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public CircleF ToCircleF()
-        {
-            return new CircleF(Center, Radius);
-        }
-
-        /// <summary>
-        /// Conversion from CircleF to IrisData.
-        /// </summary>
-        /// <param name="circle">The circle data.</param>
-        /// <returns>The new Iris data.</returns>
-        public static implicit operator IrisData(CircleF circle)
-        {
-            return new IrisData(circle.Center, circle.Radius);
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>

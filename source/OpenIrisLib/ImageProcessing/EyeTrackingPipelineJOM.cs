@@ -84,12 +84,24 @@ namespace OpenIris
                 new Point(eyeROI.Left, eyeROI.Top),
                 new Size((imageEye.Size.Width - eyeROI.Left - eyeROI.Width), (imageEye.Size.Height - eyeROI.Top - eyeROI.Height)));
             eyeROI.Intersect(imageEye.Image.ROI);
-            if (eyeROI.Width < 20 || eyeROI.Height < 20) return (new EyeData(imageEye, ProcessFrameResult.MissingPupil), null);
+            if (eyeROI.Width < 20 || eyeROI.Height < 20) return (new EyeData()
+            {
+                WhichEye = imageEye.WhichEye,
+                Timestamp = imageEye.TimeStamp,
+                ImageSize = imageEye.Size,
+                ProcessFrameResult = ProcessFrameResult.MissingPupil,
+            }, null);
 
             // 1 - Quick search of the pupil
             var pupilAprox = pupilTracker.FindPupil(imageEye, eyeROI, settings);
             EyeTrackerDebug.TrackProcessingTime("FindPupil");
-            if (pupilAprox.IsEmpty) return (new EyeData(imageEye, ProcessFrameResult.MissingPupil), null);
+            if (pupilAprox.IsEmpty) return (new EyeData()
+            {
+                WhichEye = imageEye.WhichEye,
+                Timestamp = imageEye.TimeStamp,
+                ImageSize = imageEye.Size,
+                ProcessFrameResult = ProcessFrameResult.MissingPupil,
+            }, null);
 
             // Provisional eye model if there is none from calibration
             if (eyeModel.IsEmpty) eyeModel = new EyePhysicalModel(pupilAprox.Center, (float)irisRadius * 2);
@@ -120,8 +132,13 @@ namespace OpenIris
             EyeTrackerDebug.TrackProcessingTime("CalculateTorsionAngle");
 
             // Create the data structure
-            var eyeData = new EyeData(imageEye, ProcessFrameResult.Good)
+            var eyeData = new EyeData()
             {
+                WhichEye = imageEye.WhichEye,
+                Timestamp = imageEye.TimeStamp,
+                ImageSize = imageEye.Size,
+                ProcessFrameResult = ProcessFrameResult.Good,
+
                 Pupil = pupil,
                 Iris = iris,
                 CornealReflections = cornealReflections,

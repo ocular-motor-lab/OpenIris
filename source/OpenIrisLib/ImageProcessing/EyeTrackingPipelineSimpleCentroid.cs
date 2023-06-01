@@ -48,7 +48,13 @@ namespace OpenIris
                 new Point(eyeROI.Left, eyeROI.Top),
                 new Size((imageEye.Size.Width - eyeROI.Left - eyeROI.Width), (imageEye.Size.Height - eyeROI.Top - eyeROI.Height)));
             eyeROI.Intersect(imageEye.Image.ROI);
-            if (eyeROI.Width < 20 || eyeROI.Height < 20) return (new EyeData(imageEye, ProcessFrameResult.MissingPupil), null);
+            if (eyeROI.Width < 20 || eyeROI.Height < 20) return (new EyeData()
+            {
+                WhichEye = imageEye.WhichEye,
+                Timestamp = imageEye.TimeStamp,
+                ImageSize = imageEye.Size,
+                ProcessFrameResult = ProcessFrameResult.MissingPupil,
+            }, null);
 
 
             //// Threshold the image to find the dark parts (pupil)
@@ -69,8 +75,13 @@ namespace OpenIris
 
 
             // Create the data structure
-            var eyeData = new EyeData(imageEye, ProcessFrameResult.Good)
+            var eyeData = new EyeData()
             {
+                WhichEye = imageEye.WhichEye,
+                Timestamp = imageEye.TimeStamp,
+                ImageSize = imageEye.Size,
+                ProcessFrameResult = ProcessFrameResult.Good,
+
                 Pupil = pupil,
                 Iris = new IrisData( pupil.Center,  (float)(12.0f/settings.MmPerPix)),
                 CornealReflections = null,

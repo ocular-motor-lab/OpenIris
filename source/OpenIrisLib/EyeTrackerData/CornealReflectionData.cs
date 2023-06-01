@@ -51,25 +51,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Initializes a new instance of the Ellipse class from a CornealReflectionData object.
-        /// </summary>
-        /// <param name="cornealReflectionData">Corneal Reflection Data.</param>
-        /// <returns>New Ellipse object.</returns>
-        public static implicit operator Ellipse(CornealReflectionData cornealReflectionData)
-        {
-            return cornealReflectionData.ToEllipse();
-        }
-
-        /// <summary>
-        /// Converts corneal reflection to ellipse.
-        /// </summary>
-        /// <returns></returns>
-        public Ellipse ToEllipse()
-        {
-            return new Ellipse(Center, Size, Angle);
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="other"></param>

@@ -54,7 +54,7 @@ namespace OpenIris.ImageProcessing
         {
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
 
-            int blurSize = (int)Math.Ceiling(trackingSettings.MinCRRadPix);
+            int blurSize = (int)Math.Ceiling(trackingSettings.MinCRRadPix/2); //if not divided by 2, it only picks very small ones and by increasing the minCRRadPix it will make the cr vanish in opening and closing
             if (blurSize == 0) { blurSize = 1; }
             var threshold = (imageEye.WhichEye == Eye.Left) ? trackingSettings.BrightThresholdLeftEye : trackingSettings.BrightThresholdRightEye;
             var maxBlobArea = trackingSettings.MaxCRRadPix * Math.PI * Math.PI;
@@ -81,12 +81,12 @@ namespace OpenIris.ImageProcessing
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
 
             //using iris radius for the ROI to look for CR
-            int squareSize = irisRadiusPix * 2;
+            double squareSize = irisRadiusPix * 2;
             var irisROI = new Rectangle(
                 (int)Math.Round(pupilAprox.Center.X - squareSize / 2),
                 (int)Math.Round(pupilAprox.Center.Y - squareSize / 2),
-                squareSize,
-                squareSize
+                (int)Math.Round(squareSize),
+                (int)Math.Round(squareSize)
                 );
             irisROI.Intersect(new Rectangle(new Point(0, 0), imageEye.Size));
 
@@ -103,29 +103,29 @@ namespace OpenIris.ImageProcessing
             // -- Thresholding -- Resize and Get the binary image
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            int resizeBlur = (int) Math.Round(blurSize * scaleFactor_findBlob);
-            resizeBlur = resizeBlur == 0 ? 1 : resizeBlur;
-            int resizeWidth =(int) Math.Round(irisROI.Width * scaleFactor_findBlob);
-            int resizeHeight =(int) Math.Round(irisROI.Height * scaleFactor_findBlob);
+            //int resizeBlur = (int) Math.Round(blurSize * scaleFactor_findBlob);
+            //resizeBlur = resizeBlur == 0 ? 1 : resizeBlur;
+            double resizeWidth = irisROI.Width * scaleFactor_findBlob;
+            double resizeHeight = irisROI.Height * scaleFactor_findBlob;
 
             if (irisROI.Width == 0 || irisROI.Height == 0) return null;
 
-            Image<Gray, byte> imgTemp;
+            Image<Gray, byte> imgBlurred = imageEye.Image.Copy(irisROI).SmoothBlur(blurSize, blurSize);
+            Image<Gray, byte> imgResized;
+            //resize the image
             if (scaleFactor_findBlob == 1)
-            {
-                //No resizing
-                imgTemp = imageEye.Image.Copy(irisROI).SmoothBlur(resizeBlur, resizeBlur);
-            }
+            { imgResized = imgBlurred; }
             else
             {
-                imgTemp = imageEye.Image.Copy(irisROI).Resize(resizeWidth, resizeHeight, Emgu.CV.CvEnum.Inter.Cubic).SmoothBlur(resizeBlur, resizeBlur);
+                imgResized = imgBlurred.Resize((int)Math.Round(resizeWidth), (int)Math.Round(resizeHeight), Emgu.CV.CvEnum.Inter.Cubic);
             }
-            
-            var imgPupilBinary = imgTemp.ThresholdBinary(new Gray(threshold), new Gray(255));
 
+            var imgCRBinary = imgResized.ThresholdBinary(new Gray(threshold), new Gray(255));
+
+            //draw debug binary image
             if (EyeTracker.DEBUG)
             {
-                var imgDebug = imgPupilBinary.Convert<Bgr, byte>();
+                var imgDebug = imgCRBinary.Convert<Bgr, byte>();
 
                 EyeTrackerDebug.AddImage("CR_Binary", imageEye.WhichEye, imgDebug);
             }
@@ -133,8 +133,10 @@ namespace OpenIris.ImageProcessing
             // --  Morphological erosion and dilation --
             // Optimize the blobs by removing small white or black spots
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            var kernelSize = resizeBlur;
+            //adjust the kernel size as the image resized
+            int kernelSize = (int) Math.Round(blurSize * scaleFactor_findBlob);
+            kernelSize = kernelSize == 0 ? 1 : kernelSize;
+            //var kernelSize = resizeBlur;
             var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(kernelSize, kernelSize), new Point(-1, -1));
             var center = new Point(-1, -1);
             var one = new MCvScalar(1);
@@ -143,33 +145,32 @@ namespace OpenIris.ImageProcessing
                 // Image opening. Morpholigical operation to remove small spots that are above treshold.
                 // First it erodes the image. That is reduce the size of the white blobs. Next it dilates the
                 // remaning blobs. This will eliminate the blobs that are smaller than the kernel size.
-                CvInvoke.Erode(imgPupilBinary, imgPupilBinary, kernel, center, 1, BorderType.Default, one);
-                CvInvoke.Dilate(imgPupilBinary, imgPupilBinary, kernel, center, 1, BorderType.Default, one);
+                CvInvoke.Erode(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
+                CvInvoke.Dilate(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
             }
             if (closeImage)
             {
                 // Image closing. Morpholigical operation to remove small spots that are below treshold.
                 // First it dilates the image. That is increase the size of the white blobs. Next it erods the
                 // remaning blobs. This will eliminate the spots within the blobs that are smaller than the kernel size.
-                CvInvoke.Dilate(imgPupilBinary, imgPupilBinary, kernel, center, 1, BorderType.Default, one);
-                CvInvoke.Erode(imgPupilBinary, imgPupilBinary, kernel, center, 1, BorderType.Default, one);
+                CvInvoke.Dilate(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
+                CvInvoke.Erode(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
             }
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // --  Blob selection --
             // Find the blob that is most likely to be the CR.
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+            //draw debug binary image after opening and closing
             if (EyeTracker.DEBUG)
             {
-                var imgDebug = imgPupilBinary.Convert<Bgr, byte>();
-
+                var imgDebug = imgCRBinary.Convert<Bgr, byte>();
                 EyeTrackerDebug.AddImage("CR_BinaryOpenClose", imageEye.WhichEye, imgDebug);
             }
 
-            var crs = new System.Collections.Generic.List<CornealReflectionData>();
+            var crs = new List<CornealReflectionData>();
 
-            detector.Detect(imgPupilBinary, blobs);
+            detector.Detect(imgCRBinary, blobs);
 
             irisRadiusPix = (int) Math.Round(irisRadiusPix * scaleFactor_findBlob);
             maxBlobArea = maxBlobArea * Math.Pow(scaleFactor_findBlob, 2);
@@ -208,21 +209,30 @@ namespace OpenIris.ImageProcessing
                 }
                 else
                 {
-                    //score it based on a perfect circle within a square (area of a circle within a square = pi/4) - 0.38 
+                    //score it based on a perfect circle within a square (area of a circle within a square = pi/4), the square is enlarged by variable k. Therefore the score is (pi/4)/k^2
                     if (score > 0.4)
                     {
                         // up sample to find the center of the crs
-                        resizeWidth = (int)Math.Round(blob.BoundingBox.Width / scaleFactor_findBlob);
-                        resizeHeight = (int)Math.Round(blob.BoundingBox.Height / scaleFactor_findBlob);
-                        squareSize = Math.Max(resizeWidth, resizeHeight);
+                        resizeWidth = blob.BoundingBox.Width / scaleFactor_findBlob;
+                        resizeHeight = blob.BoundingBox.Height / scaleFactor_findBlob;
+                        squareSize = Math.Max(resizeWidth, resizeHeight) * 1.2; // expand the square size to upsample the blob 
 
                         crROI = new Rectangle(
                             (int)Math.Round(blob.Centroid.X / scaleFactor_findBlob + irisROI.X - squareSize),
                             (int)Math.Round(blob.Centroid.Y / scaleFactor_findBlob + irisROI.Y - squareSize),
-                            squareSize * 2,
-                            squareSize * 2
+                            (int)Math.Round(squareSize * 2),
+                            (int)Math.Round(squareSize * 2)
                         );
                         crROI.Intersect(new Rectangle(new Point(0, 0), imageEye.Size));
+
+                        var crROI2 = new Rectangle(
+                            (int)Math.Round(blob.Centroid.X / scaleFactor_findBlob + irisROI.X - squareSize),
+                            (int)Math.Round(blob.Centroid.Y / scaleFactor_findBlob + irisROI.Y - squareSize),
+                            (int)Math.Round(squareSize * 2 / 1.2),
+                            (int)Math.Round(squareSize * 2 / 1.2)
+                        );
+                        crROI2.Intersect(new Rectangle(new Point(0, 0), imageEye.Size));
+
 
                         if (EyeTracker.DEBUG)
                         {
@@ -233,27 +243,27 @@ namespace OpenIris.ImageProcessing
                             EyeTrackerDebug.AddImage("CR - crROI", imageEye.WhichEye, imgDebug);
                         }
 
-                        resizeBlur = (int)Math.Round(blurSize * scaleFactor_findCenter);
-                        resizeBlur = resizeBlur == 0 ? 1 : resizeBlur;
+                        //resizeBlur = (int)Math.Round(blurSize * scaleFactor_findCenter);
+                        //resizeBlur = resizeBlur == 0 ? 1 : resizeBlur;
                         resizeWidth = (int)Math.Round(crROI.Width * scaleFactor_findCenter);
                         resizeHeight = (int)Math.Round(crROI.Height * scaleFactor_findCenter);
 
-                        imgTemp = imageEye.Image.Copy(crROI).Resize(resizeWidth, resizeHeight, Emgu.CV.CvEnum.Inter.Cubic).SmoothBlur(resizeBlur, resizeBlur);
-                        var upSampled_imgCRBinary = imgTemp.ThresholdBinary(new Gray(threshold), new Gray(255));
+                        imgResized = imageEye.Image.Copy(crROI).SmoothBlur(blurSize, blurSize).Resize((int)Math.Round(resizeWidth), (int)Math.Round(resizeHeight), Emgu.CV.CvEnum.Inter.Cubic);
+                        var upSampled_imgCRBinary = imgResized.ThresholdBinary(new Gray(threshold), new Gray(255));
                         //crs.Add(new CornealReflectionData(
                         //            new PointF((int)Math.Round(blob.Centroid.X / scaleFactor_findBlob) + irisROI.X, (int)Math.Round(blob.Centroid.Y / scaleFactor_findBlob) + irisROI.Y),
                         //            new SizeF(blob.BoundingBox.Size),
                         //            (float)90.0));
+                        
 
                         if (EyeTracker.DEBUG)
                         {
-                            var imgDebug = imageEye.Image.Convert<Bgr, byte>();
-                            imgDebug.Draw(crROI, new Bgr(Color.Red), 2);
-
-
                             EyeTrackerDebug.AddImage("CRTEST", imageEye.WhichEye, upSampled_imgCRBinary);
-                        }
+                            
+                            var imgDebug = imageEye.Image.Copy(crROI).Resize((int)Math.Round(resizeWidth), (int)Math.Round(resizeHeight), Emgu.CV.CvEnum.Inter.Cubic);
+                            EyeTrackerDebug.AddImage("CRTEST2", imageEye.WhichEye, imgDebug);
 
+                        }
                         // find the center
                         var centerMass = upSampled_imgCRBinary.GetMoments(true).GravityCenter;
 
@@ -276,7 +286,7 @@ namespace OpenIris.ImageProcessing
 
             if (EyeTracker.DEBUG)
             {
-                var imgDebug = imgPupilBinary.Convert<Bgr, byte>();
+                var imgDebug = imgCRBinary.Convert<Bgr, byte>();
                 foreach (var cr in crs)
                 {
                     imgDebug.Draw(new CircleF(new PointF((int) Math.Round((cr.Center.X - irisROI.X)*scaleFactor_findBlob),(int) Math.Round((cr.Center.Y - irisROI.Y)*scaleFactor_findBlob)), cr.Size.Width * 2), new Bgr(Color.Red), 2);

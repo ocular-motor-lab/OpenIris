@@ -215,7 +215,7 @@ namespace OpenIris.ImageProcessing
                         // up sample to find the center of the crs
                         resizeWidth = blob.BoundingBox.Width / scaleFactor_findBlob;
                         resizeHeight = blob.BoundingBox.Height / scaleFactor_findBlob;
-                        squareSize = Math.Max(resizeWidth, resizeHeight) * 1.2; // expand the square size to upsample the blob 
+                        squareSize = Math.Max(resizeWidth, resizeHeight) * 1.8; // expand the square size to upsample the blob 
 
                         crROI = new Rectangle(
                             (int)Math.Round(blob.Centroid.X / scaleFactor_findBlob + irisROI.X - squareSize),

@@ -91,6 +91,36 @@ namespace OpenIris.UI
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadAcceleration, Eye.Right, Color.Red));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadAcceleration, Eye.Right, Color.Green));
 
+
+
+            var chartCRLH = new TraceChartArea(tracesChart, DataStream.CRLH, "CRLH")
+            {
+                DefaultRange = new Range(0, 500),
+                ShouldZoom = true
+            };
+            tracesChart.Series.Add(new EyeTraceSeries(chartCRLH, Eye.Left));
+
+            var chartCRLV = new TraceChartArea(tracesChart, DataStream.CRLV, "CRLV")
+            {
+                DefaultRange = new Range(0, 500),
+                ShouldZoom = true
+            };
+            tracesChart.Series.Add(new EyeTraceSeries(chartCRLV, Eye.Left));
+
+            var chartCRRH = new TraceChartArea(tracesChart, DataStream.CRRH, "CRRH")
+            {
+                DefaultRange = new Range(0, 500),
+                ShouldZoom = true
+            };
+            tracesChart.Series.Add(new EyeTraceSeries(chartCRRH, Eye.Right));
+
+            var chartCRRV = new TraceChartArea(tracesChart, DataStream.CRRV, "CRRV")
+            {
+                DefaultRange = new Range(0, 500),
+                ShouldZoom = true
+            };
+            tracesChart.Series.Add(new EyeTraceSeries(chartCRRV, Eye.Right));
+
             foreach (var chartArea in tracesChart.ChartAreas)
             {
                 if (chartArea is TraceChartArea traceChart)
@@ -265,6 +295,10 @@ namespace OpenIris.UI
             tracesChart.ChartAreas["HR"].Visible = headAccelerationToolStripMenuItem.Checked;
             tracesChart.ChartAreas["P"].Visible = pupilToolStripMenuItem.Checked;
             tracesChart.ChartAreas["E"].Visible = eyeLidsToolStripMenuItem.Checked;
+            tracesChart.ChartAreas["CRLH"].Visible = cRToolStripMenuItem.Checked;
+            tracesChart.ChartAreas["CRLV"].Visible = cRToolStripMenuItem.Checked;
+            tracesChart.ChartAreas["CRRH"].Visible = cRToolStripMenuItem.Checked;
+            tracesChart.ChartAreas["CRRV"].Visible = cRToolStripMenuItem.Checked;
 
             var menuPercent = (float)horizontalToolStripMenuItem.Height / this.Height*100f;
 
@@ -366,11 +400,6 @@ namespace OpenIris.UI
                     traceChartArea.ResetAxis();
                 }
             }
-        }
-
-        private void headAccelerationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            UpdateVisibleCharts();
         }
     }
 

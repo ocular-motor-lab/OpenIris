@@ -70,6 +70,23 @@ namespace SpinnakerInterface
             rightEyeCamera?.Stop();
             rightEyeCamera?.Dispose();
         }
+
+       /* public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
+        {
+            var imSourceData = procesedImages.Images[Eye.Left].ImageSourceData;
+            if (imSourceData != null)
+            {
+                var (chunkData, _) = (Tuple<ManagedChunkData, IManagedImage>)imSourceData;
+                procesedImages.Data.ExtraData.Int0 = chunkData.ExposureEndLineStatusAll;
+            }
+            var imSourceData = procesedImages.Images[Eye.Right].ImageSourceData;
+            if (imSourceData != null)
+            {
+                var (chunkData, _) = (Tuple<ManagedChunkData, IManagedImage>)imSourceData;
+                procesedImages.Data.ExtraData.Int1 = chunkData.ExposureEndLineStatusAll;
+            }
+            return procesedImages;
+        }*/
     }
 
 

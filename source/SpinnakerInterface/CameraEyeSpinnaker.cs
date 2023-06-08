@@ -31,9 +31,12 @@ namespace SpinnakerInterface
         private bool IsFirstFrame = true;
         private ulong FirstFrameID, CurrentFrameID;  // CurrentFrameID is based on the internal camera hardware frame counter.
         private ulong NumFramesGrabbed = 0;
+        private long lastExposureEndLineStatusAll;
+        private ImageEyeTimestamp lastTimestamp; 
 
         private const string TRIGGER_LINE = "Line2";
         private const string STROBE_OUT_LINE = "Line1";
+        private const string INPUT_LINE = "Line0";
 
 
         Vector2 maxROI_Offset, roiSize;
@@ -108,6 +111,7 @@ namespace SpinnakerInterface
 
         #endregion constructor
 
+
         #region public methods
 
         public override void Start()
@@ -156,6 +160,10 @@ namespace SpinnakerInterface
                         frameNumber: CurrentFrameID,
                         frameNumberRaw: RawFrameID);
 
+                    lastExposureEndLineStatusAll = rawImage.ChunkData.ExposureEndLineStatusAll;
+
+                    lastTimestamp = timestamp;
+
                     return new ImageEye(
                                      (int)rawImage.Width,
                                      (int)rawImage.Height,
@@ -164,7 +172,7 @@ namespace SpinnakerInterface
                                      timestamp)
                     {
                         WhichEye = WhichEye,
-                        ImageSourceData = rawImage
+                        ImageSourceData = (rawImage.ChunkData,  rawImage),
                     };
                 }
             }
@@ -188,7 +196,8 @@ namespace SpinnakerInterface
         // its own string, so we must distinguish which camera this pertains to.
         public override object Info =>
             $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
-          + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n";
+          + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
+          + $"GPIO {lastExposureEndLineStatusAll}\n\n";
 
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel
         // location of the tracked pupil within the ROI, so we use it to offset the
@@ -247,6 +256,9 @@ namespace SpinnakerInterface
             cam.ChunkSelector.FromString("FrameID");
             cam.ChunkEnable.Value = true;
 
+            //cam.ChunkSelector.FromString("LineStatusAll");
+           // cam.ChunkEnable.Value = true;
+
             // This saves the status of all 4 GPIO digital lines.
             try
             {
@@ -296,6 +308,15 @@ namespace SpinnakerInterface
 
                     //# MUST make sure all non-master cameras set strobeOutLine to high.
                     cam.LineSelector.FromString(STROBE_OUT_LINE);
+                    cam.LineInverter.Value = false;
+
+                    //# For Firefly, set to Input. For Blackfly, this will be an error,
+                    //# since the line is hard-wired as an output.        
+                    try { cam.LineMode.FromString("Input"); } catch { }
+
+
+                    //# Set line 0 as input for receiving ttl pulses for synchornization
+                    cam.LineSelector.FromString(INPUT_LINE);
                     cam.LineInverter.Value = false;
 
                     //# For Firefly, set to Input. For Blackfly, this will be an error,

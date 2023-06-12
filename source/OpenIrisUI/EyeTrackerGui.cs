@@ -520,7 +520,7 @@ namespace OpenIris.UI
         {
             // Update images
             var imageLeft = eyeTracker.LastImagesAndData?.Images[Eye.Left]?.Image.Convert<Bgr, byte>();
-            var imageRight = eyeTracker.LastImagesAndData?.Images[Eye.Left]?.Image.Convert<Bgr, byte>();
+            var imageRight = eyeTracker.LastImagesAndData?.Images[Eye.Right]?.Image.Convert<Bgr, byte>();
             if (imageLeft != null) eyeTrackerImageEyeBoxLeftEyeSmall.Image = imageLeft;
             if (imageRight != null) eyeTrackerImageEyeBoxRightEyeSmall.Image = imageRight;
 

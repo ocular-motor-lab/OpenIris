@@ -280,6 +280,7 @@ namespace OpenIris
                   "DebugTimeProcessed";
         }
     }
+
     /// <summary>
     /// Structure for the generic extra data.
     /// </summary>

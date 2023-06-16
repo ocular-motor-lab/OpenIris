@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
+using SpinnakerNET.GenApi;
 using static OpenIris.EyeTrackerExtentionMethods;
 
 namespace SpinnakerInterface
@@ -166,8 +167,6 @@ namespace SpinnakerInterface
 
                     lastTimestamp = timestamp;
 
-                    line0Status = rawImage.ChunkData.LineStatusAll.ToString();
-
                     return new ImageEye(
                                      (int)rawImage.Width,
                                      (int)rawImage.Height,
@@ -202,14 +201,13 @@ namespace SpinnakerInterface
             $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
           + $"GPIO {lastExposureEndLineStatusAll} Seconds {lastTimestamp.Seconds}\n\n"
-          + $"GPIO Line 0 {camLineStatus(INPUT_LINE)} \n\n"
-          + $"GPIO Line status all in Chunk Data {line0Status}" ;
+          + $"GPIO Line 0 {camLineStatus(INPUT_LINE)} \n\n" ;
 
 
-        private string  camLineStatus(string lineName)
+        private BoolNode camLineStatus(string lineName)
         {
             cam.LineSelector.FromString(lineName);
-            return cam.LineStatus.ToString();
+            return cam.LineStatus;
         }
 
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel

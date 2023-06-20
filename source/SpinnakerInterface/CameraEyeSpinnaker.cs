@@ -39,6 +39,7 @@ namespace SpinnakerInterface
         private const string STROBE_OUT_LINE = "Line1";
         private const string INPUT_LINE = "Line0";
 
+        private string errortest;
 
         Vector2 maxROI_Offset, roiSize;
 
@@ -199,7 +200,7 @@ namespace SpinnakerInterface
             $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
           + $"GPIO {lastExposureEndLineStatusAll} Seconds {lastTimestamp.Seconds}\n\n"
-          + $"GPIO Line 0 {camLineStatus(INPUT_LINE)} \n\n" ;
+          + $"GPIO Line 0 {camLineStatus(INPUT_LINE)} \n\n";
 
 
         private BoolNode camLineStatus(string lineName)
@@ -262,20 +263,22 @@ namespace SpinnakerInterface
             SetROI(maxROI_Offset / 2);
 
             // Image Chunk data, saved with each video frame.
-            cam.ChunkModeActive.Value = true;
             cam.ChunkSelector.FromString("FrameID");
             cam.ChunkEnable.Value = true;
+            cam.ChunkModeActive.Value = true;
 
             //cam.ChunkSelector.FromString("LineStatusAll");
-           // cam.ChunkEnable.Value = true;
+            // cam.ChunkEnable.Value = true;
 
             // This saves the status of all 4 GPIO digital lines.
             try
             {
                 cam.ChunkSelector.FromString("ExposureEndLineStatusAll");
                 cam.ChunkEnable.Value = true;
+                cam.ChunkModeActive.Value = true;
+
             }
-            catch { }
+            catch(Exception e) { errortest = e.ToString(); }
 
             //# Gain settings.
             cam.GainAuto.FromString("Off");

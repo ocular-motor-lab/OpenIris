@@ -40,29 +40,51 @@
   "PreReleaseLabelWithDash": "-iss13",
   "PreReleaseNumber": 1,
   "WeightedPreReleaseNumber": 1,
+<<<<<<< HEAD
   "BuildMetaData": 21,
   "BuildMetaDataPadded": "0021",
   "FullBuildMetaData": "21.Branch.iss13.Sha.f88f0f094920d7e3f0e88d8f9df04468f07e24c5",
+=======
+  "BuildMetaData": 23,
+  "BuildMetaDataPadded": "0023",
+  "FullBuildMetaData": "23.Branch.iss13.Sha.1215a93759f37498d52aaf7bf98474bbfac8f6bd",
+>>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
   "MajorMinorPatch": "0.1.3",
   "SemVer": "0.1.3-iss13.1",
   "LegacySemVer": "0.1.3-iss13-1",
   "LegacySemVerPadded": "0.1.3-iss13-0001",
   "AssemblySemVer": "0.1.3.0",
   "AssemblySemFileVer": "0.1.3.0",
+<<<<<<< HEAD
   "FullSemVer": "0.1.3-iss13.1+21",
   "InformationalVersion": "0.1.3-iss13.1+21.Branch.iss13.Sha.f88f0f094920d7e3f0e88d8f9df04468f07e24c5",
   "BranchName": "iss13",
   "EscapedBranchName": "iss13",
   "Sha": "f88f0f094920d7e3f0e88d8f9df04468f07e24c5",
   "ShortSha": "f88f0f0",
+=======
+  "FullSemVer": "0.1.3-iss13.1+23",
+  "InformationalVersion": "0.1.3-iss13.1+23.Branch.iss13.Sha.1215a93759f37498d52aaf7bf98474bbfac8f6bd",
+  "BranchName": "iss13",
+  "EscapedBranchName": "iss13",
+  "Sha": "1215a93759f37498d52aaf7bf98474bbfac8f6bd",
+  "ShortSha": "1215a93",
+>>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
   "NuGetVersionV2": "0.1.3-iss13-0001",
   "NuGetVersion": "0.1.3-iss13-0001",
   "NuGetPreReleaseTagV2": "iss13-0001",
   "NuGetPreReleaseTag": "iss13-0001",
   "VersionSourceSha": "97ccf6a41f418f20f001bcf2a15bbb0a4b8ae2f7",
+<<<<<<< HEAD
   "CommitsSinceVersionSource": 21,
   "CommitsSinceVersionSourcePadded": "0021",
   "UncommittedChanges": 0,
   "CommitDate": "2023-06-01"
 >>>>>>> 5e0ad84 (starting to add the chunk data to the extra columns in the txt file - not completed. And also, started adding the line 0 for using the black cable as an input and get values - not completed.)
+=======
+  "CommitsSinceVersionSource": 23,
+  "CommitsSinceVersionSourcePadded": "0023",
+  "UncommittedChanges": 0,
+  "CommitDate": "2023-06-16"
+>>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
 }

@@ -12,6 +12,7 @@ using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
 using System.Threading;
 using System.ComponentModel;
+using SpinnakerNET.GenApi;
 
 namespace SpinnakerInterface
 {
@@ -76,14 +77,26 @@ namespace SpinnakerInterface
             var imSourceData = procesedImages.Images[Eye.Left].ImageSourceData;
             if (imSourceData != null)
             {
+<<<<<<< HEAD
                 var (chunkData, _) = (Tuple<ManagedChunkData, IManagedImage>)imSourceData;
                 procesedImages.Data.ExtraData.Int0 = chunkData.ExposureEndLineStatusAll;
+=======
+                var (line0, _) = (ValueTuple<BoolNode, IManagedImage>)imSourceData;
+                extraData.Int0 = line0 ? 1 : 0;
+                procesedImages.Data.ExtraData = extraData;
+>>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
             }
             var imSourceData = procesedImages.Images[Eye.Right].ImageSourceData;
             if (imSourceData != null)
             {
+<<<<<<< HEAD
                 var (chunkData, _) = (Tuple<ManagedChunkData, IManagedImage>)imSourceData;
                 procesedImages.Data.ExtraData.Int1 = chunkData.ExposureEndLineStatusAll;
+=======
+                var (line0, _) = (ValueTuple<BoolNode, IManagedImage>)imSourceData;
+                extraData.Int0 = line0 ? 1 : 0;
+                procesedImages.Data.ExtraData = extraData;
+>>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
             }
             return procesedImages;
         }*/

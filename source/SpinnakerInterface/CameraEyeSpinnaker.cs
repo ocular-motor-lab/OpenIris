@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
+using SpinnakerNET.GenApi;
 using static OpenIris.EyeTrackerExtentionMethods;
 
 namespace SpinnakerInterface
@@ -197,7 +198,19 @@ namespace SpinnakerInterface
         public override object Info =>
             $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
+<<<<<<< HEAD
           + $"GPIO {lastExposureEndLineStatusAll}\n\n";
+=======
+          + $"GPIO {lastExposureEndLineStatusAll} Seconds {lastTimestamp.Seconds}\n\n"
+          + $"GPIO Line 0 {camLineStatus(INPUT_LINE)} \n\n" ;
+
+
+        private BoolNode camLineStatus(string lineName)
+        {
+            cam.LineSelector.FromString(lineName);
+            return cam.LineStatus;
+        }
+>>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
 
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel
         // location of the tracked pupil within the ROI, so we use it to offset the

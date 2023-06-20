@@ -8,28 +8,50 @@
   "PreReleaseLabelWithDash": "-iss13",
   "PreReleaseNumber": 1,
   "WeightedPreReleaseNumber": 1,
+<<<<<<< HEAD
   "BuildMetaData": 31,
   "BuildMetaDataPadded": "0031",
   "FullBuildMetaData": "31.Branch.iss13.Sha.7830573e59d57154bf39f3f4877a6d2ea0d5837b",
+=======
+  "BuildMetaData": 23,
+  "BuildMetaDataPadded": "0023",
+  "FullBuildMetaData": "23.Branch.iss13.Sha.1215a93759f37498d52aaf7bf98474bbfac8f6bd",
+>>>>>>> 890c2292bc9611ebb0772af515185d1d6b5a2a26
   "MajorMinorPatch": "0.1.3",
   "SemVer": "0.1.3-iss13.1",
   "LegacySemVer": "0.1.3-iss13-1",
   "LegacySemVerPadded": "0.1.3-iss13-0001",
   "AssemblySemVer": "0.1.3.0",
   "AssemblySemFileVer": "0.1.3.0",
+<<<<<<< HEAD
   "FullSemVer": "0.1.3-iss13.1+31",
   "InformationalVersion": "0.1.3-iss13.1+31.Branch.iss13.Sha.7830573e59d57154bf39f3f4877a6d2ea0d5837b",
   "BranchName": "iss13",
   "EscapedBranchName": "iss13",
   "Sha": "7830573e59d57154bf39f3f4877a6d2ea0d5837b",
   "ShortSha": "7830573",
+=======
+  "FullSemVer": "0.1.3-iss13.1+23",
+  "InformationalVersion": "0.1.3-iss13.1+23.Branch.iss13.Sha.1215a93759f37498d52aaf7bf98474bbfac8f6bd",
+  "BranchName": "iss13",
+  "EscapedBranchName": "iss13",
+  "Sha": "1215a93759f37498d52aaf7bf98474bbfac8f6bd",
+  "ShortSha": "1215a93",
+>>>>>>> 890c2292bc9611ebb0772af515185d1d6b5a2a26
   "NuGetVersionV2": "0.1.3-iss13-0001",
   "NuGetVersion": "0.1.3-iss13-0001",
   "NuGetPreReleaseTagV2": "iss13-0001",
   "NuGetPreReleaseTag": "iss13-0001",
   "VersionSourceSha": "97ccf6a41f418f20f001bcf2a15bbb0a4b8ae2f7",
+<<<<<<< HEAD
   "CommitsSinceVersionSource": 31,
   "CommitsSinceVersionSourcePadded": "0031",
   "UncommittedChanges": 0,
   "CommitDate": "2023-06-20"
+=======
+  "CommitsSinceVersionSource": 23,
+  "CommitsSinceVersionSourcePadded": "0023",
+  "UncommittedChanges": 0,
+  "CommitDate": "2023-06-16"
+>>>>>>> 890c2292bc9611ebb0772af515185d1d6b5a2a26
 }

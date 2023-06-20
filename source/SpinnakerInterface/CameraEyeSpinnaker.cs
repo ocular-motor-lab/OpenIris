@@ -35,6 +35,10 @@ namespace SpinnakerInterface
         private long lastExposureEndLineStatusAll;
         private ImageEyeTimestamp lastTimestamp; 
 
+
+        private string line0Status = "FALSE";
+
+
         private const string TRIGGER_LINE = "Line2";
         private const string STROBE_OUT_LINE = "Line1";
         private const string INPUT_LINE = "Line0";
@@ -174,7 +178,10 @@ namespace SpinnakerInterface
                                      timestamp)
                     {
                         WhichEye = WhichEye,
-                        ImageSourceData = (rawImage.ChunkData,  rawImage),
+                        //ImageSourceData = (rawImage.ChunkData,  rawImage),
+
+                        ImageSourceData = (camLineStatus(INPUT_LINE),  rawImage),
+
                     };
                 }
             }
@@ -201,6 +208,7 @@ namespace SpinnakerInterface
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
           + $"GPIO {lastExposureEndLineStatusAll} Seconds {lastTimestamp.Seconds}\n\n"
           + $"GPIO Line 0 {camLineStatus(INPUT_LINE)} \n\n";
+
 
 
         private BoolNode camLineStatus(string lineName)
@@ -270,6 +278,9 @@ namespace SpinnakerInterface
             //cam.ChunkSelector.FromString("LineStatusAll");
             // cam.ChunkEnable.Value = true;
 
+            //cam.ChunkSelector.FromString("LineStatusAll");
+           // cam.ChunkEnable.Value = true;
+
             // This saves the status of all 4 GPIO digital lines.
             try
             {
@@ -330,6 +341,7 @@ namespace SpinnakerInterface
 
                     //# Set line 0 as input for receiving ttl pulses for synchornization
                     cam.LineSelector.FromString(INPUT_LINE);
+                    cam.LineMode.FromString("Input");
                     cam.LineInverter.Value = false;
 
                     //# For Firefly, set to Input. For Blackfly, this will be an error,

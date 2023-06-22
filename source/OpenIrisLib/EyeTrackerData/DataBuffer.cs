@@ -191,13 +191,17 @@ namespace OpenIris
 
                     DataStream.HVY => bufferData[idx]?.HeadDataCalibrated?.PitchVelocity ?? double.NaN,
 
-                    DataStream.CRLH => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.X ?? double.NaN,
+                    DataStream.CRLH => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections == null | bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?.Length < 1 ? double.NaN:
+                    (double) bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.X,
 
-                    DataStream.CRLV => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.Y ?? double.NaN,
+                    DataStream.CRLV => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections == null | bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?.Length < 1 ? double.NaN :
+                    (double)bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.Y,
 
-                    DataStream.CRRH => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.X ?? double.NaN,
+                    DataStream.CRRH => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections == null | bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?.Length < 1 ? double.NaN :
+                    (double)bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.X,
 
-                    DataStream.CRRV => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.Y ?? double.NaN,
+                    DataStream.CRRV => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections == null | bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?.Length < 1 ? double.NaN :
+                    (double)bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.Y,
 
                     _ => double.NaN,
                 };

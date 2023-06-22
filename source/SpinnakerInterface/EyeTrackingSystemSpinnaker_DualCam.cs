@@ -71,37 +71,6 @@ namespace SpinnakerInterface
             rightEyeCamera?.Stop();
             rightEyeCamera?.Dispose();
         }
-
-<<<<<<< HEAD
-       /* public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
-        {
-            var imSourceData = procesedImages.Images[Eye.Left].ImageSourceData;
-            if (imSourceData != null)
-            {
-<<<<<<< HEAD
-                var (chunkData, _) = (Tuple<ManagedChunkData, IManagedImage>)imSourceData;
-                procesedImages.Data.ExtraData.Int0 = chunkData.ExposureEndLineStatusAll;
-=======
-                var (line0, _) = (ValueTuple<BoolNode, IManagedImage>)imSourceData;
-                extraData.Int0 = line0 ? 1 : 0;
-                procesedImages.Data.ExtraData = extraData;
->>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
-            }
-            var imSourceData = procesedImages.Images[Eye.Right].ImageSourceData;
-            if (imSourceData != null)
-            {
-<<<<<<< HEAD
-                var (chunkData, _) = (Tuple<ManagedChunkData, IManagedImage>)imSourceData;
-                procesedImages.Data.ExtraData.Int1 = chunkData.ExposureEndLineStatusAll;
-=======
-                var (line0, _) = (ValueTuple<BoolNode, IManagedImage>)imSourceData;
-                extraData.Int0 = line0 ? 1 : 0;
-                procesedImages.Data.ExtraData = extraData;
->>>>>>> 890c229 (clean up the code - dropping frames at 500Hz by only tracking pupil :|)
-            }
-            return procesedImages;
-        }*/
-=======
         public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
         {
             ExtraData extraData = new ExtraData();
@@ -121,7 +90,6 @@ namespace SpinnakerInterface
             }
             return procesedImages;
         }
->>>>>>> 890c2292bc9611ebb0772af515185d1d6b5a2a26
     }
 
 

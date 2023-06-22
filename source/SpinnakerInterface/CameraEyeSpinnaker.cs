@@ -96,6 +96,9 @@ namespace SpinnakerInterface
 
             masterCam.Start();
             slaveCam.Start();
+
+            masterCam.cam.BeginAcquisition();
+            slaveCam.cam.BeginAcquisition();
         }
 
         #endregion Static Methods
@@ -126,7 +129,7 @@ namespace SpinnakerInterface
 
             InitParameters_TriggerSettings();
             
-            cam.BeginAcquisition();
+            //cam.BeginAcquisition();
         }
 
         public override void Stop()

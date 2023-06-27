@@ -181,9 +181,7 @@ namespace SpinnakerInterface
                                      timestamp)
                     {
                         WhichEye = WhichEye,
-                        //ImageSourceData = (rawImage.ChunkData,  rawImage),
-
-                        ImageSourceData = (camLineStatus(INPUT_LINE),  rawImage),
+                        ImageSourceData = (lastExposureEndLineStatusAll,  rawImage),
 
                     };
                 }
@@ -209,17 +207,7 @@ namespace SpinnakerInterface
         public override object Info =>
             $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
-          + $"GPIO {lastExposureEndLineStatusAll} Seconds {lastTimestamp.Seconds}\n\n"
-          + $"GPIO Line 0 {camLineStatus(INPUT_LINE)} \n\n";
-
-
-
-        private BoolNode camLineStatus(string lineName)
-        {
-            cam.LineSelector.FromString(lineName);
-            return cam.LineStatus;
-        }
-
+          + $"GPIO {lastExposureEndLineStatusAll} Seconds {lastTimestamp.Seconds}\n\n";
 
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel
         // location of the tracked pupil within the ROI, so we use it to offset the

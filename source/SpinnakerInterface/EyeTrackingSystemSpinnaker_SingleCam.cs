@@ -83,6 +83,28 @@ namespace SpinnakerInterface
                 default:
                     return images;
             }
+
+
+        }
+
+        public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
+        {
+            ExtraData extraData = new ExtraData();
+            var imSourceData = procesedImages.Images[Eye.Left]?.ImageSourceData;
+            if (imSourceData != null)
+            {
+                var (exposureEndLineStatusAll, _) = (ValueTuple<long, IManagedImage>)imSourceData;
+                extraData.Int0 = Convert.ToInt32(exposureEndLineStatusAll);
+                procesedImages.Data.ExtraData = extraData;
+            }
+            imSourceData = procesedImages.Images[Eye.Right]?.ImageSourceData;
+            if (imSourceData != null)
+            {
+                var (exposureEndLineStatusAll, _) = (ValueTuple<long, IManagedImage>)imSourceData;
+                extraData.Int1 = Convert.ToInt32(exposureEndLineStatusAll);
+                procesedImages.Data.ExtraData = extraData;
+            }
+            return procesedImages;
         }
     }
 

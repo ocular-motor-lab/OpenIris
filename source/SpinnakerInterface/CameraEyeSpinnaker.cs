@@ -308,6 +308,10 @@ namespace SpinnakerInterface
         }
         private void InitParameters_TriggerSettings()
         {
+            //camera firmware version
+            Trace.WriteLine($"{isMaster} ({WhichEye}) Camera Firmware Version: " + cam.DeviceFirmwareVersion.ToString());
+            Trace.WriteLine($"{isMaster} ({WhichEye}) Camera Model Name: " + cam.DeviceModelName.ToString());
+
             switch (isMaster)
             {
                 case TriggerMode.Master:
@@ -318,9 +322,6 @@ namespace SpinnakerInterface
                     // Allow internal camera triggering, so this camera generates frame triggers.
                     cam.TriggerMode.FromString("Off");
 
-                    //camera firmware version
-                    Trace.WriteLine($"Master ({WhichEye}) Camera Firmware Version: " + cam.DeviceFirmwareVersion.ToString());
-                    Trace.WriteLine($"Master ({WhichEye}) Camera Model Name: " + cam.DeviceModelName.ToString());
                     break;
                 case TriggerMode.Slave:
                     //# Trigger Settings
@@ -363,8 +364,6 @@ namespace SpinnakerInterface
                         cam.UserOutputValue.Value = true;
                     }
                     catch { }
-                    Trace.WriteLine($"Slave ({WhichEye}) Camera Firmware Version: " + cam.DeviceFirmwareVersion.ToString());
-                    Trace.WriteLine($"Slave ({WhichEye}) Camera Model Name: " + cam.DeviceModelName.ToString());
                     break;
                 case TriggerMode.Default:
                     // Allow internal camera triggering, so this camera generates frame triggers.

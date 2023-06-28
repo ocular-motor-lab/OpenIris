@@ -176,6 +176,7 @@ namespace SpinnakerInterface
 
                     lastTimestamp = timestamp;
 
+
                     return new ImageEye(
                                      (int)rawImage.Width,
                                      (int)rawImage.Height,
@@ -238,6 +239,8 @@ namespace SpinnakerInterface
         // frame triggers. Later, we pick one camera to be the "master".
         private void InitParameters()
         {
+
+            
             // Make sure camera is really stopped.
             cam.BeginAcquisition();
             cam.EndAcquisition();
@@ -314,6 +317,10 @@ namespace SpinnakerInterface
 
                     // Allow internal camera triggering, so this camera generates frame triggers.
                     cam.TriggerMode.FromString("Off");
+
+                    //camera firmware version
+                    Trace.WriteLine($"Master ({WhichEye}) Camera Firmware Version: " + cam.DeviceFirmwareVersion.ToString());
+                    Trace.WriteLine($"Master ({WhichEye}) Camera Model Name: " + cam.DeviceModelName.ToString());
                     break;
                 case TriggerMode.Slave:
                     //# Trigger Settings
@@ -356,7 +363,8 @@ namespace SpinnakerInterface
                         cam.UserOutputValue.Value = true;
                     }
                     catch { }
-
+                    Trace.WriteLine($"Slave ({WhichEye}) Camera Firmware Version: " + cam.DeviceFirmwareVersion.ToString());
+                    Trace.WriteLine($"Slave ({WhichEye}) Camera Model Name: " + cam.DeviceModelName.ToString());
                     break;
                 case TriggerMode.Default:
                     // Allow internal camera triggering, so this camera generates frame triggers.

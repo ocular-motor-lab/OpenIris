@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
@@ -96,9 +97,9 @@ namespace SpinnakerInterface
 
             masterCam.Start();
             slaveCam.Start();
-
-            masterCam.cam.BeginAcquisition();
+           
             slaveCam.cam.BeginAcquisition();
+            masterCam.cam.BeginAcquisition();
         }
 
         #endregion Static Methods

@@ -34,6 +34,7 @@ namespace SpinnakerInterface
         private ulong FirstFrameID, CurrentFrameID;  // CurrentFrameID is based on the internal camera hardware frame counter.
         private ulong NumFramesGrabbed = 0;
         private long lastExposureEndLineStatusAll;
+        private long lastLineStatusAll;
         private ImageEyeTimestamp lastTimestamp; 
 
 
@@ -171,6 +172,7 @@ namespace SpinnakerInterface
                         frameNumberRaw: RawFrameID);
 
                     lastExposureEndLineStatusAll = rawImage.ChunkData.ExposureEndLineStatusAll;
+                    //lastLineStatusAll = rawImage.ChunkData.LineStatusAll; //it is not available
 
                     lastTimestamp = timestamp;
 
@@ -208,7 +210,8 @@ namespace SpinnakerInterface
         public override object Info =>
             $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
-          + $"GPIO {lastExposureEndLineStatusAll} Seconds {lastTimestamp.Seconds}\n\n";
+          + $"GPIO LineStatusAll {lastLineStatusAll}"  + $"  GPIO ExposureEndLineStatusAll {lastExposureEndLineStatusAll} \n\n" 
+          +  $"Seconds {lastTimestamp.Seconds}\n\n";
 
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel
         // location of the tracked pupil within the ROI, so we use it to offset the
@@ -277,6 +280,10 @@ namespace SpinnakerInterface
             try
             {
                 cam.ChunkSelector.FromString("ExposureEndLineStatusAll");
+                cam.ChunkEnable.Value = true;
+                cam.ChunkModeActive.Value = true;
+
+                cam.ChunkSelector.FromString("LineStatusAll");
                 cam.ChunkEnable.Value = true;
                 cam.ChunkModeActive.Value = true;
 

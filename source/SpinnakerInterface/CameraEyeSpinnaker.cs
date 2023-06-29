@@ -239,8 +239,6 @@ namespace SpinnakerInterface
         // frame triggers. Later, we pick one camera to be the "master".
         private void InitParameters()
         {
-
-            
             // Make sure camera is really stopped.
             cam.BeginAcquisition();
             cam.EndAcquisition();
@@ -273,12 +271,6 @@ namespace SpinnakerInterface
             cam.ChunkEnable.Value = true;
             cam.ChunkModeActive.Value = true;
 
-            //cam.ChunkSelector.FromString("LineStatusAll");
-            // cam.ChunkEnable.Value = true;
-
-            //cam.ChunkSelector.FromString("LineStatusAll");
-           // cam.ChunkEnable.Value = true;
-
             // This saves the status of all 4 GPIO digital lines.
             try
             {
@@ -291,8 +283,8 @@ namespace SpinnakerInterface
                 cam.ChunkModeActive.Value = true;
 
             }
-            catch(Exception e) { errortest = e.ToString(); }
-
+            //catch(Exception e) { errortest = e.ToString(); }
+            catch { }
             //# Gain settings.
             cam.GainAuto.FromString("Off");
             cam.Gain.Value = Gain;
@@ -347,10 +339,14 @@ namespace SpinnakerInterface
 
 
                     //# Set line 0 as input for receiving ttl pulses for synchornization
-                    cam.LineSelector.FromString(INPUT_LINE);
-                    cam.LineMode.FromString("Input");
-                    cam.LineInverter.Value = false;
+                    try
+                    {
+                        cam.LineSelector.FromString(INPUT_LINE);
+                        cam.LineMode.FromString("Input");
+                        cam.LineInverter.Value = false;
 
+                    }
+                    catch { }
                     //# For Firefly, set to Input. For Blackfly, this will be an error,
                     //# since the line is hard-wired as an output.        
                     try { cam.LineMode.FromString("Input"); } catch { }
@@ -368,7 +364,7 @@ namespace SpinnakerInterface
                 case TriggerMode.Default:
                     // Allow internal camera triggering, so this camera generates frame triggers.
                     cam.TriggerMode.FromString("Off");
-
+                    cam.BeginAcquisition();
                     break;
                 default:
                     break;

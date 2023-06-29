@@ -87,6 +87,12 @@ namespace SpinnakerInterface
 
         }
 
+        public override void Dispose()
+        {
+            camera?.Stop();
+            camera?.Dispose();
+        }
+
         public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
         {
             ExtraData extraData = new ExtraData();

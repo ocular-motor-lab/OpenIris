@@ -76,8 +76,9 @@ namespace SpinnakerInterface
                     var roiRight = new Rectangle(0, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
 
                     var imageLeft = images[Eye.Both].Copy(roiLeft);
-                    imageLeft.WhichEye = Eye.Left;
                     var imageRight = images[Eye.Both].Copy(roiRight);
+
+                    imageLeft.WhichEye = Eye.Left;
                     imageRight.WhichEye = Eye.Right;
                     return new EyeCollection<ImageEye>(imageLeft, imageRight);
                 default:

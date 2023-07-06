@@ -159,6 +159,11 @@ namespace OpenIris
         public bool CamerasMovable { get => imageSources?.Any(s => s is IMovableImageEyeSource) ?? false; }
 
         /// <summary>
+        /// Gets a value indicating weather the cameras can change exposure.
+        /// </summary>
+        public bool CamerasHaveVariableEspsure { get => imageSources?.Any(s => s is IVariableExposureImageEyeSource) ?? false; }
+
+        /// <summary>
         /// Gets a string with a status message regarding the grabbing of images and head data.
         /// </summary>
         public string GrabbingStatus =>$"Grabbing " +

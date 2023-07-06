@@ -30,6 +30,10 @@
   "VersionSourceSha": "289aebeae07ac7beff7654116633686d869698d3",
   "CommitsSinceVersionSource": 0,
   "CommitsSinceVersionSourcePadded": "0000",
+<<<<<<< HEAD
   "UncommittedChanges": 2,
+=======
+  "UncommittedChanges": 0,
+>>>>>>> 64f527ef1b82b712f49e296d1a5d9975cee368dc
   "CommitDate": "2023-06-30"
 }

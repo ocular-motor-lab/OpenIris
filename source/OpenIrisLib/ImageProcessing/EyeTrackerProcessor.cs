@@ -321,8 +321,6 @@ namespace OpenIris
                 tempEvent = eyeDoneEvent[Eye.Right];
                 eyeDoneEvent[Eye.Right] = null;
                 tempEvent?.Dispose();
-
-                inputBuffer = null;
             }
         }
 

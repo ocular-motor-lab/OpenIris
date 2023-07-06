@@ -81,6 +81,7 @@
       <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
+    <Compile Include="ImageGrabbing\IVariableExposureImageEyeSource.cs" />
     <Compile Include="Util\EyeTrackerSettingsBase.cs" />
     <Compile Include="HeadTracking\HeadTracker.cs" />
     <Compile Include="ImageProcessing\EyeTrackingPipelineBase.cs" />

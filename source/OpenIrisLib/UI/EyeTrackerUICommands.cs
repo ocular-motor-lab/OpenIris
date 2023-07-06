@@ -48,6 +48,8 @@ namespace OpenIris
 
         public EyeTrackerUICommand CenterCamerasCommand;
         public EyeTrackerUICommand MoveCamerasCommand;
+        public EyeTrackerUICommand IncreaseExposureCommand;
+        public EyeTrackerUICommand ReduceExposureCommand;
 
         public EyeTrackerUICommand EditSettingsCommand;
         public EyeTrackerUICommand ChangeDataFolderCommand;
@@ -197,6 +199,14 @@ namespace OpenIris
                     eyeTracker.MoveCamera(eye, direction);
                 },
                 canExecute: () => (eyeTracker.ImageGrabber?.CamerasMovable ?? false) && !eyeTracker.Recording);
+
+            IncreaseExposureCommand = new EyeTrackerUICommand(
+                execute: async _ => eyeTracker.CenterEyes(),
+                canExecute: () => (eyeTracker.ImageGrabber?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
+
+            ReduceExposureCommand = new EyeTrackerUICommand(
+                execute: async _ => eyeTracker.CenterEyes(),
+                canExecute: () => (eyeTracker.ImageGrabber?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
 
             ChangeDataFolderCommand = new EyeTrackerUICommand(
                 execute: async _ =>

@@ -32,7 +32,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateAndStartCameras()
+        protected override EyeCollection<CameraEye> CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsInteracoustics;
 
@@ -168,7 +168,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="filenames"></param>
         /// <returns>List of image eye source objects.</returns>
-        public override EyeCollection<VideoEye> CreateVideos(EyeCollection<string> filenames)
+        protected override EyeCollection<VideoEye> CreateVideos(EyeCollection<string> filenames)
         {
             if (filenames is null) throw new ArgumentNullException(nameof(filenames));
 

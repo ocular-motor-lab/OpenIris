@@ -24,7 +24,7 @@ namespace SpinnakerInterface
     {
         protected CameraEyeSpinnaker? camera = null;
         
-        public override EyeCollection<CameraEye?>? CreateAndStartCameras()
+        protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsSpinnaker_SingleCam;
 

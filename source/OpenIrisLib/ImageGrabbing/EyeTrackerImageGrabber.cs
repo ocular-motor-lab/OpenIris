@@ -66,7 +66,7 @@ namespace OpenIris
         /// <exception cref="OpenIrisException"></exception>
         internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(EyeTrackingSystemBase eyeTrackingSystem, int bufferSize = 100)
         {
-               var newSources = await Task.Run(() => eyeTrackingSystem.CreateAndStartCameras().Select(c => c as IImageEyeSource))
+               var newSources = await Task.Run(() => eyeTrackingSystem.CreateAndStartCameras1().Select(c => c as IImageEyeSource))
                 ?? throw new OpenIrisException("No cameras started.");
 
             var sources = new EyeCollection<IImageEyeSource?>(newSources);
@@ -154,16 +154,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Gets a value indicating weather the cameras can move the ROI.
-        /// </summary>
-        public bool CamerasMovable { get => imageSources?.Any(s => s is IMovableImageEyeSource) ?? false; }
-
-        /// <summary>
-        /// Gets a value indicating weather the cameras can change exposure.
-        /// </summary>
-        public bool CamerasHaveVariableEspsure { get => imageSources?.Any(s => s is IVariableExposureImageEyeSource) ?? false; }
-
-        /// <summary>
         /// Gets a string with a status message regarding the grabbing of images and head data.
         /// </summary>
         public string GrabbingStatus =>$"Grabbing " +
@@ -232,83 +222,6 @@ namespace OpenIris
 
             // Mark the camera queue as complete. This will stop the grabbing loop.
             cameraBuffer?.CompleteAdding();
-        }
-
-        /// <summary>
-        /// Centers the camera ROI around the current pupil center.
-        /// </summary>
-        internal void CenterEyes(PointF centerLeftEye, PointF centerRightEye)
-        {
-            if (imageSources is null) return;
-
-            foreach (var camera in imageSources)
-            {
-                if (camera is IMovableImageEyeSource movableCamera)
-                {
-                    var center = camera.WhichEye switch
-                    {
-                        Eye.Left => centerLeftEye,
-                        Eye.Right => centerRightEye,
-                        Eye.Both => new PointF(
-                                (centerLeftEye.X + centerRightEye.X) / 2,
-                                (centerLeftEye.Y + centerRightEye.Y) / 2),
-                        _ => throw new InvalidOperationException("Not valid eye"),
-                    };
-
-                    movableCamera.Center(center);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Moves the camera (or ROI).
-        /// </summary>
-        /// <param name="whichEyeToMove">Left,right or both.</param>
-        /// <param name="direction">Which direction to move.</param>
-        internal void MoveCamera(Eye whichEyeToMove, MovementDirection direction)
-        {
-            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
-
-            foreach (var camera in imageSources)
-            {
-                if (camera is IMovableImageEyeSource movableCamera)
-                {
-                    if ((camera.WhichEye == whichEyeToMove) || (whichEyeToMove == Eye.Both) || (camera.WhichEye == Eye.Both))
-                    {
-                        movableCamera?.Move(direction);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// </summary>
-        internal void IncreaseExposure()
-        {
-            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
-
-            foreach (var camera in imageSources)
-            {
-                if (camera is IVariableExposureImageEyeSource cameraExpo)
-                {
-                    cameraExpo?.IncreaseExposure();
-                }
-            }
-        }
-
-        /// <summary>
-        /// </summary>
-        internal void ReduceExposure()
-        {
-            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
-
-            foreach (var camera in imageSources)
-            {
-                if (camera is IVariableExposureImageEyeSource cameraExpo)
-                {
-                    cameraExpo?.ReduceExposure();
-                }
-            }
         }
 
         /// <summary>
@@ -489,23 +402,23 @@ namespace OpenIris
             {
                 case Eye.Left:
                     if (sources.Count != 2 || sources[Eye.Left] == null || sources[Eye.Right] != null )
-                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                        throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
                     numberOfSources = 1;
                     break;
                 case Eye.Right:
                     if (sources.Count != 2 || sources[Eye.Right] == null || sources[Eye.Left] != null)
-                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                        throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
                     numberOfSources = 1;
                     break;
                 case Eye.Both:
                     if (sources.Count == 1 && sources[Eye.Both] == null)
-                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                        throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
                     if (sources.Count == 2 && (sources[Eye.Left] == null || sources[Eye.Right] == null))
-                        throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                        throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
                     numberOfSources = sources.Count;
                     break;
                 default:
-                    throw new InvalidOperationException("The number of image sources is not correct for " + whichEyes + " eye(s)");
+                    throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
             }
 
             return numberOfSources;

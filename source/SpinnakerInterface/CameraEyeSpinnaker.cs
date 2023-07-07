@@ -48,6 +48,12 @@ namespace SpinnakerInterface
         private string errortest;
 
         Vector2 maxROI_Offset, roiSize;
+        double maxGain;
+
+        public Point Offset { get { return new Point((int)Math.Round(GetROI().X), (int)Math.Round(GetROI().Y)); } }
+        private Point offset;
+        public double Gain { get { return gain; } set { gain = value; } }
+        private double gain;
 
         #region Static Methods
 
@@ -106,14 +112,13 @@ namespace SpinnakerInterface
         #endregion Static Methods
 
         #region constructor
-        private int Gain{get;set; }
         public CameraEyeSpinnaker(Eye whichEye, IManagedCamera camera, double frameRate, int gain, Rectangle roi)
         {
             cam = camera;
 
             WhichEye = whichEye;
             FrameRate = frameRate;
-            Gain = gain;
+            this.gain = gain;
             FrameSize = roi.Size;
 
             isMaster = TriggerMode.Default;
@@ -262,6 +267,7 @@ namespace SpinnakerInterface
             Vector2 maxFrameSize = new Vector2(cam.WidthMax.Value, cam.HeightMax.Value);
             roiSize = new Vector2(FrameSize.Width, FrameSize.Height);
             maxROI_Offset = maxFrameSize - roiSize;
+            maxGain = // TODO roksana
             Debug.WriteLine($"Centering ROI. FrameMax {maxFrameSize}, ROI_SIZE {roiSize}");
             //Center the ROI in the middle of the physical camera frame.
             SetROI(maxROI_Offset / 2);
@@ -378,22 +384,31 @@ namespace SpinnakerInterface
         // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.
         private void SetROI(Vector2 Offset)
         {
-            Offset = Max(Vector2.Zero, Min(maxROI_Offset, Round(Offset / 4) * 4));
-            (cam.OffsetX.Value, cam.OffsetY.Value) = ((long)Offset.X, (long)Offset.Y);
+            Offset = Max(Vector2.Zero, Min(maxROI_Offset, Round(Offset / 4) * 4)); // force to be a multiple of 4
+
+            offset = new Point((int)Offset.X, (int)Offset.Y);
+
+            cam.OffsetX.Value = offset.X;
+            cam.OffsetY.Value = offset.Y;
         }
         private Vector2 GetROI() => new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
 
         public bool IncreaseExposure()
         {
-            cam.Gain.Value = cam.Gain.Value + 10;
+            // TODO check how far we can go
+            gain = gain+1;
+
+            cam.Gain.Value = gain;
             return true;
             
         }
 
         public bool ReduceExposure()
         {
+            // TODO check how far we can go
+            gain = gain - 1;
 
-            cam.Gain.Value = cam.Gain.Value - 10;
+            cam.Gain.Value = gain;
             return true;
         }
 

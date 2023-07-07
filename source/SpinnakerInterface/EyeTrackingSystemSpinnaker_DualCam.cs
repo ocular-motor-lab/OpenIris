@@ -13,6 +13,7 @@ using static System.Net.Mime.MediaTypeNames;
 using System.Threading;
 using System.ComponentModel;
 using SpinnakerNET.GenApi;
+using System.Runtime.CompilerServices;
 
 namespace SpinnakerInterface
 {
@@ -25,26 +26,28 @@ namespace SpinnakerInterface
         protected CameraEyeSpinnaker? leftEyeCamera = null;
         protected CameraEyeSpinnaker? rightEyeCamera = null;
 
-        public override EyeCollection<CameraEye?>? CreateAndStartCameras()
+        protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam;
             try
             {
                 var cameraList = CameraEyeSpinnaker.FindCameras(2,settings.Eye,settings.LeftEyeCameraSerialNumber,settings.RightEyeCameraSerialNumber);
 
+                // TODO for Roksana add checks on the settings so things don't crash if somebody enters crazy numbers
+
                 leftEyeCamera = new CameraEyeSpinnaker(
                 whichEye: Eye.Left,
                 camera: cameraList[0],
                 frameRate: (double)settings.FrameRate,
                 gain: (int)settings.Gain,
-                roi: new Rectangle { Width = 720, Height = 450 });
+                roi: new Rectangle { X=settings.LeftOffset.X, Y=settings.LeftOffset.Y, Width = 720, Height = 450 });
 
                 rightEyeCamera = new CameraEyeSpinnaker(
                 whichEye: Eye.Right,
                 camera: cameraList[1],
                 frameRate: (double)settings.FrameRate,
                 gain: (int)settings.Gain,
-                roi: new Rectangle { Width = 720, Height = 450 });
+                roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = 720, Height = 450 });
 
                 settings.LeftEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
                 settings.RightEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();
@@ -90,6 +93,27 @@ namespace SpinnakerInterface
             }
             return procesedImages;
         }
+
+        protected override void SaveCameraExposure()
+        {
+            // TODO for Roksana 
+
+            // Figure out current exposure from the cameras
+            var leftGain = leftEyeCamera?.Gain ?? 0;
+            var rightGain = rightEyeCamera?.Gain ?? 0;
+
+            // TODO check if they are the same and throw error if not
+
+
+            var mySettings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam;
+
+            mySettings.Gain = 
+        }
+
+        protected override void SaveCameraMove()
+        {
+
+        }
     }
 
 
@@ -116,5 +140,15 @@ namespace SpinnakerInterface
         [Category("Camera properties"), Description("Gain")]
         public float Gain { get => this.gain; set => SetProperty(ref gain, value, nameof(Gain)); }
         private float gain = 9;
+
+        [NeedsRestarting]
+        [Category("Camera properties"), Description("Left Offset")]
+        public Point LeftOffset { get => this.leftOffset; set => SetProperty(ref leftOffset, value, nameof(LeftOffset)); }
+        private Point leftOffset = new Point(0, 0);
+
+        [NeedsRestarting]
+        [Category("Camera properties"), Description("Right Offset")]
+        public Point RightOffset { get => this.rightOffset; set => SetProperty(ref rightOffset, value, nameof(RightOffset)); }
+        private Point rightOffset = new Point(0, 0);
     }
 }

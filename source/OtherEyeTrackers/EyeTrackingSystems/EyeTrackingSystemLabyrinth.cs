@@ -22,7 +22,7 @@ namespace OpenIris
         /// Gets the cameras. In this case just one single camera.
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateAndStartCameras()
+        protected override EyeCollection<CameraEye> CreateAndStartCameras()
         {
 
             this.camera = new CameraEyeFlyCapture(Eye.Both, Settings.FrameRate, new Rectangle(16 - 16, 250, 1264, 350));
@@ -98,7 +98,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileNames">Filenames of the videos.</param>
         /// <returns>List of image eye source objects.</returns>
-        public override EyeCollection<VideoEye> CreateVideos(EyeCollection<string> fileNames)
+        protected override EyeCollection<VideoEye> CreateVideos(EyeCollection<string> fileNames)
         {
             return new EyeCollection<VideoEye>(
                 new VideoEyeFlyCapture(Eye.Left, fileNames[Eye.Left], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftVertical),

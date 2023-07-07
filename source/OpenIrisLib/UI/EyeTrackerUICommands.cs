@@ -189,7 +189,7 @@ namespace OpenIris
 
             CenterCamerasCommand = new EyeTrackerUICommand(
                 execute: async _ => eyeTracker.CenterEyes(),
-                canExecute: () => (eyeTracker.ImageGrabber?.CamerasMovable ?? false) && !eyeTracker.Recording);
+                canExecute: () => (eyeTracker.EyeTrackingSystem?.CamerasMovable ?? false) && !eyeTracker.Recording);
 
             MoveCamerasCommand = new EyeTrackerUICommand(
                 execute: async (object? sender) =>
@@ -198,15 +198,15 @@ namespace OpenIris
                     (Eye eye, MovementDirection direction) = ((Eye, MovementDirection))button.Tag;
                     eyeTracker.MoveCamera(eye, direction);
                 },
-                canExecute: () => (eyeTracker.ImageGrabber?.CamerasMovable ?? false) && !eyeTracker.Recording);
+                canExecute: () => (eyeTracker.EyeTrackingSystem?.CamerasMovable ?? false) && !eyeTracker.Recording);
 
             IncreaseExposureCommand = new EyeTrackerUICommand(
                 execute: async _ => eyeTracker.IncreaseExposure(),
-                canExecute: () => (eyeTracker.ImageGrabber?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
+                canExecute: () => (eyeTracker.EyeTrackingSystem?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
 
             ReduceExposureCommand = new EyeTrackerUICommand(
                 execute: async _ => eyeTracker.ReduceExposure(),
-                canExecute: () => (eyeTracker.ImageGrabber?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
+                canExecute: () => (eyeTracker.EyeTrackingSystem?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
 
             ChangeDataFolderCommand = new EyeTrackerUICommand(
                 execute: async _ =>

@@ -91,7 +91,7 @@ namespace OpenIris
             }
 
             // Initialize the video files
-            (Videos, FrameCount, FrameRate, FrameSize) = CheckVideos(eyeTrackingSystem.CreateVideos(fileNames));
+            (Videos, FrameCount, FrameRate, FrameSize) = CheckVideos(eyeTrackingSystem.CreateVideos1(fileNames));
 
             Videos.ForEach(v => { if (v != null) v.VideoPlayer = this; });
 

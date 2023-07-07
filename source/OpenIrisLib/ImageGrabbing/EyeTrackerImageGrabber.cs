@@ -282,6 +282,36 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// </summary>
+        internal void IncreaseExposure()
+        {
+            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
+
+            foreach (var camera in imageSources)
+            {
+                if (camera is IVariableExposureImageEyeSource cameraExpo)
+                {
+                    cameraExpo?.IncreaseExposure();
+                }
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        internal void ReduceExposure()
+        {
+            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
+
+            foreach (var camera in imageSources)
+            {
+                if (camera is IVariableExposureImageEyeSource cameraExpo)
+                {
+                    cameraExpo?.ReduceExposure();
+                }
+            }
+        }
+
+        /// <summary>
         /// Loop that grabs images from a camera and puts them in a thread safe queue.
         /// </summary>
         /// <param name="camera">Camera to grab from.</param>

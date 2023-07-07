@@ -16,7 +16,7 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
-    class CameraEyeSpinnaker : CameraEye, IMovableImageEyeSource
+    class CameraEyeSpinnaker : CameraEye, IMovableImageEyeSource, IVariableExposureImageEyeSource
     {
         public enum TriggerMode
         {
@@ -382,6 +382,20 @@ namespace SpinnakerInterface
             (cam.OffsetX.Value, cam.OffsetY.Value) = ((long)Offset.X, (long)Offset.Y);
         }
         private Vector2 GetROI() => new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
+
+        public bool IncreaseExposure()
+        {
+            cam.Gain.Value = cam.Gain.Value + 10;
+            return true;
+            
+        }
+
+        public bool ReduceExposure()
+        {
+
+            cam.Gain.Value = cam.Gain.Value - 10;
+            return true;
+        }
 
         #endregion private methods
     }

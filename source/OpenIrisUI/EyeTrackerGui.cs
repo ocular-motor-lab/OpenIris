@@ -159,6 +159,11 @@ namespace OpenIris.UI
                 eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeRight);
                 eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveLeftEyeLeft);
 
+
+                eyeTrackerUICommands.IncreaseExposureCommand.Bind(buttonIncreaseExposure);
+                eyeTrackerUICommands.ReduceExposureCommand.Bind(buttonReduceExposure);
+
+
                 eyeTrackerUICommands.CenterCamerasCommand.Bind(buttonCenterEyes);
 
                 eyeTrackerUICommands.ChangeDataFolderCommand.Bind(buttonSelectFolder);

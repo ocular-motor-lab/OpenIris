@@ -201,11 +201,11 @@ namespace OpenIris
                 canExecute: () => (eyeTracker.ImageGrabber?.CamerasMovable ?? false) && !eyeTracker.Recording);
 
             IncreaseExposureCommand = new EyeTrackerUICommand(
-                execute: async _ => eyeTracker.CenterEyes(),
+                execute: async _ => eyeTracker.IncreaseExposure(),
                 canExecute: () => (eyeTracker.ImageGrabber?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
 
             ReduceExposureCommand = new EyeTrackerUICommand(
-                execute: async _ => eyeTracker.CenterEyes(),
+                execute: async _ => eyeTracker.ReduceExposure(),
                 canExecute: () => (eyeTracker.ImageGrabber?.CamerasHaveVariableEspsure ?? false) && !eyeTracker.Recording);
 
             ChangeDataFolderCommand = new EyeTrackerUICommand(

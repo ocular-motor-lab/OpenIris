@@ -634,5 +634,19 @@ namespace OpenIris
         {
             ImageGrabber?.MoveCamera(whichEyeToMove, direction);
         }
+
+        /// <summary>
+        /// </summary>
+        public void IncreaseExposure()
+        {
+            ImageGrabber?.IncreaseExposure();
+        }
+
+        /// <summary>
+        /// </summary>
+        public void ReduceExposure()
+        {
+            ImageGrabber?.ReduceExposure();
+        }
     }
 }

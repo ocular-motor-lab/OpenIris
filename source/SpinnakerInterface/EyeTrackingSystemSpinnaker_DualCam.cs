@@ -14,6 +14,7 @@ using System.Threading;
 using System.ComponentModel;
 using SpinnakerNET.GenApi;
 using System.Runtime.CompilerServices;
+using System.Numerics;
 
 namespace SpinnakerInterface
 {
@@ -112,7 +113,12 @@ namespace SpinnakerInterface
 
         protected override void SaveCameraMove()
         {
+            var leftOffset = leftEyeCamera?.Offset?? new Point((int)leftEyeCamera.MaxROI_Offset.X/2, (int)leftEyeCamera.MaxROI_Offset.Y/2);
+            var rightOffset = rightEyeCamera?.Offset ?? new Point((int)rightEyeCamera.MaxROI_Offset.X/2, (int)rightEyeCamera.MaxROI_Offset.Y/2);
 
+            var mySettings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam;
+            mySettings.LeftOffset = leftOffset;
+            mySettings.RightOffset = rightOffset;
         }
     }
 
@@ -141,12 +147,12 @@ namespace SpinnakerInterface
         public double Gain { get => gain; set => SetProperty(ref gain, value, nameof(Gain)); }
         private double gain = 9;
 
-        [NeedsRestarting]
+        //[NeedsRestarting]
         [Category("Camera properties"), Description("Left Offset")]
         public Point LeftOffset { get => this.leftOffset; set => SetProperty(ref leftOffset, value, nameof(LeftOffset)); }
         private Point leftOffset = new Point(0, 0);
 
-        [NeedsRestarting]
+        //[NeedsRestarting]
         [Category("Camera properties"), Description("Right Offset")]
         public Point RightOffset { get => this.rightOffset; set => SetProperty(ref rightOffset, value, nameof(RightOffset)); }
         private Point rightOffset = new Point(0, 0);

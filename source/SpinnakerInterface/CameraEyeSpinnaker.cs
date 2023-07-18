@@ -35,7 +35,7 @@ namespace SpinnakerInterface
         private ulong NumFramesGrabbed = 0;
         private long lastExposureEndLineStatusAll;
         private long lastLineStatusAll;
-        private ImageEyeTimestamp lastTimestamp; 
+        private ImageEyeTimestamp lastTimestamp;
 
 
         private string line0Status = "FALSE";
@@ -48,6 +48,7 @@ namespace SpinnakerInterface
         private string errortest;
 
         Vector2 maxROI_Offset, roiSize;
+        public Vector2 MaxROI_Offset{ get { return maxROI_Offset; } set { maxROI_Offset = value; } }
         
         double maxGain;
 

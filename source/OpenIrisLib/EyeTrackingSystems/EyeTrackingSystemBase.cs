@@ -85,7 +85,7 @@ namespace OpenIris
         /// Gets the cameras.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        internal EyeCollection<VideoEye?>? CreateVideos1(EyeCollection<string?> fileNames)
+        internal EyeCollection<VideoEye?>? CreateVideos_imageSource(EyeCollection<string?> fileNames)
         {
             var videos = CreateVideos(fileNames);
             imageSources = new EyeCollection<IImageEyeSource?>(videos.Select(c => c as IImageEyeSource));

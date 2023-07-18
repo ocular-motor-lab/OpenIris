@@ -74,40 +74,40 @@ namespace SpinnakerInterface
             rightEyeCamera?.Stop();
             rightEyeCamera?.Dispose();
         }
-        public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages)
+        public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData processedImages)
         {
             ExtraData extraData = new ExtraData();
-            var imSourceData = procesedImages.Images[Eye.Left]?.ImageSourceData;
+            var imSourceData = processedImages.Images[Eye.Left]?.ImageSourceData;
             if (imSourceData != null)
             {
                 var (exposureEndLineStatusAll, _) = (ValueTuple<long, IManagedImage>)imSourceData;
                 extraData.Int0 = Convert.ToInt32(exposureEndLineStatusAll);
-                procesedImages.Data.ExtraData = extraData;
+                processedImages.Data.ExtraData = extraData;
             }
-            imSourceData = procesedImages.Images[Eye.Right]?.ImageSourceData;
+            imSourceData = processedImages.Images[Eye.Right]?.ImageSourceData;
             if (imSourceData != null)
             {
                 var (exposureEndLineStatusAll, _) = (ValueTuple<long, IManagedImage>)imSourceData;
                 extraData.Int1 = Convert.ToInt32(exposureEndLineStatusAll);
-                procesedImages.Data.ExtraData = extraData;
+                processedImages.Data.ExtraData = extraData;
             }
-            return procesedImages;
+            return processedImages;
         }
 
         protected override void SaveCameraExposure()
         {
-            // TODO for Roksana 
-
             // Figure out current exposure from the cameras
-            var leftGain = leftEyeCamera?.Gain ?? 0;
-            var rightGain = rightEyeCamera?.Gain ?? 0;
-
-            // TODO check if they are the same and throw error if not
-
-
+            var leftGain = leftEyeCamera?.Gain ?? 1;
+            var rightGain = rightEyeCamera?.Gain ?? 1;
+            
+            //check if they are the same and throw error if not
+            if (leftGain != rightGain)
+            {
+                throw new Exception("The left and right camera gain aren't equal.");
+            }
+            
             var mySettings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam;
-
-            mySettings.Gain = 
+            mySettings.Gain = leftGain; 
         }
 
         protected override void SaveCameraMove()
@@ -136,10 +136,10 @@ namespace SpinnakerInterface
         public string RightEyeCameraSerialNumber { get => this.rightEyeCameraSerialNumber; set => SetProperty(ref rightEyeCameraSerialNumber, value, nameof(RightEyeCameraSerialNumber)); }
         private string rightEyeCameraSerialNumber = null;
         
-        [NeedsRestarting]
+        //[NeedsRestarting]
         [Category("Camera properties"), Description("Gain")]
-        public float Gain { get => this.gain; set => SetProperty(ref gain, value, nameof(Gain)); }
-        private float gain = 9;
+        public double Gain { get => gain; set => SetProperty(ref gain, value, nameof(Gain)); }
+        private double gain = 9;
 
         [NeedsRestarting]
         [Category("Camera properties"), Description("Left Offset")]

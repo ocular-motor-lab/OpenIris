@@ -48,6 +48,7 @@ namespace SpinnakerInterface
         private string errortest;
 
         Vector2 maxROI_Offset, roiSize;
+        
         double maxGain;
 
         public Point Offset { get { return new Point((int)Math.Round(GetROI().X), (int)Math.Round(GetROI().Y)); } }
@@ -133,10 +134,7 @@ namespace SpinnakerInterface
         public override void Start()
         {
             InitParameters();
-
             InitParameters_TriggerSettings();
-            
-            //cam.BeginAcquisition();
         }
 
         public override void Stop()
@@ -267,7 +265,9 @@ namespace SpinnakerInterface
             Vector2 maxFrameSize = new Vector2(cam.WidthMax.Value, cam.HeightMax.Value);
             roiSize = new Vector2(FrameSize.Width, FrameSize.Height);
             maxROI_Offset = maxFrameSize - roiSize;
-            maxGain = // TODO roksana
+            
+            maxGain = cam.AutoExposureGainUpperLimit;
+            
             Debug.WriteLine($"Centering ROI. FrameMax {maxFrameSize}, ROI_SIZE {roiSize}");
             //Center the ROI in the middle of the physical camera frame.
             SetROI(maxROI_Offset / 2);
@@ -395,21 +395,39 @@ namespace SpinnakerInterface
 
         public bool IncreaseExposure()
         {
-            // TODO check how far we can go
-            gain = gain+1;
-
-            cam.Gain.Value = gain;
-            return true;
-            
+            // check the upper limit
+            if (gain + 1 <= maxGain)
+            {
+                gain += 1;
+                cam.Gain.Value = gain;
+                return true;
+            }
+            else 
+            {
+                return false; 
+            }
         }
 
         public bool ReduceExposure()
         {
-            // TODO check how far we can go
-            gain = gain - 1;
+            // check the lower limit
+            if (gain - 1 > 0)
+            {
+                gain -= 1;
+                cam.Gain.Value = gain;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
+        public double SetGain(double gain_input)
+        {
+            gain = gain_input;
             cam.Gain.Value = gain;
-            return true;
+            return gain;
         }
 
         #endregion private methods

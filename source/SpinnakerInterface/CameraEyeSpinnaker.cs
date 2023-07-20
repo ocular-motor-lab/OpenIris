@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
@@ -75,12 +74,12 @@ namespace SpinnakerInterface
             // if the selected serial number didn't found use the default cameras' indices (0 for left, 1 for right)
             if (leftEyeCamSerialNum != null && camList_.GetBySerial(leftEyeCamSerialNum) == null)
             {
-                MessageBox.Show($"Warning: Didn't find (left) camera with selected serial number of: {leftEyeCamSerialNum}");
+                Trace.WriteLine($"Warning: Didn't find (left) camera with selected serial number of: {leftEyeCamSerialNum}");
                 leftEyeCamSerialNum = null;
             }
             if (rightEyeCamSerialNum != null && camList_.GetBySerial(rightEyeCamSerialNum) == null)
             {
-                MessageBox.Show($"Warning: Didn't find right camera with selected serial number of: {rightEyeCamSerialNum}");
+                Trace.WriteLine($"Warning: Didn't find right camera with selected serial number of: {rightEyeCamSerialNum}");
                 rightEyeCamSerialNum = null;
             }
 
@@ -88,8 +87,8 @@ namespace SpinnakerInterface
             switch (whichEye, numberOfRequiredCameras)
             {
                 case (Eye.Both, 2):
-                    foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
-                    foundCameras.Add(rightEyeCamSerialNum == null ? camList_[1] : camList_.GetBySerial(rightEyeCamSerialNum));
+                    foundCameras.Add(leftEyeCamSerialNum == null || rightEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
+                    foundCameras.Add(rightEyeCamSerialNum == null || leftEyeCamSerialNum == null ? camList_[1] : camList_.GetBySerial(rightEyeCamSerialNum));
                     return foundCameras;
                 case (_, 1):
                     foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));

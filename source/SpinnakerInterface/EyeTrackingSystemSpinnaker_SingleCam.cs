@@ -3,7 +3,6 @@ using OpenIris;
 using OpenIris.ImageGrabbing;
 using System.ComponentModel.Composition;
 using SpinnakerNET;
-using System.Windows.Forms;
 using System.Drawing;
 using System;
 using System.Collections.Generic;

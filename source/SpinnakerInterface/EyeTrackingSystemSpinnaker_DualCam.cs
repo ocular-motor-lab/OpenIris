@@ -3,7 +3,6 @@ using OpenIris;
 using OpenIris.ImageGrabbing;
 using System.ComponentModel.Composition;
 using SpinnakerNET;
-using System.Windows.Forms;
 using System.Drawing;
 using System;
 using System.Collections.Generic;
@@ -29,10 +28,10 @@ namespace SpinnakerInterface
 
         protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
-            var settings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam;
+            var settings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam ?? throw new ArgumentNullException("Settings are null and shouldn't");
             try
             {
-                var cameraList = CameraEyeSpinnaker.FindCameras(2,settings.Eye,settings.LeftEyeCameraSerialNumber,settings.RightEyeCameraSerialNumber);
+                var cameraList = CameraEyeSpinnaker.FindCameras(2, settings.Eye, settings.LeftEyeCameraSerialNumber, settings.RightEyeCameraSerialNumber);
 
                 // TODO for Roksana add checks on the settings so things don't crash if somebody enters crazy numbers
 
@@ -60,9 +59,6 @@ namespace SpinnakerInterface
             }
             catch (Exception ex)
             {
-                leftEyeCamera?.Stop();
-                rightEyeCamera?.Stop();
-
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }  
         }
@@ -141,18 +137,21 @@ namespace SpinnakerInterface
         [Category("Camera properties"), Description("RightEye - CameraSerialNumber")]
         public string RightEyeCameraSerialNumber { get => this.rightEyeCameraSerialNumber; set => SetProperty(ref rightEyeCameraSerialNumber, value, nameof(RightEyeCameraSerialNumber)); }
         private string rightEyeCameraSerialNumber = null;
-        
+
         //[NeedsRestarting]
+        [ReadOnly(true)]
         [Category("Camera properties"), Description("Gain")]
         public double Gain { get => gain; set => SetProperty(ref gain, value, nameof(Gain)); }
         private double gain = 9;
 
         //[NeedsRestarting]
+        [ReadOnly(true)]
         [Category("Camera properties"), Description("Left Offset")]
         public Point LeftOffset { get => this.leftOffset; set => SetProperty(ref leftOffset, value, nameof(LeftOffset)); }
         private Point leftOffset = new Point(0, 0);
 
         //[NeedsRestarting]
+        [ReadOnly(true)]
         [Category("Camera properties"), Description("Right Offset")]
         public Point RightOffset { get => this.rightOffset; set => SetProperty(ref rightOffset, value, nameof(RightOffset)); }
         private Point rightOffset = new Point(0, 0);

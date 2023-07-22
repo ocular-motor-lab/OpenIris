@@ -105,6 +105,8 @@ namespace OpenIris.UI
             this.buttonMoveLeftEyeDown = new System.Windows.Forms.Button();
             this.imageList2 = new System.Windows.Forms.ImageList(this.components);
             this.buttonMoveRightEyeRight = new System.Windows.Forms.Button();
+            this.buttonReduceExposure = new System.Windows.Forms.Button();
+            this.buttonIncreaseExposure = new System.Windows.Forms.Button();
             this.buttonMoveLeftEyeUp = new System.Windows.Forms.Button();
             this.buttonMoveLeftEyeRight = new System.Windows.Forms.Button();
             this.buttonMoveRightEyeUp = new System.Windows.Forms.Button();
@@ -146,8 +148,6 @@ namespace OpenIris.UI
             this.panelPlayer = new System.Windows.Forms.Panel();
             this.videoPlayerUI = new OpenIris.UI.VideoPlayerUI();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.buttonIncreaseExposure = new System.Windows.Forms.Button();
-            this.buttonReduceExposure = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.menuStripMainMenu.SuspendLayout();
             this.tabPages.SuspendLayout();
@@ -755,7 +755,7 @@ namespace OpenIris.UI
             this.groupBoxCameraPosition.Size = new System.Drawing.Size(344, 142);
             this.groupBoxCameraPosition.TabIndex = 32;
             this.groupBoxCameraPosition.TabStop = false;
-            this.groupBoxCameraPosition.Text = "Camera position";
+            this.groupBoxCameraPosition.Text = "Camera position and exposure";
             // 
             // buttonCenterEyes
             // 
@@ -800,6 +800,30 @@ namespace OpenIris.UI
             this.buttonMoveRightEyeRight.Size = new System.Drawing.Size(32, 30);
             this.buttonMoveRightEyeRight.TabIndex = 27;
             this.buttonMoveRightEyeRight.UseVisualStyleBackColor = true;
+            // 
+            // buttonReduceExposure
+            // 
+            this.buttonReduceExposure.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.buttonReduceExposure.ImageIndex = 3;
+            this.buttonReduceExposure.Location = new System.Drawing.Point(297, 102);
+            this.buttonReduceExposure.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonReduceExposure.Name = "buttonReduceExposure";
+            this.buttonReduceExposure.Size = new System.Drawing.Size(39, 30);
+            this.buttonReduceExposure.TabIndex = 28;
+            this.buttonReduceExposure.Text = "-";
+            this.buttonReduceExposure.UseVisualStyleBackColor = true;
+            // 
+            // buttonIncreaseExposure
+            // 
+            this.buttonIncreaseExposure.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.buttonIncreaseExposure.ImageIndex = 3;
+            this.buttonIncreaseExposure.Location = new System.Drawing.Point(297, 28);
+            this.buttonIncreaseExposure.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonIncreaseExposure.Name = "buttonIncreaseExposure";
+            this.buttonIncreaseExposure.Size = new System.Drawing.Size(39, 30);
+            this.buttonIncreaseExposure.TabIndex = 28;
+            this.buttonIncreaseExposure.Text = "+";
+            this.buttonIncreaseExposure.UseVisualStyleBackColor = true;
             // 
             // buttonMoveLeftEyeUp
             // 
@@ -1325,30 +1349,6 @@ namespace OpenIris.UI
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(1571, 820);
             this.panel4.TabIndex = 29;
-            // 
-            // buttonIncreaseExposure
-            // 
-            this.buttonIncreaseExposure.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonIncreaseExposure.ImageIndex = 3;
-            this.buttonIncreaseExposure.Location = new System.Drawing.Point(297, 28);
-            this.buttonIncreaseExposure.Margin = new System.Windows.Forms.Padding(4);
-            this.buttonIncreaseExposure.Name = "buttonIncreaseExposure";
-            this.buttonIncreaseExposure.Size = new System.Drawing.Size(39, 30);
-            this.buttonIncreaseExposure.TabIndex = 28;
-            this.buttonIncreaseExposure.Text = "+";
-            this.buttonIncreaseExposure.UseVisualStyleBackColor = true;
-            // 
-            // buttonReduceExposure
-            // 
-            this.buttonReduceExposure.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonReduceExposure.ImageIndex = 3;
-            this.buttonReduceExposure.Location = new System.Drawing.Point(297, 102);
-            this.buttonReduceExposure.Margin = new System.Windows.Forms.Padding(4);
-            this.buttonReduceExposure.Name = "buttonReduceExposure";
-            this.buttonReduceExposure.Size = new System.Drawing.Size(39, 30);
-            this.buttonReduceExposure.TabIndex = 28;
-            this.buttonReduceExposure.Text = "-";
-            this.buttonReduceExposure.UseVisualStyleBackColor = true;
             // 
             // EyeTrackerGui
             // 

@@ -9,6 +9,7 @@ using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
 using SpinnakerNET.GenApi;
+using static System.Net.Mime.MediaTypeNames;
 using static OpenIris.EyeTrackerExtentionMethods;
 
 namespace SpinnakerInterface
@@ -178,7 +179,10 @@ namespace SpinnakerInterface
                     //lastLineStatusAll = rawImage.ChunkData.LineStatusAll; //it is not available
 
                     lastTimestamp = timestamp;
-
+                    unsafe
+                    {
+                        Buffer.MemoryCopy((byte*)rawImage.DataPtr + rawImage.Width * rawImage.Height, (byte*)rawImage.DataPtr, rawImage.ManagedData.Length, rawImage.ManagedData.Length - rawImage.Width * rawImage.Height);
+                    }
 
                     return new ImageEye(
                                      (int)rawImage.Width,

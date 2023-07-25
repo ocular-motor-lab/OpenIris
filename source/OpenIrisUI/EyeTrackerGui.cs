@@ -65,25 +65,16 @@ namespace OpenIris.UI
             }
 
             // Check if settings changed need restarting
-            eyeTracker.Settings.PropertyChanged += (o, e) =>
+            eyeTracker.Settings.PropertyChangingNeedsRestart += (o, e) =>
                 {
-                    var needsRestartingAttributes = o.GetType().GetProperty(e.PropertyName)?.
-                        GetCustomAttributes(typeof(NeedsRestartingAttribute), false) as NeedsRestartingAttribute[];
-
-                    bool needsRestarting = needsRestartingAttributes?.Select(x => x.Value).SingleOrDefault() ?? false;
-
-                    if (needsRestarting && !eyeTracker.NotStarted)
+                    if (!eyeTracker.NotStarted)
                     {
                         DialogResult result = MessageBox.Show(
-                              "Changing the setting " + e.PropertyName + " requires to stop the tracking. Do you want to stop?",
-                              "Do you want to stop?",
-                              MessageBoxButtons.YesNo);
-
-                        if (result == DialogResult.Yes)
-                        {
-                            eyeTracker.StopTracking();
-                            return;
-                        }
+                              "Changing the setting " + e.PropertyName + " requires to stop the tracking.",
+                              "Stopping tracking.",
+                              MessageBoxButtons.OK);
+                        
+                        eyeTracker.StopTracking();
                     }
                 };
 

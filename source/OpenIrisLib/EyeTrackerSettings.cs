@@ -42,6 +42,7 @@ namespace OpenIris
                     AllEyeTrackerSystemSettings.Add(value, eyeTrackerSystemSettings);
 
                     AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    AllEyeTrackerSystemSettings[value].PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
                     AllEyeTrackerSystemSettings[value].MmPerPixChanged += (o, e) =>
                     {
                         foreach (var t in AllTrackingPipelinesSettings.Values)
@@ -99,10 +100,8 @@ namespace OpenIris
 
                     AllTrackingPipelinesSettings.Add(value, trackingSettings);
 
-                    AllTrackingPipelinesSettings[value].PropertyChanged += (o, e) =>
-                    {
-                        OnPropertyChanged(o, e.PropertyName);
-                    };
+                    AllTrackingPipelinesSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    AllTrackingPipelinesSettings[value].PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
                 }
 
                 if (value != eyeTrackingPipeline)
@@ -144,10 +143,8 @@ namespace OpenIris
 
                     AllCalibrationImplementations.Add(value, calibrationSettings);
 
-                    AllCalibrationImplementations[value].PropertyChanged += (o, e) =>
-                    {
-                        OnPropertyChanged(o, e.PropertyName);
-                    };
+                    AllCalibrationImplementations[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    AllCalibrationImplementations[value].PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
                 }
 
                 if (value != calibrationMethod)

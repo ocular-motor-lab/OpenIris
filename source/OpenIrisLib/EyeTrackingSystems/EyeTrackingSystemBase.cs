@@ -9,6 +9,7 @@ namespace OpenIris
 
     using System;
     using System.ComponentModel;
+    using System.Drawing;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Windows.Forms;
@@ -39,6 +40,11 @@ namespace OpenIris
         public EyeTrackingSystemSettings Settings { get; private set; }
 
         /// <summary>
+        /// Image sources (cameras or videos) of this eye tracking system.
+        /// </summary>
+        public EyeCollection<IImageEyeSource?>? imageSources;
+
+        /// <summary>
         /// Initializzes an insstance of the class EyeTrackinSystem.
         /// </summary>
         /// <param name="settings"></param>
@@ -64,12 +70,33 @@ namespace OpenIris
         {
         }
 
+        /// <summary>
+        /// Gets the cameras.
+        /// </summary>
+        /// <returns>List of image eye source objects.</returns>
+        internal EyeCollection<CameraEye?>? CreateAndStartCameras1()
+        {
+            var cameras = CreateAndStartCameras();
+            imageSources = new EyeCollection<IImageEyeSource?>(cameras.Select(c => c as IImageEyeSource));
+            return cameras;
+        }
 
         /// <summary>
         /// Gets the cameras.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        public virtual EyeCollection<CameraEye?>? CreateAndStartCameras() => null;
+        internal EyeCollection<VideoEye?>? CreateVideos_imageSource(EyeCollection<string?> fileNames)
+        {
+            var videos = CreateVideos(fileNames);
+            imageSources = new EyeCollection<IImageEyeSource?>(videos.Select(c => c as IImageEyeSource));
+            return videos;
+        }
+
+        /// <summary>
+        /// Gets the cameras.
+        /// </summary>
+        /// <returns>List of image eye source objects.</returns>
+        protected virtual EyeCollection<CameraEye?>? CreateAndStartCameras() => null;
 
         /// <summary>
         /// Gets the head tracking sensor. 
@@ -88,7 +115,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileNames">Names of the files to load.</param>
         /// <returns>List of image eye source objects.</returns>
-        public virtual EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames)
+        protected virtual EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames)
         {
             switch (fileNames.Count)
             {
@@ -146,6 +173,104 @@ namespace OpenIris
         /// </summary>
         /// <returns></returns>
         public virtual ToolStripMenuItem[]? GetToolStripMenuItems() => null;
+
+        /// <summary>
+        /// Gets a value indicating weather the cameras can move the ROI.
+        /// </summary>
+        public bool CamerasMovable { get => imageSources?.Any(s => s is IMovableImageEyeSource) ?? false; }
+
+        /// <summary>
+        /// Gets a value indicating weather the cameras can change exposure.
+        /// </summary>
+        public bool CamerasHaveVariableEspsure { get => imageSources?.Any(s => s is IVariableExposureImageEyeSource) ?? false; }
+
+
+        /// <summary>
+        /// Centers the camera ROI around the current pupil center.
+        /// </summary>
+        internal void CenterEyes(PointF centerLeftEye, PointF centerRightEye)
+        {
+            if (imageSources is null) return;
+
+            foreach (var camera in imageSources)
+            {
+                if (camera is IMovableImageEyeSource movableCamera)
+                {
+                    var center = camera.WhichEye switch
+                    {
+                        Eye.Left => centerLeftEye,
+                        Eye.Right => centerRightEye,
+                        Eye.Both => new PointF(
+                                (centerLeftEye.X + centerRightEye.X) / 2,
+                                (centerLeftEye.Y + centerRightEye.Y) / 2),
+                        _ => throw new InvalidOperationException("Not valid eye"),
+                    };
+
+                    movableCamera.Center(center);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Moves the camera (or ROI).
+        /// </summary>
+        /// <param name="whichEyeToMove">Left,right or both.</param>
+        /// <param name="direction">Which direction to move.</param>
+        internal void MoveCamera(Eye whichEyeToMove, MovementDirection direction)
+        {
+            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
+
+            foreach (var camera in imageSources)
+            {
+                if (camera is IMovableImageEyeSource movableCamera)
+                {
+                    if ((camera.WhichEye == whichEyeToMove) || (whichEyeToMove == Eye.Both) || (camera.WhichEye == Eye.Both))
+                    {
+                        movableCamera?.Move(direction);
+                    }
+                }
+            }
+
+            SaveCameraMove();
+        }
+
+        protected virtual void SaveCameraMove() { }
+        protected virtual void SaveCameraExposure() { }
+
+        /// <summary>
+        /// </summary>
+        internal void IncreaseExposure()
+        {
+            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
+
+            foreach (var camera in imageSources)
+            {
+                if (camera is IVariableExposureImageEyeSource cameraExpo)
+                {
+                    cameraExpo?.IncreaseExposure();
+                }
+            }
+
+            SaveCameraExposure();
+        }
+
+        /// <summary>
+        /// </summary>
+        internal void ReduceExposure()
+        {
+            if (imageSources is null) throw new InvalidOperationException("Sources cannot be null");
+
+            foreach (var camera in imageSources)
+            {
+                if (camera is IVariableExposureImageEyeSource cameraExpo)
+                {
+                    cameraExpo?.ReduceExposure();
+                }
+            }
+
+            SaveCameraExposure();
+        }
+
     }
 
 

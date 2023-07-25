@@ -5,18 +5,18 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using OpenIris;
 using OpenIris.ImageGrabbing;
 using SpinnakerNET;
 using SpinnakerNET.GenApi;
+using static System.Net.Mime.MediaTypeNames;
 using static OpenIris.EyeTrackerExtentionMethods;
 
 namespace SpinnakerInterface
 {
 #nullable enable
 
-    class CameraEyeSpinnaker : CameraEye, IMovableImageEyeSource
+    class CameraEyeSpinnaker : CameraEye, IMovableImageEyeSource, IVariableExposureImageEyeSource
     {
         public enum TriggerMode
         {
@@ -35,7 +35,7 @@ namespace SpinnakerInterface
         private ulong NumFramesGrabbed = 0;
         private long lastExposureEndLineStatusAll;
         private long lastLineStatusAll;
-        private ImageEyeTimestamp lastTimestamp; 
+        private ImageEyeTimestamp lastTimestamp;
 
 
         private string line0Status = "FALSE";
@@ -48,6 +48,14 @@ namespace SpinnakerInterface
         private string errortest;
 
         Vector2 maxROI_Offset, roiSize;
+        public Vector2 MaxROI_Offset{ get { return maxROI_Offset; } set { maxROI_Offset = value; } }
+        
+        double maxGain;
+
+        public Point Offset { get { return new Point((int)Math.Round(GetROI().X), (int)Math.Round(GetROI().Y)); } }
+        private Point offset;
+        public double Gain { get { return gain; } set { gain = value; } }
+        private double gain;
 
         #region Static Methods
 
@@ -67,12 +75,12 @@ namespace SpinnakerInterface
             // if the selected serial number didn't found use the default cameras' indices (0 for left, 1 for right)
             if (leftEyeCamSerialNum != null && camList_.GetBySerial(leftEyeCamSerialNum) == null)
             {
-                MessageBox.Show($"Warning: Didn't find (left) camera with selected serial number of: {leftEyeCamSerialNum}");
+                Trace.WriteLine($"Warning: Didn't find (left) camera with selected serial number of: {leftEyeCamSerialNum}");
                 leftEyeCamSerialNum = null;
             }
             if (rightEyeCamSerialNum != null && camList_.GetBySerial(rightEyeCamSerialNum) == null)
             {
-                MessageBox.Show($"Warning: Didn't find right camera with selected serial number of: {rightEyeCamSerialNum}");
+                Trace.WriteLine($"Warning: Didn't find right camera with selected serial number of: {rightEyeCamSerialNum}");
                 rightEyeCamSerialNum = null;
             }
 
@@ -80,8 +88,8 @@ namespace SpinnakerInterface
             switch (whichEye, numberOfRequiredCameras)
             {
                 case (Eye.Both, 2):
-                    foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
-                    foundCameras.Add(rightEyeCamSerialNum == null ? camList_[1] : camList_.GetBySerial(rightEyeCamSerialNum));
+                    foundCameras.Add(leftEyeCamSerialNum == null || rightEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
+                    foundCameras.Add(rightEyeCamSerialNum == null || leftEyeCamSerialNum == null ? camList_[1] : camList_.GetBySerial(rightEyeCamSerialNum));
                     return foundCameras;
                 case (_, 1):
                     foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
@@ -106,14 +114,13 @@ namespace SpinnakerInterface
         #endregion Static Methods
 
         #region constructor
-        private int Gain{get;set; }
         public CameraEyeSpinnaker(Eye whichEye, IManagedCamera camera, double frameRate, int gain, Rectangle roi)
         {
             cam = camera;
 
             WhichEye = whichEye;
             FrameRate = frameRate;
-            Gain = gain;
+            this.gain = gain;
             FrameSize = roi.Size;
 
             isMaster = TriggerMode.Default;
@@ -128,10 +135,7 @@ namespace SpinnakerInterface
         public override void Start()
         {
             InitParameters();
-
             InitParameters_TriggerSettings();
-            
-            //cam.BeginAcquisition();
         }
 
         public override void Stop()
@@ -175,7 +179,10 @@ namespace SpinnakerInterface
                     //lastLineStatusAll = rawImage.ChunkData.LineStatusAll; //it is not available
 
                     lastTimestamp = timestamp;
-
+                    unsafe
+                    {
+                        Buffer.MemoryCopy((byte*)rawImage.DataPtr + rawImage.Width * rawImage.Height, (byte*)rawImage.DataPtr, rawImage.ManagedData.Length, rawImage.ManagedData.Length - rawImage.Width * rawImage.Height);
+                    }
 
                     return new ImageEye(
                                      (int)rawImage.Width,
@@ -262,6 +269,9 @@ namespace SpinnakerInterface
             Vector2 maxFrameSize = new Vector2(cam.WidthMax.Value, cam.HeightMax.Value);
             roiSize = new Vector2(FrameSize.Width, FrameSize.Height);
             maxROI_Offset = maxFrameSize - roiSize;
+            
+            maxGain = cam.AutoExposureGainUpperLimit;
+            
             Debug.WriteLine($"Centering ROI. FrameMax {maxFrameSize}, ROI_SIZE {roiSize}");
             //Center the ROI in the middle of the physical camera frame.
             SetROI(maxROI_Offset / 2);
@@ -378,10 +388,51 @@ namespace SpinnakerInterface
         // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.
         private void SetROI(Vector2 Offset)
         {
-            Offset = Max(Vector2.Zero, Min(maxROI_Offset, Round(Offset / 4) * 4));
-            (cam.OffsetX.Value, cam.OffsetY.Value) = ((long)Offset.X, (long)Offset.Y);
+            Offset = Max(Vector2.Zero, Min(maxROI_Offset, Round(Offset / 4) * 4)); // force to be a multiple of 4
+
+            offset = new Point((int)Offset.X, (int)Offset.Y);
+
+            cam.OffsetX.Value = offset.X;
+            cam.OffsetY.Value = offset.Y;
         }
         private Vector2 GetROI() => new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
+
+        public bool IncreaseExposure()
+        {
+            // check the upper limit
+            if (gain + 1 <= maxGain)
+            {
+                gain += 1;
+                cam.Gain.Value = gain;
+                return true;
+            }
+            else 
+            {
+                return false; 
+            }
+        }
+
+        public bool ReduceExposure()
+        {
+            // check the lower limit
+            if (gain - 1 > 0)
+            {
+                gain -= 1;
+                cam.Gain.Value = gain;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public double SetGain(double gain_input)
+        {
+            gain = gain_input;
+            cam.Gain.Value = gain;
+            return gain;
+        }
 
         #endregion private methods
     }

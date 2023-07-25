@@ -10,13 +10,15 @@ namespace OpenIris
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Linq;
+    using System.Windows.Forms;
 
 
     //
     // TODO: consider using ApplicateSettingsBase. I tried but I could not get it to serialized properly.
     //
 
-   
+
     /// <summary>
     /// Attribute used to indicate if a given settings requires the eye tracker to restart to take effect.
     /// </summary>
@@ -46,6 +48,9 @@ namespace OpenIris
         [field: NonSerialized]
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        [field: NonSerialized]
+        public event PropertyChangedEventHandler? PropertyChangingNeedsRestart;
+
         /// <summary>
         /// https://www.danrigby.com/2012/01/08/inotifypropertychanged-the-anders-hejlsberg-way/
         /// </summary>
@@ -57,6 +62,16 @@ namespace OpenIris
         {
             if (!EqualityComparer<T>.Default.Equals(field, value))
             {
+                var needsRestartingAttributes = this.GetType().GetProperty(name)?.
+                    GetCustomAttributes(typeof(NeedsRestartingAttribute), false) as NeedsRestartingAttribute[];
+
+                bool needsRestarting = needsRestartingAttributes?.Select(x => x.Value).SingleOrDefault() ?? false;
+
+                if (needsRestarting)
+                {
+                    PropertyChangingNeedsRestart?.Invoke(this, new PropertyChangedEventArgs(name));
+                }
+
                 field = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
             }
@@ -74,6 +89,16 @@ namespace OpenIris
         {
             if (field != value)
             {
+                var needsRestartingAttributes = this.GetType().GetProperty(name)?.
+                    GetCustomAttributes(typeof(NeedsRestartingAttribute), false) as NeedsRestartingAttribute[];
+
+                bool needsRestarting = needsRestartingAttributes?.Select(x => x.Value).SingleOrDefault() ?? false;
+
+                if (needsRestarting)
+                {
+                    PropertyChangingNeedsRestart?.Invoke(this, new PropertyChangedEventArgs(name));
+                }
+
                 field = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
@@ -81,6 +106,7 @@ namespace OpenIris
                 {
                     // make sure the property changes propagate
                     v.PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    v.PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
                 }
             }
         }
@@ -94,6 +120,17 @@ namespace OpenIris
         {
             // Save thesettings everytime something changes
             PropertyChanged?.Invoke(o, new PropertyChangedEventArgs(name));
+        }
+
+        /// <summary>
+        /// Raises the PropertyChange event
+        /// </summary>
+        /// <param name="o">The object.</param>
+        /// <param name="name">Event parameters</param>
+        public void OnPropertyChangingNeedsRestart(object o, string name)
+        {
+            // Save thesettings everytime something changes
+            PropertyChangingNeedsRestart?.Invoke(o, new PropertyChangedEventArgs(name));
         }
     }
 }

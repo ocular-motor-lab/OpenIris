@@ -621,7 +621,7 @@ namespace OpenIris
                 var centerRight = (dataRightEye?.ProcessFrameResult == ProcessFrameResult.Good) ?
                     dataRightEye.Pupil.Center : PointF.Empty;
 
-                ImageGrabber?.CenterEyes(centerLeft, centerRight);
+                EyeTrackingSystem?.CenterEyes(centerLeft, centerRight);
             }
         }
 
@@ -632,7 +632,21 @@ namespace OpenIris
         /// <param name="direction">Which direction to move.</param>
         public void MoveCamera(Eye whichEyeToMove, MovementDirection direction)
         {
-            ImageGrabber?.MoveCamera(whichEyeToMove, direction);
+            EyeTrackingSystem?.MoveCamera(whichEyeToMove, direction);
+        }
+
+        /// <summary>
+        /// </summary>
+        public void IncreaseExposure()
+        {
+            EyeTrackingSystem?.IncreaseExposure();
+        }
+
+        /// <summary>
+        /// </summary>
+        public void ReduceExposure()
+        {
+            EyeTrackingSystem?.ReduceExposure();
         }
     }
 }

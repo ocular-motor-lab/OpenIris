@@ -23,7 +23,7 @@ namespace OpenIris
         /// Gets the cameras. In this case just one single camera.
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        public override EyeCollection<CameraEye> CreateAndStartCameras()
+        protected override EyeCollection<CameraEye> CreateAndStartCameras()
         {
             var cameraLeft = new CameraEyeVirtualEye(Eye.Left, UIform);
             cameraLeft.Start();

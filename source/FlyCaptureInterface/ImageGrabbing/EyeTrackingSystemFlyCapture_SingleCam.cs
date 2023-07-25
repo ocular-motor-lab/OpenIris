@@ -20,8 +20,8 @@ namespace SpinnakerInterface
     class EyeTrackingSystemFlyCapture_SingleCam : EyeTrackingSystemBase
     {
         protected CameraEyeFlyCapture? camera = null;
-        
-        public override EyeCollection<CameraEye?>? CreateAndStartCameras()
+
+        protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettings;
 

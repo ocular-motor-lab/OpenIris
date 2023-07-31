@@ -406,7 +406,7 @@ namespace SpinnakerInterface
             {
                 gain += 1;
                 cam.Gain.Value = gain;
-                Trace.WriteLine($"Camera {WhichEye} gain set to{gain}.");
+                Trace.WriteLine($"Camera {WhichEye} gain set to {gain}.");
                 return true;
             }
             else
@@ -422,7 +422,7 @@ namespace SpinnakerInterface
             {
                 gain -= 1;
                 cam.Gain.Value = gain;
-                Trace.WriteLine($"Camera {WhichEye} gain set to{gain}.");
+                Trace.WriteLine($"Camera {WhichEye} gain set to {gain}.");
                 return true;
             }
             else

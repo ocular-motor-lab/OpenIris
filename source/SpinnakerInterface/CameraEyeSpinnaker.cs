@@ -246,10 +246,6 @@ namespace SpinnakerInterface
         // frame triggers. Later, we pick one camera to be the "master".
         private void InitParameters()
         {
-            // Make sure camera is really stopped.
-            cam.BeginAcquisition();
-            cam.EndAcquisition();
-
             camModelName = cam.DeviceModelName.Value;
 
             IsFirstFrame = true;  // Remember to grab first frame number and save it.

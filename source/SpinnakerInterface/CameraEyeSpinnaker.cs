@@ -48,8 +48,8 @@ namespace SpinnakerInterface
         private string errortest;
 
         Vector2 maxROI_Offset, roiSize;
-        public Vector2 MaxROI_Offset{ get { return maxROI_Offset; } set { maxROI_Offset = value; } }
-        
+        public Vector2 MaxROI_Offset { get { return maxROI_Offset; } set { maxROI_Offset = value; } }
+
         double maxGain;
 
         public Point Offset { get { return new Point((int)Math.Round(GetROI().X), (int)Math.Round(GetROI().Y)); } }
@@ -106,7 +106,7 @@ namespace SpinnakerInterface
 
             masterCam.Start();
             slaveCam.Start();
-           
+
             slaveCam.cam.BeginAcquisition();
             masterCam.cam.BeginAcquisition();
         }
@@ -192,7 +192,7 @@ namespace SpinnakerInterface
                                      timestamp)
                     {
                         WhichEye = WhichEye,
-                        ImageSourceData = (lastExposureEndLineStatusAll,  rawImage),
+                        ImageSourceData = (lastExposureEndLineStatusAll, rawImage),
 
                     };
                 }
@@ -218,13 +218,13 @@ namespace SpinnakerInterface
         public override object Info =>
             $"This string shows up in Timing tab!! [{WhichEye}{(isMaster == TriggerMode.Master ? "[Master]" : "")}: {camModelName}]\n"
           + $"FrameID {CurrentFrameID}  #Grabbed {NumFramesGrabbed}  #Dropped {CurrentFrameID - NumFramesGrabbed}\n\n"
-          + $"GPIO LineStatusAll {lastLineStatusAll}"  + $"  GPIO ExposureEndLineStatusAll {lastExposureEndLineStatusAll} \n\n" 
-          +  $"Seconds {lastTimestamp.Seconds}\n\n";
+          + $"GPIO LineStatusAll {lastLineStatusAll}" + $"  GPIO ExposureEndLineStatusAll {lastExposureEndLineStatusAll} \n\n"
+          + $"Seconds {lastTimestamp.Seconds}\n\n";
 
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel
         // location of the tracked pupil within the ROI, so we use it to offset the
         // current ROI to bring the pupil to the center. One liner!!
-        public void Center(PointF centerPupil) => SetROI(GetROI() - ToVector2(centerPupil) + roiSize / 2);
+        public void Center(PointF centerPupil) => SetROI(GetROI() + ToVector2(centerPupil) - roiSize / 2);
 
         public void Move(MovementDirection direction)
         {
@@ -269,9 +269,9 @@ namespace SpinnakerInterface
             Vector2 maxFrameSize = new Vector2(cam.WidthMax.Value, cam.HeightMax.Value);
             roiSize = new Vector2(FrameSize.Width, FrameSize.Height);
             maxROI_Offset = maxFrameSize - roiSize;
-            
+
             maxGain = cam.AutoExposureGainUpperLimit;
-            
+
             Debug.WriteLine($"Centering ROI. FrameMax {maxFrameSize}, ROI_SIZE {roiSize}");
             //Center the ROI in the middle of the physical camera frame.
             SetROI(maxROI_Offset / 2);
@@ -394,6 +394,8 @@ namespace SpinnakerInterface
 
             cam.OffsetX.Value = offset.X;
             cam.OffsetY.Value = offset.Y;
+
+            Trace.WriteLine($"Camera {WhichEye} ROI moved to ({offset.X},{offset.Y}).");
         }
         private Vector2 GetROI() => new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
 
@@ -404,11 +406,12 @@ namespace SpinnakerInterface
             {
                 gain += 1;
                 cam.Gain.Value = gain;
+                Trace.WriteLine($"Camera {WhichEye} gain set to{gain}.");
                 return true;
             }
-            else 
+            else
             {
-                return false; 
+                return false;
             }
         }
 
@@ -419,6 +422,7 @@ namespace SpinnakerInterface
             {
                 gain -= 1;
                 cam.Gain.Value = gain;
+                Trace.WriteLine($"Camera {WhichEye} gain set to{gain}.");
                 return true;
             }
             else

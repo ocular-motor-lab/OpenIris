@@ -13,6 +13,7 @@ namespace OpenIris
     using System.ComponentModel;
     using System.Xml;
     using System.Xml.Serialization;
+    using System.Reflection;
 
 
     /// <summary>
@@ -168,6 +169,10 @@ namespace OpenIris
         #endregion C) Choose a calibration method
 
         #region D) General settings
+
+        [ReadOnly(true)]
+        public string OpenIrisVersion { get => openIrisVersion; set => openIrisVersion = value; }
+        private string openIrisVersion = GitVersionInformation.AssemblySemVer;
 
         [Category("D) General settings"), Description("Maximum number of processing threads.")]
         [NeedsRestarting(true)]

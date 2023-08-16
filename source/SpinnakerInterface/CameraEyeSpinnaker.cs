@@ -68,6 +68,17 @@ namespace SpinnakerInterface
             var camList_ = system.GetCameras();
             if (numberOfRequiredCameras > camList_.Count)
                 throw new Exception($"Need at least {numberOfRequiredCameras} camera(s). {camList_.Count} FLIR Spinnaker compatible camera(s) found.");
+            ManagedCameraList camList_ordered = new ManagedCameraList();
+
+            if (Convert.ToInt32(camList_[0].DeviceSerialNumber) < Convert.ToInt32(camList_[1].DeviceSerialNumber))
+            {
+                camList_ordered = camList_; 
+            }
+            else
+            {
+                camList_ordered[0] = camList_[1];
+                camList_ordered[1] = camList_[0];
+            }
 
             // output found cameras
             List<IManagedCamera> foundCameras = new List<IManagedCamera>();
@@ -88,11 +99,11 @@ namespace SpinnakerInterface
             switch (whichEye, numberOfRequiredCameras)
             {
                 case (Eye.Both, 2):
-                    foundCameras.Add(leftEyeCamSerialNum == null || rightEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
-                    foundCameras.Add(rightEyeCamSerialNum == null || leftEyeCamSerialNum == null ? camList_[1] : camList_.GetBySerial(rightEyeCamSerialNum));
+                    foundCameras.Add(leftEyeCamSerialNum == null || rightEyeCamSerialNum == null ? camList_ordered[0] : camList_ordered.GetBySerial(leftEyeCamSerialNum));
+                    foundCameras.Add(rightEyeCamSerialNum == null || leftEyeCamSerialNum == null ? camList_ordered[1] : camList_ordered.GetBySerial(rightEyeCamSerialNum));
                     return foundCameras;
                 case (_, 1):
-                    foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
+                    foundCameras.Add(leftEyeCamSerialNum == null ? camList_ordered[0] : camList_ordered.GetBySerial(leftEyeCamSerialNum));
                     return foundCameras;
                 default:
                     throw new Exception($"Error: Dual camera selected for tracking single eye. For tracking single eye, please use Spinnaker Single Camera.");

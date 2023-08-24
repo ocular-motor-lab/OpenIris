@@ -12,10 +12,12 @@ namespace OpenIris
     using System.Diagnostics;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using System.Net.Sockets;
     using System.ServiceModel;
     using System.ServiceModel.Web;
     using System.Text;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Forms;
@@ -384,6 +386,63 @@ namespace OpenIris
             return result;
         }
 
+
+        /// <summary>
+        /// A JSON serializeable class representing a 2d point.
+        /// </summary>
+        public class JsonPointF
+        {
+            public JsonPointF(PointF point)
+            {
+                X = point.X; Y = point.Y;
+            }
+
+            public float X { get; set; }
+            public float Y { get; set; }
+        }
+
+        /// <summary>
+        /// A JSON serializeable class representing eyedata.
+        /// </summary>
+        public class JsonEyeData
+        {
+            public JsonEyeData(EyeData data)
+            {
+                FrameNumber = data.Timestamp.FrameNumberRaw;
+                Seconds = data.Timestamp.Seconds;
+                Pupil = new JsonPointF(data.Pupil.Center);
+
+                var crs = data.CornealReflections ?? new CornealReflectionData[] { };
+                var crCenters = new List<JsonPointF>();
+                foreach (var cr in crs)
+                {
+                    crCenters.Add(new JsonPointF(cr.Center));
+                }
+
+                CRs = crCenters.ToArray();
+            }
+            public ulong? FrameNumber { get; set; }
+            public double? Seconds { get; set; }
+
+            public JsonPointF? Pupil { get; set; }
+            public JsonPointF[]? CRs { get; set; }
+
+        }
+
+        /// <summary>
+        /// A JSON serializeable class representing both left and right eyedata.
+        /// </summary>
+        public class JsonData
+        {
+            public JsonData(EyeData leftData, EyeData rightData)
+            {
+                Left = new JsonEyeData(leftData);
+                Right = new JsonEyeData(rightData);
+            }
+            public JsonEyeData? Left { get; set; }
+            public JsonEyeData? Right { get; set; }
+        }
+
         /// <summary>
         /// Escute a command based on a string message.
         /// </summary>
@@ -408,19 +467,15 @@ namespace OpenIris
                 case "GETDATA":
                     var eyedata = GetCurrentData();
                     var leftData = eyedata?[Eye.Left] ?? new EyeData();
-                    var rightData = eyedata?[Eye.Left] ?? new EyeData();
-                    var eyedatamsg =
-                    $"{leftData.Timestamp.FrameNumberRaw};{leftData.Timestamp.Seconds};{leftData.Pupil.Center.X};{leftData.Pupil.Center.Y};" +
-                    $"{rightData.Timestamp.FrameNumberRaw};{rightData.Timestamp.Seconds};{rightData.Pupil.Center.X};{rightData.Pupil.Center.Y};";
+                    var rightData = eyedata?[Eye.Right] ?? new EyeData();
+                    var eyedatamsg = JsonSerializer.Serialize(new JsonData(leftData, rightData));
                     return Encoding.ASCII.GetBytes(eyedatamsg);
 
                 case "WAITFORDATA":
                     eyedata = WaitForNewData();
                     leftData = eyedata?[Eye.Left] ?? new EyeData();
-                    rightData = eyedata?[Eye.Left] ?? new EyeData();
-                    eyedatamsg =
-                    $"{leftData.Timestamp.FrameNumberRaw};{leftData.Timestamp.Seconds};{leftData.Pupil.Center.X};{leftData.Pupil.Center.Y};" +
-                    $"{rightData.Timestamp.FrameNumberRaw};{rightData.Timestamp.Seconds};{rightData.Pupil.Center.X};{rightData.Pupil.Center.Y};";
+                    rightData = eyedata?[Eye.Right] ?? new EyeData();
+                    eyedatamsg = JsonSerializer.Serialize(new JsonData(leftData, rightData));
                     return Encoding.ASCII.GetBytes(eyedatamsg);
 
                 case "RECORDEVENT":
@@ -502,7 +557,7 @@ namespace OpenIris
 
                 if (WebOperationContext.Current != null)
                     WebOperationContext.Current.OutgoingResponse.ContentType = "application/csv";
-                
+
                 return stream;
 
             }

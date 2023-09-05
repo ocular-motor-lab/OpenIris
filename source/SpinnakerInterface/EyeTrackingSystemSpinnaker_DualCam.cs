@@ -28,40 +28,112 @@ namespace SpinnakerInterface
 
         protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
-            var settings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam ?? throw new ArgumentNullException("Settings are null and shouldn't");
+            /*var settings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam ?? throw new ArgumentNullException("Settings are null and shouldn't");
             try
             {
-                var cameraList = CameraEyeSpinnaker.FindCameras(2, settings.Eye, settings.LeftEyeCameraSerialNumber, settings.RightEyeCameraSerialNumber);
+                  string? leftSer = settings.LeftEyeCameraSerialNumber == "" ? null : settings.LeftEyeCameraSerialNumber;
+                  string? rightSer = settings.RightEyeCameraSerialNumber == "" ? null : settings.RightEyeCameraSerialNumber;
 
-                // TODO for Roksana add checks on the settings so things don't crash if somebody enters crazy numbers
+                  var cameraList = CameraEyeSpinnaker.FindCameras(2, settings.Eye, leftSer, rightSer);
 
-                leftEyeCamera = new CameraEyeSpinnaker(
-                whichEye: Eye.Left,
-                camera: cameraList[0],
-                frameRate: (double)settings.FrameRate,
-                gain: (int)settings.Gain,
-                roi: new Rectangle { X=settings.LeftOffset.X, Y=settings.LeftOffset.Y, Width = 720, Height = 450 });
+                  // TODO for Roksana add checks on the settings so things don't crash if somebody enters crazy numbers
+                  CameraEyeSpinnaker? cam0 = null;
+                  CameraEyeSpinnaker? cam1 = null;
 
-                rightEyeCamera = new CameraEyeSpinnaker(
-                whichEye: Eye.Right,
-                camera: cameraList[1],
-                frameRate: (double)settings.FrameRate,
-                gain: (int)settings.Gain,
-                roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = 720, Height = 450 });
+                  cam0 = new CameraEyeSpinnaker(
+                      whichEye: Eye.Left,
+                      camera: cameraList[0],
+                      frameRate: (double)settings.FrameRate,
+                      gain: (int)settings.Gain,
+                      roi: new Rectangle { X=settings.LeftOffset.X, Y=settings.LeftOffset.Y, Width = 720, Height = 450 });
 
-                settings.LeftEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
-                settings.RightEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();
+                  cam1 = new CameraEyeSpinnaker(
+                      whichEye: Eye.Right,
+                      camera: cameraList[1],
+                      frameRate: (double)settings.FrameRate,
+                      gain: (int)settings.Gain,
+                      roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = 720, Height = 450 });
 
-                //start cameras
-                CameraEyeSpinnaker.BeginSynchronizedAcquisition(leftEyeCamera, rightEyeCamera);
+                  if(leftSer == null || rightSer == null)
+                  {
+                      if (Convert.ToInt32(cameraList[0].DeviceSerialNumber) < Convert.ToInt32(cameraList[1].DeviceSerialNumber))
+                      {
+                          leftEyeCamera = cam0; 
+                          leftEyeCamera.WhichEye = Eye.Left;
 
-                return new EyeCollection<CameraEye?>(leftEyeCamera, rightEyeCamera);
+                          rightEyeCamera = cam1;
+                          rightEyeCamera.WhichEye = Eye.Right;
+
+                          settings.LeftEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
+                          settings.RightEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();
+                      }
+                      else
+                      {
+                          leftEyeCamera = cam0;
+                          leftEyeCamera.WhichEye = Eye.Left;
+
+                          rightEyeCamera = cam1;
+                          rightEyeCamera.WhichEye = Eye.Right;
+
+                          settings.LeftEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();
+                          settings.RightEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
+                      }
+                  }
+                  else
+                  {
+                      leftEyeCamera = cam0;
+                      leftEyeCamera.WhichEye = Eye.Left;
+
+                      rightEyeCamera = cam1;
+                      rightEyeCamera.WhichEye = Eye.Right;
+
+                      settings.LeftEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
+                      settings.RightEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();
+                  }
+
+                  //start cameras
+                  CameraEyeSpinnaker.BeginSynchronizedAcquisition(leftEyeCamera, rightEyeCamera);
+
+                  return new EyeCollection<CameraEye?>(leftEyeCamera, rightEyeCamera);
+              }
+              catch (Exception ex)
+              {
+                  throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
+              }  */
+                var settings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam ?? throw new ArgumentNullException("Settings are null and shouldn't");
+                try
+                {
+                    var cameraList = CameraEyeSpinnaker.FindCameras(2, settings.Eye, settings.LeftEyeCameraSerialNumber, settings.RightEyeCameraSerialNumber);
+
+                    // TODO for Roksana add checks on the settings so things don't crash if somebody enters crazy numbers
+
+                    leftEyeCamera = new CameraEyeSpinnaker(
+                    whichEye: Eye.Left,
+                    camera: cameraList[0],
+                    frameRate: (double)settings.FrameRate,
+                    gain: (int)settings.Gain,
+                    roi: new Rectangle { X = settings.LeftOffset.X, Y = settings.LeftOffset.Y, Width = 720, Height = 450 });
+
+                    rightEyeCamera = new CameraEyeSpinnaker(
+                    whichEye: Eye.Right,
+                    camera: cameraList[1],
+                    frameRate: (double)settings.FrameRate,
+                    gain: (int)settings.Gain,
+                    roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = 720, Height = 450 });
+
+                    settings.LeftEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
+                    settings.RightEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();
+
+                    //start cameras
+                    CameraEyeSpinnaker.BeginSynchronizedAcquisition(leftEyeCamera, rightEyeCamera);
+
+                    return new EyeCollection<CameraEye?>(leftEyeCamera, rightEyeCamera);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
+                }
             }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
-            }  
-        }
 
         public override void Dispose()
         {

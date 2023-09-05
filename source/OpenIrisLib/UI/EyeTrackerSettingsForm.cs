@@ -77,14 +77,16 @@ namespace OpenIris.UI
         {
             var settings = propertyGridGeneralSettings.SelectedObject as EyeTrackerSettings ?? throw new InvalidOperationException("never should happen");
 
-            propertyGridSystemSettings.SelectedObject = settings.EyeTrackingSystemSettings;
-            propertyGridTrackingSettings.SelectedObject = settings.TrackingPipelineSettings;
-            propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
+            this.BeginInvoke(new Action(() =>
+            {
+                propertyGridSystemSettings.SelectedObject = settings.EyeTrackingSystemSettings;
+                propertyGridTrackingSettings.SelectedObject = settings.TrackingPipelineSettings;
+                propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
 
-            propertyGridGeneralSettings.Refresh();
-            propertyGridSystemSettings.Refresh();
-            propertyGridTrackingSettings.Refresh();
-            propertyGridCalibrationSettings.Refresh();
+                propertyGridGeneralSettings.Refresh();
+                propertyGridTrackingSettings.Refresh();
+                propertyGridCalibrationSettings.Refresh();
+            }));
         }
 
     }

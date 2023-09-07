@@ -209,10 +209,16 @@ namespace OpenIris.ImageProcessing
 
 
                 // quaternion defining the rotation of the eyeball (ignoring torsion) just the center of the pupil
-                var angle = Math.Atan2((iris.Center.Y - eyeModel.Center.Y), (iris.Center.X - eyeModel.Center.X));
                 var yC = iris.Center.Y - eyeModel.Center.Y;
                 var xC = iris.Center.X - eyeModel.Center.X;
+
+                // First get the polar angle of the rotation. As the direction angle the eye moves from eye model center
+                // to iris center.
+                var angle = Math.Atan2(yC, xC);
+                // Then, get the eccentricity from the length of the vector in pixels to the angle that moves the eye that far
                 var ecc = Math.Asin(Math.Sqrt(yC * yC + xC * xC) / eyeModel.Radius);
+
+                // Finally get the quaternion that defines that rotation. This is a rotation without torsion in a reference frame perpendicular to the camera
                 var q = new Quaternions(Math.Cos(ecc / 2), -Math.Sin(angle) * Math.Sin(ecc / 2), Math.Cos(angle) * Math.Sin(ecc / 2), 0);
 
 

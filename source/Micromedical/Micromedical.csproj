@@ -121,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="app.config" />
     <None Include="HeadTracking\MPUTeensy.ino" />
     <None Include="packages.config" />
   </ItemGroup>

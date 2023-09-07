@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+    <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="FlyCapture2Managed_v140.dll" />

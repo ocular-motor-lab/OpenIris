@@ -24,9 +24,8 @@ namespace OpenIris.Calibration
         private readonly EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
         public EyeCollection<ImageEye?> lastImages;
         public EyeCollection<EyePhysicalModel>? eyeModels;
-        private ICalibrationUIControl? currentUI;
 
-        public ICalibrationUIControl? GetCalibrationUI() => currentUI;
+        public ICalibrationUIControl? GetCalibrationUI() => this;
 
         /// <summary>
         /// Indicates weather the calibration was cancelled.

@@ -622,6 +622,8 @@ namespace OpenIris.UI
                 
                 UpdateStatusBar();
 
+                UpdateTabCalibration();
+
                 switch (tabPages.SelectedTab.Name)
                 {
                     case "tabStart":
@@ -633,7 +635,6 @@ namespace OpenIris.UI
                         break;
 
                     case ("tabCalibration"):
-                        UpdateTabCalibration();
                         break;
 
                     case ("tabViewer"):

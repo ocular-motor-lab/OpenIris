@@ -59,7 +59,7 @@ namespace SpinnakerInterface
 
         #region Static Methods
 
-        public static List<IManagedCamera> FindCameras(int numberOfRequiredCameras, Eye whichEye, string? leftEyeCamSerialNum, string? rightEyeCamSerialNum)
+        public static List<IManagedCamera> FindCameras(int numberOfRequiredCameras, Eye whichEye, string? leftEyeCamSerialNum, string? rightEyeCamSerialNum, string? leftEyeCamSerialNum2 = null, string? rightEyeCamSerialNum2 = null)
         {
             // Retrieve singleton reference to Spinnaker system object
             ManagedSystem system = new ManagedSystem();
@@ -94,20 +94,30 @@ namespace SpinnakerInterface
                 case (_, 1):
                     foundCameras.Add(leftEyeCamSerialNum == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
                     return foundCameras;
+                case (Eye.Both, 4):
+                    foundCameras.Add(leftEyeCamSerialNum == null || rightEyeCamSerialNum == null || leftEyeCamSerialNum2 == null || rightEyeCamSerialNum2 == null ? camList_[0] : camList_.GetBySerial(leftEyeCamSerialNum));
+                    foundCameras.Add(leftEyeCamSerialNum2 == null || rightEyeCamSerialNum == null || leftEyeCamSerialNum2 == null || rightEyeCamSerialNum2 == null ? camList_[1] : camList_.GetBySerial(leftEyeCamSerialNum2));
+
+                    foundCameras.Add(rightEyeCamSerialNum == null || leftEyeCamSerialNum == null || leftEyeCamSerialNum2 == null || rightEyeCamSerialNum2 == null ? camList_[2] : camList_.GetBySerial(rightEyeCamSerialNum));
+                    foundCameras.Add(rightEyeCamSerialNum2 == null || leftEyeCamSerialNum == null || leftEyeCamSerialNum2 == null || rightEyeCamSerialNum2 == null ? camList_[3] : camList_.GetBySerial(rightEyeCamSerialNum2));
+                    return foundCameras;
                 default:
                     throw new Exception($"Error: Dual camera selected for tracking single eye. For tracking single eye, please use Spinnaker Single Camera.");
             }
         }
 
-        public static void BeginSynchronizedAcquisition(CameraEyeSpinnaker masterCam, CameraEyeSpinnaker slaveCam)
+        public static void BeginSynchronizedAcquisition(CameraEyeSpinnaker masterCam, params CameraEyeSpinnaker[] slaveCams)
         {
             masterCam.isMaster = TriggerMode.Master;
-            slaveCam.isMaster = TriggerMode.Slave;
+            foreach (var slaveCam in slaveCams)
+                slaveCam.isMaster = TriggerMode.Slave;
 
             masterCam.Start();
-            slaveCam.Start();
-
-            slaveCam.cam.BeginAcquisition();
+            foreach (var slaveCam in slaveCams)
+            {
+                slaveCam.Start();
+                slaveCam.cam.BeginAcquisition();
+            }
             masterCam.cam.BeginAcquisition();
         }
 

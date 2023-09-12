@@ -8,6 +8,7 @@ namespace OpenIris
 #nullable enable
 
     using Emgu.CV;
+    using Emgu.CV.Ocl;
     using Emgu.CV.Structure;
     using OpenIris.UI;
     using System;
@@ -16,6 +17,7 @@ namespace OpenIris
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+    using static System.Net.Mime.MediaTypeNames;
 
     /// <summary>
     /// Class that controls data and video recording. The object has to take care of syncronizing all
@@ -33,11 +35,11 @@ namespace OpenIris
     {
         private readonly RecordingOptions options;
 
-        private readonly Consumer<(EyeCollection<ImageEye?> images, double frameRate)> rawFramesRecorder;
+        private readonly Consumer<(ImageEye?[] images, double frameRate)> rawFramesRecorder;
         private readonly Consumer<(EyeTrackerImagesAndData images, double frameRate)> processedFramesRecorder;
         private readonly Consumer<EyeTrackerEvent> eventRecorder;
 
-        private EyeCollection<VideoWriter?>? rawVideoWriters;
+        private VideoWriter?[]? rawVideoWriters;
         private VideoWriter? processedVideoWriter;
         private StreamWriter? eventFile;
         private StreamWriter? dataFile;
@@ -191,7 +193,7 @@ namespace OpenIris
                 // Use a different thread so the UI does not freeze.
                 await Task.Run(() =>
                 {
-                    rawVideoWriters?.ForEach(v => v?.Dispose());
+                    if (rawVideoWriters != null) Array.ForEach(rawVideoWriters, v => v?.Dispose());
                     rawVideoWriters = null;
 
                     dataFile?.Dispose();
@@ -320,7 +322,7 @@ namespace OpenIris
             return eventRecorder.TryAdd(new EyeTrackerEvent(eventMessage, frameNumber, data), frameNumber);
         }
 
-        private bool RecordGrabbedImages((EyeCollection<ImageEye?> images, double frameRate) imagesEye)
+        private bool RecordGrabbedImages((ImageEye?[] images, double frameRate) imagesEye)
         {
             if (imagesEye.images == null) throw new ArgumentNullException(nameof(imagesEye));
 
@@ -340,11 +342,13 @@ namespace OpenIris
                            isColor: false)).ToArray());
 
             // Record the images
-            foreach (var image in imagesEye.images)
+            for (int i = 0; i < imagesEye.images.Length; i++)
             {
+                var image = imagesEye.images[i];
+
                 if (image is null) continue;
 
-                rawVideoWriters[image.WhichEye]?.Write(image.Image.Mat);
+                rawVideoWriters[i]?.Write(image.Image.Mat);
             }
             return true;
         }
@@ -434,7 +438,7 @@ namespace OpenIris
             rawFramesRecorder.Dispose();
             processedFramesRecorder.Dispose();
             eventRecorder.Dispose();
-            rawVideoWriters?.ForEach(v => v?.Dispose());
+            if (rawVideoWriters != null) Array.ForEach(rawVideoWriters, v => v?.Dispose());
             processedVideoWriter?.Dispose();
             eventFile?.Dispose();
             dataFile?.Dispose();

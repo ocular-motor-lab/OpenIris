@@ -21,7 +21,7 @@ namespace SpinnakerInterface
     {
         protected CameraEyeFlyCapture? camera = null;
 
-        protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
+        protected override CameraEye?[]? CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettings;
 
@@ -56,26 +56,6 @@ namespace SpinnakerInterface
                 case Eye.Both:
                     return new EyeCollection<CameraEye?>(camera);
                 default: return new EyeCollection<CameraEye?>(camera);
-            }
-        }
-
-        public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
-        {
-            var settings = Settings as EyeTrackingSystemSettings;
-
-            switch (settings.Eye)
-            {
-                case Eye.Both:
-                    var roiLeft = new Rectangle(images[Eye.Both].Size.Width/2, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-                    var roiRight = new Rectangle(0, 0, images[Eye.Both].Size.Width/2, images[Eye.Both].Size.Height);
-
-                    var imageLeft = images[Eye.Both].Copy(roiLeft);
-                    imageLeft.WhichEye = Eye.Left;
-                    var imageRight = images[Eye.Both].Copy(roiRight);
-                    imageRight.WhichEye = Eye.Right;
-                    return new EyeCollection<ImageEye>(imageLeft, imageRight);
-                default:
-                    return images;
             }
         }
     }

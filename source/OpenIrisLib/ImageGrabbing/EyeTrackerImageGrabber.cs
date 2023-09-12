@@ -33,7 +33,7 @@ namespace OpenIris
 
         private CancellationTokenSource? cancellation;
 
-        private EyeCollection<IImageEyeSource?>? imageSources;
+        private IImageEyeSource?[]? imageSources;
         private BlockingCollection<ImageEye>? cameraBuffer;
         private EyeCollection<Queue<ImageEye>?>? cameraQueues;
         private (double TimeStamp, long FrameCounter) lastCheckGrabbing;
@@ -99,7 +99,7 @@ namespace OpenIris
         /// Notifies listeners about a new frame available. This event runs in the grabber thread. Any
         /// event handler should be quick.
         /// </summary>
-        public event EventHandler<EyeCollection<ImageEye?>>? ImagesGrabbed;
+        public event EventHandler<ImageEye?[]>? ImagesGrabbed;
 
         /// <summary>
         /// Gets the frame number of the last image grabbed.

@@ -23,7 +23,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        protected override EyeCollection<CameraEye?> CreateAndStartCameras()
+        protected override CameraEye?[] CreateAndStartCameras()
         {
             var cameraSettings = Settings as EyeTrackingSystemSettingsWebCam
                 ?? throw new InvalidOperationException("Wrong type of settings;");
@@ -40,34 +40,6 @@ namespace OpenIris
                 Eye.Right => new EyeCollection<CameraEye?>(null, camera),
                 _ => throw new NotImplementedException(),
             };
-        }
-
-        /// <summary>
-        /// Prepares images for processing. Split, rotate, etc. 
-        /// </summary>
-        /// <remarks>An specific implementation of ImageEyeGrabber can optionally override this 
-        /// method to prepare the images. For instance, if a system has only one camera capturing both eyes.
-        /// This method would be where the image gets split into two.</remarks>
-        /// <param name="images">Images captured from the cameras.</param>
-        /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?>  images)
-        {
-            if (images.Count == 1 && images[0]?.WhichEye == Eye.Both)
-            {
-                var image = images[0]!;
-
-                var width = image.Size.Width;
-                var height = image.Size.Height;
-
-                var imageLeft = image.Copy(new Rectangle(width / 2, 0, width / 2, height));
-                imageLeft.WhichEye = Eye.Left;
-
-                var imageRight = image.Copy(new Rectangle(0, 0, width / 2, height));
-                imageRight.WhichEye = Eye.Right;
-
-                return new EyeCollection<ImageEye?>(imageLeft, imageRight);
-            }
-            return images;
         }
     }
 

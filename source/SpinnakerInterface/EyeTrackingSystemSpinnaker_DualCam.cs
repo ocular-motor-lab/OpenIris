@@ -26,7 +26,7 @@ namespace SpinnakerInterface
         protected CameraEyeSpinnaker? leftEyeCamera = null;
         protected CameraEyeSpinnaker? rightEyeCamera = null;
 
-        protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
+        protected override CameraEye?[]? CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsSpinnaker_DualCam ?? throw new ArgumentNullException("Settings are null and shouldn't");
             try

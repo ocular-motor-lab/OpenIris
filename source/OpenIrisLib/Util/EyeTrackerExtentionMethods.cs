@@ -40,6 +40,16 @@ namespace OpenIris
         /// </summary>
         /// <param name="images"></param>
         /// <returns></returns>
+        public static Size GetFrameSize(this ImageEye?[] images)
+        {
+            return images[0]?.Size ?? images[1]?.Size ?? throw new InvalidOperationException("No images");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="images"></param>
+        /// <returns></returns>
         public static Size GetFrameSize(this EyeCollection<(Eye, Image<Gray, byte>?)> images)
         {
             return images[0].Item2?.Size ?? images[1].Item2?.Size ?? throw new InvalidOperationException("No images");

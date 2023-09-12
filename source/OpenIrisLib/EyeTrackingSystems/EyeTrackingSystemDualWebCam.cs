@@ -22,7 +22,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        protected override EyeCollection<CameraEye?> CreateAndStartCameras()
+        protected override CameraEye?[] CreateAndStartCameras()
         {
             var cameraSettings = Settings as EyeTrackingSystemSettingsDualWebcam ?? throw new InvalidOperationException("null settings.");
 

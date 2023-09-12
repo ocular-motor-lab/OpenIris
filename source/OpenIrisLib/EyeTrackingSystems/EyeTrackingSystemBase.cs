@@ -13,7 +13,10 @@ namespace OpenIris
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Windows.Forms;
+    using Emgu.CV.Structure;
+    using Emgu.CV;
     using OpenIris.ImageGrabbing;
+    using static System.Net.Mime.MediaTypeNames;
 
     /// <summary>
     /// Base class for eye tracking systems.
@@ -42,7 +45,7 @@ namespace OpenIris
         /// <summary>
         /// Image sources (cameras or videos) of this eye tracking system.
         /// </summary>
-        public EyeCollection<IImageEyeSource?>? imageSources;
+        public IImageEyeSource?[]? imageSources;
 
         /// <summary>
         /// Initializzes an insstance of the class EyeTrackinSystem.
@@ -74,10 +77,10 @@ namespace OpenIris
         /// Gets the cameras.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        internal EyeCollection<CameraEye?>? CreateAndStartCameras1()
+        internal CameraEye?[]? CreateAndStartCameras1()
         {
             var cameras = CreateAndStartCameras();
-            imageSources = new EyeCollection<IImageEyeSource?>(cameras.Select(c => c as IImageEyeSource));
+            imageSources = cameras.Select(c => c as IImageEyeSource).ToArray();
             return cameras;
         }
 
@@ -88,7 +91,7 @@ namespace OpenIris
         internal EyeCollection<VideoEye?>? CreateVideos_imageSource(EyeCollection<string?> fileNames)
         {
             var videos = CreateVideos(fileNames);
-            imageSources = new EyeCollection<IImageEyeSource?>(videos.Select(c => c as IImageEyeSource));
+            imageSources = videos.Select(c => c as IImageEyeSource).ToArray();
             return videos;
         }
 
@@ -96,7 +99,7 @@ namespace OpenIris
         /// Gets the cameras.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        protected virtual EyeCollection<CameraEye?>? CreateAndStartCameras() => null;
+        protected virtual CameraEye?[]? CreateAndStartCameras() => null;
 
         /// <summary>
         /// Gets the head tracking sensor. 
@@ -115,16 +118,16 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileNames">Names of the files to load.</param>
         /// <returns>List of image eye source objects.</returns>
-        protected virtual EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> fileNames)
+        protected virtual VideoEye?[] CreateVideos(string?[] fileNames)
         {
-            switch (fileNames.Count)
+            switch (fileNames.Length)
             {
                 case 1:
-                    var fileName = fileNames[Eye.Both] ?? throw new NullReferenceException("Filename missing.");
+                    var fileName = fileNames[0] ?? throw new NullReferenceException("Filename missing.");
                     return new EyeCollection<VideoEye?>(new VideoEye(Eye.Both, fileName));
                 case 2:
-                    var filenameLeft = fileNames[Eye.Left];
-                    var filenameRight = fileNames[Eye.Right];
+                    var filenameLeft = fileNames[(int)Eye.Left];
+                    var filenameRight = fileNames[(int)Eye.Right];
 
                     if (filenameLeft is null && filenameRight is null)
                         throw new NullReferenceException("Filenames missing.");
@@ -136,7 +139,7 @@ namespace OpenIris
                         ? new VideoEye(Eye.Right, filenameRight)
                         : null;
 
-                    return new EyeCollection<VideoEye?>(videoLeft, videoRight);
+                    return new VideoEye?[] { videoLeft, videoRight };
                 default:
                     throw new InvalidOperationException("The number of video files must be one or two.");
             }
@@ -150,7 +153,74 @@ namespace OpenIris
         /// This method would be where the image gets split into two.</remarks>
         /// <param name="images">Images captured from the cameras.</param>
         /// <returns>Images prepared for processing.</returns>
-        public virtual EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?> images) => images;
+        public virtual EyeCollection<ImageEye?> PreProcessImages(ImageEye?[] images)
+        {
+            if (images.Length == 1)
+            {
+                if (images[0]?.WhichEye == Eye.Both)
+                {
+                    // Split the image into an image for each eye down the middle
+                    var image = images[0]!;
+
+                    var width = image.Size.Width;
+                    var height = image.Size.Height;
+
+                    var imageLeft = image.Copy(new Rectangle(width / 2, 0, width / 2, height));
+                    imageLeft.WhichEye = Eye.Left;
+
+                    var imageRight = image.Copy(new Rectangle(0, 0, width / 2, height));
+                    imageRight.WhichEye = Eye.Right;
+
+                    return new EyeCollection<ImageEye?>(imageLeft, imageRight);
+                }
+                else
+                {
+                    return new EyeCollection<ImageEye?>(images[0]);
+                }
+            }
+            if (images.Length == 2)
+            {
+                return new EyeCollection<ImageEye?>(images[0], images[1]);
+            }
+            if (images.Length == 4)
+            {
+                // Paste the two images from the same eye together
+
+                if (images[0]?.WhichEye == Eye.Left && images[1]?.WhichEye == Eye.Left && images[2]?.WhichEye == Eye.Right && images[3]?.WhichEye == Eye.Right)
+                {
+                    var image0 = images[0] ?? throw new Exception("Image cannot be null");
+                    var image1 = images[1] ?? throw new Exception("Image cannot be null");
+                    var image2 = images[2] ?? throw new Exception("Image cannot be null");
+                    var image3 = images[3] ?? throw new Exception("Image cannot be null");
+
+                    if (image0.Size != image1.Size) throw new Exception("Images are not the same size");
+                    if (image2.Size != image3.Size) throw new Exception("Images are not the same size");
+
+                    var w = image0.Size.Width;
+                    var h = image0.Size.Height;
+                    var imageTemp = new Image<Gray, byte>(image0.Size.Width, image0.Size.Height * 2);
+                    imageTemp.ROI = new Rectangle(0, 0, w, h);
+                    image0.Image.CopyTo(imageTemp);
+                    imageTemp.ROI = new Rectangle(0, h + 1, w, h);
+                    image1.Image.CopyTo(imageTemp);
+                    imageTemp.ROI = Rectangle.Empty;
+                    var imageLeftEye = new ImageEye(imageTemp, Eye.Left, image0.TimeStamp, image1.TimeStamp);
+
+                    imageTemp = new Image<Gray, byte>(image0.Size.Width, image0.Size.Height * 2);
+                    imageTemp.ROI = new Rectangle(0, 0, w, h);
+                    image2.Image.CopyTo(imageTemp);
+                    imageTemp.ROI = new Rectangle(0, h + 1, w, h);
+                    image3.Image.CopyTo(imageTemp);
+                    imageTemp.ROI = Rectangle.Empty;
+
+                    var imageRighttEye = new ImageEye(imageTemp, Eye.Right, image2.TimeStamp, image3.TimeStamp);
+
+                    return new EyeCollection<ImageEye?>(imageLeftEye, imageRighttEye);
+                }
+
+            }
+            throw new InvalidOperationException("Cannot deal with this combination of cameras. It has to be 1 for both eyes, 1 for a single eye, 2 with one for each eye, or 4, 2 for each eye");
+        }
 
         /// <summary>
         /// Method to extract additional data that should be saved to the data file. 

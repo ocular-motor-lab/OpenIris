@@ -22,7 +22,7 @@ namespace OpenIris
         /// Gets the cameras. In this case just one single camera.
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        protected override EyeCollection<CameraEye> CreateAndStartCameras()
+        protected override CameraEye[] CreateAndStartCameras()
         {
 
             this.camera = new CameraEyeFlyCapture(Eye.Both, Settings.FrameRate, new Rectangle(16 - 16, 250, 1264, 350));
@@ -38,7 +38,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="images">Raw image from the camera.</param>
         /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye> PreProcessImages(EyeCollection<ImageEye> images)
+        public override EyeCollection<ImageEye> PreProcessImages(ImageEye[] images)
         {
             ImageEye imageLeft = null;
             ImageEye imageRight = null;
@@ -48,17 +48,17 @@ namespace OpenIris
                 var roiLeft = new Rectangle(682, 0, 432, 350);
                 var roiRight = new Rectangle(150, 0, 432, 350);
 
-                imageLeft = images[Eye.Both].GetCroppedAndTransposedImage(roiLeft);
+                imageLeft = images[(int)Eye.Both].GetCroppedAndTransposedImage(roiLeft);
                 imageLeft.WhichEye = Eye.Left;
                 
-                imageRight = images[Eye.Both].GetCroppedAndTransposedImage(roiRight);
+                imageRight = images[(int)Eye.Both].GetCroppedAndTransposedImage(roiRight);
                 imageRight.WhichEye = Eye.Right;
                 imageRight.FlipVertical();
                 imageRight.FlipHorizontal();
 
                 // Copy the embedded fields into both images
-                var bitsSeconds = BitConverter.GetBytes(images[Eye.Both].TimeStamp.Seconds);
-                var bitsFrameNumber = BitConverter.GetBytes(images[Eye.Both].TimeStamp.FrameNumber);
+                var bitsSeconds = BitConverter.GetBytes(images[(int)Eye.Both].TimeStamp.Seconds);
+                var bitsFrameNumber = BitConverter.GetBytes(images[(int)Eye.Both].TimeStamp.FrameNumber);
 
                 for (int i = 0; i < bitsSeconds.Length; i++)
                 {
@@ -98,11 +98,11 @@ namespace OpenIris
         /// </summary>
         /// <param name="fileNames">Filenames of the videos.</param>
         /// <returns>List of image eye source objects.</returns>
-        protected override EyeCollection<VideoEye> CreateVideos(EyeCollection<string> fileNames)
+        protected override VideoEye[] CreateVideos(string[] fileNames)
         {
             return new EyeCollection<VideoEye>(
-                new VideoEyeFlyCapture(Eye.Left, fileNames[Eye.Left], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftVertical),
-                new VideoEyeFlyCapture(Eye.Right, fileNames[Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftVertical));
+                new VideoEyeFlyCapture(Eye.Left, fileNames[(int)Eye.Left], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftVertical),
+                new VideoEyeFlyCapture(Eye.Right, fileNames[(int)Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftVertical));
         }
         
         //public override IHeadTracker GetHeadSensor()

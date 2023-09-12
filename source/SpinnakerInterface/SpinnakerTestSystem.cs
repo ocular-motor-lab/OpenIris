@@ -17,7 +17,7 @@ namespace SpinnakerInterface
 
     class SpinnakerTestSystem : EyeTrackingSystemBase
     {
-        protected override EyeCollection<CameraEye> CreateAndStartCameras()
+        protected override CameraEye?[] CreateAndStartCameras()
         {
             var CAMLIST = SpinnakerCameraEye.EnumerateCameras();
             if (CAMLIST == null) return null;

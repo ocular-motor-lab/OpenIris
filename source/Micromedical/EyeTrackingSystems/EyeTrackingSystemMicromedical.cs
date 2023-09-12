@@ -26,7 +26,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        protected override EyeCollection<CameraEye> CreateAndStartCameras()
+        protected override CameraEye[] CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSettingsMicromedical;
 
@@ -134,16 +134,16 @@ namespace OpenIris
         /// </summary>
         /// <param name="filenames"></param>
         /// <returns>List of image eye source objects.</returns>
-        protected override EyeCollection<VideoEye> CreateVideos(EyeCollection<string> filenames)
+        protected override VideoEye[] CreateVideos(string[] filenames)
         {
             if (filenames is null) throw new ArgumentNullException(nameof(filenames));
 
-            var videoLeftEye = (filenames[Eye.Left] != null && filenames[Eye.Left].Length > 1)
-                ? new VideoEyeFlyCapture(Eye.Left, filenames[Eye.Left], VideoEyeFlyCapture.PositionOfEmbeddedInfo.BottomLeftHorizontal)
+            var videoLeftEye = (filenames[(int)Eye.Left] != null && filenames[(int)Eye.Left].Length > 1)
+                ? new VideoEyeFlyCapture(Eye.Left, filenames[(int)Eye.Left], VideoEyeFlyCapture.PositionOfEmbeddedInfo.BottomLeftHorizontal)
                 : null;
 
-            var videoRightEye = (filenames[Eye.Right] != null && filenames[Eye.Right].Length > 1)
-                ? new VideoEyeFlyCapture(Eye.Right, filenames[Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopRightHorizontal)
+            var videoRightEye = (filenames[(int)Eye.Right] != null && filenames[(int)Eye.Right].Length > 1)
+                ? new VideoEyeFlyCapture(Eye.Right, filenames[(int)Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopRightHorizontal)
                 : null;
 
             return new EyeCollection<VideoEye>(videoLeftEye, videoRightEye);

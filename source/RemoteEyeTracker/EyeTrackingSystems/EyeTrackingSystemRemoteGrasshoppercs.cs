@@ -24,7 +24,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        protected override EyeCollection<CameraEye?> CreateAndStartCameras()
+        protected override CameraEye?[] CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackerSystemSettingsRemoteGrasshopper ??
                 throw new InvalidOperationException("Wrong settings.");
@@ -80,14 +80,14 @@ namespace OpenIris
         /// </summary>
         /// <param name="images">Raw image from the camera.</param>
         /// <returns>Images prepared for processing.</returns>
-        public override EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye?> images)
+        public override EyeCollection<ImageEye?> PreProcessImages(ImageEye?[] images)
         {
-            if (images.Count == 1)
+            if (images.Length == 1)
             {
                 var settings = Settings as EyeTrackerSystemSettingsRemoteGrasshopper ??
                      throw new InvalidOperationException("Wrong settings.");
 
-                var imageBothEyes = images[Eye.Both] ?? throw new InvalidOperationException("No image for both eyes");
+                var imageBothEyes = images[0] ?? throw new InvalidOperationException("No image for both eyes");
 
                 var roiLeft = new Rectangle(1160, 0, 760, imageBothEyes.Size.Height);
                 var roiRight = new Rectangle(0, 0, 760, imageBothEyes.Size.Height);
@@ -114,10 +114,10 @@ namespace OpenIris
             }
             else
             {
-                if (images[Eye.Left] is null || images[Eye.Right] is null) throw new InvalidOperationException("Images cannot be null.");
+                if (images[(int)Eye.Left] is null || images[(int)Eye.Right] is null) throw new InvalidOperationException("Images cannot be null.");
 
                 // Because only the right image has the timestamp in the bytes we copy the raw frame number to the left image
-                images[Eye.Left]!.TimeStamp.FrameNumberRaw = images[Eye.Right]!.TimeStamp.FrameNumberRaw;
+                images[(int)Eye.Left]!.TimeStamp.FrameNumberRaw = images[(int)Eye.Right]!.TimeStamp.FrameNumberRaw;
                 return base.PreProcessImages(images);
             }
         }
@@ -126,20 +126,20 @@ namespace OpenIris
         /// Gets the image sources.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        protected override EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> filenames)
+        protected override VideoEye?[] CreateVideos(string?[] filenames)
         {
             VideoEyeFlyCapture? videoLeftEye = null;
             VideoEyeFlyCapture? videoRightEye = null;
 
 
-            if (filenames[Eye.Left] != null && filenames[Eye.Left]?.Length > 1)
+            if (filenames[(int)Eye.Left] != null && filenames[(int)Eye.Left]?.Length > 1)
             {
-                videoLeftEye = new VideoEyeFlyCapture(Eye.Left, filenames[Eye.Left], VideoEyeFlyCapture.PositionOfEmbeddedInfo.BottomLeftHorizontal, 24);
+                videoLeftEye = new VideoEyeFlyCapture(Eye.Left, filenames[(int)Eye.Left], VideoEyeFlyCapture.PositionOfEmbeddedInfo.BottomLeftHorizontal, 24);
             }
 
-            if (filenames[Eye.Right] != null && filenames[Eye.Right]?.Length > 1)
+            if (filenames[(int)Eye.Right] != null && filenames[(int)Eye.Right]?.Length > 1)
             {
-                videoRightEye = new VideoEyeFlyCapture(Eye.Right, filenames[Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftHorizontal, 24);
+                videoRightEye = new VideoEyeFlyCapture(Eye.Right, filenames[(int)Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftHorizontal, 24);
             }
 
             return new EyeCollection<VideoEye?>(videoLeftEye, videoRightEye);

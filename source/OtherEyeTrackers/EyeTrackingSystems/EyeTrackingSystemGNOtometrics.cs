@@ -19,7 +19,7 @@ namespace OpenIris
         /// Gets the cameras. In this case two, left and right eye. 
         /// </summary>
         /// <returns>The list of cameras.</returns>
-        protected override EyeCollection<CameraEye> CreateAndStartCameras()
+        protected override CameraEye[] CreateAndStartCameras()
         {
             var frameRate = Settings.FrameRate;
 
@@ -65,11 +65,11 @@ namespace OpenIris
         /// Gets the image sources.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        protected override EyeCollection<VideoEye> CreateVideos(EyeCollection<string> filenames)
+        protected override VideoEye[] CreateVideos(string[] filenames)
         {
             return new EyeCollection<VideoEye>(
                 null,
-                new VideoEyeFlyCapture(Eye.Right, filenames[Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopRightHorizontal));
+                new VideoEyeFlyCapture(Eye.Right, filenames[(int)Eye.Right], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopRightHorizontal));
         }
     }
 }

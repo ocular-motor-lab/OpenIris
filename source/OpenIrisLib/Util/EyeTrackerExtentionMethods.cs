@@ -65,6 +65,16 @@ namespace OpenIris
             return (long)(images[0]?.TimeStamp.FrameNumber ?? images[1]?.TimeStamp.FrameNumber ?? throw new InvalidOperationException("No images"));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="images"></param>
+        /// <returns></returns>
+        public static long GetFrameNumber(this ImageEye?[] images)
+        {
+            return (long)(images[0]?.TimeStamp.FrameNumber ?? images[1]?.TimeStamp.FrameNumber ?? throw new InvalidOperationException("No images"));
+        }
+
 
         public static Vector2 Round(Vector2 V) => new Vector2((float)Math.Round(V.X), (float)Math.Round(V.Y));
         public static Vector2 Max(Vector2 V1, Vector2 V2) => Vector2.Max(V1, V2);

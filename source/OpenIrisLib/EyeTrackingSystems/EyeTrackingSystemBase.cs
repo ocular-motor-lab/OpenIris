@@ -33,7 +33,7 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Name of the eye tracking System.
+        /// Name of the eye tracking System. It will be set by the Create method according to the plugin configuration.
         /// </summary>
         public string Name { get; private set; }
 
@@ -80,7 +80,7 @@ namespace OpenIris
         internal CameraEye?[]? CreateAndStartCameras1()
         {
             var cameras = CreateAndStartCameras();
-            imageSources = cameras.Select(c => c as IImageEyeSource).ToArray();
+            imageSources = cameras;
             return cameras;
         }
 
@@ -88,10 +88,10 @@ namespace OpenIris
         /// Gets the cameras.
         /// </summary>
         /// <returns>List of image eye source objects.</returns>
-        internal EyeCollection<VideoEye?>? CreateVideos_imageSource(EyeCollection<string?> fileNames)
+        internal VideoEye?[]? CreateVideos_imageSource(string?[] fileNames)
         {
             var videos = CreateVideos(fileNames);
-            imageSources = videos.Select(c => c as IImageEyeSource).ToArray();
+            imageSources = videos;
             return videos;
         }
 

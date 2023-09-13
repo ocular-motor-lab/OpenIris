@@ -109,7 +109,7 @@ namespace OpenIris
                         imageRight.WhichEye = Eye.Right;
                         return new EyeCollection<ImageEye?>(imageLeft, imageRight);
                     default:
-                        return images;
+                        return new EyeCollection<ImageEye?>(images);
                 }
             }
             else

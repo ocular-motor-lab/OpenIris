@@ -137,15 +137,7 @@ namespace OpenIris
             return collection?.items ?? Array.Empty<T>();
         }
 
-        /// <summary>
-        /// Converts an array into an EyeCollection.
-        /// </summary>
-        /// <param name="collection"></param>
-        public static implicit operator EyeCollection<T>(T[] collection)
-        {
-            return new EyeCollection<T>(collection);
-        }
-
+  
         /// <summary>
         /// Executes an action for each element of the collection
         /// </summary>

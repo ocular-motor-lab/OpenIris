@@ -266,7 +266,7 @@ namespace OpenIris
         /// <param name="images">Frames to be recorded.</param>
         /// <param name="frameRate">Frame rate of the image grabber.</param>
         /// <returns>True if the frames were recording, false if dropped.</returns>
-        internal bool TryRecordImages(EyeCollection<ImageEye?> images, double frameRate)
+        internal bool TryRecordImages(ImageEye?[] images, double frameRate)
         {
             if (rawFramesRecorder is null) throw new InvalidOperationException("Recorder not ready.");
 

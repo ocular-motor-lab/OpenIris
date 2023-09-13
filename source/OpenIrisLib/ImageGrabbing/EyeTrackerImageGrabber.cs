@@ -34,8 +34,8 @@ namespace OpenIris
         private CancellationTokenSource? cancellation;
 
         private IImageEyeSource?[]? imageSources;
-        private BlockingCollection<ImageEye>? cameraBuffer;
-        private EyeCollection<Queue<ImageEye>?>? cameraQueues;
+        private BlockingCollection<(ImageEye?, int)>? cameraBuffer;
+        private Queue<ImageEye>?[]? cameraQueues;
         private (double TimeStamp, long FrameCounter) lastCheckGrabbing;
         private bool started;
         private bool stopping;
@@ -49,12 +49,10 @@ namespace OpenIris
         /// <exception cref="OpenIrisException"></exception>
         internal static EyeTrackerImageGrabber CreateNewForVideos(VideoPlayer videoPlayer, int bufferSize = 100)
         {
-            var newSources = videoPlayer.Videos.Select(v => v as IImageEyeSource)
+            var newSources = videoPlayer.Videos.Select(v => v as IImageEyeSource).ToArray()
                 ?? throw new OpenIrisException("No videos.");
 
-            var sources = new EyeCollection<IImageEyeSource?>(newSources);
-
-            return new EyeTrackerImageGrabber(sources, bufferSize, ((EyeTrackingSystemBase)videoPlayer).Settings.Eye);
+            return new EyeTrackerImageGrabber(newSources, bufferSize, ((EyeTrackingSystemBase)videoPlayer).Settings.Eye);
         }
 
         /// <summary>
@@ -66,12 +64,10 @@ namespace OpenIris
         /// <exception cref="OpenIrisException"></exception>
         internal static async Task<EyeTrackerImageGrabber> CreateNewForCameras(EyeTrackingSystemBase eyeTrackingSystem, int bufferSize = 100)
         {
-               var newSources = await Task.Run(() => eyeTrackingSystem.CreateAndStartCameras1().Select(c => c as IImageEyeSource))
+            var newSources = await Task.Run(() => eyeTrackingSystem.CreateAndStartCameras1().Select(c => c as IImageEyeSource).ToArray())
                 ?? throw new OpenIrisException("No cameras started.");
 
-            var sources = new EyeCollection<IImageEyeSource?>(newSources);
-
-            return new EyeTrackerImageGrabber(sources, bufferSize, eyeTrackingSystem.Settings.Eye);
+            return new EyeTrackerImageGrabber(newSources, bufferSize, eyeTrackingSystem.Settings.Eye);
         }
 
         /// <summary>
@@ -80,7 +76,7 @@ namespace OpenIris
         /// <param name="sources">Image sources, cameras or videos.</param>
         /// <param name="bufferSize">Number of frames held in the buffer.</param>
         /// <param name="whichEye">Which eye to grab from, left, right, or both.</param>
-        private EyeTrackerImageGrabber(EyeCollection<IImageEyeSource?> sources, int bufferSize = 100, Eye whichEye = Eye.Both)
+        private EyeTrackerImageGrabber(IImageEyeSource?[] sources, int bufferSize = 100, Eye whichEye = Eye.Both)
         {
             // Check if the sources are videos and get the video player
             videoPlayer = (sources.FirstOrDefault(s => s is VideoEye) as VideoEye)?.VideoPlayer;
@@ -178,10 +174,10 @@ namespace OpenIris
                 if (usingCameras && numberOfImageSources > 1)
                 {
                     // Setup the queue and start the threads for each camera
-                    cameraBuffer = new BlockingCollection<ImageEye>(bufferSize);
-                    cameraQueues = new EyeCollection<Queue<ImageEye>?>(imageSources.Select(c => (c != null) ? new Queue<ImageEye>() : null));
-                    cameraTasks = Task.WhenAll(imageSources.Select(s => Task.Factory.StartNew(() => 
-                        CameraLoop(s as CameraEye), 
+                    cameraBuffer = new BlockingCollection<(ImageEye?, int)>(bufferSize);
+                    cameraQueues = imageSources.Select(c => (c != null) ? new Queue<ImageEye>() : null).ToArray();
+                    cameraTasks = Task.WhenAll(imageSources.Select((s, idx) => Task.Factory.StartNew(() =>
+                        CameraLoop(s as CameraEye, idx),
                         TaskCreationOptions.LongRunning).ContinueWith(errorHandler.HandleError)).ToArray());
                 }
 
@@ -228,7 +224,8 @@ namespace OpenIris
         /// Loop that grabs images from a camera and puts them in a thread safe queue.
         /// </summary>
         /// <param name="camera">Camera to grab from.</param>
-        private void CameraLoop(CameraEye? camera)
+        /// <param name="cameraNumber">Number of the camera.</param>
+        private void CameraLoop(CameraEye? camera, int cameraNumber)
         {
             if (camera is null) return;
 
@@ -245,7 +242,7 @@ namespace OpenIris
 
                 if (image is null) continue;
                 
-                cameraBuffer?.TryAdd(image);
+                cameraBuffer?.TryAdd((image, cameraNumber));
             }
 
             Trace.WriteLine(Thread.CurrentThread.Name + " finished.");
@@ -316,14 +313,15 @@ namespace OpenIris
                 throw new InvalidOperationException("Camera buffers are not ready.");
 
             // Wait for an image from the queue
-            var result = cameraBuffer.TryTake(out ImageEye? image, millisecondsTimeout: -1, cancellation.Token);
+            var result = cameraBuffer.TryTake(out (ImageEye? image, int number) imageAndNumber, millisecondsTimeout: -1, cancellation.Token);
+            var image = imageAndNumber.image;
             if (!result || image is null) return null;
 
             try
             {
-                var cameraQueue = cameraQueues[image.WhichEye] ?? throw new InvalidOperationException("This queue should not be null.");
+                var cameraQueue = cameraQueues[imageAndNumber.number] ?? throw new InvalidOperationException("This queue should not be null.");
 
-                // When grabbing from two cameras, it is possible that a frame is dropped in one camera
+                // When grabbing from two or more cameras, it is possible that a frame is dropped in one camera
                 // but not in the other. For that reason it is necessary to have a buffer to hold frames
                 // from one camera while the corresponding frame from the other camera may or may not arrive.
 
@@ -343,10 +341,10 @@ namespace OpenIris
                 // that frame number is missing in some other queue to deal with dropped frames. If there
                 // was dropped frame this will clean the queues until a non-dropped frame arrives to all
                 // the queues.
-                var images = new ImageEye[cameraQueues.Count];
+                var images = new ImageEye[cameraQueues.Length];
                 bool anyImageMissing = false;
 
-                for (int i = 0; i < cameraQueues.Count; i++)
+                for (int i = 0; i < cameraQueues.Length; i++)
                 {
                     var queue = cameraQueues[i];
 
@@ -379,7 +377,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="newImageEyeSources">Image sources.</param>
         /// <returns>The frame rate.</returns>
-        private static double CheckFrameRate(EyeCollection<IImageEyeSource?> newImageEyeSources)
+        private static double CheckFrameRate(IImageEyeSource?[] newImageEyeSources)
         {
             var maxFrameRateDifference = 0.5;
 
@@ -395,27 +393,27 @@ namespace OpenIris
             return frameRates.Average();
         }
 
-        private static int CheckNumberOfSources(EyeCollection<IImageEyeSource?> sources, Eye whichEyes)
+        private static int CheckNumberOfSources(IImageEyeSource?[] sources, Eye whichEyes)
         {
             var numberOfSources = 0;
             switch (whichEyes)
             {
                 case Eye.Left:
-                    if (sources.Count != 2 || sources[Eye.Left] == null || sources[Eye.Right] != null )
+                    if (sources.Length != 2 || sources[(int)Eye.Left] == null || sources[(int)Eye.Right] != null )
                         throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
                     numberOfSources = 1;
                     break;
                 case Eye.Right:
-                    if (sources.Count != 2 || sources[Eye.Right] == null || sources[Eye.Left] != null)
+                    if (sources.Length != 2 || sources[(int)Eye.Right] == null || sources[(int)Eye.Left] != null)
                         throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
                     numberOfSources = 1;
                     break;
                 case Eye.Both:
-                    if (sources.Count == 1 && sources[Eye.Both] == null)
+                    if (sources.Length == 1 && sources[(int)Eye.Both] == null)
                         throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
-                    if (sources.Count == 2 && (sources[Eye.Left] == null || sources[Eye.Right] == null))
+                    if (sources.Length == 2 && (sources[(int)Eye.Left] == null || sources[(int)Eye.Right] == null))
                         throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
-                    numberOfSources = sources.Count;
+                    numberOfSources = sources.Length;
                     break;
                 default:
                     throw new InvalidOperationException("The number of image imageEyeSource is not correct for " + whichEyes + " eye(s)");
@@ -430,7 +428,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="newImageEyeSources">Image sources.</param>
         /// <returns>The frame size.</returns>
-        private static Size CheckFrameSize(EyeCollection<IImageEyeSource?> newImageEyeSources)
+        private static Size CheckFrameSize(IImageEyeSource?[] newImageEyeSources)
         {
             try
             {

@@ -230,7 +230,7 @@ namespace OpenIris
                     Tracking = true;
 
                     RecordingSession?.TryRecordImages(grabbedImages, ImageGrabber.FrameRate);
-                    ImageProcessor?.TryProcessImages(new EyeTrackerImagesAndData(grabbedImages, Calibration, Settings.EyeTrackingPipeline, Settings.TrackingPipelineSettings));
+                    ImageProcessor?.TryProcessImages(grabbedImages, Calibration, Settings.EyeTrackingPipeline, Settings.TrackingPipelineSettings);
                 };
 
                 // Action for every time new images are processed

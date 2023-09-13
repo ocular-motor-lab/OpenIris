@@ -53,7 +53,7 @@ namespace OpenIris
         private readonly int inputBufferSize;
         private readonly EyeTrackingSystemBase eyeTrackingsystem;
 
-        private BlockingCollection<(EyeTrackerImagesAndData imagesAndData, long orderNumber)>? inputBuffer;
+        private BlockingCollection<(ImageEye?[] images, CalibrationParameters calibration, string pipelineName, EyeTrackingPipelineSettings trackingSettings, long orderNumber)>? inputBuffer;
         private ConcurrentDictionary<long, EyeTrackerImagesAndData>? outputWaitingList;
         private int outputNextExpectedNumber = 0;
 
@@ -127,7 +127,7 @@ namespace OpenIris
 
             try
             {
-                using (inputBuffer = new BlockingCollection<(EyeTrackerImagesAndData, long)>(inputBufferSize))
+                using (inputBuffer = new BlockingCollection<(ImageEye?[] images, CalibrationParameters calibration, string pipelineName, EyeTrackingPipelineSettings trackingSettings, long orderNumber)>(inputBufferSize))
                 {
                     outputWaitingList = new ConcurrentDictionary<long, EyeTrackerImagesAndData>();
 
@@ -187,7 +187,7 @@ namespace OpenIris
         /// True if the images were queued for processing. False if the frames were dropped because
         /// the buffere was full
         /// </returns>
-        internal bool TryProcessImages(EyeTrackerImagesAndData imagesAndData)
+        internal bool TryProcessImages(ImageEye?[] images, CalibrationParameters calibration, string pipelineName, EyeTrackingPipelineSettings trackingSettings)
         {
             if (inputBuffer is null)
             {
@@ -208,10 +208,10 @@ namespace OpenIris
             switch (mode)
             {
                 case Mode.RealTime:
-                    result = inputBuffer.TryAdd((imagesAndData, NumberFramesProcessed));
+                    result = inputBuffer.TryAdd((images, calibration, pipelineName, trackingSettings, NumberFramesProcessed));
                     break;
                 case Mode.Offline:
-                    inputBuffer.Add((imagesAndData, NumberFramesProcessed));
+                    inputBuffer.Add((images, calibration, pipelineName, trackingSettings, NumberFramesProcessed));
                     break;
             }
 
@@ -240,13 +240,13 @@ namespace OpenIris
             {
                 // Keep processing images until the buffer is marked as complete and empty
                 using CancellationTokenSource? cancellation = new ();
-                foreach ((EyeTrackerImagesAndData imagesAndData, long orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
+                foreach ((ImageEye?[] images, CalibrationParameters calibration, string pipelineName, EyeTrackingPipelineSettings trackingSettings, long orderNumber) in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                 {
-                    UpdatePipeline(ref pipelines, imagesAndData);
+                    UpdatePipeline(ref pipelines, pipelineName, trackingSettings);
 
                     // Prepare the images for processing depending on the system. For instance flipping,
                     // cropping, splitting, increasing contrast, whatever ...
-                    imagesAndData.UpdateImages(eyeTrackingsystem.PreProcessImages(imagesAndData.Images));
+                    var imagesAndData = new EyeTrackerImagesAndData(eyeTrackingsystem.PreProcessImages(images), calibration, pipelineName, trackingSettings);
 
                     //
                     // Wait for left and right eye to process
@@ -284,9 +284,9 @@ namespace OpenIris
                         // Go thru the waiting list to look for next expected order number. If the image we
                         // are waiting for is in the waiting list. Remove the item and raise an event
                         // notifying that a new image was processed
-                        while (outputWaitingList.TryRemove(outputNextExpectedNumber, out EyeTrackerImagesAndData images))
+                        while (outputWaitingList.TryRemove(outputNextExpectedNumber, out EyeTrackerImagesAndData imagesFromWaitingList))
                         {
-                            ImagesProcessed?.Invoke(this, images);
+                            ImagesProcessed?.Invoke(this, imagesFromWaitingList);
                             outputNextExpectedNumber++;
                         }
                     }
@@ -324,18 +324,18 @@ namespace OpenIris
             }
         }
 
-        private void UpdatePipeline(ref EyeCollection<EyeTrackingPipelineBase?>? pipelines, EyeTrackerImagesAndData imagesAndData)
+        private void UpdatePipeline(ref EyeCollection<EyeTrackingPipelineBase?>? pipelines, string pipelineName, EyeTrackingPipelineSettings trackingSettings)
         {
             // 
             // Check if it is necessary to change the pipeline and the corresponding UI
             //
-            string currentPipelineName = imagesAndData.EyeTrackingPipelineName;
+            string currentPipelineName = pipelineName;
 
             if (pipelines?[Eye.Left]?.Name != currentPipelineName || pipelines?[Eye.Right]?.Name != currentPipelineName)
             {
                 pipelines = new EyeCollection<EyeTrackingPipelineBase?>(
-                    EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Left, imagesAndData.TrackingSettings),
-                    EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Right, imagesAndData.TrackingSettings));
+                    EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Left, trackingSettings),
+                    EyeTrackingPipelineBase.Create(currentPipelineName, Eye.Right, trackingSettings));
 
                 // need this condition also because there may be many threads
                 // only one needs to change the UI but all of them need to change

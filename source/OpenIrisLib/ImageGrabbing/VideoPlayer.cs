@@ -8,6 +8,7 @@ namespace OpenIris
 #nullable enable
 
     using System;
+    using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
     using System.Timers;
@@ -80,7 +81,7 @@ namespace OpenIris
         /// controlled by the imagegrabber.
         /// </param>
         /// <returns>New ImageGrabberVideoFile object.</returns>
-        private VideoPlayer(EyeTrackingSystemBase system, EyeCollection<string?> fileNames, Range frameRange, bool useTimer)
+        private VideoPlayer(EyeTrackingSystemBase system, string?[] fileNames, Range frameRange, bool useTimer)
         {
             eyeTrackingSystem = system;
 
@@ -90,8 +91,11 @@ namespace OpenIris
                 throw new ArgumentException("File " + file + " does not exist.");
             }
 
+            VideoEye?[]? newVideos;
             // Initialize the video files
-            (Videos, FrameCount, FrameRate, FrameSize) = CheckVideos(eyeTrackingSystem.CreateVideos_imageSource(fileNames));
+            (newVideos, FrameCount, FrameRate, FrameSize) = CheckVideos(eyeTrackingSystem.CreateVideos_imageSource(fileNames));
+
+            Videos = new List<VideoEye?>(newVideos);
 
             Videos.ForEach(v => { if (v != null) v.VideoPlayer = this; });
 
@@ -157,7 +161,7 @@ namespace OpenIris
         /// <summary>
         /// List of sources of images of the eyes.
         /// </summary>
-        public EyeCollection<VideoEye?> Videos { get; }
+        public List<VideoEye?> Videos { get; }
 
         /// <summary>
         /// Gets or sets the total number of frames in the video file.
@@ -372,7 +376,7 @@ namespace OpenIris
         /// </summary>
         /// <param name="newVideos"></param>
         /// <returns></returns>
-        private static (EyeCollection<VideoEye?>, long, double, Size) CheckVideos(EyeCollection<VideoEye?> newVideos)
+        private static (VideoEye?[], long, double, Size) CheckVideos(VideoEye?[] newVideos)
         {
             // Get the number of frames (get the shortest in the case the videos have different durations)
             var frameCount = newVideos.Min(video => video?.NumberOfFrames) ??

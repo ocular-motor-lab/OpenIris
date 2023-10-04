@@ -221,7 +221,6 @@ namespace OpenIris.ImageProcessing
                 // Finally get the quaternion that defines that rotation. This is a rotation without torsion in a reference frame perpendicular to the camera
                 var q = new Quaternions(Math.Cos(ecc / 2), -Math.Sin(angle) * Math.Sin(ecc / 2), Math.Cos(angle) * Math.Sin(ecc / 2), 0);
 
-
                 // Intermideate variables neccesary for the quaternion rotation
                 double
                    t2 = q.W * q.X,

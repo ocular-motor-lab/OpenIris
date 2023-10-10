@@ -57,11 +57,11 @@ namespace OpenIris
                 }
                 catch (SocketException e)
                 {
-                    Console.WriteLine("SocketException: {0}", e);
+                    Trace.WriteLine("SocketException: " + e);
                 }
                 finally
                 {
-                    server.Close();
+                    server?.Close();
                 }
             });
         }

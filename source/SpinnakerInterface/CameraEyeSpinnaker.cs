@@ -16,6 +16,8 @@ namespace SpinnakerInterface
 {
 #nullable enable
 
+    // OPEN IRIS VERSION NOT DALES
+
     class CameraEyeSpinnaker : CameraEye, IMovableImageEyeSource, IVariableExposureImageEyeSource
     {
         public enum TriggerMode
@@ -146,8 +148,11 @@ namespace SpinnakerInterface
 
         protected override ImageEye GrabImageFromCamera()
         {
+            ImageEye? newImageEye = null;
             IManagedImage rawImage = null;
-            if (!cam.IsStreaming()) { return null; }
+            if (!cam.IsStreaming()) { 
+                return null; 
+            }
             try
             {
                 using (rawImage = cam.GetNextImage())
@@ -184,7 +189,7 @@ namespace SpinnakerInterface
                         Buffer.MemoryCopy((byte*)rawImage.DataPtr + rawImage.Width * rawImage.Height, (byte*)rawImage.DataPtr, rawImage.ManagedData.Length, rawImage.ManagedData.Length - rawImage.Width * rawImage.Height);
                     }
 
-                    return new ImageEye(
+                    newImageEye = new ImageEye(
                                      (int)rawImage.Width,
                                      (int)rawImage.Height,
                                      (int)rawImage.Stride,
@@ -195,16 +200,19 @@ namespace SpinnakerInterface
                         ImageSourceData = (lastExposureEndLineStatusAll, rawImage),
 
                     };
+
+                    return newImageEye;
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                return null;
+                Trace.WriteLine("Camera ERROR " + ex);
+                throw;
             }
             finally
             {
-                rawImage?.Release();
-                rawImage?.Dispose();
+              // rawImage?.Release();
+              // rawImage?.Dispose();
             }
         }
 

@@ -221,7 +221,6 @@ namespace OpenIris.ImageProcessing
                 // Finally get the quaternion that defines that rotation. This is a rotation without torsion in a reference frame perpendicular to the camera
                 var q = new Quaternions(Math.Cos(ecc / 2), -Math.Sin(angle) * Math.Sin(ecc / 2), Math.Cos(angle) * Math.Sin(ecc / 2), 0);
 
-
                 // Intermideate variables neccesary for the quaternion rotation
                 double
                    t2 = q.W * q.X,
@@ -253,45 +252,98 @@ namespace OpenIris.ImageProcessing
                 // what is the corresponding x and y coordinate of the pixel in the original image.
 
                 double cp, sp, x, y, rr, z,r;
-                double hfactor = 2 * Math.PI / h;
-                double wfactor = (iris.Radius - pupilRadius)/w;
+                double hfactor = 2 * Math.PI / h; // horizontal resolution in radians per pixel of the iris image
+                double wfactor = (iris.Radius - pupilRadius)/w; // vertical resolution in pixel per pixel of the iris image.
+                                                                // that is, how much bigger is the iris image than the actual
+                                                                // iris in the original eye image.
 
                 unsafe
                 {
+                    //
+                    // This loop is going to prepare a mapx and mapy variable to use later on the remap method 
+                    // Remap creates a new image by warping an original image
+                    // This warping needs two maps of the same size of the desired output image
+                    // containing the x and y coordinates respective of each pixel in the original image
+                    //
                     // Fix the pointers to the begining of the data
+                    // For both maps (x and y)
                     fixed (float* px = mapx.Data)
                     fixed (float* py = mapy.Data)
                     {
+                        // loop trhough the columns of the iris image
+                        // that correspond with different angles around the pupil. 
                         for (int phi = 0; phi < h; phi++)
                         {
+                            // Go from polar to cartesian coordinates but in an eye model
+                            // of radious 1
                             cp = Math.Cos(phi * hfactor);
                             sp = Math.Sin(phi * hfactor);
 
+                            // Speed optimization to get a pointer with the address of
+                            // the first pixel of the current column in each of the maps
                             float* mx = px + phi * w;
                             float* my = py + phi * w;
 
+                            // loop through the rows of the iris image
+                            // that correspond with rings from the pupil edge
+                            // to the iris edge
                             for (int rho = 0; rho < w; rho++)
                             {
+                                // This is an intermediate step that for every point in the iris image
+                                // gets the coordinates in pixels of that point in an image that contains
+                                // an eyeball looking straight at the camera with paramters according to the 
+                                // current eye model
+                                // This image never gets actually created because it is not needed. Instead
+                                // those coordinates are mapped again into an eyeball that is rotated by as
+                                // much as we have estimated according to the pupil position and the eye model
+                                // using the quaterion.
+
+
+                                // r is the distance from the center of the pupil
+                                // of the current "ring" in this loop in an image
+                                // where the eye ball is looking at the camera
+                                // according to the eye model paramaters
                                 r = rho * wfactor + pupilRadius;
 
-                                // x and y are the coordinates relative to the center of the pupil that correspond with rho and phi
+                                // x and y are the coordinates relative to the center of the
+                                // pupil that correspond with rho and phi in an image
+                                // where the eye ball is looking at the camera
+                                // according to the eye model paramaters
                                 x = r * cp;
                                 y = r * sp;
 
                                 if (useGeometricCorrection)
                                 {
-                                    // now we need to rotate those to the actual position
+                                    // This step rotates the points of the iris within an eyeball
+                                    // according the current position of the pupil
 
+                                    // er is eye radious model
+
+                                    // now we are going to calculate the 3D cartesian position
+                                    // of every point of the iris in a virtual eye model
+                                    // So we can rotate it according to the quaternion and bring it
+                                    // to the current eye orientation (pupil position)
+
+                                    // rr is distance in pixels from the cuurrent iris pixel
+                                    // to the center of the pupil but divided by the eye radius
+                                    // so it is as if the sphere with radius 1
                                     rr = Math.Sqrt(x * x + y * y) / er;
 
                                     if (rr <= 1)
                                     {
+                                        // all the points of a ring around the pupil center
+                                        // with an eccentricity rr will have the same z coordinate in 3D space
+                                        // On that space we can think of rr as the cosine of the angle
+                                        // so z will be the sine of that angle.
+                                        // remember sin = sqrt(1-cos)
                                         z = Math.Sqrt(1 - rr * rr) * er;
 
-                                        // var p2 = q.RotatePoint(p);
+                                        // calculate the rotated coordinates (xyz) of the point of the iris
+                                        // according to the quaterion
                                         x = 2.0 * ((t8 + t10) * x + (t6 - t4) * y + (t3 + t7) * z) + x;
                                         y = 2.0 * ((t4 + t6) * x + (t5 + t10) * y + (t9 - t2) * z) + y;
-                                        //double zz = 2.0 * ((t7 - t3) * x + (t2 + t9) * y + (t5 + t8) * z) + z;
+                                        // we don't actually need to calculate the z coordinate of the rotated point
+                                        // z = 2.0 * ((t7 - t3) * x + (t2 + t9) * y + (t5 + t8) * z) + z;
                                     }
                                 }
 

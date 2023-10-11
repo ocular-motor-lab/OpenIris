@@ -137,7 +137,7 @@ namespace OpenIris
             return collection?.items ?? Array.Empty<T>();
         }
 
-  
+
         /// <summary>
         /// Executes an action for each element of the collection
         /// </summary>

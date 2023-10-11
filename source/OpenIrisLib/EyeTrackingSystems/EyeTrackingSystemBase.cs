@@ -203,7 +203,7 @@ namespace OpenIris
                     image0.Image.CopyTo(imageTemp);
                     imageTemp.ROI = new Rectangle(0, h + 1, w, h);
                     image1.Image.CopyTo(imageTemp);
-                    imageTemp.ROI = Rectangle.Empty;
+                    imageTemp.ROI =  Rectangle.Empty;
                     var imageLeftEye = new ImageEye(imageTemp, Eye.Left, image0.TimeStamp, image1.TimeStamp);
 
                     imageTemp = new Image<Gray, byte>(image0.Size.Width, image0.Size.Height * 2);

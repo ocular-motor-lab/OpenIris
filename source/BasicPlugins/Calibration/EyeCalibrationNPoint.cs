@@ -72,7 +72,7 @@ namespace OpenIris.Calibration
             return (true, EyePhysicalModel.EmptyModel);
         }
 
-        public override (bool referebceCalibrationCompleted, ImageEye referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
+        public override (bool referenceCalibrationCompleted, ImageEye referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
             CalibrationUI = null;
 

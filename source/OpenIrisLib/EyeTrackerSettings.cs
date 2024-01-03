@@ -221,7 +221,7 @@ namespace OpenIris
 
         #region G) Network settings
 
-        [Category("F) Network "), Description("TCP port where the host is listening")]
+        [Category("G) Network "), Description("TCP port where the host is listening")]
         [NeedsRestarting]
         public int ServiceListeningPort { get => serviceListeningPort; set => SetProperty(ref serviceListeningPort, value, nameof(ServiceListeningPort)); }
         private int serviceListeningPort = 9000; // Default value

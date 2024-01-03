@@ -235,13 +235,14 @@ namespace OpenIris
         /// <returns></returns>
         public EyeCollection<EyeData?>? WaitForNewData()
         {
-            var dataWait = new AutoResetEvent(true);
+            var dataWait = new AutoResetEvent(false);
             EyeCollection<EyeData?>? data = null;
 
             if (eyeTracker is null) return null;
 
             EventHandler<EyeTrackerImagesAndData>? eventHandler = (_, o) =>
             {
+                Console.WriteLine("eventHandler");
                 data = o?.Data?.EyeDataRaw;
                 dataWait.Set();
             };
@@ -300,6 +301,18 @@ namespace OpenIris
             if (eyeTracker is null) throw new InvalidOperationException("Eye tracker is null.");
 
             return eyeTracker.RecordEvent(message, null);
+        }
+
+        /// <summary>
+        /// Handles a CALIBRATION message
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public string CalibrationMessage(string message)
+        {
+            if (eyeTracker is null) throw new InvalidOperationException("Eye tracker is null.");
+
+            return eyeTracker.CalibrationMessage(message);
         }
 
         /// <summary>
@@ -388,20 +401,6 @@ namespace OpenIris
 
 
         /// <summary>
-        /// A JSON serializeable class representing a 2d point.
-        /// </summary>
-        public class JsonPointF
-        {
-            public JsonPointF(PointF point)
-            {
-                X = point.X; Y = point.Y;
-            }
-
-            public float X { get; set; }
-            public float Y { get; set; }
-        }
-
-        /// <summary>
         /// A JSON serializeable class representing eyedata.
         /// </summary>
         public class JsonEyeData
@@ -410,22 +409,21 @@ namespace OpenIris
             {
                 FrameNumber = data.Timestamp.FrameNumberRaw;
                 Seconds = data.Timestamp.Seconds;
-                Pupil = new JsonPointF(data.Pupil.Center);
+                Pupil = data.Pupil;
 
                 var crs = data.CornealReflections ?? new CornealReflectionData[] { };
-                var crCenters = new List<JsonPointF>();
+                var crCenters = new List<PointF>();
                 foreach (var cr in crs)
                 {
-                    crCenters.Add(new JsonPointF(cr.Center));
+                    crCenters.Add(cr.Center);
                 }
 
                 CRs = crCenters.ToArray();
             }
             public ulong? FrameNumber { get; set; }
             public double? Seconds { get; set; }
-
-            public JsonPointF? Pupil { get; set; }
-            public JsonPointF[]? CRs { get; set; }
+            public PupilData? Pupil { get; set; }
+            public PointF[]? CRs { get; set; }
 
         }
 
@@ -443,6 +441,7 @@ namespace OpenIris
             public JsonEyeData? Right { get; set; }
         }
 
+
         /// <summary>
         /// Escute a command based on a string message.
         /// </summary>
@@ -455,8 +454,11 @@ namespace OpenIris
             var stringMessage = Encoding.ASCII.GetString(bytes);
             // var stringMessage = Encoding.ASCII.GetString(bytes, 0, i); TODO think how to optimize TCP
 
-            var msg = stringMessage.Split('|');
-            switch (msg[0].ToUpper())
+            var bar_idx = stringMessage.IndexOf('|');
+
+            var command = bar_idx == -1 ? stringMessage : stringMessage.Substring(0, bar_idx);
+            var data = bar_idx == -1 ? string.Empty : stringMessage.Substring(bar_idx + 1);
+            switch (command.ToUpper())
             {
                 case "STARTRECORDING":
                     StartRecording();
@@ -479,8 +481,13 @@ namespace OpenIris
                     return Encoding.ASCII.GetBytes(eyedatamsg);
 
                 case "RECORDEVENT":
-                    var frameNumber = RecordEvent(msg[1]);
+                    var frameNumber = RecordEvent(data);
                     return Encoding.ASCII.GetBytes(frameNumber.ToString());
+
+                case "CALIBRATION":
+                    var result = CalibrationMessage(data);
+                    return Encoding.ASCII.GetBytes(result);
+
                 case "TESEMPTY":
                     return new byte[1] { 68 };
                 default:

@@ -72,7 +72,12 @@ namespace OpenIris
         /// <summary>
         /// Process data for setting a new reference.
         /// </summary>
-        public abstract (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings);
+        public abstract (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings);
+
+        /// <summary>
+        /// Handle an incoming remote command.
+        /// </summary>
+        public virtual string HandleRemoteMessage(string message) => string.Empty;
 
         /// <summary>
         /// User interface of the calibration.

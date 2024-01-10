@@ -41,7 +41,7 @@ namespace OpenIris
 
                     AllEyeTrackerSystemSettings.Add(value, eyeTrackerSystemSettings);
 
-                    AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e);
                     AllEyeTrackerSystemSettings[value].PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
                     AllEyeTrackerSystemSettings[value].MmPerPixChanged += (o, e) =>
                     {

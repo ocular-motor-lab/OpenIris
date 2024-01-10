@@ -15,6 +15,7 @@ namespace OpenIris
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using static OpenIris.EyeTrackerSettingsBase;
 
     /// <summary>
     /// Main class that offers the public interface to the library for eye tracking.
@@ -57,6 +58,7 @@ namespace OpenIris
                 // Load settings. Needs to happen after the plugins have been initialized to properly
                 // load the settings of each plugin
                 Settings = EyeTrackerSettings.Load();
+                Settings.PropertyChanged += Settings_PropertyChanged;
 
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
@@ -68,6 +70,13 @@ namespace OpenIris
                 Dispose();
                 throw;
             }
+        }
+
+        private void Settings_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            var eventArgs = e as PropertyChangedWithValueEventArgs;
+
+            this.RecordEvent("UPDATED SETTING: " + e.PropertyName + " = " + eventArgs?.value, null);
         }
 
         /// <summary>

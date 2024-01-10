@@ -45,6 +45,17 @@ namespace OpenIris
     [Serializable]
     public class EyeTrackerSettingsBase : INotifyPropertyChanged
     {
+        public class PropertyChangedWithValueEventArgs : PropertyChangedEventArgs
+        {
+            public PropertyChangedWithValueEventArgs(string propertyName, object? value)
+                :base(propertyName)
+            {
+                this.value = value;
+            }
+
+            public object? value;
+        }
+
         [field: NonSerialized]
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -73,7 +84,7 @@ namespace OpenIris
                 }
 
                 field = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+                PropertyChanged?.Invoke(this, new PropertyChangedWithValueEventArgs(name, value));
             }
         }
 
@@ -100,12 +111,12 @@ namespace OpenIris
                 }
 
                 field = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+                PropertyChanged?.Invoke(this, new PropertyChangedWithValueEventArgs(name, value));
 
                 foreach (var v in value.Values)
                 {
                     // make sure the property changes propagate
-                    v.PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
+                    v.PropertyChanged += (o, e) => PropertyChanged?.Invoke(o, e);
                     v.PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
                 }
             }
@@ -120,6 +131,17 @@ namespace OpenIris
         {
             // Save thesettings everytime something changes
             PropertyChanged?.Invoke(o, new PropertyChangedEventArgs(name));
+        }
+
+        /// <summary>
+        /// Raises the PropertyChange event
+        /// </summary>
+        /// <param name="o">The object.</param>
+        /// <param name="name">Event parameters</param>
+        public void OnPropertyChanged(object o, PropertyChangedEventArgs e)
+        {
+            // Save thesettings everytime something changes
+            PropertyChanged?.Invoke(o, e);
         }
 
         /// <summary>

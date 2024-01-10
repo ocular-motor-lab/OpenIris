@@ -28,7 +28,7 @@ namespace OpenIris
         /// <summary>
         /// Process data for setting a new reference.
         /// </summary>
-        public override (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
+        public override (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
             if (image is null) return ( false, null);
 

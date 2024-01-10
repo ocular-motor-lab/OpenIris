@@ -606,6 +606,21 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Handles a CALIBRATION remote message.
+        /// </summary>
+        /// <param name="eventMessage">Message associated with the event.</param>
+        /// <param name="data">Data associated with the event.</param>
+        /// <returns>The current frame number that will be associated with the event.</returns>
+        public string CalibrationMessage(string eventMessage)
+        {
+            Trace.WriteLine("Calibration Message = " + eventMessage);
+
+            if (CalibrationSession is null) return string.Empty;
+
+            return CalibrationSession?.HandleRemoteMessage(eventMessage) ?? string.Empty;
+        }
+
+        /// <summary>
         /// Centers the camera ROI around the current pupil center.
         /// </summary>
         public void CenterEyes()

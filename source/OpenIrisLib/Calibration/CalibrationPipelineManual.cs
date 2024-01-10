@@ -39,7 +39,7 @@ namespace OpenIris
             return (true, ui.eyeModels[image.WhichEye]);
         }
 
-        public override (bool referebceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
+        public override (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
             ui = null; // No UI for resetting reference
 

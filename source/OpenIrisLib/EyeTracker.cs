@@ -615,9 +615,9 @@ namespace OpenIris
         {
             Trace.WriteLine("Calibration Message = " + eventMessage);
 
-            if (CalibrationSession is null) return string.Empty;
+            if (CalibrationSession is null) return "ack";
 
-            return CalibrationSession?.HandleRemoteMessage(eventMessage) ?? string.Empty;
+            return CalibrationSession?.HandleRemoteMessage(eventMessage) ?? "ack";
         }
 
         /// <summary>

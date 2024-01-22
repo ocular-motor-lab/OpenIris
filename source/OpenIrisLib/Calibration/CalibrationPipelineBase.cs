@@ -77,7 +77,7 @@ namespace OpenIris
         /// <summary>
         /// Handle an incoming remote command.
         /// </summary>
-        public virtual string HandleRemoteMessage(string message) => string.Empty;
+        public virtual string HandleRemoteMessage(string message) => "ack";
 
         /// <summary>
         /// User interface of the calibration.

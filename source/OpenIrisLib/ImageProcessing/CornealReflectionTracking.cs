@@ -55,7 +55,7 @@ namespace OpenIris.ImageProcessing
             if (trackingSettings is null) throw new ArgumentNullException(nameof(trackingSettings));
 
             int blurSize = (int)Math.Ceiling(trackingSettings.MinCRRadPix/2); //if not divided by 2, it only picks very small ones and by increasing the minCRRadPix it will make the cr vanish in opening and closing
-            if (blurSize == 0) { blurSize = 1; }
+            //if (blurSize == 0) { blurSize = 1; }
             var threshold = (imageEye.WhichEye == Eye.Left) ? trackingSettings.BrightThresholdLeftEye : trackingSettings.BrightThresholdRightEye;
             var maxBlobArea = trackingSettings.MaxCRRadPix * Math.PI * Math.PI;
             var minBlobArea = trackingSettings.MinCRRadPix * Math.PI * Math.PI;
@@ -110,7 +110,9 @@ namespace OpenIris.ImageProcessing
 
             if (irisROI.Width == 0 || irisROI.Height == 0) return null;
 
-            Image<Gray, byte> imgBlurred = imageEye.Image.Copy(irisROI).SmoothBlur(blurSize, blurSize);
+            var smoothBlurSize = blurSize + 1;
+
+            Image<Gray, byte> imgBlurred = imageEye.Image.Copy(irisROI).SmoothBlur(smoothBlurSize, smoothBlurSize);
             Image<Gray, byte> imgResized;
             //resize the image
             if (scaleFactor_findBlob == 1)
@@ -133,30 +135,34 @@ namespace OpenIris.ImageProcessing
             // --  Morphological erosion and dilation --
             // Optimize the blobs by removing small white or black spots
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            //adjust the kernel size as the image resized
-            int kernelSize = (int) Math.Round(blurSize * scaleFactor_findBlob);
-            kernelSize = kernelSize == 0 ? 1 : kernelSize;
-            //var kernelSize = resizeBlur;
-            var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(kernelSize, kernelSize), new Point(-1, -1));
-            var center = new Point(-1, -1);
-            var one = new MCvScalar(1);
-            if (openImage)
-            {
-                // Image opening. Morpholigical operation to remove small spots that are above treshold.
-                // First it erodes the image. That is reduce the size of the white blobs. Next it dilates the
-                // remaning blobs. This will eliminate the blobs that are smaller than the kernel size.
-                CvInvoke.Erode(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
-                CvInvoke.Dilate(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
-            }
-            if (closeImage)
-            {
-                // Image closing. Morpholigical operation to remove small spots that are below treshold.
-                // First it dilates the image. That is increase the size of the white blobs. Next it erods the
-                // remaning blobs. This will eliminate the spots within the blobs that are smaller than the kernel size.
-                CvInvoke.Dilate(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
-                CvInvoke.Erode(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
-            }
 
+            //if blurSize == 0, skip the erosion and dilation step
+            if (blurSize != 0)
+            {
+                //adjust the kernel size as the image resized
+                int kernelSize = (int)Math.Round(blurSize * scaleFactor_findBlob);
+                kernelSize = kernelSize == 0 ? 1 : kernelSize;
+                //var kernelSize = resizeBlur;
+                var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(kernelSize, kernelSize), new Point(-1, -1));
+                var center = new Point(-1, -1);
+                var one = new MCvScalar(1);
+                if (openImage)
+                {
+                    // Image opening. Morpholigical operation to remove small spots that are above treshold.
+                    // First it erodes the image. That is reduce the size of the white blobs. Next it dilates the
+                    // remaning blobs. This will eliminate the blobs that are smaller than the kernel size.
+                    CvInvoke.Erode(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
+                    CvInvoke.Dilate(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
+                }
+                if (closeImage)
+                {
+                    // Image closing. Morpholigical operation to remove small spots that are below treshold.
+                    // First it dilates the image. That is increase the size of the white blobs. Next it erods the
+                    // remaning blobs. This will eliminate the spots within the blobs that are smaller than the kernel size.
+                    CvInvoke.Dilate(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
+                    CvInvoke.Erode(imgCRBinary, imgCRBinary, kernel, center, 1, BorderType.Default, one);
+                }
+            }
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // --  Blob selection --
             // Find the blob that is most likely to be the CR.
@@ -198,8 +204,8 @@ namespace OpenIris.ImageProcessing
 
                 if (scaleFactor_findCenter == 1)
                 {
-                    //score it based on a perfect circle within a square (area of a circle within a square = pi/4) - 0.38 
-                    if (score > 0.4)
+                    //score it based on a perfect circle within a square (area of a circle within a square = pi/4) - 0.48 
+                    if (score > 0.3)
                     {
                         crs.Add(new CornealReflectionData(
                             new PointF((float) (blob.Centroid.X / scaleFactor_findBlob) + irisROI.X, (float) (blob.Centroid.Y / scaleFactor_findBlob) + irisROI.Y),
@@ -210,7 +216,7 @@ namespace OpenIris.ImageProcessing
                 else
                 {
                     //score it based on a perfect circle within a square (area of a circle within a square = pi/4), the square is enlarged by variable k. Therefore the score is (pi/4)/k^2
-                    if (score > 0.4)
+                    if (score > 0.3)
                     {
                         // up sample to find the center of the crs
                         resizeWidth = blob.BoundingBox.Width / scaleFactor_findBlob;
@@ -248,7 +254,7 @@ namespace OpenIris.ImageProcessing
                         resizeWidth = (int)Math.Round(crROI.Width * scaleFactor_findCenter);
                         resizeHeight = (int)Math.Round(crROI.Height * scaleFactor_findCenter);
 
-                        imgResized = imageEye.Image.Copy(crROI).SmoothBlur(blurSize, blurSize).Resize((int)Math.Round(resizeWidth), (int)Math.Round(resizeHeight), Emgu.CV.CvEnum.Inter.Cubic);
+                        imgResized = imageEye.Image.Copy(crROI).SmoothBlur(smoothBlurSize, smoothBlurSize).Resize((int)Math.Round(resizeWidth), (int)Math.Round(resizeHeight), Emgu.CV.CvEnum.Inter.Cubic);
                         var upSampled_imgCRBinary = imgResized.ThresholdBinary(new Gray(threshold), new Gray(255));
                         //crs.Add(new CornealReflectionData(
                         //            new PointF((int)Math.Round(blob.Centroid.X / scaleFactor_findBlob) + irisROI.X, (int)Math.Round(blob.Centroid.Y / scaleFactor_findBlob) + irisROI.Y),

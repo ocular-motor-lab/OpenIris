@@ -213,6 +213,15 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Handles a remote message
+        /// </summary>
+        /// <param name="message"></param>
+        public string HandleRemoteMessage(string message)
+        {
+            return calibrationPipeline.HandleRemoteMessage(message);
+        }
+
+        /// <summary>
         /// Processes new data.
         /// </summary>
         /// <param name="newData">New data from the last frame.</param>

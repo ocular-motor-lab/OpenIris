@@ -1,5 +1,5 @@
 # OpenIris
 
-OpenIris is an eye-tracking platform for research developed by the Ocular-Motor lab at UC Berkeley (https://omlab.berkeley.edu/). It is intended for use at high frame rates and with high precision. Its plugin-based structure allows for easy expansion to use different camera configurations, tracking, and calibration algorithms or pipelines. Examples included a binocular pupil, corneal reflections, and torsional tracking at 500 Hz using two Spinnaker FLIR cameras, simulation, and more. 
+OpenIris is an adaptable and user-friendly open-source framework for video-based eye-tracking by the Ocular-Motor lab at UC Berkeley (https://omlab.berkeley.edu/). It is developed in C# with modular design that allows further extension and customization through plugins for different hardware systems, tracking, and calibration pipelines. It can be remotely controlled via a network interface from other devices or programs. Eye movements can be recorded online from (up to 4) camera stream or offline post-processing recorded videos. Example plugins have been developed to track pupil, corneal reflections, and torsion to capture eye motion in 3-D. Currently implemented binocular pupil tracking pipelines can achieve frame rates of more than 500Hz. 
 
 ![OpenIrisUI](https://github.com/ocular-motor-lab/OpenIris/assets/1356893/0164ac5c-dc84-4233-bcf2-1469568b6292)

@@ -25,8 +25,13 @@ This is just an example video. To explore all the great features of the OpenIris
 
 ![image](https://github.com/ocular-motor-lab/OpenIris/assets/56368456/b240927e-a87b-4f95-8df1-d1a2c2f37a64)
 
+### Help Shape the Future of Open Iris Eye-Tracking
+We are excited to invite you to contribute to Open Iris, an innovative open-source eye-tracking framework that is transforming the field of vision research and human-computer interaction. By participating in this collaborative project, you have the opportunity to work with a passionate community of developers, researchers, and enthusiasts dedicated to advancing eye-tracking technology. Whether you are a seasoned programmer, a UX designer, a researcher, or simply someone with a keen interest in eye tracking, your unique skills and insights are invaluable to us. Join us in pushing the boundaries of what is possible, enhancing accessibility, and creating cutting-edge solutions that benefit everyone. Together, we can make Open Iris the premier platform for eye-tracking development and research.
 
 ### Cite
-Cite the OpenIris paper presented and published at ETRA 2024:
+If you use OpenIris, please cite the OpenIris paper:
+
+Roksana Sadeghi, Ryan Ressmeyer, Jacob Yates, and Jorge Otero-Millan. 2024. Open Iris - An Open Source Framework for Video-Based Eye-Tracking Research and Development. In Proceedings of the 2024 Symposium on Eye Tracking Research and Applications (ETRA '24). Association for Computing Machinery, New York, NY, USA, Article 17, 1–7. [https://doi.org/10.1145/3649902.3653348](https://doi.org/10.1145/3649902.3653348)
+
 
 

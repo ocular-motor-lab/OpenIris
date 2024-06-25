@@ -11,7 +11,7 @@ OpenIris has a user-freindly graphical interface, basic tracking algorithm and e
 >[!NOTE]
 > OpenIris can only work on Windows 10 or later versions (for now!)
 
-To quickly install and checkout OpenIris features, download [the latest version of the application] (https://github.com/ocular-motor-lab/OpenIris/releases).
+To quickly install and checkout OpenIris features, download [the latest version of the application](https://github.com/ocular-motor-lab/OpenIris/releases).
 - Download the release zip file in the desired directory
 - Unzip the folder
 - Inside the release folder, open openiris.exe file

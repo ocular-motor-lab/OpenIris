@@ -18,7 +18,7 @@ To quickly install and check OpenIris features, download [the latest version of 
 - The openiris main window will open. Select "Simulation" from the "Eye Tracking System" menu (default option) and hit Start Tracking.
 - The default pupil, corneal reflection, and torsion tracking pipeline will start.
 
-This is just an example video. To explore all the great features of the OpenIris, please read the wiki.
+This is just an example video. To explore all the great features of OpenIris, please read the [wiki](https://github.com/ocular-motor-lab/OpenIris/wiki).
 
 > [!TIP]
 > In some cases, Windows requires manual permission to enable the plugins to work. On the first window of the program, under the "Eye Tracking System" drop-down menu, there should be more than three options. If you don't see more than three options, you need to enable them manually. To enable the available plugins, go to the release folder and its subfolders, right-click on a dll file, and select more options. Under the security section, check "Unblock" and hit ok. Repeat for all dll files. 

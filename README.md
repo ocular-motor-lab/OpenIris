@@ -33,5 +33,6 @@ If you use OpenIris, please cite the OpenIris paper in your publication:
 
 Roksana Sadeghi, Ryan Ressmeyer, Jacob Yates, and Jorge Otero-Millan. 2024. Open Iris - An Open Source Framework for Video-Based Eye-Tracking Research and Development. In Proceedings of the 2024 Symposium on Eye Tracking Research and Applications (ETRA '24). Association for Computing Machinery, New York, NY, USA, Article 17, 1–7. [https://doi.org/10.1145/3649902.3653348](https://doi.org/10.1145/3649902.3653348)
 
-
+### Synchronization  of eye data with stimulus display
+https://github.com/ocular-motor-lab/OpenIrisSync/wiki
 

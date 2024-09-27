@@ -99,6 +99,7 @@
     <Compile Include="Calibration\CalibrationPipelineManual.cs" />
     <Compile Include="Calibration\CalibrationPipelineBase.cs" />
     <Compile Include="Calibration\CalibrationPipelineAuto.cs" />
+    <Compile Include="Calibration\CalibrationRemoteLinear.cs" />
     <Compile Include="Calibration\EyeCalibration.cs" />
     <Compile Include="Calibration\CalibrationParameters.cs" />
     <Compile Include="Calibration\CalibrationPipelineManualUI.cs">
@@ -108,6 +109,12 @@
       <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
     </Compile>
     <Compile Include="Calibration\HeadCalibration.cs" />
+    <Compile Include="Calibration\CalibrationRemoteLinearUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Calibration\CalibrationRemoteLinearUI.designer.cs">
+      <DependentUpon>CalibrationRemoteLinearUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="ImageGrabbing\IVariableExposureImageEyeSource.cs" />
     <Compile Include="Util\EyeTrackerSettingsBase.cs" />
     <Compile Include="HeadTracking\HeadTracker.cs" />
@@ -237,6 +244,9 @@
     <EmbeddedResource Include="Calibration\CalibrationPipelineManualUI.resx">
       <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Calibration\CalibrationRemoteLinearUI.resx">
+      <DependentUpon>CalibrationRemoteLinearUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\DebugImagesPanel.resx">
       <DependentUpon>DebugImagesPanel.cs</DependentUpon>

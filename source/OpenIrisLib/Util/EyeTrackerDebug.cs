@@ -122,7 +122,8 @@ namespace OpenIris
 
             //var sortedDict = from entry in deltaTimes orderby entry.Value.avgBeginTime ascending select entry;
 
-            string s = string.Format("{0,50} : {1,8:0.0}", "Interva from -> to", "Avg time (ms)") + "\r\n" + "\r\n";
+            var deltaMessage = String.Format("{0,-23} -> {1,23}", "Interval from (START)", "to (END)");
+            string s = string.Format("{0,50} : {1,8:0.0}", deltaMessage, "Avg time (ms)") + "\r\n" + "\r\n";
             foreach (var time in deltaTimes)
             {
                 if (time.Value.count > 0.2 * maxCount | time.Key == "TOTAL processing")

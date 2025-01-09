@@ -345,5 +345,11 @@ namespace OpenIris
         {
             if (disposing) Image?.Dispose();
         }
+
+        ~ImageEye()
+        {
+            // Finalizer calls Dispose(false)
+            Dispose(false);
+        }
     }
 }

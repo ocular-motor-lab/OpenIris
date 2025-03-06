@@ -274,7 +274,7 @@ namespace SpinnakerInterface
             roiSize = new Vector2(FrameSize.Width, FrameSize.Height);
             maxROI_Offset = maxFrameSize - roiSize;
 
-            maxGain = cam.AutoExposureGainUpperLimit;
+            maxGain = cam.Gain.Max;
 
             Debug.WriteLine($"Centering ROI. FrameMax {maxFrameSize}, ROI_SIZE {roiSize}");
             //Center the ROI in the middle of the physical camera frame.
@@ -331,6 +331,9 @@ namespace SpinnakerInterface
                     break;
                 case TriggerMode.Slave:
                     //# Trigger Settings
+                    // Slave must have higher aquisition rate that master or else risk falling behind due to clock skew
+                    cam.AcquisitionFrameRateEnable.Value = false;
+
                     cam.LineSelector.FromString(TRIGGER_LINE);
                     try { cam.V3_3Enable.Value = false; } catch { }
                     cam.LineMode.FromString("Input");

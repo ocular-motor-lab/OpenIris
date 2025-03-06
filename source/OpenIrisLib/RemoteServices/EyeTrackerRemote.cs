@@ -61,7 +61,7 @@ namespace OpenIris
                         Calibrating = eyeTracker.Calibrating,
 
                         ProcessorStatus = eyeTracker.ImageProcessor?.ProcessingStatus ?? "Not tracking",
-                        GrabberStatus = eyeTracker.ImageGrabber?.GrabbingStatus ?? "Not tracking" + " " + eyeTracker.HeadTracker?.Status ?? "[No head tracking]",
+                        GrabberStatus = eyeTracker.ImageGrabber?.GrabbingStatus() ?? "Not tracking" + " " + eyeTracker.HeadTracker?.Status ?? "[No head tracking]",
                         RecorderStatus = eyeTracker.RecordingSession?.RecordingStatus ?? "Not recording",
                     };
                 }

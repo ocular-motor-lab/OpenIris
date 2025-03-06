@@ -8,28 +8,50 @@
   "PreReleaseLabelWithDash": "",
   "PreReleaseNumber": null,
   "WeightedPreReleaseNumber": 60000,
+<<<<<<< HEAD
+  "BuildMetaData": 38,
+  "BuildMetaDataPadded": "0038",
+  "FullBuildMetaData": "38.Branch.main.Sha.7ba0f999085b381ca90c8eb859a85e94eeb3056e",
+=======
   "BuildMetaData": 37,
   "BuildMetaDataPadded": "0037",
   "FullBuildMetaData": "37.Branch.main.Sha.bd0a59becfe9301f9da3c29dc3dc3f6e9476cd79",
+>>>>>>> b591334dc64f3918f722637d77c1b3543db37393
   "MajorMinorPatch": "0.1.6",
   "SemVer": "0.1.6",
   "LegacySemVer": "0.1.6",
   "LegacySemVerPadded": "0.1.6",
   "AssemblySemVer": "0.1.6.0",
   "AssemblySemFileVer": "0.1.6.0",
+<<<<<<< HEAD
+  "FullSemVer": "0.1.6+38",
+  "InformationalVersion": "0.1.6+38.Branch.main.Sha.7ba0f999085b381ca90c8eb859a85e94eeb3056e",
+  "BranchName": "main",
+  "EscapedBranchName": "main",
+  "Sha": "7ba0f999085b381ca90c8eb859a85e94eeb3056e",
+  "ShortSha": "7ba0f99",
+=======
   "FullSemVer": "0.1.6+37",
   "InformationalVersion": "0.1.6+37.Branch.main.Sha.bd0a59becfe9301f9da3c29dc3dc3f6e9476cd79",
   "BranchName": "main",
   "EscapedBranchName": "main",
   "Sha": "bd0a59becfe9301f9da3c29dc3dc3f6e9476cd79",
   "ShortSha": "bd0a59b",
+>>>>>>> b591334dc64f3918f722637d77c1b3543db37393
   "NuGetVersionV2": "0.1.6",
   "NuGetVersion": "0.1.6",
   "NuGetPreReleaseTagV2": "",
   "NuGetPreReleaseTag": "",
   "VersionSourceSha": "8b00d35e155563ff1049bbbf66fba51ca2fb7a23",
+<<<<<<< HEAD
+  "CommitsSinceVersionSource": 38,
+  "CommitsSinceVersionSourcePadded": "0038",
+  "UncommittedChanges": 0,
+  "CommitDate": "2025-03-07"
+=======
   "CommitsSinceVersionSource": 37,
   "CommitsSinceVersionSourcePadded": "0037",
   "UncommittedChanges": 0,
   "CommitDate": "2025-01-09"
+>>>>>>> b591334dc64f3918f722637d77c1b3543db37393
 }

@@ -54,7 +54,7 @@ namespace SpinnakerInterface
 
                 //start cameras
                 CameraEyeSpinnaker.BeginSynchronizedAcquisition(leftEyeCamera, rightEyeCamera);
-
+                
                 return new EyeCollection<CameraEye?>(leftEyeCamera, rightEyeCamera);
             }
             catch (Exception ex)

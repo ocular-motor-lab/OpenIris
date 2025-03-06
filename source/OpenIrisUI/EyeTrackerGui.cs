@@ -556,7 +556,7 @@ namespace OpenIris.UI
 
         private void UpdateStatusBar()
         {
-            toolStripStatusLabelImageGrabbingStatus.Text = (eyeTracker.ImageGrabber?.GrabbingStatus ?? "Not tracking") + " "
+            toolStripStatusLabelImageGrabbingStatus.Text = (eyeTracker.ImageGrabber?.GrabbingStatus() ?? "Not tracking") + " "
                 + eyeTracker.HeadTracker?.Status ?? "[No head tracking]";
 
             var percentDropsInCamera = eyeTracker.ImageGrabber?.NumberFramesDropped / (eyeTracker.ImageGrabber?.NumberFramesGrabbed + eyeTracker.ImageGrabber?.NumberFramesDropped + 1.0) * 100.0 ?? 0.0;

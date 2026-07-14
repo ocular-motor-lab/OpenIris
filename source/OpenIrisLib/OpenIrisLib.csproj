@@ -127,6 +127,8 @@
     <Compile Include="RemoteServices\EyeTrackerRemote.cs" />
     <Compile Include="RemoteServices\EyeTrackerUdpListener.cs" />
     <Compile Include="RemoteServices\EyeTrackerTcpListener.cs" />
+    <Compile Include="RemoteServices\EyeTrackerLslOutlet.cs" />
+    <Compile Include="RemoteServices\Lsl.cs" />
     <Compile Include="UI\DebugImagesPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -283,6 +285,13 @@
     <None Include=".editorconfig" />
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Native Lab Streaming Layer library (liblsl), copied next to the executable so the
+         P/Invoke bindings in Lsl.cs can find it. -->
+    <Content Include="lsl.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -54,7 +54,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Remote", "Remote", "{7B3E36
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{9B8DEAF6-6FA1-42AB-83C0-B75A787C5879}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interacoustics", "Interacoustics\Interacoustics.csproj", "{7422C969-410D-4106-BBAD-745C12B231A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interacoustics", "Interacoustics\Interacoustics.csproj", "{7422C969-410D-4106-BBAD-745C12B231A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

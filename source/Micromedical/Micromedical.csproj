@@ -1,23 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <Platforms>x64</Platforms>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>8.0</LangVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <!-- Plugins are discovered from bin\x64\<Config>\Plugins, so keep the legacy output layout. -->
-    <OutputPath>..\..\bin\x64\$(Configuration)\Plugins\</OutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <!-- Don't copy ZedGraph's (an Emgu.CV.UI dependency) translated resources into Plugins. -->
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <OutputPath>$(OpenIrisPluginsDir)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DebugType>full</DebugType>
-    <DocumentationFile>$(OutputPath)Micromedical.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <DebugType>pdbonly</DebugType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FTD2XX_NET">
@@ -30,7 +17,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Emgu.CV" Version="4.1.1.3497" />
+    <PackageReference Include="Emgu.CV" />
   </ItemGroup>
   <!-- Copy-to-output items (not just copy-local references) also flow through OpenIris' solution build
        dependency on this project, which puts these DLLs next to OpenIris.exe as the legacy project did. -->

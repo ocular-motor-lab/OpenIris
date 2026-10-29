@@ -1,21 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <Platforms>x64</Platforms>
-    <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <!-- Plugins are discovered from bin\x64\<Config>\Plugins, so keep the legacy output layout. -->
-    <OutputPath>..\..\bin\x64\$(Configuration)\Plugins\</OutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>$(OpenIrisPluginsDir)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DebugType>full</DebugType>
-    <DocumentationFile>$(OutputPath)Interacoustics.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <DebugType>pdbonly</DebugType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.ComponentModel.Composition" />

@@ -1,0 +1,28 @@
+<Project>
+  <!-- Settings shared by every SDK-style project under source\. MSBuild imports this file automatically,
+       before the project file itself, so a project can still override anything set here.
+       Legacy (non-SDK) projects such as LabyrinthDevices are left alone. -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
+    <!-- This file is imported before the SDK defaults Configuration, so default it here for OutputPath. -->
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <TargetFramework>net48</TargetFramework>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>8.0</LangVersion>
+    <!-- AssemblyInfo.cs files are kept in each project. -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- Everything builds into one folder next to OpenIris.exe; plugins add Plugins\ (see OpenIrisPluginsDir). -->
+    <OpenIrisBinDir>$(MSBuildThisFileDirectory)..\bin\x64\$(Configuration)\</OpenIrisBinDir>
+    <OpenIrisPluginsDir>$(OpenIrisBinDir)Plugins\</OpenIrisPluginsDir>
+    <OutputPath>$(OpenIrisBinDir)</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Don't copy ZedGraph's (an Emgu.CV.UI dependency) translated resources. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true' and '$(Configuration)' == 'Debug'">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true' and '$(Configuration)' == 'Release'">
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+</Project>

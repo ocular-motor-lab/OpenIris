@@ -1,30 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
     <OutputType>WinExe</OutputType>
     <RootNamespace>OpenIris.UI</RootNamespace>
     <AssemblyName>OpenIris</AssemblyName>
-    <Platforms>x64</Platforms>
-    <PlatformTarget>x64</PlatformTarget>
-    <LangVersion>8.0</LangVersion>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ApplicationIcon>favicon %284%29.ico</ApplicationIcon>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <OutputPath>..\..\bin\x64\$(Configuration)\</OutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <!-- Don't copy ZedGraph's (an Emgu.CV.UI dependency) translated resources. -->
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DebugType>full</DebugType>
-    <DocumentationFile>$(OutputPath)OpenIris.xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
   </PropertyGroup>
-  <!-- ClickOnce: manifests are generated and signed on every build; publish settings kept as configured. -->
+  <!-- ClickOnce settings, kept for publishing from Visual Studio. Ordinary builds no longer generate the
+       ClickOnce manifests (they were unsigned anyway: the certificate below isn't installed). -->
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ManifestCertificateThumbprint>B80DD4D97A882DA823B3CAB3E9FA670F9372E38D</ManifestCertificateThumbprint>
     <!-- Legacy default; the SDK would otherwise use bin\...\publish\. -->
@@ -72,8 +63,8 @@
     <Reference Include="System.Windows.Forms.DataVisualization" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Emgu.CV" Version="4.1.1.3497" />
-    <PackageReference Include="GitVersion.MsBuild" Version="5.12.0" PrivateAssets="all" />
+    <PackageReference Include="Emgu.CV" />
+    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="EyeTrackerAboutBox.cs" SubType="Form" />

@@ -1,0 +1,13 @@
+<Project>
+  <!-- Central package versions: projects reference a package without a version and get the one listed here.
+       EmguCV is pinned to 4.1.1.3497 because later releases dropped Emgu.CV.Cvb (CvBlob), which the
+       pupil and corneal reflection trackers use. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Emgu.CV" Version="4.1.1.3497" />
+    <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
+    <PackageVersion Include="System.Text.Json" Version="7.0.3" />
+  </ItemGroup>
+</Project>

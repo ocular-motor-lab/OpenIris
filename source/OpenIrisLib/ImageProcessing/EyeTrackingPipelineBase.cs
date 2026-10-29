@@ -8,7 +8,6 @@ namespace OpenIris
 #nullable enable
 
     using Emgu.CV;
-    using Emgu.CV.Cvb;
     using Emgu.CV.Structure;
     using System;
     using System.ComponentModel;

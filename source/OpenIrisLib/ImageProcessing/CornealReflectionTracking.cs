@@ -10,7 +10,6 @@ namespace OpenIris.ImageProcessing
     using System.Drawing;
     using System.Linq;
     using Emgu.CV;
-    using Emgu.CV.Cvb;
     using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
 
@@ -40,8 +39,7 @@ namespace OpenIris.ImageProcessing
             //Blob_Resize,
         }
 
-        private readonly CvBlobDetector detector = new CvBlobDetector();
-        private readonly CvBlobs blobs = new CvBlobs();
+        private readonly BlobDetector detector = new BlobDetector();
 
         /// <summary>
         /// Find the corneal reflections.
@@ -69,15 +67,14 @@ namespace OpenIris.ImageProcessing
 
             return trackingSettings.CornealReflectionTrackingMethod switch
             {
-                CornealReflectionTrackingMethod.Blob => FindCornealReflectionsBlob_Resize(detector, blobs, imageEye, pupilAprox, blurSize, threshold, maxBlobArea, minBlobArea, irisRadiusPix, resizeRate_findCRBlob, resizeRate_findCRCenter, openImage, closeImage),
+                CornealReflectionTrackingMethod.Blob => FindCornealReflectionsBlob_Resize(detector, imageEye, pupilAprox, blurSize, threshold, maxBlobArea, minBlobArea, irisRadiusPix, resizeRate_findCRBlob, resizeRate_findCRCenter, openImage, closeImage),
                 _ => Array.Empty<CornealReflectionData>(),
             };
         }
 
-        public static CornealReflectionData[] FindCornealReflectionsBlob_Resize(CvBlobDetector detector, CvBlobs blobs, ImageEye imageEye, PupilData pupilAprox, int blurSize, int threshold, double maxBlobArea, double minBlobArea, int irisRadiusPix, double scaleFactor_findBlob = 1.0, double scaleFactor_findCenter = 1.0, bool openImage = false, bool closeImage = false)
+        public static CornealReflectionData[] FindCornealReflectionsBlob_Resize(BlobDetector detector, ImageEye imageEye, PupilData pupilAprox, int blurSize, int threshold, double maxBlobArea, double minBlobArea, int irisRadiusPix, double scaleFactor_findBlob = 1.0, double scaleFactor_findCenter = 1.0, bool openImage = false, bool closeImage = false)
         {
             if (detector is null) throw new ArgumentNullException(nameof(detector));
-            if (blobs is null) throw new ArgumentNullException(nameof(blobs));
             if (imageEye is null) throw new ArgumentNullException(nameof(imageEye));
 
             //using iris radius for the ROI to look for CR
@@ -176,17 +173,14 @@ namespace OpenIris.ImageProcessing
 
             var crs = new List<CornealReflectionData>();
 
-            detector.Detect(imgCRBinary, blobs);
-
             irisRadiusPix = (int) Math.Round(irisRadiusPix * scaleFactor_findBlob);
             maxBlobArea = maxBlobArea * Math.Pow(scaleFactor_findBlob, 2);
             minBlobArea = minBlobArea * Math.Pow(scaleFactor_findBlob, 2);
 
             var crROI = new Rectangle();
 
-            foreach (var item in blobs)
+            foreach (var blob in detector.Detect(imgCRBinary))
             {
-                CvBlob blob = item.Value;
 
                 var distanceToPupil = Math.Sqrt(Math.Pow(Math.Abs(blob.Centroid.X) - irisRadiusPix, 2) + Math.Pow(Math.Abs(blob.Centroid.Y) - irisRadiusPix, 2));
 
@@ -196,7 +190,6 @@ namespace OpenIris.ImageProcessing
                     continue;
                 }
 
-                var contour = blob.GetContour();
 
                 // the score is the ration between area and squared perimeter 
                 double blobBoundingBoxArea = (double) Math.Pow(Math.Max(blob.BoundingBox.Width, blob.BoundingBox.Height) , 2);  
@@ -308,9 +301,6 @@ namespace OpenIris.ImageProcessing
         /// </summary>
         public void Dispose()
         {
-            blobs?.Dispose();
-            detector?.Dispose();
-
             GC.SuppressFinalize(this);
         }
     }

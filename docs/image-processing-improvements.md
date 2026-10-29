@@ -123,6 +123,10 @@ fix item 2.
   center of the search region, which is the pupil only if the region wasn't clipped at the image edge.
 - **`VideoEye.GrabImageEye`** (`ImageGrabbing/VideoEye.cs:107-112`, not image processing): it uses
   `image.TimeStamp` before checking `image == null`, so a null frame throws instead of returning null.
-- **CvBlob:** replacing `Emgu.CV.Cvb` (used by the pupil and reflection blob search) with
-  `CvInvoke.ConnectedComponentsWithStats` is what would allow upgrading EmguCV. The tests now make it
-  possible to check that a replacement gives the same results.
+- **CvBlob: done.** `Emgu.CV.Cvb` was replaced by `ImageProcessing/BlobDetector.cs` (plain C#, no
+  OpenCV). It gives exactly the same blobs in the same order (checked by `BlobDetectorTests` on about
+  1,800 images, and all pipeline baselines are unchanged) and is about 6 times faster (11 µs versus
+  66 µs per call in Release). OpenCV's `ConnectedComponentsWithStats` was tried first: same blobs, but
+  a different order and slower than CvBlob on these small images. OpenIris no longer needs
+  `Emgu.CV.Cvb`, so EmguCV can now be upgraded. The OpenIrisDPI plugin only has an unused
+  `using Emgu.CV.Cvb;` line, which it will need to remove.

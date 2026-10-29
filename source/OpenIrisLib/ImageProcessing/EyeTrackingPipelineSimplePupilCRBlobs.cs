@@ -8,7 +8,6 @@ namespace OpenIris
 #nullable enable
 
     using Emgu.CV;
-    using Emgu.CV.Cvb;
     using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
     using Emgu.CV.Features2D;
@@ -27,20 +26,6 @@ namespace OpenIris
     [Export(typeof(EyeTrackingPipelineBase)), PluginDescriptionAttribute("SimplePupilCRBlobs", typeof(EyeTrackingPipelinePupilCRSettings))]
     public sealed class EyeTrackingPipelineSimplePupilCRBlobs : EyeTrackingPipelineBase
     {
-        private readonly CvBlobDetector detector = new CvBlobDetector();
-        private readonly CvBlobs blobs = new CvBlobs();
-
-        /// <summary>
-        /// Disposes objects.
-        /// </summary>
-        public override void Dispose()
-        {
-            detector.Dispose();
-            blobs.Dispose();
-
-            base.Dispose();
-        }
-
         /// <summary>
         /// Process images.
         /// </summary>

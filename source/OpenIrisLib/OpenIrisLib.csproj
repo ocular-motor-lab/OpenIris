@@ -1,310 +1,58 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{ED3AD445-A2FD-41C2-A77C-CE0C22B08192}</ProjectGuid>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenIris</RootNamespace>
     <AssemblyName>OpenIrisLib</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisLib.xml</DocumentationFile>
+    <Platforms>x64</Platforms>
+    <!-- The library itself is AnyCPU even in the x64 configuration. -->
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>..\CodeAnalysisRules.ruleset</CodeAnalysisRuleSet>
-    <NullableContextOptions>enable</NullableContextOptions>
     <LangVersion>9.0</LangVersion>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\..\bin\x64\Release\</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <LangVersion>9.0</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <!-- AssemblyVersion("1.3.*") uses a wildcard, which is incompatible with deterministic builds. -->
+    <Deterministic>false</Deterministic>
+    <OutputPath>..\..\bin\x64\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Name form resources after the form class, as legacy projects did (SDK default is off for .NET Framework). -->
+    <EmbeddedResourceUseDependentUponConvention>true</EmbeddedResourceUseDependentUponConvention>
+    <!-- Don't copy ZedGraph's (an Emgu.CV.UI dependency) translated resources. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
-    <DocumentationFile>..\..\bin\x64\Debug\OpenIrisLib.xml</DocumentationFile>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <LangVersion>9.0</LangVersion>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>full</DebugType>
+    <DocumentationFile>$(OutputPath)OpenIrisLib.xml</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <LangVersion>9.0</LangVersion>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Emgu.CV.UI, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
-      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Emgu.CV.World, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
-      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.World.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.7.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.ComponentModel.Composition" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.ServiceModel.Web" />
-    <Reference Include="System.Text.Encodings.Web, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Encodings.Web.7.0.0\lib\net462\System.Text.Encodings.Web.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Text.Json, Version=7.0.0.3, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Text.Json.7.0.3\lib\net462\System.Text.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
-    </Reference>
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
-    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <!-- PrivateAssets="all": don't flow these packages to projects that reference OpenIrisLib (as with packages.config),
+       otherwise every plugin copies them into Plugins\. Projects that need EmguCV reference it themselves. -->
+  <ItemGroup>
+    <PackageReference Include="Emgu.CV" Version="4.1.1.3497" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="7.0.3" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Calibration\CalibrationPipelineManual.cs" />
-    <Compile Include="Calibration\CalibrationPipelineBase.cs" />
-    <Compile Include="Calibration\CalibrationPipelineAuto.cs" />
-    <Compile Include="Calibration\CalibrationRemoteLinear.cs" />
-    <Compile Include="Calibration\EyeCalibration.cs" />
-    <Compile Include="Calibration\CalibrationParameters.cs" />
-    <Compile Include="Calibration\CalibrationPipelineManualUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Calibration\CalibrationPipelineManualUI.Designer.cs">
-      <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Calibration\HeadCalibration.cs" />
-    <Compile Include="Calibration\CalibrationRemoteLinearUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Calibration\CalibrationRemoteLinearUI.designer.cs">
-      <DependentUpon>CalibrationRemoteLinearUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ImageGrabbing\IVariableExposureImageEyeSource.cs" />
-    <Compile Include="Util\EyeTrackerSettingsBase.cs" />
-    <Compile Include="HeadTracking\HeadTracker.cs" />
-    <Compile Include="ImageProcessing\EyeTrackingPipelineBase.cs" />
-    <Compile Include="ImageGrabbing\CameraEyeWebCam.cs" />
-    <Compile Include="ImageProcessing\EyeTrackingPipelineSimpleCentroid.cs" />
-    <Compile Include="ImageProcessing\EyeTrackingPipelineNothing.cs" />
-    <Compile Include="ImageProcessing\EyeTrackingPipelineSimplePupilCRBlobs.cs" />
-    <Compile Include="UI\EyeTrackerUICommands.cs" />
-    <Compile Include="RemoteServices\EyeTrackerRemote.cs" />
-    <Compile Include="RemoteServices\EyeTrackerUdpListener.cs" />
-    <Compile Include="RemoteServices\EyeTrackerTcpListener.cs" />
-    <Compile Include="UI\DebugImagesPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\DebugImagesPanel.Designer.cs">
-      <DependentUpon>DebugImagesPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Calibration\CalibrationUIControl.cs" />
-    <Compile Include="EyeTrackerData\DataBuffer.cs" />
-    <Compile Include="EyeTrackerData\CornealReflectionData.cs" />
-    <Compile Include="EyeTrackingSystems\EyeTrackingSystemDualWebCam.cs" />
-    <Compile Include="EyeTrackingSystems\EyeTrackingSystemSingleWebCam.cs" />
-    <Compile Include="EyeTrackingSystems\EyeTrackingSystemBase.cs" />
-    <Compile Include="ImageGrabbing\CameraEye.cs" />
-    <Compile Include="ImageProcessing\CornealReflectionTracking.cs" />
-    <Compile Include="ImageProcessing\EyeLidTracking.cs" />
-    <Compile Include="ImageProcessing\ImageProcessingExtentionMethods.cs" />
-    <Compile Include="ImageProcessing\PositionTrackerEllipseFitting.cs" />
-    <Compile Include="ImageProcessing\PupilTracking.cs" />
-    <Compile Include="ImageProcessing\TorsionTracking.cs" />
-    <Compile Include="RemoteServices\IEyeTrackerWebService.cs" />
-    <Compile Include="UI\ProgressBarDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\ProgressBarDialog.Designer.cs">
-      <DependentUpon>ProgressBarDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Util\VideoTools.cs" />
-    <Compile Include="Util\EyeTrackerExtentionMethods.cs" />
-    <Compile Include="Util\OpenIrisException.cs" />
-    <Compile Include="Util\Consumer.cs" />
-    <Compile Include="Calibration\CalibrationSession.cs" />
-    <Compile Include="Calibration\EyePhysicalModel.cs" />
-    <Compile Include="EyeTrackerData\EyeTrackerEvent.cs" />
-    <Compile Include="ImageGrabbing\EyeTrackerImageGrabber.cs" />
-    <Compile Include="ImageProcessing\EyeTrackerProcessor.cs" />
-    <Compile Include="Util\RecordingSession.cs" />
-    <Compile Include="Util\EyeTrackerPluginManager.cs" />
-    <Compile Include="EyeTrackerData\CalibratedEyeData.cs" />
-    <Compile Include="EyeTrackerData\EyeTrackerData.cs" />
-    <Compile Include="EyeTrackerData\HeadData.cs" />
-    <Compile Include="EyeTrackerData\EyelidData.cs" />
-    <Compile Include="EyeTrackerData\IrisData.cs" />
-    <Compile Include="EyeTrackerData\PupilData.cs" />
-    <Compile Include="Util\EyeCollection.cs" />
-    <Compile Include="ImageGrabbing\IMovableImageEyeSource.cs" />
-    <Compile Include="EyeTrackerData\Eye.cs" />
-    <Compile Include="Util\EyeTrackerLog.cs" />
-    <Compile Include="Util\SoundRecorder.cs" />
-    <Compile Include="ImageGrabbing\CameraEyeVideoSimulation.cs" />
-    <Compile Include="EyeTrackingSystems\EyeTrackingSystemSimulation.cs" />
-    <Compile Include="ImageGrabbing\VideoEye.cs" />
-    <Compile Include="ImageProcessing\EyeTrackingPipelineJOM.cs" />
-    <Compile Include="UI\BatchAnalysis.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\BatchAnalysis.Designer.cs">
-      <DependentUpon>BatchAnalysis.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EyeTracker.cs" />
-    <Compile Include="EyeTrackerData\ImageEyeTimestamp.cs" />
-    <Compile Include="Util\EyeTrackerDebug.cs" />
-    <Compile Include="UI\ImageEyeBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\ImageEyeBox.Designer.cs">
-      <DependentUpon>ImageEyeBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\EyeTrackerSettingsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\EyeTrackerSettingsForm.Designer.cs">
-      <DependentUpon>EyeTrackerSettingsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\EyeTrackerTrace.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\EyeTrackerTrace.Designer.cs">
-      <DependentUpon>EyeTrackerTrace.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ImageGrabbing\IImageEyeSource.cs" />
-    <Compile Include="UI\VideoPlayerUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\VideoPlayerUI.Designer.cs">
-      <DependentUpon>VideoPlayerUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Util\Range.cs" />
-    <Compile Include="EyeTrackerData\ImageEye.cs" />
-    <Compile Include="ImageProcessing\EyeTrackerMask.cs" />
-    <Compile Include="RemoteServices\IEyeTrackerService.cs" />
-    <Compile Include="RemoteServices\EyeTrackerRemoteServices.cs" />
-    <Compile Include="EyeTrackerSettings.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="ImageProcessing\IrisTracker.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EyeTrackerData\EyeData.cs" />
-    <Compile Include="UI\SelectVideoDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\SelectVideoDialog.Designer.cs">
-      <DependentUpon>SelectVideoDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\SliderTextControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UI\SliderTextControl.Designer.cs">
-      <DependentUpon>SliderTextControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Util\SerializableDictionary.cs" />
-    <Compile Include="Util\TaskErrorHandler.cs" />
-    <Compile Include="ImageGrabbing\VideoPlayer.cs" />
+    <Compile Update="Calibration\CalibrationPipelineManualUI.cs" SubType="UserControl" />
+    <Compile Update="Calibration\CalibrationRemoteLinearUI.cs" SubType="UserControl" />
+    <Compile Update="UI\BatchAnalysis.cs" SubType="Form" />
+    <Compile Update="UI\DebugImagesPanel.cs" SubType="UserControl" />
+    <Compile Update="UI\EyeTrackerSettingsForm.cs" SubType="Form" />
+    <Compile Update="UI\EyeTrackerTrace.cs" SubType="UserControl" />
+    <Compile Update="UI\ImageEyeBox.cs" SubType="UserControl" />
+    <Compile Update="UI\ProgressBarDialog.cs" SubType="Form" />
+    <Compile Update="UI\SelectVideoDialog.cs" SubType="Form" />
+    <Compile Update="UI\SliderTextControl.cs" SubType="UserControl" />
+    <Compile Update="UI\VideoPlayerUI.cs" SubType="UserControl" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Calibration\CalibrationPipelineManualUI.resx">
-      <DependentUpon>CalibrationPipelineManualUI.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Calibration\CalibrationRemoteLinearUI.resx">
-      <DependentUpon>CalibrationRemoteLinearUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\DebugImagesPanel.resx">
-      <DependentUpon>DebugImagesPanel.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\BatchAnalysis.resx">
-      <DependentUpon>BatchAnalysis.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\ImageEyeBox.resx">
-      <DependentUpon>ImageEyeBox.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\EyeTrackerSettingsForm.resx">
-      <DependentUpon>EyeTrackerSettingsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\EyeTrackerTrace.resx">
-      <DependentUpon>EyeTrackerTrace.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\ProgressBarDialog.resx">
-      <DependentUpon>ProgressBarDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\SelectVideoDialog.resx">
-      <DependentUpon>SelectVideoDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\SliderTextControl.resx">
-      <DependentUpon>SliderTextControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UI\VideoPlayerUI.resx">
-      <DependentUpon>VideoPlayerUI.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".editorconfig" />
-    <None Include="app.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <Import Project="..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets" Condition="Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenIrisRemoteConsole", "Ey
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SubjectiveTracker", "SubjectiveEyeTracker\SubjectiveTracker.csproj", "{2BA5EA85-11F0-47B3-AD99-A9455AC1C458}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisLib", "OpenIrisLib\OpenIrisLib.csproj", "{ED3AD445-A2FD-41C2-A77C-CE0C22B08192}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenIrisLib", "OpenIrisLib\OpenIrisLib.csproj", "{ED3AD445-A2FD-41C2-A77C-CE0C22B08192}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenIrisRemoteGUI", "EyeTrackerRemoteGUI\OpenIrisRemoteGUI.csproj", "{8AF6AA0E-D508-4727-B081-6D88BE7E85FE}"
 EndProject

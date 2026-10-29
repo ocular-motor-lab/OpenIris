@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIris", "OpenIrisUI\OpenIris.csproj", "{7F66FED2-01EB-4809-8077-75E824A8EC85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenIris", "OpenIrisUI\OpenIris.csproj", "{7F66FED2-01EB-4809-8077-75E824A8EC85}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9D013E2E-13CC-4DF6-8CCD-663659689F3D} = {9D013E2E-13CC-4DF6-8CCD-663659689F3D}
 		{8E7AF573-B6CF-45ED-9CEF-09462CE345B3} = {8E7AF573-B6CF-45ED-9CEF-09462CE345B3}

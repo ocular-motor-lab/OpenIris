@@ -1,24 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.props" Condition="Exists('..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{7F66FED2-01EB-4809-8077-75E824A8EC85}</ProjectGuid>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenIris.UI</RootNamespace>
     <AssemblyName>OpenIris</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
     <LangVersion>8.0</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ApplicationIcon>favicon %284%29.ico</ApplicationIcon>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <OutputPath>..\..\bin\x64\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Don't copy ZedGraph's (an Emgu.CV.UI dependency) translated resources. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>full</DebugType>
+    <DocumentationFile>$(OutputPath)OpenIris.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <!-- ClickOnce: manifests are generated and signed on every build; publish settings kept as configured. -->
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+    <SignManifests>true</SignManifests>
+    <ManifestCertificateThumbprint>B80DD4D97A882DA823B3CAB3E9FA670F9372E38D</ManifestCertificateThumbprint>
+    <!-- Legacy default; the SDK would otherwise use bin\...\publish\. -->
+    <PublishDir>$(OutputPath)app.publish\</PublishDir>
     <PublishUrl>..\..\publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -35,116 +45,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
   </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>favicon %284%29.ico</ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\..\bin\x64\Debug\OpenIris.xml</DocumentationFile>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\..\bin\x64\Release\</OutputPath>
-    <PlatformTarget>x64</PlatformTarget>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>TRACE</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestCertificateThumbprint>B80DD4D97A882DA823B3CAB3E9FA670F9372E38D</ManifestCertificateThumbprint>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignManifests>true</SignManifests>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
-    <DocumentationFile>..\..\bin\x64\Debug\OpenIris.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Emgu.CV.UI, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
-      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Emgu.CV.World, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
-      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.World.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Windows.Forms.DataVisualization" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Extensions.cs" />
-    <Compile Include="EyeTrackerAboutBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="EyeTrackerAboutBox.Designer.cs">
-      <DependentUpon>EyeTrackerAboutBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EyeTrackerGui.cs">
-      <SubType>Form</SubType>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
-    <Compile Include="EyeTrackerGui.Designer.cs">
-      <DependentUpon>EyeTrackerGui.cs</DependentUpon>
-    </Compile>
-    <Compile Include="EyeTrackerGuiLog.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="EyeTrackerAboutBox.resx">
-      <DependentUpon>EyeTrackerAboutBox.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EyeTrackerGui.resx">
-      <DependentUpon>EyeTrackerGui.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include=".editorconfig" />
-    <None Include="app.config" />
-    <None Include="EyeTrackerGui_TemporaryKey.pfx" />
-    <None Include="packages.config" />
-    <None Include="Properties\DataSources\OculomotorLab.VOG.Data.EyeTrackerDatabase.datasource" />
-    <None Include="Properties\DataSources\OculomotorLab.VOG.EyeTracker.datasource" />
-  </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
       <Visible>False</Visible>
@@ -163,46 +65,30 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\VideoSamples\JorgeLeft.avi">
-      <Link>JorgeLeft.avi</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\VideoSamples\JorgeRight.avi">
-      <Link>JorgeRight.avi</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="favicon %284%29.ico" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
-      <Project>{ed3ad445-a2fd-41c2-a77c-ce0c22b08192}</Project>
-      <Name>OpenIrisLib</Name>
-    </ProjectReference>
+    <PackageReference Include="Emgu.CV" Version="4.1.1.3497" />
+    <PackageReference Include="GitVersion.MsBuild" Version="5.12.0" PrivateAssets="all" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <Import Project="..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets" Condition="Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets'))" />
-    <Error Condition="!Exists('..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.props'))" />
-    <Error Condition="!Exists('..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.targets'))" />
-  </Target>
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
-  <Import Project="..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.targets" Condition="Exists('..\packages\GitVersion.MsBuild.5.12.0\build\GitVersion.MsBuild.targets')" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <ItemGroup>
+    <Compile Update="EyeTrackerAboutBox.cs" SubType="Form" />
+    <Compile Update="EyeTrackerGui.cs" SubType="Form" />
+    <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DesignTime="True" DependentUpon="Resources.resx" />
+    <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+  </ItemGroup>
+  <!-- Sample videos live in the gitignored VideoSamples folder; copy them only when present so fresh clones still build. -->
+  <ItemGroup Condition="Exists('..\..\VideoSamples\JorgeLeft.avi')">
+    <Content Include="..\..\VideoSamples\JorgeLeft.avi" Link="JorgeLeft.avi" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup Condition="Exists('..\..\VideoSamples\JorgeRight.avi')">
+    <Content Include="..\..\VideoSamples\JorgeRight.avi" Link="JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj" />
+  </ItemGroup>
 </Project>

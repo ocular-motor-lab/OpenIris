@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisRemoteGUI", "EyeTra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisRemoteClient", "EyeTrackerRemoteClient\OpenIrisRemoteClient.csproj", "{CCA5E468-60BC-45AA-BF20-AAAC7B2ABD27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Micromedical", "Micromedical\Micromedical.csproj", "{11B9A0EA-7C00-4F7E-8601-0B45EE20D406}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Micromedical", "Micromedical\Micromedical.csproj", "{11B9A0EA-7C00-4F7E-8601-0B45EE20D406}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9D013E2E-13CC-4DF6-8CCD-663659689F3D} = {9D013E2E-13CC-4DF6-8CCD-663659689F3D}
 	EndProjectSection
@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteEyeTracker", "RemoteE
 		{9D013E2E-13CC-4DF6-8CCD-663659689F3D} = {9D013E2E-13CC-4DF6-8CCD-663659689F3D}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicPlugins", "BasicPlugins\BasicPlugins.csproj", "{97A6FD48-B34F-4BBB-8253-4BCB64F44FF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasicPlugins", "BasicPlugins\BasicPlugins.csproj", "{97A6FD48-B34F-4BBB-8253-4BCB64F44FF0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OtherEyeTrackers", "OtherEyeTrackers\OtherEyeTrackers.csproj", "{5F660CEB-2EFB-4690-8D16-10C378369D53}"
 	ProjectSection(ProjectDependencies) = postProject

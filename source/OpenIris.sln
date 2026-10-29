@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIris", "OpenIrisUI\Open
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisRemoteConsole", "EyeTrackerClientConsole\OpenIrisRemoteConsole.csproj", "{51505035-780E-4732-96B1-455085715C38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubjectiveTracker", "SubjectiveEyeTracker\SubjectiveTracker.csproj", "{2BA5EA85-11F0-47B3-AD99-A9455AC1C458}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SubjectiveTracker", "SubjectiveEyeTracker\SubjectiveTracker.csproj", "{2BA5EA85-11F0-47B3-AD99-A9455AC1C458}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenIrisLib", "OpenIrisLib\OpenIrisLib.csproj", "{ED3AD445-A2FD-41C2-A77C-CE0C22B08192}"
 EndProject
@@ -26,11 +26,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Micromedical", "Micromedica
 		{9D013E2E-13CC-4DF6-8CCD-663659689F3D} = {9D013E2E-13CC-4DF6-8CCD-663659689F3D}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VideoPlayer", "VideoPlayer\VideoPlayer.csproj", "{782516D6-D145-4EFD-9A55-0079D60E4F48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoPlayer", "VideoPlayer\VideoPlayer.csproj", "{782516D6-D145-4EFD-9A55-0079D60E4F48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleEyeTrackerUI", "SimpleEyeTrackerUI\SimpleEyeTrackerUI.csproj", "{F629D51D-CE5B-47B9-823B-7B4F7253D036}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleEyeTrackerUI", "SimpleEyeTrackerUI\SimpleEyeTrackerUI.csproj", "{F629D51D-CE5B-47B9-823B-7B4F7253D036}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PointGreyTest", "PointGreyTest\PointGreyTest.csproj", "{4DEC7C80-D8F6-4F34-A10F-76CB2A26E6B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PointGreyTest", "PointGreyTest\PointGreyTest.csproj", "{4DEC7C80-D8F6-4F34-A10F-76CB2A26E6B1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteEyeTracker", "RemoteEyeTracker\RemoteEyeTracker.csproj", "{8E7AF573-B6CF-45ED-9CEF-09462CE345B3}"
 	ProjectSection(ProjectDependencies) = postProject

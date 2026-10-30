@@ -11,6 +11,7 @@ using SpinnakerNET;
 using SpinnakerNET.GenApi;
 using static System.Net.Mime.MediaTypeNames;
 using static OpenIris.EyeTrackerExtentionMethods;
+using System.Collections.Concurrent;
 
 namespace SpinnakerInterface
 {
@@ -54,8 +55,22 @@ namespace SpinnakerInterface
 
         double maxGain;
 
-        public Point Offset { get { return new Point((int)Math.Round(GetROI().X), (int)Math.Round(GetROI().Y)); } }
+        public Point Offset { get {
+                lock (_roiLock)
+                {
+                    var offset = new Point(_lastOffset.X, _lastOffset.Y);
+                }
+                return offset;
+         } }
+
         private Point offset;
+
+        // --- Thread-Safe ROI Update Fields ---
+        private readonly object _roiLock = new object();
+        private Point _roiChangeDelta = Point.Empty;
+        private bool _centerRequested = false;
+        private PointF _pupilCenterForCentering;
+        private Point _lastOffset = Point.Empty;
         public double Gain { get { return gain; } set { gain = value; } }
         private double gain;
 
@@ -148,6 +163,10 @@ namespace SpinnakerInterface
 
         protected override ImageEye GrabImageFromCamera()
         {
+            // Apply any pending ROI changes from the UI thread. This must be done
+            // here, in the "safe zone" between grabbing frames.
+            SyncROI();
+
             ImageEye? newImageEye = null;
             IManagedImage rawImage = null;
             if (!cam.IsStreaming()) { 
@@ -231,21 +250,32 @@ namespace SpinnakerInterface
 
         // Center the pupil in the ROI. The centerPupil parameter gives the current pixel
         // location of the tracked pupil within the ROI, so we use it to offset the
-        // current ROI to bring the pupil to the center. One liner!!
-        public void Center(PointF centerPupil) => SetROI(GetROI() + ToVector2(centerPupil) - roiSize / 2);
+        // current ROI to bring the pupil to the center.
+        public void Center(PointF centerPupil)
+        {
+            // The UI thread now only writes its intent to a shared variable.
+            // It does NOT read GetROI() from the camera.
+            lock (_roiLock)
+            {
+                _centerRequested = true;
+                _pupilCenterForCentering = centerPupil;
+            }
+        }
 
         public void Move(MovementDirection direction)
         {
-            var Offset = GetROI();  // Read values from Spinnaker API.
-
-            switch (direction)
+            // The UI thread simply accumulates the requested changes.
+            // It does NOT read GetROI() from the camera.
+            lock (_roiLock)
             {
-                case MovementDirection.Down: Offset.Y += 4; break;
-                case MovementDirection.Up: Offset.Y -= 4; break;
-                case MovementDirection.Left: Offset.X -= 4; break;
-                case MovementDirection.Right: Offset.X += 4; break;
+                switch (direction)
+                {
+                    case MovementDirection.Down: _roiChangeDelta.Y += 4; break;
+                    case MovementDirection.Up: _roiChangeDelta.Y -= 4; break;
+                    case MovementDirection.Left: _roiChangeDelta.X -= 4; break;
+                    case MovementDirection.Right: _roiChangeDelta.X += 4; break;
+                }
             }
-            SetROI(Offset);
         }
         #endregion public methods
 
@@ -274,7 +304,7 @@ namespace SpinnakerInterface
             roiSize = new Vector2(FrameSize.Width, FrameSize.Height);
             maxROI_Offset = maxFrameSize - roiSize;
 
-            maxGain = cam.AutoExposureGainUpperLimit;
+            maxGain = cam.Gain.Max;
 
             Debug.WriteLine($"Centering ROI. FrameMax {maxFrameSize}, ROI_SIZE {roiSize}");
             //Center the ROI in the middle of the physical camera frame.
@@ -304,10 +334,8 @@ namespace SpinnakerInterface
             cam.Gain.Value = Gain;
             //# Exposure settings.
             cam.ExposureAuto.FromString("Off");
-
             //# Set to 500uSec less than frame interval.
-            cam.AutoExposureExposureTimeUpperLimit.Value = 1e6 / FrameRate - 500;
-            cam.ExposureTime.Value = cam.AutoExposureExposureTimeUpperLimit.Value - 100;
+            cam.ExposureTime.Value = 1e6 / FrameRate - 500;
 
             cam.AcquisitionFrameRateEnable.Value = true;
             cam.AcquisitionFrameRate.Value = FrameRate;
@@ -331,6 +359,10 @@ namespace SpinnakerInterface
                     break;
                 case TriggerMode.Slave:
                     //# Trigger Settings
+                    // Slave must have higher aquisition rate that master or else risk falling behind due to clock skew
+                    //cam.AcquisitionFrameRateEnable.Value = false;
+                    cam.AcquisitionFrameRate.Value = FrameRate + 50;
+
                     cam.LineSelector.FromString(TRIGGER_LINE);
                     try { cam.V3_3Enable.Value = false; } catch { }
                     cam.LineMode.FromString("Input");
@@ -399,9 +431,73 @@ namespace SpinnakerInterface
             cam.OffsetX.Value = offset.X;
             cam.OffsetY.Value = offset.Y;
 
+            _lastOffset = offset;
+
             Trace.WriteLine($"Camera {WhichEye} ROI moved to ({offset.X},{offset.Y}).");
         }
-        private Vector2 GetROI() => new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
+
+        /// <summary>
+        /// Synchronizes the camera's ROI with any pending changes from the UI thread.
+        /// </summary>
+        /// <remarks>
+        /// MOTIVATION FOR THIS FUNCTION:
+        /// A hardware-level race condition can occur if we try to change camera parameters (like the ROI)
+        /// at the same time the camera's firmware is acting on a high-priority hardware trigger. This is
+        /// especially problematic for the slave camera, which relies on unpredictable external triggers.
+        ///
+        /// The crash happens when a call to read a camera parameter (e.g., GetROI()) is immediately
+        /// followed by a hardware trigger, which is then followed by a call to write a parameter (e.g., SetROI()).
+        /// The firmware enters an unstable state and fails.
+        ///
+        /// This function solves the problem by ensuring that ALL communication with the camera hardware
+        /// (both reading and writing of parameters) happens exclusively within this single, atomic block.
+        /// This block is only ever called from the camera's own grabbing thread, during the "safe zone"
+        /// after one frame has been acquired and before the next one is requested. This completely
+        /// eliminates any possibility of a conflict with an incoming hardware trigger.
+        /// </remarks>
+        private void SyncROI()
+        {
+            Point delta;
+            bool shouldCenter;
+            PointF pupilCenter = PointF.Empty;
+
+            // Step 1: Atomically get the pending changes requested by the UI thread.
+            lock (_roiLock)
+            {
+                delta = _roiChangeDelta;
+                shouldCenter = _centerRequested;
+                if (shouldCenter)
+                {
+                    pupilCenter = _pupilCenterForCentering;
+                }
+                // Reset the shared variables for the next command.
+                _roiChangeDelta = Point.Empty;
+                _centerRequested = false;
+            }
+
+            // Step 2: If there's a change pending, perform the entire Read-Calculate-Write
+            // operation as a single, uninterrupted unit.
+            if (delta != Point.Empty || shouldCenter)
+            {
+                // READ from the hardware.
+                var currentOffset = new Vector2(cam.OffsetX.Value, cam.OffsetY.Value);
+
+                // CALCULATE the new state based on the read value and the UI's intent.
+                if (shouldCenter)
+                {
+                    // A center command overrides any pending move commands.
+                    currentOffset = currentOffset + ToVector2(pupilCenter) - roiSize / 2;
+                }
+                else
+                {
+                    currentOffset.X += delta.X;
+                    currentOffset.Y += delta.Y;
+                }
+
+                // WRITE the final state back to the hardware.
+                SetROI(currentOffset);
+            }
+        }
 
         public bool IncreaseExposure()
         {

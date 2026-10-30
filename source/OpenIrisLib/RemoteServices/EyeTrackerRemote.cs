@@ -61,7 +61,7 @@ namespace OpenIris
                         Calibrating = eyeTracker.Calibrating,
 
                         ProcessorStatus = eyeTracker.ImageProcessor?.ProcessingStatus ?? "Not tracking",
-                        GrabberStatus = eyeTracker.ImageGrabber?.GrabbingStatus ?? "Not tracking" + " " + eyeTracker.HeadTracker?.Status ?? "[No head tracking]",
+                        GrabberStatus = eyeTracker.ImageGrabber?.GrabbingStatus() ?? "Not tracking" + " " + eyeTracker.HeadTracker?.Status ?? "[No head tracking]",
                         RecorderStatus = eyeTracker.RecordingSession?.RecordingStatus ?? "Not recording",
                     };
                 }
@@ -224,26 +224,26 @@ namespace OpenIris
         /// 
         /// </summary>
         /// <returns></returns>
-        public EyeCollection<EyeData?>? GetCurrentData()
+        public EyeTrackerData? GetCurrentData()
         {
-            return eyeTracker?.LastImagesAndData?.Data?.EyeDataRaw;
+            return eyeTracker?.LastImagesAndData?.Data;
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public EyeCollection<EyeData?>? WaitForNewData()
+        public EyeTrackerData? WaitForNewData()
         {
             var dataWait = new AutoResetEvent(false);
-            EyeCollection<EyeData?>? data = null;
+            EyeTrackerData? data = null;
 
             if (eyeTracker is null) return null;
 
             EventHandler<EyeTrackerImagesAndData>? eventHandler = (_, o) =>
             {
                 Console.WriteLine("eventHandler");
-                data = o?.Data?.EyeDataRaw;
+                data = o?.Data;
                 dataWait.Set();
             };
 
@@ -432,13 +432,16 @@ namespace OpenIris
         /// </summary>
         public class JsonData
         {
-            public JsonData(EyeData leftData, EyeData rightData)
+            public JsonData(EyeData leftData, EyeData rightData, ExtraData extraData)
             {
                 Left = new JsonEyeData(leftData);
                 Right = new JsonEyeData(rightData);
+                Extra = extraData;
             }
             public JsonEyeData? Left { get; set; }
             public JsonEyeData? Right { get; set; }
+
+            public ExtraData? Extra { get; set; }
         }
 
 
@@ -468,16 +471,18 @@ namespace OpenIris
                     return bytesToSend;
                 case "GETDATA":
                     var eyedata = GetCurrentData();
-                    var leftData = eyedata?[Eye.Left] ?? new EyeData();
-                    var rightData = eyedata?[Eye.Right] ?? new EyeData();
-                    var eyedatamsg = JsonSerializer.Serialize(new JsonData(leftData, rightData));
+                    var leftData = eyedata?.EyeDataRaw?[Eye.Left] ?? new EyeData();
+                    var rightData = eyedata?.EyeDataRaw?[Eye.Right] ?? new EyeData();
+                    var extraData = eyedata?.ExtraData ?? new ExtraData();
+                    var eyedatamsg = JsonSerializer.Serialize(new JsonData(leftData, rightData, extraData));
                     return Encoding.ASCII.GetBytes(eyedatamsg);
 
                 case "WAITFORDATA":
                     eyedata = WaitForNewData();
-                    leftData = eyedata?[Eye.Left] ?? new EyeData();
-                    rightData = eyedata?[Eye.Right] ?? new EyeData();
-                    eyedatamsg = JsonSerializer.Serialize(new JsonData(leftData, rightData));
+                    leftData = eyedata?.EyeDataRaw?[Eye.Left] ?? new EyeData();
+                    rightData = eyedata?.EyeDataRaw?[Eye.Right] ?? new EyeData();
+                    extraData = eyedata?.ExtraData ?? new ExtraData();
+                    eyedatamsg = JsonSerializer.Serialize(new JsonData(leftData, rightData, extraData));
                     return Encoding.ASCII.GetBytes(eyedatamsg);
 
                 case "RECORDEVENT":
@@ -487,6 +492,13 @@ namespace OpenIris
                 case "CALIBRATION":
                     var result = CalibrationMessage(data);
                     return Encoding.ASCII.GetBytes(result);
+
+                case "SETSESSIONNAME":
+                    if (eyeTracker != null)
+                    {
+                        eyeTracker.Settings.SessionName = data;
+                    }
+                    return bytesToSend;
 
                 case "TESEMPTY":
                     return new byte[1] { 68 };

@@ -27,6 +27,7 @@ namespace OpenIris
             task = Task.Run(() =>
             {
                 Thread.CurrentThread.Name = "EyeTracker:TCP server";
+                Thread.CurrentThread.IsBackground = true; // Stops the thread from preventing the application from closing
 
                 try
                 {
@@ -37,7 +38,7 @@ namespace OpenIris
                     server.Start();
 
                     // Buffer for reading data
-                    Byte[] bytes = new Byte[256];
+                    Byte[] bytes = new Byte[1024];
 
                     // Enter the listening loop.
                     while (true)
@@ -57,9 +58,13 @@ namespace OpenIris
                         // Loop to receive all the data sent by the client.
                         while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                         {
-                            // Translate data bytes to a ASCII string.
-                            
-                            var bytesToSend = eyeTracker.ParseAndExecuteStringMessage(bytes);
+                            // Create a new byte array containing only the received data.
+                            byte[] receivedBytes = new byte[i];
+                            Array.Copy(bytes, 0, receivedBytes, 0, i);
+
+                            // Pass the correctly sized byte array to the parsing method.
+                            var bytesToSend = eyeTracker.ParseAndExecuteStringMessage(receivedBytes);
+
                             if (bytesToSend.Length > 0)
                             {
                                 // Send back a response.

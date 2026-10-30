@@ -156,9 +156,20 @@ namespace OpenIris
         /// <summary>
         /// Gets a string with a status message regarding the grabbing of images and head data.
         /// </summary>
-        public string GrabbingStatus =>$"Grabbing " +
+        public string GrabbingStatus()
+        {
+            string ret = $"Grabbing " +
             $"at {FrameRateMeasured:0.0}Hz  {FrameSize.Width}x{FrameSize.Height}px " +
-            $"Frames:{NumberFramesGrabbed} Dropped:{NumberFramesDropped} Buffer:{ cameraBuffer?.Count ?? 0}";
+            $"Frames:{NumberFramesGrabbed} Dropped:{NumberFramesDropped} Buffer:{cameraBuffer?.Count ?? 0}";
+
+            //for (int i = 0; i < (cameraQueues?.Count ?? 0); i++)
+            //{
+            //    var queue = cameraQueues;
+            //    if (queue is null) continue;
+            //    ret += $" Queue{i}:{queue.Count}";
+            //}
+            return ret;
+        }
 
         /// <summary>
         /// Starts grabbing.

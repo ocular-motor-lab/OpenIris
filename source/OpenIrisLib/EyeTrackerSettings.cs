@@ -190,11 +190,11 @@ namespace OpenIris
 
         [Category("E) Recording settings"), Description("Name of the data files")]
         public string SessionName { get => sessionName; set => SetProperty(ref sessionName, value, nameof(SessionName)); }
-        private string sessionName = "SESSION_NAME"; // Default value
+        private string sessionName = "OpenIris"; // Default value
 
         [Category("E) Recording settings"), Description("Folder where data is saved")]
         public string DataFolder { get => dataFolder; set => SetProperty(ref dataFolder, value, nameof(DataFolder)); }
-        private string dataFolder = @"C:\secure\Data\Raw\Torsion\DataTest"; // Default value
+        private string dataFolder = @"C:\OpenIrisData"; // Default value
 
         [Browsable(false)]
         [Category("E) Recording settings"), Description("Last file saved.")]
@@ -203,7 +203,7 @@ namespace OpenIris
 
         [Category("E) Recording settings"), Description("Indicates if video should be recorded.")]
         public bool RecordVideo { get => recordVideo; set => SetProperty(ref recordVideo, value, nameof(RecordVideo)); }
-        private bool recordVideo = true; // Default value
+        private bool recordVideo = false; // Default value
 
         [Category("E) Recording settings"), Description("Proportion of frames that should be recorded (1 every x).")]
         public int DecimateVideoRatio { get => decimateVideoRatio; set => SetProperty(ref decimateVideoRatio, value, nameof(DecimateVideoRatio)); }

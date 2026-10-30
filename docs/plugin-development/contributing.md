@@ -30,8 +30,7 @@ Run them from **Test Explorer** in Visual Studio, or from the repository folder 
 dotnet test source\OpenIrisTests\OpenIrisTests.csproj --no-build -c Debug -p:Platform=x64
 ```
 
-Tests that need the sample videos are skipped when the `VideoSamples` folder is missing (as on
-GitHub).
+The speed test is skipped on GitHub, where timing isn't meaningful.
 
 ### When a baseline test fails
 

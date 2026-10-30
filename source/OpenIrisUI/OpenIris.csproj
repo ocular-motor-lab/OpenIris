@@ -23,6 +23,10 @@
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Small sample videos played by the Simulation eye tracking system. -->
+    <None Include="..\SampleVideos\*.mp4" Link="SampleVideos\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="EyeTrackerAboutBox.cs" SubType="Form" />
     <Compile Update="EyeTrackerGui.cs" SubType="Form" />
     <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DesignTime="True" DependentUpon="Resources.resx" />

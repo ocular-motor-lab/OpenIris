@@ -86,10 +86,7 @@ namespace OpenIris.Tests
                     }
                 }
 
-                var video = Path.Combine(PipelineHarness.VideoSamplesFolder, eye == Eye.Left ? "JorgeLeft.avi" : "JorgeRight.avi");
-                if (!File.Exists(video)) continue;
-
-                foreach (var frame in PipelineHarness.ReadVideo(video, eye, 100))
+                foreach (var frame in PipelineHarness.ReadVideo(PipelineHarness.SampleVideo(eye), eye, 100))
                 {
                     using (frame)
                     {

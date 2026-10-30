@@ -33,8 +33,7 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
-        /// Runs on the recordings used by the Simulation eye tracking system. They are not in git, so
-        /// this test is skipped where the VideoSamples folder is missing (for example on GitHub).
+        /// Runs on the sample videos played by the Simulation eye tracking system.
         /// </summary>
         [DataTestMethod]
         [DataRow("JOM", Eye.Left)]
@@ -45,11 +44,8 @@ namespace OpenIris.Tests
         [DataRow("SimpleCentroid", Eye.Right)]
         public void SampleVideoMatchesBaseline(string pipeline, Eye eye)
         {
-            var video = Path.Combine(PipelineHarness.VideoSamplesFolder, eye == Eye.Left ? "JorgeLeft.avi" : "JorgeRight.avi");
-            if (!File.Exists(video)) Assert.Inconclusive($"Sample video not found: {video}");
-
             // Same pixel scale as the Simulation system's default settings.
-            var data = PipelineHarness.Run(pipeline, eye, PipelineHarness.ReadVideo(video, eye, VideoFrames), SyntheticEye.MmPerPix);
+            var data = PipelineHarness.Run(pipeline, eye, PipelineHarness.ReadVideo(PipelineHarness.SampleVideo(eye), eye, VideoFrames), SyntheticEye.MmPerPix);
 
             Baseline.Check($"video-{pipeline}-{eye}", data);
         }

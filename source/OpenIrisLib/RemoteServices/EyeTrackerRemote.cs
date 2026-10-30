@@ -224,16 +224,27 @@ namespace OpenIris
         /// 
         /// </summary>
         /// <returns></returns>
-        public EyeTrackerData? GetCurrentData()
+        public EyeCollection<EyeData?>? GetCurrentData()
         {
-            return eyeTracker?.LastImagesAndData?.Data;
+            return eyeTracker?.LastImagesAndData?.Data?.EyeDataRaw;
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
-        public EyeTrackerData? WaitForNewData()
+        public EyeCollection<EyeData?>? WaitForNewData()
+        {
+            return WaitForNewTrackerData()?.EyeDataRaw;
+        }
+
+        /// <summary>
+        /// Waits for the next processed frame and returns all its data (including the extra data).
+        /// GetCurrentData and WaitForNewData keep returning only the raw eye data so existing
+        /// clients (OpenIrisRemoteClient, the MATLAB client) keep working.
+        /// </summary>
+        /// <returns></returns>
+        private EyeTrackerData? WaitForNewTrackerData()
         {
             var dataWait = new AutoResetEvent(false);
             EyeTrackerData? data = null;
@@ -470,7 +481,7 @@ namespace OpenIris
                     StopRecording();
                     return bytesToSend;
                 case "GETDATA":
-                    var eyedata = GetCurrentData();
+                    var eyedata = eyeTracker?.LastImagesAndData?.Data;
                     var leftData = eyedata?.EyeDataRaw?[Eye.Left] ?? new EyeData();
                     var rightData = eyedata?.EyeDataRaw?[Eye.Right] ?? new EyeData();
                     var extraData = eyedata?.ExtraData ?? new ExtraData();
@@ -478,7 +489,7 @@ namespace OpenIris
                     return Encoding.ASCII.GetBytes(eyedatamsg);
 
                 case "WAITFORDATA":
-                    eyedata = WaitForNewData();
+                    eyedata = WaitForNewTrackerData();
                     leftData = eyedata?.EyeDataRaw?[Eye.Left] ?? new EyeData();
                     rightData = eyedata?.EyeDataRaw?[Eye.Right] ?? new EyeData();
                     extraData = eyedata?.ExtraData ?? new ExtraData();

@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>OpenIris.UI</RootNamespace>
     <AssemblyName>OpenIris</AssemblyName>
-    <ApplicationIcon>favicon %284%29.ico</ApplicationIcon>
+    <ApplicationIcon>OpenIris.ico</ApplicationIcon>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

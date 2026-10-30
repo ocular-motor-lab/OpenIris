@@ -12,5 +12,6 @@ OpenIris, see the [plugin development manual](../plugin-development/README.md).)
 5. [Playing and processing videos](processing-videos.md)
 6. [Remote control](remote-control.md): controlling OpenIris from MATLAB, Python or your stimulus
    program.
-7. [Hardware](hardware.md): cameras, IR filters and illuminators, synchronization, 3D-printed parts.
-8. [Troubleshooting](troubleshooting.md)
+7. [Plugins](plugins.md): recommended plugins, such as OpenIrisDPI, and how to install them.
+8. [Hardware](hardware.md): cameras, IR filters and illuminators, synchronization, 3D-printed parts.
+9. [Troubleshooting](troubleshooting.md)

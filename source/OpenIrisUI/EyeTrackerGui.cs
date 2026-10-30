@@ -53,6 +53,9 @@ namespace OpenIris.UI
         {
             InitializeComponent();
 
+            // Use the program's icon (OpenIris.ico) for the window and the taskbar too.
+            Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Windows.Forms.Application.ExecutablePath);
+
             // Initialize button hold timers
             moveCommandTimer = new Timer { Interval = 100 };
             moveCommandTimer.Tick += MoveCommandTimer_Tick;

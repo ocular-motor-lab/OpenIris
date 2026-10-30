@@ -11,9 +11,12 @@ edit_uri: edit/main/docs/
 copyright: Ocular Motor Lab, UC Berkeley. OpenIris is licensed under the GNU AGPL v3.
 
 docs_dir: docs
+# The site's home page is docs/index.md; docs/README.md is the index GitHub shows for the folder.
+exclude_docs: |
+  /README.md
 
 nav:
-  - Home: README.md
+  - Home: index.md
   - User manual:
       - user-manual/README.md
       - Installation: user-manual/installation.md
@@ -22,6 +25,7 @@ nav:
       - Calibration: user-manual/calibration.md
       - Playing and processing videos: user-manual/processing-videos.md
       - Remote control: user-manual/remote-control.md
+      - Plugins: user-manual/plugins.md
       - Hardware: user-manual/hardware.md
       - Troubleshooting: user-manual/troubleshooting.md
   - Plugin development:
@@ -37,6 +41,10 @@ nav:
 
 theme:
   name: material
+  logo: images/logo.svg
+  favicon: images/favicon.png
+  # Helvetica, like the lab website (set in stylesheets/openiris.css), instead of Google Fonts.
+  font: false
   features:
     - navigation.tabs
     - navigation.indexes
@@ -49,13 +57,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Light mode
@@ -66,15 +76,22 @@ plugins:
   # on GitHub and on the site.
   - gh-admonitions
 
+extra_css:
+  - stylesheets/openiris.css
+
 markdown_extensions:
   - admonition
   - attr_list
+  - md_in_html
   - tables
   - toc:
       permalink: true
   - pymdownx.details
   - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 validation:
   links:

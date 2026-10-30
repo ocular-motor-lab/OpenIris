@@ -51,7 +51,7 @@ A command is a plain ASCII string. Commands that take a parameter separate it wi
 > will hang (or time out).
 
 A command OpenIris doesn't recognize, or one that fails, gets no reply and an error is written in the
-log. (Before version 0.2.0, it stopped the UDP or TCP listener until OpenIris was restarted.)
+log. (Before version 0.1.6, it stopped the UDP or TCP listener until OpenIris was restarted.)
 
 ### UDP or TCP?
 

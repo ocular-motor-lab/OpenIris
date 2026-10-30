@@ -6,8 +6,8 @@ has its own log.
 
 ## The eye tracking system I need isn't in the list
 
-- **Versions before 0.2.0:** Windows blocked the plugins downloaded with OpenIris. Unblock them (see
-  [Installation](installation.md#versions-before-020-unblock-the-plugins)) and restart OpenIris.
+- **Versions before 0.1.6:** Windows blocked the plugins downloaded with OpenIris. Unblock them (see
+  [Installation](installation.md#versions-before-016-unblock-the-plugins)) and restart OpenIris.
 - Check the Log tab for errors loading plugins. A plugin built for a different version of OpenIris
   may fail to load.
 

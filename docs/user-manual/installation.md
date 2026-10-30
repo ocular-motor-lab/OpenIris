@@ -21,9 +21,9 @@ See [Hardware](hardware.md) for the cameras, lenses and illuminators we use.
 2. Unzip it into a folder of your choice, for example `C:\OpenIris`.
 3. Double-click `OpenIris.exe`.
 
-### Versions before 0.2.0: unblock the plugins
+### Versions before 0.1.6: unblock the plugins
 
-Windows marks files downloaded from the internet, and OpenIris versions before 0.2.0 can't load
+Windows marks files downloaded from the internet, and OpenIris versions before 0.1.6 can't load
 plugins marked that way. The **Eyetracking System** list then only shows a couple of options. To
 avoid it, **before unzipping**, right-click the zip file, **Properties**, check **Unblock**, **OK**.
 The extracted files are then not marked.

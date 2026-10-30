@@ -129,6 +129,10 @@ namespace OpenIris
 
             frameRateTimer?.Dispose();
             frameRateTimer = null;
+
+            // Close the video files. Otherwise they stay open until the GC finalizes them, and the
+            // videos cannot be moved or deleted while OpenIris is running.
+            Videos.ForEach(video => video?.Dispose());
         }
 
         /// <summary>

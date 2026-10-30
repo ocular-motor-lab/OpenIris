@@ -23,6 +23,11 @@ dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c Debug -p:Pla
 - **Speed** (`PipelinePerformanceTests`): the JOM pipeline must not get more than 25% slower. The
   first run on each computer records a reference time in `Baselines\performance\` (not committed).
   Delete that file to record a new one. Skipped on GitHub.
+- **Record and process** (`RecordAndProcessTests`): runs OpenIris without the user interface, as a
+  user would. It tracks with the Simulation system, records about 1.5 seconds of raw video, then
+  processes that recording with "Save processed video" and checks the processed video has the
+  frames, side by side for both eyes. Settings and recordings go to a temporary folder, so your
+  settings are not touched. Needs the sample videos, so it is skipped where they are missing.
 
 ## When a baseline test fails
 

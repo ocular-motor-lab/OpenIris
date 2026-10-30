@@ -171,6 +171,10 @@ namespace OpenIris.ImageProcessing
                 previousCount = currentCount;
             }
 
+            // The loop above reads the pixels through a raw pointer, which does not stop the GC
+            // from freeing the image. Keep it alive until here.
+            GC.KeepAlive(binaryImage);
+
             // Fold each label's statistics into its root. Roots keep the smallest label of their
             // blob, which is the label of the blob's first pixel, so going up in label order lists
             // the blobs in scanning order.

@@ -2,7 +2,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ExceptionServices;
+using System.Security;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OpenIris.UI
@@ -15,9 +19,27 @@ namespace OpenIris.UI
         [STAThread]
         static void Main()
         {
+            // Write crashes to the log. Without this an exception on a background thread closes
+            // OpenIris without leaving any trace.
+            AppDomain.CurrentDomain.UnhandledException += LogUnhandledException;
+            TaskScheduler.UnobservedTaskException += (_, e) =>
+                Trace.WriteLine("ERROR: Unobserved task exception: " + e.Exception);
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new EyeTrackerGui());
+        }
+
+        /// <summary>
+        /// Logs an exception that is about to close OpenIris. The attributes let it also see access
+        /// violations from native code (OpenCV), which .NET otherwise hides from handlers.
+        /// </summary>
+        [HandleProcessCorruptedStateExceptions]
+        [SecurityCritical]
+        private static void LogUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Trace.WriteLine("FATAL ERROR: OpenIris is closing because of an unhandled exception: " + e.ExceptionObject);
+            Trace.Flush();
         }
     }
 }

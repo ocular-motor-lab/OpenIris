@@ -106,10 +106,10 @@ namespace OpenIris.ImageGrabbing
             {
                 var image = GrabImageEyeFromVideo();
 
+                if (image == null) return null;
+
                 image.TimeStamp.TimeGrabbed = EyeTrackerDebug.TimeElapsed.TotalSeconds;
                 image.TimeStamp.DateTimeGrabbed = DateTime.Now;
-
-                if (image == null) return null;
 
                 if (LastFrameNumber > (long)image.TimeStamp.FrameNumber)
                         throw new InvalidOperationException("Frame numbers should keep growing.");
@@ -141,9 +141,13 @@ namespace OpenIris.ImageGrabbing
         /// always monotonic. There could be dropped frames though. The <see
         /// cref="EyeTrackerImageGrabber"/> object will take care of it.
         /// </summary>
+        /// <remarks>
+        /// Does not call VideoCapture.Start. That starts an EmguCV thread that keeps grabbing frames
+        /// from the same capture at the same time as <see cref="GrabImageEyeFromVideo"/>, which is
+        /// not thread safe and skips frames.
+        /// </remarks>
         public void Start()
         {
-            Video.Start();
         }
 
         /// <summary>
@@ -152,8 +156,6 @@ namespace OpenIris.ImageGrabbing
         public void Stop()
         {
             stopping = true;
-
-            Video.Stop();
         }
 
         /// <summary>
@@ -168,10 +170,13 @@ namespace OpenIris.ImageGrabbing
                 frameNumber: (ulong)Video.GetCaptureProperty(CapProp.PosFrames),
                 frameNumberRaw: (ulong)Video.GetCaptureProperty(CapProp.PosFrames));
 
-            // Retrieve the new frame
-            var grayImage = Video.QueryFrame().ToImage<Gray, byte>();
+            // Retrieve the new frame. Pass the image itself to ImageEye, not grayImage.Bitmap: that
+            // Bitmap shares grayImage's memory, which the GC can free while it is still being copied.
+            using var frame = Video.QueryFrame()
+                ?? throw new InvalidOperationException($"Could not read frame {timestamp.FrameNumber} of the video.");
+            var grayImage = frame.ToImage<Gray, byte>();
 
-            var imageEye = new ImageEye(grayImage.Bitmap, WhichEye, timestamp);
+            var imageEye = new ImageEye(grayImage, WhichEye, timestamp, null);
             imageEye.CorrectOrientation(CameraOrientation);
 
             LastFrameNumber = (long)timestamp.FrameNumberRaw;

@@ -31,6 +31,8 @@ This is just an example video. To explore all the great features of OpenIris, pl
 ### Help Shape the Future of Open Iris Eye-Tracking
 We are excited to invite you to contribute to Open Iris, an innovative open-source eye-tracking framework that is transforming the field of vision research and human-computer interaction. By participating in this collaborative project, you have the opportunity to work with a passionate community of developers, researchers, and enthusiasts dedicated to advancing eye-tracking technology. Whether you are a seasoned programmer, a UX designer, a researcher, or simply someone with a keen interest in eye tracking, your unique skills and insights are invaluable to us. Join us in pushing the boundaries of what is possible, enhancing accessibility, and creating cutting-edge solutions that benefit everyone. Together, we can make OpenIris the premier platform for eye-tracking development and research.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+
 ### Cite
 If you use OpenIris, please cite the OpenIris paper in your publication:
 
@@ -38,4 +40,9 @@ Roksana Sadeghi, Ryan Ressmeyer, Jacob Yates, and Jorge Otero-Millan. 2024. Open
 
 ### Synchronization  of eye data with stimulus display
 https://github.com/ocular-motor-lab/OpenIrisSync/wiki
+
+### License
+OpenIris is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+OpenIris uses third-party components under their own licenses, notably [Emgu CV](https://www.emgu.com/) (GNU GPL v3, or a commercial license from Emgu Corporation) and the camera vendors' SDKs (FLIR Spinnaker and FlyCapture, and others), which are subject to their vendors' terms.
 

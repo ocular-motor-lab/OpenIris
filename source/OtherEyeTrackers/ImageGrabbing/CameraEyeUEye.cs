@@ -1,6 +1,7 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="CameraEyeUEye.cs">
-//     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
+//     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
+//     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
 //-----------------------------------------------------------------------
 namespace OpenIris.ImageGrabbing

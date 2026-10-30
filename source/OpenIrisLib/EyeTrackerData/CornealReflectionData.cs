@@ -1,6 +1,7 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="CornealReflectionData.cs">
-//     Copyright (c) 2018 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University. All rights reserved.
+//     Copyright (c) 2018 Jorge Otero-Millan, Oculomotor lab, Johns Hopkins University.
+//     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
 //-----------------------------------------------------------------------                            
 namespace OpenIris

@@ -6,6 +6,12 @@ OpenIris has a user-friendly graphical interface, basic tracking algorithm, and 
 
 ![OpenIrisUI](https://github.com/ocular-motor-lab/OpenIris/assets/1356893/0164ac5c-dc84-4233-bcf2-1469568b6292)
 
+<p align="center">
+  <img src="docs/images/hardware/desktop-eye-tracker.jpg" width="420" alt="A desktop eye tracker built for OpenIris: two FLIR cameras and an infrared illuminator on a 3D-printed mount">
+  <br>
+  <em>A desktop eye tracker for OpenIris: two FLIR Blackfly S cameras and an infrared illuminator on a 3D-printed mount. See <a href="https://ocular-motor-lab.github.io/OpenIris/user-manual/hardware/">Hardware</a> for the parts.</em>
+</p>
+
 
 # Quick Start
 >[!NOTE]

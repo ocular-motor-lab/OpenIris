@@ -103,9 +103,10 @@ namespace OpenIris.ImageGrabbing
         public override ImageEye GrabImageEyeFromVideo()
         {
             var image = base.GrabImageEyeFromVideo();
-            var videoTimestamp = image.TimeStamp;
 
             if ( image is null)   return null;
+
+            var videoTimestamp = image.TimeStamp;
 
             // Update the timestamp with the info from the pixels
             ImageEyeTimestamp timestamp = VideoEyeFlyCapture.GetTimeStampFromImage(image, positionOfEmbeddedInfo, this.offsetFrameNumber);

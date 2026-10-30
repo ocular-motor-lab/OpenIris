@@ -205,9 +205,11 @@ namespace OpenIris
                         eyeTracker.LastImagesAndData.Data?.EyeDataCalibrated?[Eye.Left] ?? new CalibratedEyeData(),
                         eyeTracker.LastImagesAndData.Data?.EyeDataCalibrated?[Eye.Right] ?? new CalibratedEyeData()
                         );
+                    // ToBitmap copies the pixels. Image.Bitmap would share the memory of an image
+                    // that can be freed before the reply is sent.
                     imagesAndData.Image = new EyeCollection<Bitmap?>(
-                        eyeTracker.LastImagesAndData.Images[Eye.Left]?.Image.Bitmap,
-                        eyeTracker.LastImagesAndData.Images[Eye.Right]?.Image.Bitmap
+                        eyeTracker.LastImagesAndData.Images[Eye.Left]?.Image.ToBitmap(),
+                        eyeTracker.LastImagesAndData.Images[Eye.Right]?.Image.ToBitmap()
                         );
 
                 }

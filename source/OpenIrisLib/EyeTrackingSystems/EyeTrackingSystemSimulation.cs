@@ -28,8 +28,13 @@ namespace OpenIris
         protected override EyeCollection<CameraEye?> CreateAndStartCameras()
         {
             var settings = Settings as EyeTrackingSystemSimulationSettings;
-            var (leftVideo, leftOrientation) = GetVideo(settings?.LeftEyeVideo, "JorgeLeft", settings);
-            var (rightVideo, rightOrientation) = GetVideo(settings?.RightEyeVideo, "JorgeRight", settings);
+
+            // Use the full quality sample videos only if both are there, so both eyes play the same recording.
+            var folder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var useFullSamples = File.Exists(Path.Combine(folder, "JorgeLeft.avi")) && File.Exists(Path.Combine(folder, "JorgeRight.avi"));
+
+            var (leftVideo, leftOrientation) = GetVideo(settings?.LeftEyeVideo, "JorgeLeft", useFullSamples, settings);
+            var (rightVideo, rightOrientation) = GetVideo(settings?.RightEyeVideo, "JorgeRight", useFullSamples, settings);
 
             var cameraLeft = new CameraEyeVideoSimulation(Eye.Left, leftVideo, Settings.FrameRate)
             {
@@ -74,7 +79,7 @@ namespace OpenIris
         /// full sample video next to OpenIris if present (it is large and not included in releases),
         /// or else the small sample video included with OpenIris.
         /// </summary>
-        private static (string fileName, CameraOrientation orientation) GetVideo(string? videoSetting, string sampleName, EyeTrackingSystemSimulationSettings? settings)
+        private static (string fileName, CameraOrientation orientation) GetVideo(string? videoSetting, string sampleName, bool useFullSamples, EyeTrackingSystemSimulationSettings? settings)
         {
             var folder = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
@@ -88,8 +93,7 @@ namespace OpenIris
             }
 
             // The sample videos were recorded with a mirrored camera.
-            var fullSample = Path.Combine(folder, sampleName + ".avi");
-            if (File.Exists(fullSample)) return (fullSample, CameraOrientation.UprightMirrored);
+            if (useFullSamples) return (Path.Combine(folder, sampleName + ".avi"), CameraOrientation.UprightMirrored);
 
             var smallSample = Path.Combine(folder, "SampleVideos", sampleName + ".mp4");
             if (File.Exists(smallSample)) return (smallSample, CameraOrientation.UprightMirrored);

@@ -32,9 +32,10 @@
     <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DesignTime="True" DependentUpon="Resources.resx" />
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
   </ItemGroup>
-  <!-- Sample videos live in the gitignored VideoSamples folder; copy them only when present so fresh clones still build. -->
-  <ItemGroup Condition="Exists('..\..\VideoSamples\JorgeLeft.avi')">
+  <!-- The full quality sample videos, if present in the gitignored VideoSamples folder. Simulation plays them instead of the MP4s. -->
+  <ItemGroup Condition="Exists('..\..\VideoSamples\JorgeLeft.avi') And Exists('..\..\VideoSamples\JorgeRight.avi')">
     <Content Include="..\..\VideoSamples\JorgeLeft.avi" Link="JorgeLeft.avi" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\VideoSamples\JorgeRight.avi" Link="JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup Condition="Exists('..\..\VideoSamples\JorgeRight.avi')">
     <Content Include="..\..\VideoSamples\JorgeRight.avi" Link="JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />

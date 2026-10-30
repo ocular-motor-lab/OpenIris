@@ -4,7 +4,7 @@
 #   mkdocs serve
 site_name: OpenIris
 site_description: Open-source framework for video-based eye tracking.
-site_url: https://ocular-motor-lab.github.io/OpenIris/
+site_url: https://omlab.berkeley.edu/OpenIris/
 repo_url: https://github.com/ocular-motor-lab/OpenIris
 repo_name: ocular-motor-lab/OpenIris
 edit_uri: edit/main/docs/

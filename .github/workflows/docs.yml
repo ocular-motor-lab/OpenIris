@@ -1,6 +1,6 @@
 # Builds the documentation website from docs/ (see mkdocs.yml). Every pull request that changes the
 # documentation is checked (broken links fail the build); pushes to main publish the site on
-# GitHub Pages, at https://ocular-motor-lab.github.io/OpenIris/
+# GitHub Pages, at https://omlab.berkeley.edu/OpenIris/
 name: Docs
 
 on:

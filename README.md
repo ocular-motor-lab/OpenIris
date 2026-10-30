@@ -9,7 +9,7 @@ OpenIris has a user-friendly graphical interface, basic tracking algorithm, and 
 <p align="center">
   <img src="docs/images/hardware/desktop-eye-tracker.jpg" width="420" alt="A desktop eye tracker built for OpenIris: two FLIR cameras and an infrared illuminator on a 3D-printed mount">
   <br>
-  <em>A desktop eye tracker for OpenIris: two FLIR Blackfly S cameras and an infrared illuminator on a 3D-printed mount. See <a href="https://ocular-motor-lab.github.io/OpenIris/user-manual/hardware/">Hardware</a> for the parts.</em>
+  <em>A desktop eye tracker for OpenIris: two FLIR Blackfly S cameras and an infrared illuminator on a 3D-printed mount. See <a href="https://omlab.berkeley.edu/OpenIris/user-manual/hardware/">Hardware</a> for the parts.</em>
 </p>
 
 
@@ -24,11 +24,11 @@ To quickly install and check OpenIris features, download [the latest version of 
 - The openiris main window will open. Select "Simulation" from the "Eye Tracking System" menu (default option) and hit Start Tracking.
 - The default pupil, corneal reflection, and torsion tracking pipeline will start.
 
-This is just an example video. To explore all the great features of OpenIris, please read the [documentation](https://ocular-motor-lab.github.io/OpenIris/).
+This is just an example video. To explore all the great features of OpenIris, please read the [documentation](https://omlab.berkeley.edu/OpenIris/).
 
 # Documentation
 
-The documentation is at **[ocular-motor-lab.github.io/OpenIris](https://ocular-motor-lab.github.io/OpenIris/)** (also readable here, in [docs](docs/README.md)):
+The documentation is at **[omlab.berkeley.edu/OpenIris](https://omlab.berkeley.edu/OpenIris/)** (also readable here, in [docs](docs/README.md)):
 
 - **[User manual](docs/user-manual/README.md)**: installing, configuring, recording, calibrating, processing videos, controlling OpenIris from MATLAB, Python or your stimulus program, and the hardware we use.
 - **[Plugin development](docs/plugin-development/README.md)**: how OpenIris works, writing plugins for new cameras, tracking methods and calibrations, building from source, and contributing.

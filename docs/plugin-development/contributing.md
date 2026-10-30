@@ -15,7 +15,7 @@ Visual Studio first.
 ## Documentation
 
 The documentation is the Markdown files in `docs/`. On every push to `main`, GitHub builds them into
-the website at [ocular-motor-lab.github.io/OpenIris](https://ocular-motor-lab.github.io/OpenIris/),
+the website at [omlab.berkeley.edu/OpenIris](https://omlab.berkeley.edu/OpenIris/),
 with [MkDocs](https://www.mkdocs.org/) and the Material theme (configured in `mkdocs.yml`). Pull
 requests that change the documentation are checked too: a broken link fails the check.
 

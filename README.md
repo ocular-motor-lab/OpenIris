@@ -18,9 +18,11 @@ To quickly install and check OpenIris features, download [the latest version of 
 - The openiris main window will open. Select "Simulation" from the "Eye Tracking System" menu (default option) and hit Start Tracking.
 - The default pupil, corneal reflection, and torsion tracking pipeline will start.
 
-This is just an example video. To explore all the great features of OpenIris, please read the [documentation](docs/README.md).
+This is just an example video. To explore all the great features of OpenIris, please read the [documentation](https://ocular-motor-lab.github.io/OpenIris/).
 
 # Documentation
+
+The documentation is at **[ocular-motor-lab.github.io/OpenIris](https://ocular-motor-lab.github.io/OpenIris/)** (also readable here, in [docs](docs/README.md)):
 
 - **[User manual](docs/user-manual/README.md)**: installing, configuring, recording, calibrating, processing videos, controlling OpenIris from MATLAB, Python or your stimulus program, and the hardware we use.
 - **[Plugin development](docs/plugin-development/README.md)**: how OpenIris works, writing plugins for new cameras, tracking methods and calibrations, building from source, and contributing.

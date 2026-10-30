@@ -1,0 +1,4 @@
+# Tools to build the documentation website (see mkdocs.yml).
+mkdocs==1.6.1
+mkdocs-material==9.7.7
+mkdocs-github-admonitions-plugin==0.1.1

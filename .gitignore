@@ -363,3 +363,6 @@ VideoSamples/JorgeLeft.avi
 VideoSamples/JorgeRight.avi
 VideoSamples/VideoSamples.zip
 source/OpenIrisTests/Baselines/performance/
+
+# Documentation website built locally with "mkdocs build" or "mkdocs serve"
+site/

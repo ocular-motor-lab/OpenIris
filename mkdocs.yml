@@ -1,0 +1,83 @@
+# Documentation website, built from docs/ with MkDocs and published on GitHub Pages by
+# .github/workflows/docs.yml. To preview it locally:
+#   pip install -r requirements-docs.txt
+#   mkdocs serve
+site_name: OpenIris
+site_description: Open-source framework for video-based eye tracking.
+site_url: https://ocular-motor-lab.github.io/OpenIris/
+repo_url: https://github.com/ocular-motor-lab/OpenIris
+repo_name: ocular-motor-lab/OpenIris
+edit_uri: edit/main/docs/
+copyright: Ocular Motor Lab, UC Berkeley. OpenIris is licensed under the GNU AGPL v3.
+
+docs_dir: docs
+
+nav:
+  - Home: README.md
+  - User manual:
+      - user-manual/README.md
+      - Installation: user-manual/installation.md
+      - Configuration: user-manual/configuration.md
+      - Tracking and recording: user-manual/tracking-and-recording.md
+      - Calibration: user-manual/calibration.md
+      - Playing and processing videos: user-manual/processing-videos.md
+      - Remote control: user-manual/remote-control.md
+      - Hardware: user-manual/hardware.md
+      - Troubleshooting: user-manual/troubleshooting.md
+  - Plugin development:
+      - plugin-development/README.md
+      - How OpenIris works: plugin-development/architecture.md
+      - Creating a plugin: plugin-development/creating-a-plugin.md
+      - Eye tracking systems: plugin-development/eye-tracking-systems.md
+      - Tracking pipelines: plugin-development/tracking-pipelines.md
+      - Calibration pipelines: plugin-development/calibration-pipelines.md
+      - Building from source: plugin-development/building.md
+      - Contributing: plugin-development/contributing.md
+      - Known image processing issues: plugin-development/image-processing-improvements.md
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+
+plugins:
+  - search
+  # Shows GitHub's "> [!NOTE]" style notes as Material admonitions, so the same Markdown works
+  # on GitHub and on the site.
+  - gh-admonitions
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+validation:
+  links:
+    not_found: warn
+    anchors: warn
+    absolute_links: info

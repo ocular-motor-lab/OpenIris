@@ -12,9 +12,31 @@ Visual Studio first.
    shows on the pull request.
 5. Once it's reviewed and the checks pass, merge it into `main`.
 
+## Documentation
+
+The documentation is the Markdown files in `docs/`. On every push to `main`, GitHub builds them into
+the website at [ocular-motor-lab.github.io/OpenIris](https://ocular-motor-lab.github.io/OpenIris/),
+with [MkDocs](https://www.mkdocs.org/) and the Material theme (configured in `mkdocs.yml`). Pull
+requests that change the documentation are checked too: a broken link fails the check.
+
+- Keep the user manual (`docs/user-manual/`) free of programming; it is for people running
+  experiments. Everything for programmers goes in `docs/plugin-development/`.
+- A new page must also be added to `nav` in `mkdocs.yml` to appear in the site's menu.
+- Notes in GitHub's format (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`) show as boxes on both GitHub
+  and the site.
+
+To preview the site while editing, with Python installed:
+
+```
+pip install -r requirements-docs.txt
+mkdocs serve
+```
+
+and open <http://127.0.0.1:8000>. The page reloads when you save a file.
+
 ## Tests
 
-The tests are in `source\OpenIrisTests`. Its [README](../../source/OpenIrisTests/README.md) explains
+The tests are in `source\OpenIrisTests`. Its [README](https://github.com/ocular-motor-lab/OpenIris/blob/main/source/OpenIrisTests/README.md) explains
 each test in detail. In short:
 
 - **Baselines**: each tracking pipeline processes a fixed set of frames (a synthetic eye and the

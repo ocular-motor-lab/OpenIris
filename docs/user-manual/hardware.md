@@ -133,7 +133,7 @@ To install it, in SpinView:
 
 ## 3D printed parts
 
-STEP files of the parts of our setup, ready to print, are in [3d-parts](3d-parts/):
+STEP files of the parts of our setup, ready to print, are in the [3d-parts folder](https://github.com/ocular-motor-lab/OpenIris/tree/main/docs/user-manual/3d-parts):
 
 | File | Part |
 | --- | --- |

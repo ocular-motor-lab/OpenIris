@@ -372,14 +372,6 @@ namespace OpenIris
 
             if (processedVideoOptions?.SaveProcessedVideo is true)
             {
-                // Open the video
-                processedVideoWriter ??= new VideoWriter(
-                            fileName: DataFileName.Replace(".txt", ".avi"),
-                            compressionCode: 0,
-                            fps: images.frameRate,
-                            size: images.dataAndImages.Images.GetFrameSize(),
-                            isColor: true);
-
                 // Save the processed video
                 var imagesColor = images.dataAndImages.Images
                     .Where(im => im is not null)
@@ -403,6 +395,16 @@ namespace OpenIris
                     2 => CombineImages(imagesColor[0].Image, imagesColor[1].Image),
                     _ => throw new InvalidOperationException("Invalid option"),
                 };
+
+                // Open the video with the size of the frames written. With both eyes the frame is
+                // twice as wide as one eye image, and VideoWriter silently drops frames of a
+                // different size, leaving an empty video.
+                processedVideoWriter ??= new VideoWriter(
+                            fileName: DataFileName.Replace(".txt", ".avi"),
+                            compressionCode: 0,
+                            fps: images.frameRate,
+                            size: imageForVideo.Size,
+                            isColor: true);
 
                 processedVideoWriter.Write(imageForVideo.Mat);
             }

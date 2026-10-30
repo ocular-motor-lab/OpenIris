@@ -123,7 +123,8 @@ namespace SpinnakerInterface
             Eye = Eye.Both;
         }
 
-        [NeedsRestarting]
+        // Not [NeedsRestarting]: the system itself sets this while starting the camera, and that
+        // would stop the tracking that is just starting.
         [Category("Camera properties"), Description("BothEye - CameraSerialNumber")]
         public string CameraSerialNumber { get => this.cameraSerialNumber; set => SetProperty(ref cameraSerialNumber, value, nameof(CameraSerialNumber)); }
         private string cameraSerialNumber = null;

@@ -145,6 +145,9 @@ namespace OpenIris.UI
                     < 20 => 1,
                     _ => 0,
                 };
+
+                // The value may have been set before the range.
+                UpdateControls();
             }
         }
 
@@ -176,15 +179,33 @@ namespace OpenIris.UI
 
                     sliderValue = value;
 
-                    trackBar.Value = (int)Math.Max(0, Math.Min(100, Math.Round((sliderValue - Range.Begin) *100.0 / (Range.End - Range.Begin))));
-                    numericUpDown1.Value = (decimal)sliderValue;
+                    UpdateControls();
 
                     if (EnableValueChangedEvent)
                     {
                         OnValueChanged(new EventArgs());
                     }
                 }
+                else
+                {
+                    // Even if the value did not change, the controls may not show it yet. For
+                    // instance, a first value of 0 is the same as the initial value, but the
+                    // designer leaves the track bar at the right end.
+                    UpdateControls();
+                }
             }
+        }
+
+        /// <summary>
+        /// Moves the track bar and the number box to the current value.
+        /// </summary>
+        private void UpdateControls()
+        {
+            if (range.IsEmpty) return;
+
+            var value = Math.Max(range.Begin, Math.Min(range.End, sliderValue));
+            trackBar.Value = (int)Math.Max(0, Math.Min(100, Math.Round((value - Range.Begin) *100.0 / (Range.End - Range.Begin))));
+            numericUpDown1.Value = (decimal)value;
         }
 
         /// <summary>

@@ -158,7 +158,13 @@ namespace SpinnakerInterface
         public override void Stop()
         {
             // TODO: potentially reset trigger settings here.
-            cam.EndAcquisition();
+
+            // EndAcquisition throws if the camera never started streaming (for example, if
+            // starting failed). That would hide the original error and leave the camera stuck.
+            if (cam.IsStreaming())
+            {
+                cam.EndAcquisition();
+            }
         }
 
         protected override ImageEye GrabImageFromCamera()

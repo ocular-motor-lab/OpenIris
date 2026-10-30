@@ -160,9 +160,24 @@ function reply = ask(u, command, openiris, port)
 end
 ```
 
-> [!NOTE]
-> `OpenIrisTCP.m`, in the source code, expects an older reply format (values separated by `;`) and
-> its `GetCurrentData` no longer works. Use the example above instead.
+### MATLAB class for TCP
+
+`OpenIrisTCP.m` (in `source\EyeTrackerRemoteClient`) wraps the commands over TCP, including waiting
+for complete replies:
+
+```matlab
+oi = OpenIrisTCP;
+oi.Connect('127.0.0.1');            % Port 9002 by default
+oi.SetSessionName('Subject01');
+oi.StartRecording();
+frame = oi.RecordEvent('StimulusOn');
+data = oi.GetCurrentData();         % Or oi.WaitForData() for the next frame
+fprintf('Left pupil at %.1f, %.1f\n', data.LeftX, data.LeftY);
+oi.StopRecording();
+```
+
+The data has the whole reply in `data.Left`, `data.Right` and `data.Extra`, and for convenience
+`LeftX`, `LeftY`, `LeftTime`, `LeftFrameNumber` and the same for the right eye.
 
 ## Calibration
 
@@ -209,10 +224,20 @@ long frame = openIris.RecordEvent("StimulusOn");
 openIris.StopRecording();
 ```
 
-> [!NOTE]
-> The MATLAB wrapper `OpenIrisMatlabClient.m`, in the source code, still uses the client's old names
-> (`EyeTrackerRemoteClient.dll`, `EyeTrackerClient`) and doesn't work with the current version. From
-> MATLAB, use the [UDP commands](#example-matlab).
+From MATLAB on Windows, `OpenIrisMatlabClient.m` (in `source\EyeTrackerRemoteClient`) wraps it:
+
+```matlab
+oi = OpenIrisMatlabClient;
+oi.openiris_folder = 'C:\OpenIris';   % Folder with OpenIrisRemoteClient.dll
+oi.Connect('127.0.0.1');
+oi.SetSessionName('Subject01');
+oi.StartRecording();
+frame = oi.RecordEvent('StimulusOn');
+oi.StopRecording();
+```
+
+With Psychtoolbox installed, `RecordEvent` starts each message with the `GetSecs` time, to help
+synchronize the stimulus and eye tracker clocks.
 
 ## From a web browser
 

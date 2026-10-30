@@ -61,14 +61,22 @@ namespace OpenIris.Tests
                 var tracking = eyeTracker.StartTracking();
                 await WaitUntil(() => eyeTracker.Tracking, tracking, "tracking to start");
 
+                // Also record events: one right after starting, before the first frame is recorded
+                // (as a stimulus program marking the start of a trial would), and one later.
                 var recording = eyeTracker.StartRecording();
+                eyeTracker.RecordEvent("RightAfterStart", null);
                 await WaitUntil(() => eyeTracker.Recording, recording, "recording to start");
                 await Task.Delay(1500);
+                eyeTracker.RecordEvent("DuringRecording", null);
                 eyeTracker.StopRecording();
                 await WithinLimit(recording, "recording to finish");
 
                 eyeTracker.StopTracking();
                 await WithinLimit(tracking, "tracking to stop");
+
+                var events = File.ReadAllText(Directory.GetFiles(folder, "Test-*-events.txt", SearchOption.AllDirectories).Single());
+                StringAssert.Contains(events, "RightAfterStart", "An event sent right after starting the recording was lost.");
+                StringAssert.Contains(events, "DuringRecording");
 
                 var rawLeft = Directory.GetFiles(folder, "Test-*-Left.avi", SearchOption.AllDirectories).Single();
                 var rawRight = rawLeft.Replace("-Left.avi", "-Right.avi");

@@ -315,8 +315,11 @@ namespace OpenIris
         {
             if (eventRecorder is null) throw new InvalidOperationException("Recorder not ready.");
 
-            if (RangeToRecord.DoesNotContain(frameNumber)) return false;
-            
+            // Only drop events after the end of the recording. The range is empty until the first
+            // frame is recorded, and an event sent right after starting the recording (for example
+            // the start of a trial) may come before that frame. It belongs to the recording too.
+            if (!RangeToRecord.IsEmpty && frameNumber > RangeToRecord.End) return false;
+
             return eventRecorder.TryAdd(new EyeTrackerEvent(eventMessage, frameNumber, data), frameNumber);
         }
 

@@ -72,7 +72,7 @@ msbuild source\OpenIris.sln -restore -p:Configuration=Release -p:Platform=x64
 | **OpenIrisLib** | The core: grabbing, processing, recording, calibration, remote control, the base classes for plugins, and the built-in Simulation system and pipelines. |
 | **OpenIris** (`OpenIrisUI`) | The main program, `OpenIris.exe`. |
 | **BasicPlugins** | Built-in plugins, for example calibrations and a simulated eye. |
-| **SpinnakerInterface**, **FlyCaptureInterface**, **Micromedical**, **Interacoustics**, **OtherEyeTrackers** | Eye tracking systems for specific cameras and devices. |
+| **SpinnakerInterface**, **FlyCaptureInterface**, **Micromedical** | Eye tracking systems for specific cameras and devices. |
 | **OpenIrisRemoteClient** | The .NET client for controlling OpenIris remotely (see [Remote control](../user-manual/remote-control.md)). |
 | **OpenIrisTests** | The automated tests (see [Testing](contributing.md#tests)). |
 | Others | Small tools and test programs (remote console and GUI, video player, etc.). |

@@ -26,12 +26,11 @@ namespace OpenIris.Tests
         public static string SourceFolder { get; } = GetSourceFolder();
 
         /// <summary>
-        /// Gets the folder with the sample videos: OPENIRIS_VIDEOSAMPLES if set, otherwise the
-        /// VideoSamples folder at the root of the repository. They are not in git, so it may not exist.
+        /// Gets the full path of one of the sample videos included with OpenIris (source\SampleVideos),
+        /// the same ones the Simulation eye tracking system plays.
         /// </summary>
-        public static string VideoSamplesFolder =>
-            Environment.GetEnvironmentVariable("OPENIRIS_VIDEOSAMPLES")
-            ?? Path.GetFullPath(Path.Combine(SourceFolder, "..", "..", "VideoSamples"));
+        public static string SampleVideo(Eye whichEye) =>
+            Path.GetFullPath(Path.Combine(SourceFolder, "..", "SampleVideos", whichEye == Eye.Left ? "JorgeLeft.mp4" : "JorgeRight.mp4"));
 
         /// <summary>
         /// Processes the frames with a new instance of the pipeline, using its default settings and an

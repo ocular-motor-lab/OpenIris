@@ -11,16 +11,13 @@ namespace OpenIris.Tests
     using System.Threading.Tasks;
     using Emgu.CV;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using OpenIris.ImageGrabbing;
 
     /// <summary>
     /// Runs OpenIris end to end without the user interface, as a user would: tracks with the
     /// Simulation system, records a short raw video of both eyes, and then processes that recording
     /// saving the processed video (GitHub issue #41: the processed video used to come out empty).
     /// </summary>
-    /// <remarks>
-    /// The Simulation system plays the sample videos, which are not in git, so this test is skipped
-    /// where the VideoSamples folder is missing (for example on GitHub).
-    /// </remarks>
     [TestClass]
     public class RecordAndProcessTests
     {
@@ -30,17 +27,6 @@ namespace OpenIris.Tests
         [Timeout(300000)]
         public async Task RecordedVideoCanBeProcessedAndSaved()
         {
-            // The Simulation system plays these videos from the folder of OpenIrisLib.dll.
-            var libraryFolder = Path.GetDirectoryName(typeof(EyeTracker).Assembly.Location)!;
-            foreach (var name in new[] { "JorgeLeft.avi", "JorgeRight.avi" })
-            {
-                var source = Path.Combine(PipelineHarness.VideoSamplesFolder, name);
-                if (!File.Exists(source)) Assert.Inconclusive($"Sample video not found: {source}");
-
-                var target = Path.Combine(libraryFolder, name);
-                if (!File.Exists(target)) File.Copy(source, target);
-            }
-
             // EyeTracker loads and saves EyeTrackerSettings.xml in the current folder. Use a new
             // temporary folder so the test starts from the default settings and never touches the
             // user's settings. The recordings go there too. It is kept if the test fails.
@@ -53,6 +39,10 @@ namespace OpenIris.Tests
             try
             {
                 eyeTracker.Settings.EyeTrackerSystem = "Simulation";
+                var simulation = (EyeTrackingSystemSimulationSettings)eyeTracker.Settings.EyeTrackingSystemSettings;
+                simulation.LeftEyeVideo = PipelineHarness.SampleVideo(Eye.Left);
+                simulation.RightEyeVideo = PipelineHarness.SampleVideo(Eye.Right);
+                simulation.VideoOrientation = CameraOrientation.UprightMirrored;
                 eyeTracker.Settings.DataFolder = folder;
                 eyeTracker.Settings.SessionName = "Test";
                 eyeTracker.Settings.RecordVideo = true;

@@ -30,18 +30,16 @@ Inside you'll find:
 | `source\` | The code. `source\OpenIris.sln` is the solution to open. |
 | `docs\` | This documentation. |
 | `bin\` | Created by the build: the programs and plugins (not in git). |
-| `VideoSamples\` | The sample videos for the Simulation system and the tests (not in git, see below). |
 
 ### Sample videos
 
-The Simulation eye tracking system and some tests use two recordings, `JorgeLeft.avi` and
-`JorgeRight.avi`, which are too large for git. Put them in a `VideoSamples` folder at the root of the
-repository (next to `source` and `docs`).
+`source\SampleVideos` has two short recordings of the eyes (MP4, about 40 seconds). The build copies
+them to `bin\x64\<configuration>\SampleVideos`, where the Simulation eye tracking system plays them,
+and the tests use them too.
 
-<!-- TODO(Jorge): where to download the sample videos. -->
-
-Without them OpenIris builds and runs normally; the Simulation system won't start, and the tests
-that need the videos are skipped.
+The same recordings also exist in full quality, `JorgeLeft.avi` and `JorgeRight.avi` (about 335 MB
+each, too large for git). If they are next to `OpenIris.exe`, Simulation plays them instead. They
+are optional.
 
 ## Build and run
 
@@ -93,6 +91,6 @@ minor (or major) version.
 
 Every push and pull request is built on GitHub, in Debug and Release, and the tests are run. The
 result shows next to each commit and pull request, and in the **Actions** tab of the repository.
-The tests that need the sample videos are skipped there.
+The speed test is skipped there, because timing on shared build servers isn't meaningful.
 
 The workflow is in `.github/workflows/build.yml`.

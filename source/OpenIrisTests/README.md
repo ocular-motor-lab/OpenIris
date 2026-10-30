@@ -14,10 +14,9 @@ dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c Debug -p:Pla
 - **Baselines** (`PipelineRegressionTests`): each pipeline processes a fixed set of frames and its
   output (pupil, iris, reflection, torsion, quality) must match the CSV files in `Baselines\` to
   within 0.01 (pixels, degrees). Two sets of frames are used:
-  - 100 frames of a synthetic eye drawn by `SyntheticEye.cs`. These run everywhere, including on GitHub.
-  - The first 300 frames of `VideoSamples\JorgeLeft.avi` and `JorgeRight.avi`. These videos aren't in
-    git, so the tests are skipped where the folder is missing. Set `OPENIRIS_VIDEOSAMPLES` to use
-    another folder.
+  - 100 frames of a synthetic eye drawn by `SyntheticEye.cs`.
+  - The first 300 frames of the sample videos in `source\SampleVideos` (the ones the Simulation
+    system plays).
 - **Accuracy** (`PipelineAccuracyTests`): the pupil and reflection must be found within 1.5 pixels
   of where the synthetic eye drew them.
 - **Speed** (`PipelinePerformanceTests`): the JOM pipeline must not get more than 25% slower. The
@@ -26,8 +25,8 @@ dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c Debug -p:Pla
 - **Record and process** (`RecordAndProcessTests`): runs OpenIris without the user interface, as a
   user would. It tracks with the Simulation system, records about 1.5 seconds of raw video, then
   processes that recording with "Save processed video" and checks the processed video has the
-  frames, side by side for both eyes. Settings and recordings go to a temporary folder, so your
-  settings are not touched. Needs the sample videos, so it is skipped where they are missing.
+  frames, side by side for both eyes, and that events sent during the recording are saved. Settings
+  and recordings go to a temporary folder, so your settings are not touched.
 
 ## When a baseline test fails
 

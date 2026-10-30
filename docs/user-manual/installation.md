@@ -49,6 +49,12 @@ came from two cameras.
 
 The default pipeline starts tracking the pupil, the corneal reflection and torsion of both eyes.
 
+The Simulation system plays two short sample videos included with OpenIris (in the `SampleVideos`
+folder). It can also play your own: set **LeftEyeVideo** and **RightEyeVideo** in its settings
+([configuration](configuration.md), System settings), and **VideoOrientation** to **Upright** for
+videos recorded with OpenIris. Unlike Play video, Simulation acts like live cameras, so it is useful
+to test a setup or a stimulus program without a subject.
+
 ![The main window while tracking](../images/user-manual/main-window.jpg)
 
 From here, see [Configuration](configuration.md) to adjust OpenIris to your setup, and

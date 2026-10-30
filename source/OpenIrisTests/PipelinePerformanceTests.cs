@@ -36,12 +36,8 @@ namespace OpenIris.Tests
         {
             if (Environment.GetEnvironmentVariable("CI") == "true") Assert.Inconclusive("Timing is not meaningful on shared build servers.");
 
-            // The sample video is more representative; fall back to the synthetic eye without it.
-            var video = Path.Combine(PipelineHarness.VideoSamplesFolder, "JorgeLeft.avi");
-            bool useVideo = File.Exists(video);
-            var frames = (useVideo
-                ? PipelineHarness.ReadVideo(video, Eye.Left, WarmupFrames + TimedFrames)
-                : SyntheticEye.Frames(Eye.Left, WarmupFrames + TimedFrames)).ToList();
+            // A real eye is more representative than the synthetic one.
+            var frames = PipelineHarness.ReadVideo(PipelineHarness.SampleVideo(Eye.Left), Eye.Left, WarmupFrames + TimedFrames).ToList();
 
             var calibration = new EyeCalibration(Eye.Left);
             var milliseconds = new double[frames.Count];
@@ -62,11 +58,11 @@ namespace OpenIris.Tests
 
             var sorted = milliseconds.Skip(WarmupFrames).OrderBy(t => t).ToArray();
             double median = sorted[sorted.Length / 2];
-            TestContext.WriteLine($"JOM pipeline, {(useVideo ? "sample video" : "synthetic eye")}: median {median:0.000} ms per frame ({1000 / median:0} frames/s per eye)");
+            TestContext.WriteLine($"JOM pipeline, sample video: median {median:0.000} ms per frame ({1000 / median:0} frames/s per eye)");
 
             var config = typeof(PipelinePerformanceTests).Assembly.Location.Contains(@"\Release\") ? "Release" : "Debug";
             var referenceFile = Path.Combine(PipelineHarness.SourceFolder, "Baselines", "performance",
-                $"{Environment.MachineName}-{config}-{(useVideo ? "video" : "synthetic")}.txt");
+                $"{Environment.MachineName}-{config}-sample-video.txt");
 
             if (Baseline.UpdateRequested || !File.Exists(referenceFile))
             {

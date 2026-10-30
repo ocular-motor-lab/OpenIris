@@ -18,12 +18,15 @@ To quickly install and check OpenIris features, download [the latest version of 
 - The openiris main window will open. Select "Simulation" from the "Eye Tracking System" menu (default option) and hit Start Tracking.
 - The default pupil, corneal reflection, and torsion tracking pipeline will start.
 
-This is just an example video. To explore all the great features of OpenIris, please read the [wiki](https://github.com/ocular-motor-lab/OpenIris/wiki).
+This is just an example video. To explore all the great features of OpenIris, please read the [documentation](docs/README.md).
+
+# Documentation
+
+- **[User manual](docs/user-manual/README.md)**: installing, configuring, recording, calibrating, processing videos, controlling OpenIris from MATLAB, Python or your stimulus program, and the hardware we use.
+- **[Plugin development](docs/plugin-development/README.md)**: how OpenIris works, writing plugins for new cameras, tracking methods and calibrations, building from source, and contributing.
 
 > [!TIP]
-> In some cases, Windows requires manual permission to enable the plugins to work. On the first window of the program, under the "Eye Tracking System" drop-down menu, there should be more than three options. If you don't see more than three options, you need to enable them manually. To enable the available plugins, go to the release folder and its subfolders, right-click on a dll file, and select more options. Under the security section, check "Unblock" and hit ok. Repeat for all dll files. 
-
-![testdll copy](https://github.com/ocular-motor-lab/OpenIris/assets/56368456/78c4456b-dbb8-4ca9-9de5-8c3132f72073)
+> With versions before 0.2.0, Windows may block the plugins: the "Eye Tracking System" menu then shows only a few options. Before unzipping, right-click the zip file, select Properties, check "Unblock" and hit OK. See [Installation](docs/user-manual/installation.md#versions-before-020-unblock-the-plugins) for details.
 
 ### Help Shape the Future of Open Iris Eye-Tracking
 We are excited to invite you to contribute to Open Iris, an innovative open-source eye-tracking framework that is transforming the field of vision research and human-computer interaction. By participating in this collaborative project, you have the opportunity to work with a passionate community of developers, researchers, and enthusiasts dedicated to advancing eye-tracking technology. Whether you are a seasoned programmer, a UX designer, a researcher, or simply someone with a keen interest in eye tracking, your unique skills and insights are invaluable to us. Join us in pushing the boundaries of what is possible, enhancing accessibility, and creating cutting-edge solutions that benefit everyone. Together, we can make OpenIris the premier platform for eye-tracking development and research.

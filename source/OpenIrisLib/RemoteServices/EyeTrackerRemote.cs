@@ -462,9 +462,23 @@ namespace OpenIris
         /// Escute a command based on a string message.
         /// </summary>
         /// <param name="bytes">String message.</param>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <returns>The reply to send back, empty if there is none (also if the command failed).</returns>
         public byte[] ParseAndExecuteStringMessage(byte[] bytes)
+        {
+            // Errors are logged and the message is ignored. Letting them through would end the
+            // UDP or TCP listener, and remote control would stop working until OpenIris restarts.
+            try
+            {
+                return ExecuteStringMessage(bytes);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"ERROR: remote command '{Encoding.ASCII.GetString(bytes)}' failed: {ex.Message}");
+                return new byte[0];
+            }
+        }
+
+        private byte[] ExecuteStringMessage(byte[] bytes)
         {
             byte[] bytesToSend = new byte[0];
             var stringMessage = Encoding.ASCII.GetString(bytes);
@@ -516,7 +530,7 @@ namespace OpenIris
                 case "TESEMPTY":
                     return new byte[1] { 68 };
                 default:
-                    throw new NotImplementedException("This command does not exist");
+                    throw new NotImplementedException($"Unknown command '{command}'.");
             }
         }
 

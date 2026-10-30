@@ -50,9 +50,8 @@ A command is a plain ASCII string. Commands that take a parameter separate it wi
 > Commands marked "none" send **no reply**. Don't wait for an answer after them, or your program
 > will hang (or time out).
 
-> [!WARNING]
-> In the current version, a command OpenIris doesn't recognize (for example a typo) stops the UDP or
-> TCP listener until OpenIris is restarted. Check the spelling of commands.
+A command OpenIris doesn't recognize, or one that fails, gets no reply and an error is written in the
+log. (Before version 0.2.0, it stopped the UDP or TCP listener until OpenIris was restarted.)
 
 ### UDP or TCP?
 

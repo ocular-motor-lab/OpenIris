@@ -242,12 +242,75 @@ async function showTargets(points, onRecord) {
   return recorded;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Displays: with several, the targets can go full screen on any of them. Needs the Window
+// Management API (Chrome and Edge) and a secure page: http://localhost works, another computer's
+// address doesn't. Without it, the targets go on the display of this window.
+
+let screenDetails = null;
+
+async function findDisplays(ask) {
+  const note = $("displayNote");
+  if (!("getScreenDetails" in window)) {
+    $("findDisplays").style.display = "none";
+    note.textContent = window.isSecureContext
+      ? "This browser can't choose the display: move this window to it. Chrome and Edge can."
+      : "To choose the display, open this page as http://localhost:9001 on the OpenIris computer. From here, move this window to the display.";
+    return;
+  }
+  if (!ask) {
+    // Only list them without asking if the browser already has the permission.
+    try {
+      const permission = await navigator.permissions.query({ name: "window-management" });
+      if (permission.state !== "granted") return;
+    } catch (e) {
+      return;
+    }
+  }
+  try {
+    screenDetails = await window.getScreenDetails();
+    screenDetails.addEventListener("screenschange", listDisplays);
+    listDisplays();
+    $("findDisplays").style.display = "none";
+    note.textContent = "";
+  } catch (error) {
+    note.textContent = "The browser didn't allow listing the displays: move this window to the display.";
+  }
+}
+
+function listDisplays() {
+  const select = $("display");
+  const previous = select.value || localStorage.getItem("openiris.display") || "";
+  select.replaceChildren(...screenDetails.screens.map((s, i) => {
+    const name = (s.label || "Display " + (i + 1)) + ` (${s.width} × ${s.height}${s.isPrimary ? ", primary" : ""}${s === screenDetails.currentScreen ? ", this window" : ""})`;
+    return new Option(name, String(i));
+  }));
+  const index = screenDetails.screens.indexOf(screenDetails.currentScreen);
+  select.value = previous !== "" && Number(previous) < screenDetails.screens.length ? previous : String(Math.max(0, index));
+}
+
+function chosenDisplay() {
+  const value = $("display").value;
+  if (!screenDetails || value === "") return undefined;
+  try { localStorage.setItem("openiris.display", value); } catch (e) { /* not saved */ }
+  return screenDetails.screens[Number(value)];
+}
+
+$("findDisplays").onclick = () => findDisplays(true);
+
 async function enterStage(hint) {
   $("results").classList.remove("show");
   $("stage").classList.add("show");
   $("hint").textContent = hint;
   if (!document.fullscreenElement) {
-    try { await document.documentElement.requestFullscreen(); } catch (e) { /* still works in the window */ }
+    const screen = chosenDisplay();
+    try {
+      await document.documentElement.requestFullscreen(screen ? { screen } : undefined);
+    } catch (e) {
+      /* still works in the window */
+    }
+    // Wait for the full-screen window to have its size on the new display.
+    await new Promise((r) => setTimeout(r, 300));
   }
   resizeCanvas();
   clear();
@@ -418,5 +481,6 @@ $("calibrate").onclick = () => { showError(null); calibrate(); };
 $("validate").onclick = () => { showError(null); validate(); };
 
 loadOptions();
+findDisplays(false);
 refreshInfo();
 connectStream();

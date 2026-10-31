@@ -39,11 +39,18 @@
   <div id="setup">
     <h1><img src="logo.svg" alt="">Calibration</h1>
     <section class="card">
-      <p class="note">Move this window to the screen the subject looks at, then press Calibrate. The targets
-        go full screen. The subject looks at the center of each target. Press Esc to stop.</p>
+      <p class="note">Choose the display the subject looks at (or move this window to it), then press
+        Calibrate. The targets go full screen. The subject looks at the center of each target. Press Esc to stop.</p>
       <p class="note">This uses the <b>Remote Linear</b> calibration (by Ryan Ressmeyer): a linear fit from the eye
         signal (pupil minus corneal reflection, by default) to the target positions in degrees.</p>
       <div class="fields">
+        <label style="grid-column: 1 / -1">Display for the targets
+          <span class="row">
+            <select id="display" style="flex:1"><option value="">This window's display</option></select>
+            <button id="findDisplays" type="button">Find displays</button>
+          </span>
+          <span id="displayNote"></span>
+        </label>
         <label>Screen width (cm)<input type="number" id="screenWidth" step="0.1" min="1"></label>
         <label>Viewing distance (cm)<input type="number" id="distance" step="0.1" min="1"></label>
         <label>Points

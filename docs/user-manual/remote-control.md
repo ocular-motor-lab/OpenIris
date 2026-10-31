@@ -231,9 +231,13 @@ Several browsers can be open at the same time.
 ### Full-screen calibration and validation
 
 **Full-screen calibration** opens a page that shows calibration targets on the screen the subject
-looks at. Open it in a browser on the computer of that screen, move the window to that screen, and
-press **Calibrate**. The targets go full screen; the subject looks at the center of each one. Esc
+looks at. Open it in a browser on the computer of that screen, choose the display (or move the
+window to it), and press **Calibrate**. The targets go full screen; the subject looks at the center of each one. Esc
 stops at any time.
+
+Choosing the display works in Chrome and Edge, which ask once for permission (**Find displays**),
+and only when the page is opened as `http://localhost:9001`, on the OpenIris computer. Browsers don't
+allow it for pages at another computer's address: there, move the window to the display instead.
 
 It uses the **Remote Linear** calibration (by Ryan Ressmeyer, see [Calibration](#calibration)) and
 switches OpenIris to it. Set the width of the screen and the viewing distance, so the targets are at

@@ -366,3 +366,12 @@ source/OpenIrisTests/Baselines/performance/
 
 # Documentation website built locally with "mkdocs build" or "mkdocs serve"
 site/
+
+# Written by GitVersion on every build
+gitversion.json
+
+# Editor settings
+.vscode/
+
+# Run logs
+log.txt

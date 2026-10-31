@@ -229,6 +229,18 @@ namespace OpenIris
 
         #endregion  Network settings
 
+        #region H) LSL streaming
+
+        [Category("H) LSL streaming"), Description("Indicates if the eye tracking data should be streamed through a Lab Streaming Layer (LSL) outlet. This runs in parallel with any eye tracking system.")]
+        public bool StreamToLsl { get => streamToLsl; set => SetProperty(ref streamToLsl, value, nameof(StreamToLsl)); }
+        private bool streamToLsl = false; // Default value
+
+        [Category("H) LSL streaming"), Description("Name of the LSL stream (outlet) advertised on the network.")]
+        public string LslStreamName { get => lslStreamName; set => SetProperty(ref lslStreamName, value, nameof(LslStreamName)); }
+        private string lslStreamName = "OpenIris"; // Default value
+
+        #endregion H) LSL streaming
+
         #region Settings just for storage
 
         /// <summary>

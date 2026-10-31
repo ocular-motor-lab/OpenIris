@@ -47,4 +47,9 @@
     <Compile Update="UI\SliderTextControl.cs" SubType="UserControl" />
     <Compile Update="UI\VideoPlayerUI.cs" SubType="UserControl" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Native Lab Streaming Layer library (liblsl), copied next to the executable so the
+         P/Invoke bindings in Lsl.cs can find it. -->
+    <Content Include="lsl.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

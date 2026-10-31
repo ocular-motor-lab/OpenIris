@@ -26,6 +26,7 @@ namespace OpenIris
         private static ServiceHost? eyeTrackerHostWeb;
         private static EyeTrackerTcpListener? eyeTrackerHostTcp = null;
         private static EyeTrackerUdpListener? eyeTrackerHostUdp = null;
+        private static EyeTrackerLslOutlet? eyeTrackerLslOutlet = null;
 
         /// <summary>
         /// Starts the service.
@@ -116,6 +117,18 @@ namespace OpenIris
                 eyeTrackerHostUdp = null;
             }
 
+            // LSL OUTLET (data sink running in parallel with any eye tracking system)
+            try
+            {
+                eyeTrackerLslOutlet = new EyeTrackerLslOutlet(newEyeTracker);
+                eyeTrackerLslOutlet.Start();
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine("Error starting LSL outlet: " + ex.Message);
+                eyeTrackerLslOutlet = null;
+            }
+
 
             // HTTP SERVICE FROM CLEVELAND DO NOT CHANGE
             //Need to run something like this in the command line. 
@@ -142,6 +155,7 @@ namespace OpenIris
                 eyeTrackerHostWeb?.Close();
                 eyeTrackerHostTcp?.Stop();
                 eyeTrackerHostUdp?.Stop();
+                eyeTrackerLslOutlet?.Stop();
             }
             catch (Exception ex)
             {

@@ -194,6 +194,110 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Gets the data of this frame as an array of doubles, in the same column order as
+        /// <see cref="GetStringLine"/> and <see cref="GetStringHeader"/>. Used to stream the
+        /// data through channels (e.g. LSL) keeping the same layout as the recorded data files.
+        /// </summary>
+        /// <returns>The array of values, one per column of the data file.</returns>
+        public double[] GetDataArray()
+        {
+            var data = this;
+
+            var eyelidsLeft = data?.EyeDataRaw?[Eye.Left]?.Eyelids;
+            var eyelidsRight = data?.EyeDataRaw?[Eye.Right]?.Eyelids;
+
+            var leftUpperEyelid = (eyelidsLeft is null) ? 0 : eyelidsLeft.Upper[0].Y + eyelidsLeft.Upper[1].Y + eyelidsLeft.Upper[2].Y + eyelidsLeft.Upper[3].Y;
+            var leftLowerEyelid = (eyelidsLeft is null) ? 0 : eyelidsLeft.Lower[0].Y + eyelidsLeft.Lower[1].Y + eyelidsLeft.Lower[2].Y + eyelidsLeft.Lower[3].Y;
+            var rightUpperEyelid = (eyelidsRight is null) ? 0 : eyelidsRight.Upper[0].Y + eyelidsRight.Upper[1].Y + eyelidsRight.Upper[2].Y + eyelidsRight.Upper[3].Y;
+            var rightLowerEyelid = (eyelidsRight is null) ? 0 : eyelidsRight.Lower[0].Y + eyelidsRight.Lower[1].Y + eyelidsRight.Lower[2].Y + eyelidsRight.Lower[3].Y;
+
+            var lcr = data?.EyeDataRaw?[Eye.Left]?.CornealReflections ?? new CornealReflectionData[5];
+            var rcr = data?.EyeDataRaw?[Eye.Right]?.CornealReflections ?? new CornealReflectionData[5];
+            lcr = lcr.Concat(new CornealReflectionData[5 - lcr.Length]).ToArray();
+            rcr = rcr.Concat(new CornealReflectionData[5 - rcr.Length]).ToArray();
+
+            var dataLeft = data?.EyeDataRaw?[Eye.Left] ?? new EyeData();
+            var dataRight = data?.EyeDataRaw?[Eye.Right] ?? new EyeData();
+
+            var headData = data?.HeadDataRaw ?? new HeadData();
+
+            var extraData = data?.ExtraData ?? new ExtraData();
+
+            return new double[]
+            {
+                dataLeft.Timestamp.FrameNumber,
+                dataLeft.Timestamp.FrameNumberRaw,
+                dataLeft.Timestamp.Seconds,
+                dataLeft.Pupil.Center.X,
+                dataLeft.Pupil.Center.Y,
+                dataLeft.Pupil.Size.Width,
+                dataLeft.Pupil.Size.Height,
+                dataLeft.Pupil.Angle,
+                dataLeft.Iris.Radius,
+                dataLeft.TorsionAngle,
+                leftUpperEyelid,
+                leftLowerEyelid,
+                dataLeft.DataQuality,
+                lcr[0].Center.X, lcr[0].Center.Y,
+                lcr[1].Center.X, lcr[1].Center.Y,
+                lcr[2].Center.X, lcr[2].Center.Y,
+                lcr[3].Center.X, lcr[3].Center.Y,
+                lcr[4].Center.X, lcr[4].Center.Y,
+
+                dataRight.Timestamp.FrameNumber,
+                dataRight.Timestamp.FrameNumberRaw,
+                dataRight.Timestamp.Seconds,
+                dataRight.Pupil.Center.X,
+                dataRight.Pupil.Center.Y,
+                dataRight.Pupil.Size.Width,
+                dataRight.Pupil.Size.Height,
+                dataRight.Pupil.Angle,
+                dataRight.Iris.Radius,
+                dataRight.TorsionAngle,
+                rightUpperEyelid,
+                rightLowerEyelid,
+                dataRight.DataQuality,
+                rcr[0].Center.X, rcr[0].Center.Y,
+                rcr[1].Center.X, rcr[1].Center.Y,
+                rcr[2].Center.X, rcr[2].Center.Y,
+                rcr[3].Center.X, rcr[3].Center.Y,
+                rcr[4].Center.X, rcr[4].Center.Y,
+
+                headData.AccelerometerX,
+                headData.AccelerometerY,
+                headData.AccelerometerZ,
+                headData.GyroX,
+                headData.GyroY,
+                headData.GyroZ,
+                headData.MagnetometerX,
+                headData.MagnetometerY,
+                headData.MagnetometerZ,
+
+                extraData.Int0,
+                extraData.Int1,
+                extraData.Int2,
+                extraData.Int3,
+                extraData.Int4,
+                extraData.Int5,
+                extraData.Int6,
+                extraData.Int7,
+
+                extraData.Double0,
+                extraData.Double1,
+                extraData.Double2,
+                extraData.Double3,
+                extraData.Double4,
+                extraData.Double5,
+                extraData.Double6,
+                extraData.Double7,
+
+                dataLeft.Timestamp.TimeGrabbed,
+                dataRight.Timestamp.TimeGrabbed,
+                data?.TimeProcessed ?? 0.0,
+            };
+        }
+
+        /// <summary>
         /// Gets the header for the data file.
         /// </summary>
         /// <returns></returns>

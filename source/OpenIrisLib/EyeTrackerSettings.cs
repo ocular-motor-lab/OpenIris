@@ -33,6 +33,13 @@ namespace OpenIris
             get { return eyeTrackerSystem; }
             set
             {
+                // A settings file saved with a plugin that is no longer installed.
+                if (!AllEyeTrackerSystemSettings.ContainsKey(value) && EyeTrackerPluginManager.EyeTrackingsyStemFactory?.IsAvailable(value) == false)
+                {
+                    System.Diagnostics.Trace.WriteLine($"WARNING: the eye tracking system '{value}' in the settings is not installed. Using '{eyeTrackerSystem}' instead.");
+                    return;
+                }
+
                 // If the dictionary does not contain the settings for the current eye tracking
                 // system, get the defaults and add them.
                 if (!AllEyeTrackerSystemSettings.ContainsKey(value))
@@ -92,6 +99,13 @@ namespace OpenIris
             get { return eyeTrackingPipeline; }
             set
             {
+                // A settings file saved with a plugin that is no longer installed.
+                if (!AllTrackingPipelinesSettings.ContainsKey(value) && EyeTrackerPluginManager.EyeTrackingPipelineFactory?.IsAvailable(value) == false)
+                {
+                    System.Diagnostics.Trace.WriteLine($"WARNING: the tracking pipeline '{value}' in the settings is not installed. Using '{eyeTrackingPipeline}' instead.");
+                    return;
+                }
+
                 // If the dictionary does not contain the settings for the current eye tracking
                 // system, get the defaults and add them.
                 if (!AllTrackingPipelinesSettings.ContainsKey(value))
@@ -135,6 +149,13 @@ namespace OpenIris
             get { return calibrationMethod; }
             set
             {
+                // A settings file saved with a plugin that is no longer installed.
+                if (!AllCalibrationImplementations.ContainsKey(value) && EyeTrackerPluginManager.CalibrationPipelineFactory?.IsAvailable(value) == false)
+                {
+                    System.Diagnostics.Trace.WriteLine($"WARNING: the calibration '{value}' in the settings is not installed. Using '{calibrationMethod}' instead.");
+                    return;
+                }
+
                 // If the dictionary does not contain the settings for the current eye tracking
                 // system, get the defaults and add them.
                 if (!AllCalibrationImplementations.ContainsKey(value))
@@ -295,8 +316,17 @@ namespace OpenIris
         /// </summary>
         public static EyeTrackerSettings Load()
         {
-            var settingsFileName = Path.Combine(Directory.GetCurrentDirectory(), "EyeTrackerSettings.xml");
+            return Load(Path.Combine(Directory.GetCurrentDirectory(), "EyeTrackerSettings.xml"));
+        }
 
+        /// <summary>
+        /// Loads the settings from a file. Settings of plugins that are no longer installed are
+        /// skipped, and if the selected system, pipeline or calibration is one of them, the default
+        /// is used instead.
+        /// </summary>
+        /// <param name="settingsFileName">Full path of the settings file.</param>
+        public static EyeTrackerSettings Load(string settingsFileName)
+        {
             if (!File.Exists(settingsFileName))
             {
                 System.Diagnostics.Trace.WriteLine("No settings file yet, using the default settings. They will be saved to " + settingsFileName + " when OpenIris closes.");
@@ -312,6 +342,13 @@ namespace OpenIris
 
                 var settings = (EyeTrackerSettings)reader.Deserialize(xmlreader);
                 settings.settingsPath = settingsFileName;
+
+                // The selected plugins are read before the lists of settings, which then replace the
+                // defaults the selection added. Selecting them again adds the defaults back for any
+                // whose saved settings were skipped.
+                settings.EyeTrackerSystem = settings.EyeTrackerSystem;
+                settings.EyeTrackingPipeline = settings.EyeTrackingPipeline;
+                settings.CalibrationMethod = settings.CalibrationMethod;
                 return settings;
             }
             catch (IOException ex)
@@ -319,6 +356,10 @@ namespace OpenIris
                 System.Diagnostics.Trace.WriteLine("Error loading settings going to defaults. " + ex);
             }
             catch (InvalidOperationException ex)
+            {
+                System.Diagnostics.Trace.WriteLine("Error loading settings going to defaults. " + ex);
+            }
+            catch (PluginManagerException ex)
             {
                 System.Diagnostics.Trace.WriteLine("Error loading settings going to defaults. " + ex);
             }

@@ -71,10 +71,24 @@ namespace OpenIris
                 reader.ReadEndElement();
 
                 reader.ReadStartElement("value");
-                TValue value = (TValue)valueSerializer.Deserialize(reader);
-                reader.ReadEndElement();
+                reader.MoveToContent();
 
-                this.Add(key, value);
+                // Read the value on its own, so that one that can't be read (the settings of a plugin
+                // that is no longer installed) is skipped instead of failing the whole file. Closing
+                // the subtree leaves the reader on the value's last node.
+                try
+                {
+                    using var valueReader = reader.ReadSubtree();
+                    this.Add(key, (TValue)valueSerializer.Deserialize(valueReader));
+                }
+                catch (InvalidOperationException ex)
+                {
+                    System.Diagnostics.Trace.WriteLine($"WARNING: skipping the saved settings of '{key}', probably a plugin that is no longer installed. {ex.InnerException?.Message ?? ex.Message}");
+                }
+
+                reader.Read();
+                reader.MoveToContent();
+                reader.ReadEndElement();
 
                 reader.ReadEndElement();
                 reader.MoveToContent();

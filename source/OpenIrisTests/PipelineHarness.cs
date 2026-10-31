@@ -80,7 +80,7 @@ namespace OpenIris.Tests
             }
         }
 
-        private static void EnsurePluginsLoaded()
+        internal static void EnsurePluginsLoaded()
         {
             lock (initLock)
             {

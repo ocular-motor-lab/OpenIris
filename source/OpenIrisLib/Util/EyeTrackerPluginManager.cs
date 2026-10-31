@@ -192,6 +192,12 @@ namespace OpenIris
         public IEnumerable<TPluginMetadata> ClassesAvaiable { get { return ClassFactories.Select(x => x.Metadata); } }
 
         /// <summary>
+        /// Whether a plugin with this name is installed.
+        /// </summary>
+        /// <param name="name">Name of the plugin.</param>
+        public bool IsAvailable(string name) => ClassFactories?.Any(x => x.Metadata.Name == name) ?? false;
+
+        /// <summary>
         /// Generic factory method.
         /// </summary>
         /// <param name="name">Name of the factory. Must match Metadata.Name.</param>

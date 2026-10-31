@@ -28,6 +28,7 @@ nav:
       - Calibration: user-manual/calibration.md
       - Playing and processing videos: user-manual/processing-videos.md
       - Webcam tracking: user-manual/webcam-tracking.md
+      - Labeling videos by hand: user-manual/subjective-labeling.md
       - Remote control: user-manual/remote-control.md
       - Plugins: user-manual/plugins.md
       - Hardware: user-manual/hardware.md

@@ -123,6 +123,9 @@ namespace OpenIris
             // Close the video files. Otherwise they stay open until the GC finalizes them, and the
             // videos cannot be moved or deleted while OpenIris is running.
             Videos.ForEach(video => video?.Dispose());
+
+            // The system of the videos (Subjective saves its labels and closes its window here).
+            eyeTrackingSystem?.Dispose();
         }
 
         /// <summary>

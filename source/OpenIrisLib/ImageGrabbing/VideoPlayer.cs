@@ -29,23 +29,12 @@ namespace OpenIris
         private (bool isOn, ulong frameNumber) scrolling;
 
         /// <summary>
-        /// Initializes a new instance of the VideoPlayer class.
-        /// </summary>
-        /// <param name="fileName">Names of the video files.</param>
-        public VideoPlayer(string fileName)
-            : this(new EyeTrackingSystemSingleWebCam(),
-                  new EyeCollection<string?>(fileName),
-                  new Range(),
-                  true)
-        { }
-
-        /// <summary>
         /// Initializes a new instance of the VideoPlayer class for playback, not for processing.
         /// </summary>
         /// <param name="fileNameLeft">Names of the video file for left eye.</param>
         /// <param name="fileNameRight">Names of the video file for right eye.</param>
         public VideoPlayer(string? fileNameLeft, string? fileNameRight)
-            : this(new EyeTrackingSystemDualWebCam(),
+            : this(new EyeTrackingSystemSimulation(),
                   new string?[] { fileNameLeft, fileNameRight },
                   new Range(),
                   true)

@@ -12,13 +12,17 @@
     <PackageReference Include="Emgu.CV" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Calibration\EyeCalibrationNPointUI.cs" SubType="UserControl" />
-    <Compile Update="EyeTrackingSystems\FakeEyeControlUI.cs" SubType="Form" />
+    <Compile Update="NPointCalibration\EyeCalibrationNPointUI.cs" SubType="UserControl" />
+    <Compile Update="SimulationFakeEye\FakeEyeControlUI.cs" SubType="Form" />
     <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DesignTime="True" DependentUpon="Resources.resx" />
     <!-- Explicit DependentUpon keeps the form resources named after the form class (OpenIris.*), not the folder path. -->
-    <EmbeddedResource Update="Calibration\EyeCalibrationNPointUI.resx" DependentUpon="EyeCalibrationNPointUI.cs" />
-    <EmbeddedResource Update="EyeTrackingSystems\FakeEyeControlUI.resx" DependentUpon="FakeEyeControlUI.cs" />
+    <EmbeddedResource Update="NPointCalibration\EyeCalibrationNPointUI.resx" DependentUpon="EyeCalibrationNPointUI.cs" />
+    <EmbeddedResource Update="SimulationFakeEye\FakeEyeControlUI.resx" DependentUpon="FakeEyeControlUI.cs" />
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Neural networks of the webcam system and pipeline, in Plugins\WebcamModels\. See its README.md. -->
+    <None Include="Webcam\Models\*.onnx;Webcam\Models\README.md" Link="WebcamModels\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">

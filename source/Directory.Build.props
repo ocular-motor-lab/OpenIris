@@ -1,7 +1,7 @@
 <Project>
   <!-- Settings shared by every SDK-style project under source\. MSBuild imports this file automatically,
        before the project file itself, so a project can still override anything set here.
-       Legacy (non-SDK) projects such as LabyrinthDevices are left alone. -->
+       Legacy (non-SDK) projects such as EyeTrackerConsoleTest are left alone. -->
   <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
     <!-- This file is imported before the SDK defaults Configuration, so default it here for OutputPath. -->
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>

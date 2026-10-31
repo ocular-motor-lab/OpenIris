@@ -8,8 +8,12 @@
   For binocular recordings at 500 Hz, we recommend a recent Intel Core i9 (or similar) with a base
   frequency above 3 GHz.
 - **For FLIR cameras:** install the [Spinnaker SDK](https://www.flir.com/products/spinnaker-sdk/)
-  before running OpenIris. It includes SpinView, which is very useful to test the cameras and solve
-  problems with them.
+  before running OpenIris, including its .NET libraries (the **Application Development** option of
+  the installer). OpenIris uses the version you install. It also includes SpinView, which is very
+  useful to test the cameras and solve problems with them.
+
+  > [!NOTE]
+  > OpenIris 0.1.6 and earlier need exactly version 3.0.0.118 of the Spinnaker SDK.
 
 See [Hardware](hardware.md) for the cameras, lenses and illuminators we use.
 

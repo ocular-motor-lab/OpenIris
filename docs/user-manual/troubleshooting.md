@@ -14,6 +14,8 @@ has its own log.
 ## The cameras don't start
 
 - **FLIR cameras:** check that the Spinnaker SDK is installed and that the cameras work in SpinView.
+  If OpenIris says it can't find `SpinnakerNET_v140`, the SDK isn't installed, or was installed
+  without its .NET libraries: reinstall it with the **Application Development** option.
   Close SpinView before starting OpenIris: a camera can only be used by one program at a time.
 - **Spinnaker Dual Camera** needs the two cameras connected with the synchronization cable (see
   [Hardware](hardware.md#synchronized-cameras)).

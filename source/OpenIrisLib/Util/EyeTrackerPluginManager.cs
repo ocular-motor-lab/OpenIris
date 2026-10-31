@@ -31,6 +31,12 @@ namespace OpenIris
         {
             try
             {
+                if (!resolvingFromPath)
+                {
+                    AppDomain.CurrentDomain.AssemblyResolve += LoadFromPath;
+                    resolvingFromPath = true;
+                }
+
                 var pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
 
                 // An aggregate catalog that combines multiple catalogs
@@ -59,6 +65,67 @@ namespace OpenIris
             {
                 throw new PluginManagerException("ERROR loading plugins", ex);
             }
+        }
+
+        private static bool resolvingFromPath;
+        private static readonly HashSet<string> notInPath = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Loads an assembly that isn't next to OpenIris or its plugins from the folders in PATH.
+        /// Camera SDKs such as Spinnaker install their .NET library in a folder they add to PATH,
+        /// next to the native libraries it needs, and the two must be the same version. So plugins
+        /// don't ship it: it is loaded from there, whatever version of the SDK is installed.
+        /// </summary>
+        private static Assembly? LoadFromPath(object sender, ResolveEventArgs args)
+        {
+            var fileName = new AssemblyName(args.Name).Name + ".dll";
+
+            lock (notInPath)
+            {
+                if (notInPath.Contains(fileName)) return null;
+
+                foreach (var folder in (Environment.GetEnvironmentVariable("PATH") ?? string.Empty).Split(Path.PathSeparator))
+                {
+                    try
+                    {
+                        var file = Path.Combine(folder.Trim().Trim('"'), fileName);
+                        if (!File.Exists(file)) continue;
+
+                        var assembly = Assembly.LoadFrom(file);
+                        Trace.WriteLine($"Loaded {assembly.FullName} from {file}");
+                        return assembly;
+                    }
+                    catch (ArgumentException)
+                    {
+                        // A PATH entry with invalid characters.
+                    }
+                }
+
+                notInPath.Add(fileName);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Describes an error for the user, explaining what to do when a plugin can't find a
+        /// library, which usually means a camera SDK isn't installed.
+        /// </summary>
+        /// <param name="ex">The error.</param>
+        /// <returns>The description.</returns>
+        public static string DescribeError(Exception ex)
+        {
+            for (var inner = ex; inner != null; inner = inner.InnerException)
+            {
+                if (inner is FileNotFoundException || inner is FileLoadException)
+                {
+                    var missing = (inner as FileNotFoundException)?.FileName ?? (inner as FileLoadException)?.FileName;
+                    var name = missing is null ? "a library" : new AssemblyName(missing).Name;
+                    return $"{ex.Message}\n\nOpenIris can't find {name}. If it comes with a camera SDK (for example " +
+                        "SpinnakerNET with the Spinnaker SDK for FLIR cameras), install the SDK and restart OpenIris.";
+                }
+            }
+
+            return ex.Message;
         }
 
         /// <summary>

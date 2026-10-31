@@ -1,0 +1,8 @@
+<Project>
+  <!-- Imported when the Spinnaker SDK isn't installed (for example on GitHub's build machines):
+       skip the Spinnaker plugin with a warning instead of failing the whole build. -->
+  <Target Name="Build">
+    <Warning Text="The Spinnaker SDK isn't installed ($(SpinnakerSdkDir)SpinnakerNET_v140.dll not found), so the Spinnaker plugin isn't built. Install the Spinnaker SDK, or set SpinnakerSdkDir to the folder with SpinnakerNET_v140.dll." />
+  </Target>
+  <Target Name="Rebuild" DependsOnTargets="Build" />
+</Project>

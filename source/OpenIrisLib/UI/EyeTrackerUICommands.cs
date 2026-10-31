@@ -349,7 +349,7 @@ namespace OpenIris
                 catch (Exception ex)
                 {
                     MessageBox.Show(
-                        "ERROR: " + ex.Message,
+                        "ERROR: " + EyeTrackerPluginManager.DescribeError(ex),
                         "ERROR",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error);

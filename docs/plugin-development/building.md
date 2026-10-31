@@ -11,9 +11,13 @@ download a release instead (see [Installation](../user-manual/installation.md)).
   OpenIris needs.
 - **Git**, or GitHub Desktop.
 
-You don't need any camera SDK to build: the camera libraries OpenIris compiles against are in the
-repository. To *run* with FLIR cameras, install the
-[Spinnaker SDK](https://www.flir.com/products/spinnaker-sdk/) as for a normal installation.
+To build the plugin for FLIR cameras, install the
+[Spinnaker SDK](https://www.flir.com/products/spinnaker-sdk/) as for a normal installation (with its
+.NET libraries). FLIR's license doesn't allow redistributing its libraries, so they aren't in the
+repository: the plugin compiles against the installed SDK, and at run time OpenIris loads
+`SpinnakerNET_v140.dll` from the SDK folder in PATH, whatever version is installed. Without the SDK,
+everything else builds, and the Spinnaker plugin is skipped with a warning. If the SDK is somewhere
+else, pass its folder: `-p:SpinnakerSdkDir=C:\path\to\bin64\vs2015\`.
 
 ## Get the code
 

@@ -264,7 +264,8 @@ namespace OpenIris
         /// <returns>Calibrated data.</returns>
         public CalibratedHeadData GetCalibratedHeadData(HeadData? headData)
         {
-            if (headData is null) return new CalibratedHeadData();
+            // Without a head sensor, all 0 (Atan2 of zeros would give ±180°).
+            if (headData is null || headData.IsEmpty) return new CalibratedHeadData();
 
             return new CalibratedHeadData
             {

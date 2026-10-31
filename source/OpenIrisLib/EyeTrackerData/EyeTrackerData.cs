@@ -190,7 +190,61 @@ namespace OpenIris
                 string.Format("{0:0.0000}", dataRight.Timestamp.TimeGrabbed) + " " +
                 string.Format("{0:0.0000}", data?.TimeProcessed ?? 0.0);
 
+            foreach (var value in GetCalibratedAndRoiValues())
+            {
+                line += " " + string.Format("{0:0.0000}", value);
+            }
+
             return line;
+        }
+
+        /// <summary>
+        /// Names of the columns added in 0.2: calibrated data and ROI. They go after the original
+        /// columns, so files and readers of older versions keep their column order.
+        /// </summary>
+        private static readonly string[] CalibratedAndRoiColumns =
+        {
+            "LeftCalibratedHorizontal", "LeftCalibratedVertical", "LeftCalibratedTorsion",
+            "LeftCalibratedPupilArea", "LeftCalibratedPercentOpening", "LeftCalibratedDataQuality",
+            "RightCalibratedHorizontal", "RightCalibratedVertical", "RightCalibratedTorsion",
+            "RightCalibratedPupilArea", "RightCalibratedPercentOpening", "RightCalibratedDataQuality",
+
+            "HeadRoll", "HeadPitch", "HeadYaw",
+            "HeadRollVelocity", "HeadPitchVelocity", "HeadYawVelocity",
+            "HeadAccelerationX", "HeadAccelerationY", "HeadAccelerationZ",
+            "HeadX", "HeadY", "HeadZ",
+
+            "LeftRoiX", "LeftRoiY", "LeftRoiWidth", "LeftRoiHeight",
+            "RightRoiX", "RightRoiY", "RightRoiWidth", "RightRoiHeight",
+        };
+
+        /// <summary>
+        /// Values of <see cref="CalibratedAndRoiColumns"/>.
+        /// </summary>
+        private double[] GetCalibratedAndRoiValues()
+        {
+            var notTracked = new CalibratedEyeData { HorizontalPosition = double.NaN, VerticalPosition = double.NaN, TorsionalPosition = double.NaN };
+            var left = EyeDataCalibrated?[Eye.Left] ?? notTracked;
+            var right = EyeDataCalibrated?[Eye.Right] ?? notTracked;
+            var head = HeadDataCalibrated ?? new CalibratedHeadData();
+
+            return new double[]
+            {
+                left.HorizontalPosition, left.VerticalPosition, left.TorsionalPosition,
+                left.PupilArea, left.PercentOpening, left.DataQuality,
+                right.HorizontalPosition, right.VerticalPosition, right.TorsionalPosition,
+                right.PupilArea, right.PercentOpening, right.DataQuality,
+
+                head.Roll, head.Pitch, head.Yaw,
+                head.RollVelocity, head.PitchVelocity, head.YawVelocity,
+                head.XAcceleration, head.YAcceleration, head.ZAcceleration,
+                head.X, head.Y, head.Z,
+
+                // ROI of each eye image in the camera image, in pixels. Placeholders: no system
+                // passes its ROI along with the images yet.
+                0, 0, 0, 0,
+                0, 0, 0, 0,
+            };
         }
 
         /// <summary>
@@ -223,7 +277,7 @@ namespace OpenIris
 
             var extraData = data?.ExtraData ?? new ExtraData();
 
-            return new double[]
+            var values = new double[]
             {
                 dataLeft.Timestamp.FrameNumber,
                 dataLeft.Timestamp.FrameNumberRaw,
@@ -295,6 +349,8 @@ namespace OpenIris
                 dataRight.Timestamp.TimeGrabbed,
                 data?.TimeProcessed ?? 0.0,
             };
+
+            return values.Concat(GetCalibratedAndRoiValues()).ToArray();
         }
 
         /// <summary>
@@ -382,7 +438,9 @@ namespace OpenIris
 
                   "DebugTimeGrabbedLeft " +
                   "DebugTimeGrabbedRight " +
-                  "DebugTimeProcessed";
+                  "DebugTimeProcessed " +
+
+                  string.Join(" ", CalibratedAndRoiColumns);
         }
     }
 

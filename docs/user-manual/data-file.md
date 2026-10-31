@@ -35,11 +35,14 @@ each column.
   camera orientation: x to the right, y down, with the origin at the top left corner of the image.
   With cameras that move their region of interest (the arrows in the Set up tab), positions are
   relative to that region, so **don't move it during a recording**.
-- **The data isn't calibrated.** To convert positions to eye angles, use the calibration saved next to
-  the data, in the `.cal` file (see [Calibration](calibration.md)).
-- **Zeros mean "not found"**: a frame where the pupil wasn't found still has its line, with the frame
-  number and time, but zeros for the pupil, the reflections, the eyelids and torsion. An eye that isn't
-  tracked has zeros everywhere.
+- **Raw and calibrated data.** The first columns are raw, in pixels. Since version 0.2 the file also
+  has the eye positions in degrees, calibrated with the calibration in use at the time (see
+  [Calibrated data](#calibrated-data)). The calibration is also saved next to the data, in the
+  `.cal` file (see [Calibration](calibration.md)), so the raw data can be calibrated again later.
+- **Zeros mean "not found"** in the raw columns: a frame where the pupil wasn't found still has its
+  line, with the frame number and time, but zeros for the pupil, the reflections, the eyelids and
+  torsion. An eye that isn't tracked has zeros everywhere. In the calibrated columns, where 0 is a
+  valid angle, "not found" is `NaN`.
 - **A missing line means a dropped frame.** The frame number jumps by more than one.
 
 ## Columns for each eye
@@ -72,6 +75,40 @@ These come twice, first for the left eye (columns starting with `Left`), then fo
 | `Double0` … `Double7` | Decimal numbers that depend on the eye tracking system. None of the systems included with OpenIris use them. |
 | `DebugTimeGrabbedLeft`, `DebugTimeGrabbedRight` | When OpenIris received the frame of each eye, in seconds since OpenIris started. |
 | `DebugTimeProcessed` | When OpenIris finished processing the frame, in seconds since OpenIris started. The difference with the time grabbed is the processing delay. These three are computer times, for checking delays only: use `Seconds` for timing. |
+
+## Calibrated data
+
+Added in version 0.2, after all the columns above, so code that reads older files keeps working.
+
+For each eye, `Left` first, then `Right`:
+
+| Column | Contents |
+| --- | --- |
+| `CalibratedHorizontal`, `CalibratedVertical` | Eye position in degrees, relative to the reference position of the calibration. Positive is up, and towards the left of the eye image. Without a calibration, relative to the center of the eye image, with an eye globe whose radius is the iris diameter. `NaN` if the pupil wasn't found. |
+| `CalibratedTorsion` | Torsion in degrees, as `Torsion`. |
+| `CalibratedPupilArea` | π × `PupilWidth` × `PupilHeight` converted to mm, taking the eye globe as 24 mm across. Because width and height are the full axes, this is four times the area of the pupil ellipse. |
+| `CalibratedPercentOpening` | How open the eyelids are, in percent of the opening at calibration. 0 without a calibration reference. |
+| `CalibratedDataQuality` | `DataQuality` in percent of its value at calibration. `NaN` without a calibration reference. |
+
+For the head:
+
+| Column | Contents |
+| --- | --- |
+| `HeadRoll`, `HeadPitch`, `HeadYaw` | Head orientation in degrees. |
+| `HeadRollVelocity`, `HeadPitchVelocity`, `HeadYawVelocity` | Head angular velocity. |
+| `HeadAccelerationX`, `HeadAccelerationY`, `HeadAccelerationZ` | Head acceleration. |
+| `HeadX`, `HeadY`, `HeadZ` | Head position in mm. No system included with OpenIris measures it yet: always 0. |
+
+The head columns follow Fetter and Haslwanter (1998): with the head upright and facing straight
+ahead, x points forward, y left and z up. They are 0 for systems without a head sensor.
+
+## Region of interest
+
+Also added in version 0.2, after the calibrated data, for each eye (`Left` first, then `Right`):
+
+| Column | Contents |
+| --- | --- |
+| `RoiX`, `RoiY`, `RoiWidth`, `RoiHeight` | Where the eye image is in the full camera image, in pixels. Reserved for a future version: always 0 for now. |
 
 ## The events file
 

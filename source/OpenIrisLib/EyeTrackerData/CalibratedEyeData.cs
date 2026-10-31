@@ -191,7 +191,14 @@ namespace OpenIris
         public double YawVelocity { get; set; }
 
         /// <summary>
-        /// 
+        /// Position of the head, in mm, in the same axes. Systems that can't measure it leave it at 0.
+        /// </summary>
+        public double X { get; set; }
+        public double Y { get; set; }
+        public double Z { get; set; }
+
+        /// <summary>
+        ///
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -213,13 +220,16 @@ namespace OpenIris
         {
             return (XAcceleration == other.XAcceleration) &&
                 (YAcceleration == other.YAcceleration) &&
-                (ZAcceleration == other.XAcceleration) &&
+                (ZAcceleration == other.ZAcceleration) &&
                 (Roll == other.Roll) &&
                 (Pitch == other.Pitch) &&
                 (Yaw == other.Yaw) &&
                 (RollVelocity == other.RollVelocity) &&
                 (PitchVelocity == other.PitchVelocity) &&
-                (YawVelocity == other.YawVelocity);
+                (YawVelocity == other.YawVelocity) &&
+                (X == other.X) &&
+                (Y == other.Y) &&
+                (Z == other.Z);
         }
 
         /// <summary>

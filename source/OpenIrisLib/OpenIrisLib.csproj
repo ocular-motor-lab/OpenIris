@@ -51,5 +51,7 @@
     <!-- Native Lab Streaming Layer library (liblsl), copied next to the executable so the
          P/Invoke bindings in Lsl.cs can find it. -->
     <Content Include="lsl.dll" CopyToOutputDirectory="PreserveNewest" />
+    <!-- liblsl is MIT licensed: its notice must ship with the DLL. -->
+    <Content Include="lsl.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

@@ -58,8 +58,6 @@ collect data over many frames (for example while the subject looks at targets) b
 - `CalibrationPipelineManual.cs`: the user sets the eye model by hand, with a panel of controls.
 - `CalibrationRemoteLinear.cs`: a stimulus program shows targets and tells OpenIris where they are;
   OpenIris fits a linear transformation from eye position to target position.
-- `BasicPlugins\Calibration\EyeCalibrationNPoint.cs` ("N-Point"): a calibration with its own panel,
-  built as a plugin outside OpenIrisLib.
 
 <!-- TODO(Jorge): explain how the eye model and reference are used, and which calibration to choose
 when. -->

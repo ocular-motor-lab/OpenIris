@@ -21,7 +21,6 @@ Choose the method in the configuration (**CalibrationMethod**, General settings,
 | **Auto** | Takes the eye model and the reference from the first good frame. The subject must look straight ahead when you click Calibrate. |
 | **Manual Calibration** | You set the eye model yourself, in a panel with controls for each eye. |
 | **Remote Linear** | Your stimulus program shows targets and tells OpenIris where they are; OpenIris fits a linear transformation from eye position to target position. See [Remote control](remote-control.md#calibration). |
-| **N-Point** | A calibration with its own panel, from the BasicPlugins plugin. |
 
 <!-- TODO(Jorge): when to use each method, step by step instructions, and how to check that a
 calibration is good. -->

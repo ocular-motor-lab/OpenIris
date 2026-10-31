@@ -1,6 +1,6 @@
 ﻿namespace OpenIris.EyeTrackingSystems
 {
-    partial class FakeEyeControlUI
+    partial class SyntheticEyesUI
     {
         /// <summary>
         /// Required designer variable.
@@ -367,7 +367,7 @@
             this.RotationVectorX.TabIndex = 8;
             this.RotationVectorX.Value = 0D;
             // 
-            // FakeEyeControlUI
+            // SyntheticEyesUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -377,9 +377,9 @@
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.Name = "FakeEyeControlUI";
-            this.Text = "FakeEyeControlUI";
-            this.Load += new System.EventHandler(this.FakeEyeControlUI_Load);
+            this.Name = "SyntheticEyesUI";
+            this.Text = "Synthetic eyes";
+            this.Load += new System.EventHandler(this.SyntheticEyesUI_Load);
             this.panel2.ResumeLayout(false);
             this.groupBox6.ResumeLayout(false);
             this.groupBox7.ResumeLayout(false);

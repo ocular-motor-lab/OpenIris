@@ -11,12 +11,10 @@
     <PackageReference Include="Emgu.CV" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="NPointCalibration\EyeCalibrationNPointUI.cs" SubType="UserControl" />
-    <Compile Update="SimulationFakeEye\FakeEyeControlUI.cs" SubType="Form" />
+    <Compile Update="SyntheticEyes\SyntheticEyesUI.cs" SubType="Form" />
     <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DesignTime="True" DependentUpon="Resources.resx" />
     <!-- Explicit DependentUpon keeps the form resources named after the form class (OpenIris.*), not the folder path. -->
-    <EmbeddedResource Update="NPointCalibration\EyeCalibrationNPointUI.resx" DependentUpon="EyeCalibrationNPointUI.cs" />
-    <EmbeddedResource Update="SimulationFakeEye\FakeEyeControlUI.resx" DependentUpon="FakeEyeControlUI.cs" />
+    <EmbeddedResource Update="SyntheticEyes\SyntheticEyesUI.resx" DependentUpon="SyntheticEyesUI.cs" />
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
   </ItemGroup>
   <ItemGroup>

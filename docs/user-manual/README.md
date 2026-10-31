@@ -7,11 +7,13 @@ OpenIris, see the [plugin development manual](../plugin-development/README.md).)
    system.
 2. [Configuration](configuration.md): the settings that matter and recommended values.
 3. [Tracking and recording](tracking-and-recording.md): setting up the cameras, recording, the files
-   and data columns.
-4. [Calibration](calibration.md)
-5. [Playing and processing videos](processing-videos.md)
-6. [Remote control](remote-control.md): controlling OpenIris from MATLAB, Python or your stimulus
+   of a recording.
+4. [The data file](data-file.md): every column of the data, and how to read it in MATLAB or
+   Python.
+5. [Calibration](calibration.md)
+6. [Playing and processing videos](processing-videos.md)
+7. [Remote control](remote-control.md): controlling OpenIris from MATLAB, Python or your stimulus
    program.
-7. [Plugins](plugins.md): recommended plugins, such as OpenIrisDPI, and how to install them.
-8. [Hardware](hardware.md): cameras, IR filters and illuminators, synchronization, 3D-printed parts.
-9. [Troubleshooting](troubleshooting.md)
+8. [Plugins](plugins.md): recommended plugins, such as OpenIrisDPI, and how to install them.
+9. [Hardware](hardware.md): cameras, IR filters and illuminators, synchronization, 3D-printed parts.
+10. [Troubleshooting](troubleshooting.md)

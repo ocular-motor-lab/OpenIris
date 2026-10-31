@@ -22,6 +22,7 @@ nav:
       - Installation: user-manual/installation.md
       - Configuration: user-manual/configuration.md
       - Tracking and recording: user-manual/tracking-and-recording.md
+      - The data file: user-manual/data-file.md
       - Calibration: user-manual/calibration.md
       - Playing and processing videos: user-manual/processing-videos.md
       - Remote control: user-manual/remote-control.md
@@ -89,6 +90,8 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg

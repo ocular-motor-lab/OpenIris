@@ -42,7 +42,7 @@ time, for example `Subject01-2026Oct30-143502`. Inside, with the same name:
 
 | File | Contents |
 | --- | --- |
-| `….txt` | The data, one line per frame. |
+| `….txt` | The data, one line per frame (see [The data file](data-file.md)). |
 | `…-Left.avi`, `…-Right.avi` | The raw video of each eye, if **RecordVideo** is on. |
 | `…-events.txt` | The events sent during the recording (see [Remote control](remote-control.md)). |
 | `….cal` | The calibration used. |
@@ -51,41 +51,9 @@ time, for example `Subject01-2026Oct30-143502`. Inside, with the same name:
 
 ### The data file
 
-The data file is a text file with one line per frame and values separated by spaces. The first line
-has the name of each column, so it can be read directly, for example with `readtable` in MATLAB or
-`pandas.read_csv(file, sep=" ")` in Python.
-
-Positions are raw positions in the image, in pixels. The calibration needed to convert them to eye
-angles is saved next to the data, in the `.cal` file.
-
-For an example, see the
-[output of processing the sample videos](https://github.com/ocular-motor-lab/OpenIris/tree/main/sample-data)
-with the JOM pipeline: 40 seconds of both eyes at 100 Hz.
-
-For each eye (columns starting with `Left` and `Right`):
-
-| Columns | Contents |
-| --- | --- |
-| `FrameNumber` | Frame number. It increases by one per frame captured, so gaps mean dropped frames. |
-| `FrameNumberRaw` | The camera's own frame counter. |
-| `Seconds` | Time the image was taken, in seconds (from the camera clock when the camera has one). |
-| `PupilX`, `PupilY` | Pupil center. |
-| `PupilWidth`, `PupilHeight`, `PupilAngle` | Size of the pupil ellipse, and its angle in degrees. |
-| `IrisRadius` | Iris radius. |
-| `Torsion` | Torsion angle, in degrees, relative to the reference. |
-| `UpperEyelid`, `LowerEyelid` | Eyelid positions (when eyelid tracking is on). |
-| `DataQuality` | Quality of the tracking of this frame, as estimated by the pipeline. |
-| `CR1X`, `CR1Y` … `CR5X`, `CR5Y` | Centers of up to five corneal reflections. Zero when not found. |
-
-Then, for all frames:
-
-| Columns | Contents |
-| --- | --- |
-| `AccelerometerX` … `MagnetometerZ` | Head sensor data, for systems with a head sensor. |
-| `Int0` … `Int7`, `Double0` … `Double7` | Extra values that depend on the eye tracking system. With the Spinnaker systems, `Int0` and `Int1` are the camera input lines (see [Hardware](hardware.md#synchronizing-with-other-hardware)). |
-| `DebugTimeGrabbedLeft`, `DebugTimeGrabbedRight`, `DebugTimeProcessed` | When OpenIris received and finished processing the frame, in seconds since OpenIris started. Useful to check delays. |
-
-Values of an eye that isn't tracked are zero.
+The data file is a text file with one line per frame and one column per value: the pupil position,
+size and torsion of each eye, the corneal reflections, the eyelids, timestamps and more.
+[The data file](data-file.md) describes every column and how to read it in MATLAB or Python.
 
 ## Watching for dropped frames
 

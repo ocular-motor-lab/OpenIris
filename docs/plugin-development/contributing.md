@@ -28,7 +28,7 @@ requests that change the documentation are checked too: a broken link fails the 
 To preview the site while editing, with Python installed:
 
 ```
-pip install -r requirements-docs.txt
+pip install -r docs/requirements.txt
 mkdocs serve
 ```
 

@@ -6,9 +6,9 @@ name: Docs
 on:
   push:
     branches: [main]
-    paths: ['docs/**', 'mkdocs.yml', 'requirements-docs.txt', '.github/workflows/docs.yml']
+    paths: ['docs/**', 'mkdocs.yml', '.github/workflows/docs.yml']
   pull_request:
-    paths: ['docs/**', 'mkdocs.yml', 'requirements-docs.txt', '.github/workflows/docs.yml']
+    paths: ['docs/**', 'mkdocs.yml', '.github/workflows/docs.yml']
   workflow_dispatch:
 
 permissions:
@@ -28,10 +28,10 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: requirements-docs.txt
+          cache-dependency-path: docs/requirements.txt
 
       - name: Install MkDocs
-        run: pip install -r requirements-docs.txt
+        run: pip install -r docs/requirements.txt
 
       - name: Build the site
         run: mkdocs build --strict

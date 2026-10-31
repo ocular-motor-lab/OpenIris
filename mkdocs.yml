@@ -1,6 +1,6 @@
 # Documentation website, built from docs/ with MkDocs and published on GitHub Pages by
 # .github/workflows/docs.yml. To preview it locally:
-#   pip install -r requirements-docs.txt
+#   pip install -r docs/requirements.txt
 #   mkdocs serve
 site_name: OpenIris
 site_description: Open-source framework for video-based eye tracking.
@@ -12,8 +12,10 @@ copyright: Ocular Motor Lab, UC Berkeley. OpenIris is licensed under the GNU AGP
 
 docs_dir: docs
 # The site's home page is docs/index.md; docs/README.md is the index GitHub shows for the folder.
+# docs/requirements.txt lists the tools to build the site.
 exclude_docs: |
   /README.md
+  /requirements.txt
 
 nav:
   - Home: index.md

@@ -10,6 +10,7 @@ namespace OpenIris
 
     using System;
     using System.Drawing;
+    using System.Linq;
     using Emgu.CV;
     using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
@@ -62,6 +63,19 @@ namespace OpenIris
             return Array.ConvertAll(points, p => new PointF(
                 (float)(t[0, 0] * p.X + t[0, 1] * p.Y + t[0, 2]),
                 (float)(t[1, 0] * p.X + t[1, 1] * p.Y + t[1, 2])));
+        }
+
+        /// <summary>
+        /// The four corners in webcam image coordinates, in order around the square.
+        /// </summary>
+        public PointF[] Corners()
+        {
+            var cos = (float)Math.Cos(Angle) * Size / 2;
+            var sin = (float)Math.Sin(Angle) * Size / 2;
+            var center = Center;
+            return new[] { (-1, -1), (1, -1), (1, 1), (-1, 1) }
+                .Select(c => new PointF(center.X + cos * c.Item1 - sin * c.Item2, center.Y + sin * c.Item1 + cos * c.Item2))
+                .ToArray();
         }
 
         /// <summary>

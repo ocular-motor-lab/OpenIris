@@ -32,6 +32,16 @@ and the iris diameter for the pupil size, in the data file.
 4. Start tracking. The two eye images appear once the face is found, with the iris circle and the
    eyelids drawn on them.
 
+A separate **Webcam face** window also opens, showing the whole webcam image with the face mesh
+(green), the regions cut out as eye images (yellow), and the region searched for the face (blue).
+Use it to check the framing and the lighting, and to see why tracking fails. It closes when tracking
+stops; turn it off with `ShowFaceView`.
+
+When the webcam starts, the log lists the webcams found and every format, resolution and frame
+rate the one in use can send, followed by what it opened with. If the frame rate is lower than
+expected, check there: many webcams give their high resolutions at full frame rate only in the
+compressed MJPG format, which OpenIris asks for.
+
 Settings of the Webcam system:
 
 | Setting | Default | Meaning |
@@ -40,6 +50,7 @@ Settings of the Webcam system:
 | `ResolutionWidth`, `ResolutionHeight` | 1280 × 720 | Resolution to ask the webcam for. Webcams choose the closest one they support. |
 | `FrameRate` | 30 | Frame rate to ask for. Most webcams give 30 fps. |
 | `EyeImageSize` | 128 | Size in pixels of each eye image. |
+| `ShowFaceView` | on | Open the Webcam face window when tracking starts. |
 
 ## The data
 
@@ -61,5 +72,6 @@ choosing the Webcam system.
   reliable. The eyelid positions show when the eye is closed.
 - **Glasses** with strong reflections and faces turned far to the side make tracking worse.
 
-The networks are licensed under the Apache License 2.0. Where they come from and how they were
-converted is described in `source\BasicPlugins\Webcam\Models\README.md`.
+The networks are licensed under the Apache License 2.0, a copy of which is in
+`Plugins\WebcamModels\`. Where they come from and how they were converted is described in
+`source\BasicPlugins\Webcam\Models\README.md`.

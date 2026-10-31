@@ -22,7 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Neural networks of the webcam system and pipeline, in Plugins\WebcamModels\. See its README.md. -->
-    <None Include="Webcam\Models\*.onnx;Webcam\Models\README.md" Link="WebcamModels\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Webcam\Models\*.onnx;Webcam\Models\README.md;Webcam\Models\LICENSE-Apache-2.0.txt" Link="WebcamModels\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">

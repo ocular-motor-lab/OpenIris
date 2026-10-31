@@ -38,8 +38,15 @@ namespace OpenIris
         {
             WhichEye = whichEye;
 
+            WebcamInfo.LogWebcams(cameraIndex);
+
             capture = new VideoCapture(cameraIndex, VideoCapture.API.DShow);
             if (!capture.IsOpened) throw new InvalidOperationException($"Could not open webcam number {cameraIndex}.");
+
+            // The order matters with OpenCV 4.1's DirectShow: frame rate, size, then format. Setting
+            // the frame rate restarts the webcam in its default format, and a format set before the
+            // size is lost (tested with a C920).
+            if (requestedFrameRate > 0) capture.SetCaptureProperty(CapProp.Fps, requestedFrameRate);
 
             if (!requestedSize.IsEmpty)
             {
@@ -47,7 +54,11 @@ namespace OpenIris
                 capture.SetCaptureProperty(CapProp.FrameHeight, requestedSize.Height);
             }
 
-            if (requestedFrameRate > 0) capture.SetCaptureProperty(CapProp.Fps, requestedFrameRate);
+            // Webcams send their high resolutions at full frame rate only compressed: a C920 gives
+            // 1280x720 at 30 fps in MJPG but 10 fps in YUY2, the one DirectShow picks by default.
+            capture.SetCaptureProperty(CapProp.FourCC, VideoWriter.Fourcc('M', 'J', 'P', 'G'));
+
+            WebcamInfo.LogOpened(capture);
 
             FrameSize = new Size(
                 (int)capture.GetCaptureProperty(CapProp.FrameWidth),

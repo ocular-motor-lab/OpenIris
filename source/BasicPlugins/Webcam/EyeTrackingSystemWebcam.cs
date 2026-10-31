@@ -12,6 +12,7 @@ namespace OpenIris
     using System.ComponentModel.Composition;
     using System.Drawing;
     using System.Linq;
+    using System.Windows.Forms;
     using OpenIris.ImageGrabbing;
 
     /// <summary>
@@ -25,6 +26,7 @@ namespace OpenIris
         private readonly object trackerLock = new object();
         private CameraEyeWebcam? camera;
         private WebcamEyeLocator? tracker;
+        private volatile WebcamFaceView? faceView;
 
         protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
@@ -56,13 +58,33 @@ namespace OpenIris
             }
 
             var eyes = tracker.Process(face);
+            faceView?.Offer(face.Image, tracker, eyes);
             if (Settings.Eye == Eye.Left) eyes[Eye.Right] = null;
             if (Settings.Eye == Eye.Right) eyes[Eye.Left] = null;
             return eyes;
         }
 
+        /// <summary>
+        /// Opens the window with the whole face when tracking from the webcam starts. OpenIris
+        /// closes it when tracking stops.
+        /// </summary>
+        public override Form? OpenEyeTrackingSystemUI
+        {
+            get
+            {
+                if (!((EyeTrackingSystemWebcamSettings)Settings).ShowFaceView) return null;
+
+                var view = new WebcamFaceView();
+                view.FormClosed += (_, __) => faceView = null;
+                view.Show();
+                faceView = view;
+                return view;
+            }
+        }
+
         public override void Dispose()
         {
+            faceView = null;
             camera?.Stop();
             camera?.Dispose();
             camera = null;
@@ -108,5 +130,9 @@ namespace OpenIris
         [NeedsRestarting]
         public int EyeImageSize { get => eyeImageSize; set => SetProperty(ref eyeImageSize, value, nameof(EyeImageSize)); }
         private int eyeImageSize = 128;
+
+        [Category("Webcam"), Description("Open a window with the whole webcam image, the face mesh and the regions cut out as eye images when tracking starts.")]
+        public bool ShowFaceView { get => showFaceView; set => SetProperty(ref showFaceView, value, nameof(ShowFaceView)); }
+        private bool showFaceView = true;
     }
 }

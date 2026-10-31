@@ -48,6 +48,21 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Points of the face mesh in the last image, or null if the face was not found.
+        /// </summary>
+        public PointF[]? LastMesh { get; private set; }
+
+        /// <summary>
+        /// Score of the face mesh in the last image, 0 to 1.
+        /// </summary>
+        public float LastScore { get; private set; }
+
+        /// <summary>
+        /// Region given to the face mesh in the last image, or null if there was no face.
+        /// </summary>
+        public RotatedSquare? LastFaceRegion { get; private set; }
+
+        /// <summary>
         /// Cuts out the eye images from a webcam image.
         /// </summary>
         /// <param name="image">The webcam image.</param>
@@ -60,7 +75,10 @@ namespace OpenIris
             if (timestamp.FrameNumber < lastFrameNumber) faceRegion = null;
             lastFrameNumber = timestamp.FrameNumber;
 
+            LastScore = 0;
+            LastFaceRegion = null;
             var points = FindFaceMesh(image.Image, out var newFace);
+            LastMesh = points;
             if (points is null)
             {
                 return new EyeCollection<ImageEye?>(
@@ -102,6 +120,8 @@ namespace OpenIris
                 }
 
                 var (score, points) = mesh.Find(image, faceRegion.Value);
+                LastScore = score;
+                LastFaceRegion = faceRegion;
                 if (score >= MinFaceScore)
                 {
                     faceRegion = RegionAround(points);

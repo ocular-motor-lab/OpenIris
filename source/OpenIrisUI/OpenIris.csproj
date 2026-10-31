@@ -24,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Small sample videos played by the Simulation eye tracking system. -->
-    <None Include="..\SampleVideos\*.mp4" Link="SampleVideos\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\sample-videos\*.mp4" Link="SampleVideos\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="EyeTrackerAboutBox.cs" SubType="Form" />
@@ -32,10 +32,10 @@
     <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DesignTime="True" DependentUpon="Resources.resx" />
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
   </ItemGroup>
-  <!-- The full quality sample videos, if both are in SampleVideos (gitignored). Simulation plays them instead of the MP4s. -->
-  <ItemGroup Condition="Exists('..\SampleVideos\JorgeLeft.avi') And Exists('..\SampleVideos\JorgeRight.avi')">
-    <Content Include="..\SampleVideos\JorgeLeft.avi" Link="JorgeLeft.avi" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\SampleVideos\JorgeRight.avi" Link="JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />
+  <!-- The full quality sample videos, if both are in sample-videos (gitignored). Simulation plays them instead of the MP4s. -->
+  <ItemGroup Condition="Exists('..\..\sample-videos\JorgeLeft.avi') And Exists('..\..\sample-videos\JorgeRight.avi')">
+    <Content Include="..\..\sample-videos\JorgeLeft.avi" Link="JorgeLeft.avi" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\sample-videos\JorgeRight.avi" Link="JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj" />

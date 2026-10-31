@@ -33,17 +33,17 @@ Inside you'll find:
 
 ### Sample videos
 
-`source\SampleVideos` has two short recordings of the eyes (MP4, about 40 seconds). The build copies
-them to `bin\x64\<configuration>\SampleVideos`, where the Simulation eye tracking system plays them,
-and the tests use them too.
+`sample-videos`, at the root of the repository, has two short recordings of the eyes (MP4, about 40
+seconds). The build copies them to `bin\x64\<configuration>\SampleVideos`, where the Simulation eye
+tracking system plays them, and the tests use them too.
 
 The same recordings also exist in full quality, `JorgeLeft.avi` and `JorgeRight.avi` (about 335 MB
-each, too large for git). They are optional: if you put both in `source\SampleVideos` too (git
-ignores them there), the build copies them next to `OpenIris.exe` and Simulation plays them instead
-of the MP4s.
+each, too large for git). They are optional: if you put both in `sample-videos` too (git ignores
+them there), the build copies them next to `OpenIris.exe` and Simulation plays them instead of the
+MP4s.
 
-`source\SampleVideos\ProcessedWithJOM` has the files OpenIris writes when processing the MP4s with
-the JOM pipeline, as an example of the output.
+`sample-data` has the files OpenIris writes when processing the MP4s with the JOM pipeline, as an
+example of the output.
 
 ## Build and run
 

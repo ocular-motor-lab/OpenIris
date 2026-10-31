@@ -59,7 +59,7 @@ Positions are raw positions in the image, in pixels. The calibration needed to c
 angles is saved next to the data, in the `.cal` file.
 
 For an example, see the
-[output of processing the sample videos](https://github.com/ocular-motor-lab/OpenIris/tree/main/source/SampleVideos/ProcessedWithJOM)
+[output of processing the sample videos](https://github.com/ocular-motor-lab/OpenIris/tree/main/sample-data)
 with the JOM pipeline: 40 seconds of both eyes at 100 Hz.
 
 For each eye (columns starting with `Left` and `Right`):

@@ -4,7 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # The full quality sample videos (about 335 MB each), too large for git
-source/SampleVideos/*.avi
+sample-videos/*.avi
 
 # User-specific files
 *.rsuser

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="PipelineHarness.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -27,11 +27,11 @@ namespace OpenIris.Tests
         public static string SourceFolder { get; } = GetSourceFolder();
 
         /// <summary>
-        /// Gets the full path of one of the sample videos included with OpenIris (source\SampleVideos),
+        /// Gets the full path of one of the sample videos included with OpenIris (sample-videos, at the root of the repository),
         /// the same ones the Simulation eye tracking system plays.
         /// </summary>
         public static string SampleVideo(Eye whichEye) =>
-            Path.GetFullPath(Path.Combine(SourceFolder, "..", "SampleVideos", whichEye == Eye.Left ? "JorgeLeft.mp4" : "JorgeRight.mp4"));
+            Path.GetFullPath(Path.Combine(SourceFolder, "..", "..", "sample-videos", whichEye == Eye.Left ? "JorgeLeft.mp4" : "JorgeRight.mp4"));
 
         /// <summary>
         /// Processes the frames with a new instance of the pipeline, using its default settings and an

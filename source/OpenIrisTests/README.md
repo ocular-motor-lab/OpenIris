@@ -15,8 +15,8 @@ dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c Debug -p:Pla
   output (pupil, iris, reflection, torsion, quality) must match the CSV files in `Baselines\` to
   within 0.01 (pixels, degrees). Two sets of frames are used:
   - 100 frames of a synthetic eye drawn by `SyntheticEye.cs`.
-  - The first 300 frames of the sample videos in `source\SampleVideos` (the ones the Simulation
-    system plays).
+  - The first 300 frames of the sample videos in `sample-videos`, at the root of the repository
+    (the ones the Simulation system plays).
 - **Accuracy** (`PipelineAccuracyTests`): the pupil and reflection must be found within 1.5 pixels
   of where the synthetic eye drew them.
 - **Speed** (`PipelinePerformanceTests`): the JOM pipeline must not get more than 25% slower. The

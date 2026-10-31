@@ -193,6 +193,21 @@ namespace OpenIris
         public double AverageFrameProcessingTime { get; private set; }
 
         /// <summary>
+        /// Gets the name of the library (assembly) that couldn't be loaded, if that is the error.
+        /// </summary>
+        /// <param name="ex">The error.</param>
+        /// <returns>The name of the library, or null if the error is something else.</returns>
+        private static string? GetMissingLibrary(Exception ex)
+        {
+            var fileName = (ex as FileNotFoundException)?.FileName ?? (ex as FileLoadException)?.FileName;
+
+            // A missing library has an assembly name ("Name, Version=..."); a missing file has a path.
+            if (fileName is null || !fileName.Contains(", Version=")) return null;
+
+            return fileName.Substring(0, fileName.IndexOf(','));
+        }
+
+        /// <summary>
         /// Starts tracking from cameras, using the eye tracking system selected in the configuration settings.
         /// </summary>
         public async Task StartTracking()
@@ -218,10 +233,19 @@ namespace OpenIris
                 }
                 else
                 {
-                    EyeTrackingSystem = EyeTrackingSystemBase.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
-                    ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, EyeTrackingSystem, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
-                    ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize);
-                    HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
+                    try
+                    {
+                        EyeTrackingSystem = EyeTrackingSystemBase.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
+                        ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, EyeTrackingSystem, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
+                        ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize);
+                        HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
+                    }
+                    catch (Exception ex) when (GetMissingLibrary(ex) is string library)
+                    {
+                        throw new OpenIrisException(
+                            $"The eye tracking system {Settings.EyeTrackerSystem} needs {library}, which isn't installed. If it comes " +
+                            "with a camera SDK (for example SpinnakerNET with the Spinnaker SDK for FLIR cameras), install the SDK and restart OpenIris.", ex);
+                    }
                 }
 
                 // Action for every time new images are grabbed

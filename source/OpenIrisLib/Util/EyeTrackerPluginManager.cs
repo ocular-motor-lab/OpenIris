@@ -107,28 +107,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Describes an error for the user, explaining what to do when a plugin can't find a
-        /// library, which usually means a camera SDK isn't installed.
-        /// </summary>
-        /// <param name="ex">The error.</param>
-        /// <returns>The description.</returns>
-        public static string DescribeError(Exception ex)
-        {
-            for (var inner = ex; inner != null; inner = inner.InnerException)
-            {
-                if (inner is FileNotFoundException || inner is FileLoadException)
-                {
-                    var missing = (inner as FileNotFoundException)?.FileName ?? (inner as FileLoadException)?.FileName;
-                    var name = missing is null ? "a library" : new AssemblyName(missing).Name;
-                    return $"{ex.Message}\n\nOpenIris can't find {name}. If it comes with a camera SDK (for example " +
-                        "SpinnakerNET with the Spinnaker SDK for FLIR cameras), install the SDK and restart OpenIris.";
-                }
-            }
-
-            return ex.Message;
-        }
-
-        /// <summary>
         /// Extra types that should be given tot he xml serializer to read the settings file.
         /// </summary>
         public static List<Type>? ExtraSettingsTypesForXML { get; private set; }

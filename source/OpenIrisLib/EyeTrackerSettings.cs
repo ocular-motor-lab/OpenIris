@@ -285,6 +285,12 @@ namespace OpenIris
         {
             var settingsFileName = Path.Combine(Directory.GetCurrentDirectory(), "EyeTrackerSettings.xml");
 
+            if (!File.Exists(settingsFileName))
+            {
+                System.Diagnostics.Trace.WriteLine("No settings file yet, using the default settings. They will be saved to " + settingsFileName + " when OpenIris closes.");
+                return new EyeTrackerSettings { settingsPath = settingsFileName };
+            }
+
             try
             {
                 var reader = new XmlSerializer(typeof(EyeTrackerSettings), EyeTrackerPluginManager.ExtraSettingsTypesForXML?.ToArray());

@@ -1,0 +1,8 @@
+# Versions of the builds, computed by GitVersion from the tags (see docs/plugin-development/building.md).
+#
+# While 0.2.0 is in alpha, builds from main are labeled alpha: the commit tagged 0.2.0-alpha.1 builds
+# as 0.2.0-alpha.1, later commits as 0.2.0-alpha.2 and so on. Without this, GitVersion drops the label
+# on main. Remove it (or change it to beta) before releasing 0.2.0.
+branches:
+  main:
+    tag: alpha

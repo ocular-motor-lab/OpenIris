@@ -1,3 +1,0 @@
-<Project>
-  <!-- Stops MSBuild from importing ..\Directory.Build.props: this .NET Core project doesn't share the net48 settings. -->
-</Project>

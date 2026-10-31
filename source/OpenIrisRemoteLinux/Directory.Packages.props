@@ -1,3 +1,0 @@
-<Project>
-  <!-- Stops MSBuild from importing ..\Directory.Packages.props: this project keeps its own package versions. -->
-</Project>

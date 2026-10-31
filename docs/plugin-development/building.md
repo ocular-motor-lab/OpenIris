@@ -80,9 +80,8 @@ msbuild source\OpenIris.sln -restore -p:Configuration=Release -p:Platform=x64
 | **OpenIris** (`OpenIrisUI`) | The main program, `OpenIris.exe`. |
 | **BasicPlugins** | Built-in plugins, for example calibrations and a simulated eye. |
 | **SpinnakerInterface**, **FlyCaptureInterface**, **Micromedical** | Eye tracking systems for specific cameras and devices. |
-| **OpenIrisRemoteClient** | The .NET client for controlling OpenIris remotely (see [Remote control](../user-manual/remote-control.md)). |
 | **OpenIrisTests** | The automated tests (see [Testing](contributing.md#tests)). |
-| Others | Small tools and test programs (remote console and GUI, video player, etc.). |
+| Others | Small tools and test programs (video player, etc.). |
 
 All projects are SDK-style projects targeting .NET Framework 4.8 for x64. The settings they share are
 in two files in `source\`:

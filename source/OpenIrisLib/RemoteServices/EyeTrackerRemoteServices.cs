@@ -13,8 +13,6 @@ namespace OpenIris
     using System.Net.NetworkInformation;
     using System.Net.Sockets;
     using System.Net;
-    using System.ServiceModel;
-    using System.ServiceModel.Description;
     using System.Text;
 
     /// <summary>
@@ -22,7 +20,6 @@ namespace OpenIris
     /// </summary>
     public class EyeTrackerRemoteServices
     {
-        private static ServiceHost? eyeTrackerHostNetTcp;
         private static EyeTrackerWebServer? eyeTrackerWebServer;
         private static EyeTrackerTcpListener? eyeTrackerHostTcp = null;
         private static EyeTrackerUdpListener? eyeTrackerHostUdp = null;
@@ -35,27 +32,6 @@ namespace OpenIris
         /// <returns>The service host object.</returns>
         public static void Start(EyeTracker newEyeTracker)
         {
-            var eyeTracker = new EyeTrackerRemote(newEyeTracker);
-
-            // NET TCP SERVICE
-            try
-            {
-                eyeTrackerHostNetTcp = new ServiceHost(eyeTracker);
-                var binding = new NetTcpBinding();
-                binding.MaxReceivedMessageSize = 2147483647;
-                binding.Security.Mode = SecurityMode.None;
-
-                var address = "net.tcp://localhost:" + newEyeTracker.Settings.ServiceListeningPort + "/EyeTrackerEndpoint";
-                var e = eyeTrackerHostNetTcp.AddServiceEndpoint(typeof(IEyeTrackerService), binding, address);
-
-                eyeTrackerHostNetTcp.Open();
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("Error starting NET TCP service: " + ex.Message);
-                eyeTrackerHostNetTcp = null;
-            }
-
             // WEB SERVER: REST API, live data and web client. It replaces the WCF web endpoint
             // that was on this port, and keeps its URLs (/EyeTrackerEndpoint/Web/StartRecording...).
             try
@@ -103,20 +79,6 @@ namespace OpenIris
                 Trace.WriteLine("Error starting LSL outlet: " + ex.Message);
                 eyeTrackerLslOutlet = null;
             }
-
-
-            // HTTP SERVICE FROM CLEVELAND DO NOT CHANGE
-            //Need to run something like this in the command line. 
-            //netsh http add urlacl url = http://+:9001/EyeTrackerEndpoint/ user=jorge
-            // https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/how-to-create-a-basic-wcf-web-http-service
-            //
-            //var host = new ServiceHost(typeof(EyeTrackerRemoteService), new Uri[] { new Uri("http://10.77.17.88:" + EyeTrackerRemoteService.EyeTracker.Settings.ServiceListeningPort + "/EyeTrackerEndpoint") });
-            //host.AddServiceEndpoint(typeof(IEyeTrackerService), new BasicHttpBinding(), "Soap");
-            //var endpoint = host.AddServiceEndpoint(typeof(IEyeTrackerService), new WebHttpBinding(), "Web");
-            //endpoint.EndpointBehaviors.Add(new WebHttpBehavior());
-            //host.Open();
-
-            // END HTTP SERVICE FROM CLEVELAND DO NOT CHANGE
         }
 
         /// <summary>
@@ -126,7 +88,6 @@ namespace OpenIris
         {
             try
             {
-                eyeTrackerHostNetTcp?.Close();
                 eyeTrackerWebServer?.Dispose();
                 eyeTrackerHostTcp?.Stop();
                 eyeTrackerHostUdp?.Stop();

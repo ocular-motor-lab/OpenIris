@@ -14,9 +14,6 @@ There are three ways to do it:
 - **Text commands over UDP or TCP.** Simple text messages, the fastest for events during an
   experiment. Replies with eye data are JSON. See [Text commands](#text-commands-udp-and-tcp).
 
-The .NET remote service (`OpenIrisRemoteClient.dll`, port 9000) still works, but is going away:
-use the web API instead.
-
 OpenIris listens as soon as it starts; tracking does not need to be running. The log at startup
 shows which services started, for example `UDP server Waiting for requests in port 9003.`
 
@@ -27,7 +24,7 @@ section G, default 9000). Changing it requires restarting OpenIris.
 
 | Port | Default | Used for |
 | --- | --- | --- |
-| ServiceListeningPort | 9000 | .NET remote service (`net.tcp`), used by `OpenIrisRemoteClient.dll` |
+| ServiceListeningPort | 9000 | Not used (was the .NET remote service, removed in 0.2) |
 | ServiceListeningPort + 1 | 9001 | Web client and web API (`http`), see [Web client](#web-client) |
 | ServiceListeningPort + 2 | 9002 | Text commands over **TCP** |
 | ServiceListeningPort + 3 | 9003 | Text commands over **UDP** |
@@ -315,8 +312,9 @@ synchronize the stimulus and eye tracker clocks. Also: `IsRecording`, `GetStatus
 `ChangeSetting(name, value)`, `WaitForNewData`, `ResetReference`, `StartCalibration`,
 `CalibrationMessage`, `CancelCalibration`.
 
-Scripts written for the old version of this class keep working. The difference: `GetCurrentData`
-returns a struct (`data.Left.Pupil.Center.X`) instead of a .NET object (`data.Item(0)...`).
+Scripts written for the old version of this class, which used `OpenIrisRemoteClient.dll` and the
+.NET remote service (removed in 0.2), keep working. The difference: `GetCurrentData` returns a
+struct (`data.Left.Pupil.Center.X`) instead of a .NET object (`data.Item(0)...`).
 
 The URLs of the old browser commands (`http://localhost:9001/EyeTrackerEndpoint/Web/StartRecording`,
 `StopRecording`, `ResetReference`, `RecordEvent?message=...`, `GetFileWeb`, `StatusSummary`) also

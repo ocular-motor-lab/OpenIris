@@ -58,6 +58,10 @@ has the name of each column, so it can be read directly, for example with `readt
 Positions are raw positions in the image, in pixels. The calibration needed to convert them to eye
 angles is saved next to the data, in the `.cal` file.
 
+For an example, see the
+[output of processing the sample videos](https://github.com/ocular-motor-lab/OpenIris/tree/main/source/SampleVideos/ProcessedWithJOM)
+with the JOM pipeline: 40 seconds of both eyes at 100 Hz.
+
 For each eye (columns starting with `Left` and `Right`):
 
 | Columns | Contents |

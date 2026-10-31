@@ -3,8 +3,8 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
-#ignore the large sample videos
-VideoSamples/
+# The full quality sample videos (about 335 MB each), too large for git
+source/SampleVideos/*.avi
 
 # User-specific files
 *.rsuser
@@ -359,9 +359,6 @@ cygwin1.dll
 FILE_LIST_2021_0902_0957.flst
 OpenIris_SourceOnly_2021_0902_0957.zip
 snapshot_source_only.bat
-VideoSamples/JorgeLeft.avi
-VideoSamples/JorgeRight.avi
-VideoSamples/VideoSamples.zip
 source/OpenIrisTests/Baselines/performance/
 
 # Documentation website built locally with "mkdocs build" or "mkdocs serve"

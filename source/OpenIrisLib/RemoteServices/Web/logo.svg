@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="75.56 66.37 79 79" width="256" height="256">
+  <!-- OpenIris logo: the eye of the Ocular Motor Lab logo (its "O"), with a tracking cross on the pupil. -->
+  <circle cx="115.06" cy="105.87" r="36.3" fill="#ffffff" stroke="#231f20" stroke-width="5"/>
+  <!-- Iris, pupil and corneal reflection, from the lab logo. The eye looks up and to the left. -->
+  <path fill="#d7df23" d="M111.93,103.47c-5.87,8.94-15.1,13.25-20.6,9.63-5.51-3.62-5.21-13.8.66-22.74,5.87-8.94,15.1-13.25,20.61-9.63,5.51,3.62,5.21,13.8-.66,22.73Z"/>
+  <path fill="#231f20" stroke="#231f20" d="M104.61,98.66c-2.35,3.57-6.04,5.3-8.24,3.85-2.2-1.45-2.09-5.52.26-9.09,2.35-3.57,6.04-5.3,8.24-3.85,2.2,1.45,2.08,5.52-.26,9.09Z"/>
+  <path fill="#ffffff" stroke="#ffffff" d="M97.12,105.71c1.78-2.71,5.31-3.54,7.88-1.85,2.57,1.69,3.21,5.26,1.43,7.97-1.78,2.71-5.31,3.54-7.88,1.85-2.57-1.69-3.21-5.26-1.43-7.97Z"/>
+  <!-- Tracking cross: upright on the surface of the eye, seen through the same oblique projection as
+       the pupil (an ellipse centered at 100.62,96.04, tilted 33.3 degrees, 0.616 times as wide as it
+       is tall). So the arms are foreshortened and meet at 115 degrees instead of 90. The end points
+       are the projection of arms 30 units long. -->
+  <g stroke="#e53935" stroke-width="1.2" stroke-linecap="round">
+    <line x1="105.91" y1="69.51" x2="95.33" y2="122.57"/>
+    <line x1="78.67" y1="101.33" x2="122.57" y2="90.75"/>
+  </g>
+</svg>

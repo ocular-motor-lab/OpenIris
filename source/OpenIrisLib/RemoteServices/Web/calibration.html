@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenIris calibration</title>
+  <link rel="icon" href="logo.svg">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { min-height: 100vh; }
+    #setup { max-width: 640px; margin: 32px auto; padding: 0 16px; }
+    #setup h1 { display: flex; align-items: center; gap: 10px; font-size: 20px; }
+    #setup h1 img { width: 30px; }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+    .fields label { font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
+    .fields input, .fields select { width: 100%; }
+    .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+    .note { font-size: 13px; color: var(--muted); }
+    /* Full-screen stage: mid gray, as is usual for stimuli. */
+    #stage { position: fixed; inset: 0; background: #808080; display: none; cursor: none; }
+    #stage.show { display: block; }
+    #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #stage .hint { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; color: #555; font-size: 13px; }
+    #results {
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,.94); color: #1d2229; border-radius: 8px; padding: 12px 16px;
+      display: none; cursor: default; box-shadow: 0 2px 12px rgba(0,0,0,.25); max-width: calc(100% - 32px);
+    }
+    #results.show { display: block; }
+    #results h2 { margin: 0 0 6px; font-size: 15px; }
+    #results table { border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 13px; }
+    #results td, #results th { padding: 2px 10px; text-align: right; }
+    #results th:first-child, #results td:first-child { text-align: left; }
+    #results .actions button { background: #fff; color: #1d2229; border-color: #bbb; }
+    #results .actions button.primary { background: #2f6fd6; color: #fff; border-color: #2f6fd6; }
+  </style>
+</head>
+<body>
+  <div id="setup">
+    <h1><img src="logo.svg" alt="">Calibration</h1>
+    <section class="card">
+      <p class="note">Move this window to the screen the subject looks at, then press Calibrate. The targets
+        go full screen. The subject looks at the center of each target. Press Esc to stop.</p>
+      <p class="note">This uses the <b>Remote Linear</b> calibration (by Ryan Ressmeyer): a linear fit from the eye
+        signal (pupil minus corneal reflection, by default) to the target positions in degrees.</p>
+      <div class="fields">
+        <label>Screen width (cm)<input type="number" id="screenWidth" step="0.1" min="1"></label>
+        <label>Viewing distance (cm)<input type="number" id="distance" step="0.1" min="1"></label>
+        <label>Points
+          <select id="points">
+            <option value="5">5 (center and corners)</option>
+            <option value="9">9 (3 × 3 grid)</option>
+            <option value="13">13 (3 × 3 grid and 4 inner)</option>
+          </select>
+        </label>
+        <label>Target size (deg)<input type="number" id="targetSize" step="0.1" min="0.1"></label>
+        <label>Horizontal extent (± deg)<input type="number" id="extentX" step="0.5" min="0"></label>
+        <label>Vertical extent (± deg)<input type="number" id="extentY" step="0.5" min="0"></label>
+        <label>Time to look at each target (s)<input type="number" id="settle" step="0.1" min="0"></label>
+        <label>Time collecting data on each target (s)<input type="number" id="collect" step="0.1" min="0.1"></label>
+        <label>Eye signal
+          <select id="source"></select>
+        </label>
+        <label>Minus
+          <select id="reference"></select>
+        </label>
+      </div>
+      <p class="note" id="fits"></p>
+      <div class="actions">
+        <button class="primary" id="calibrate">Calibrate</button>
+        <button id="validate">Validate</button>
+        <a class="button" href="/">Back to control</a>
+      </div>
+      <div class="error" id="error"></div>
+    </section>
+  </div>
+
+  <div id="stage">
+    <canvas id="canvas"></canvas>
+    <div class="hint" id="hint"></div>
+    <div id="results">
+      <h2 id="resultsTitle"></h2>
+      <table id="resultsTable"></table>
+      <div class="actions">
+        <button class="primary" id="resultsValidate">Validate</button>
+        <button id="resultsRedo">Calibrate again</button>
+        <button id="resultsDone">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="calibration.js"></script>
+</body>
+</html>

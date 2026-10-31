@@ -34,11 +34,16 @@ faster:
 
 With **RecordVideo** on, the disk must also be fast enough: use a local SSD, not a network folder.
 
-## "Error starting WEB service" in the log
+## "Error starting the web server" in the log
 
-This only affects controlling OpenIris from a web browser. See
-[Remote control](remote-control.md#from-a-web-browser) to allow it, or ignore it: the other ways to
-control OpenIris remotely work without it.
+Another program is using port 9001 (ServiceListeningPort + 1), often a second OpenIris. Close it, or
+change **ServiceListeningPort**, and restart OpenIris. Only the [web client and API](remote-control.md#web-client)
+need this port; UDP and TCP commands work without it.
+
+## The web page doesn't open from another computer
+
+Windows Firewall on the OpenIris computer must allow OpenIris. Windows asks the first time; if
+someone clicked Cancel, allow OpenIris in Windows Defender Firewall, Allow an app through firewall.
 
 ## My program can't connect to OpenIris
 

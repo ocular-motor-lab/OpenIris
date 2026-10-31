@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OpenIris</title>
+  <link rel="icon" href="logo.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <img src="logo.svg" alt="">
+    <h1>OpenIris</h1>
+    <div class="info" id="info"></div>
+    <span class="pill" id="state">Connecting</span>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Control</h2>
+
+      <div class="group">
+        <label>Tracking</label>
+        <div class="row">
+          <button id="startTracking" class="primary">Start tracking</button>
+          <button id="stopTracking">Stop</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <label for="sessionName">Recording</label>
+        <div class="row">
+          <input type="text" id="sessionName" placeholder="Session name" title="Name of the data files">
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="startRecording" class="record">Record</button>
+          <button id="stopRecording">Stop recording</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <label for="eventMessage">Event</label>
+        <div class="row">
+          <input type="text" id="eventMessage" placeholder="Message saved in the events file">
+          <button id="recordEvent">Send</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <label>Calibration</label>
+        <div class="row">
+          <a class="button" id="openCalibration" href="calibration.html" target="_blank" title="Opens in a new window: move it to the screen the subject looks at">Full-screen calibration</a>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="startCalibration" title="Start the calibration method chosen in the settings">Calibrate</button>
+          <button id="cancelCalibration">Cancel</button>
+          <button id="resetReference">Reset reference</button>
+        </div>
+      </div>
+
+      <div class="group files">
+        <label>Last recording</label>
+        <div id="files" class="muted">None</div>
+      </div>
+
+      <div class="error" id="error"></div>
+    </section>
+
+    <section class="card">
+      <h2>Eyes <span class="spacer"></span>
+        <label class="muted" style="text-transform:none;letter-spacing:0;font-weight:400"><input type="checkbox" id="overlay" checked> Tracking overlay</label>
+      </h2>
+      <div class="eyes">
+        <div class="eye left" id="eyeLeft">
+          <h3>Left eye</h3>
+          <div class="image"><span>No image</span></div>
+          <div class="values">
+            <div class="value"><small>Horizontal</small><b data-v="H">–</b></div>
+            <div class="value"><small>Vertical</small><b data-v="V">–</b></div>
+            <div class="value"><small>Torsion</small><b data-v="T">–</b></div>
+          </div>
+          <div class="thresholds"></div>
+        </div>
+        <div class="eye right" id="eyeRight">
+          <h3>Right eye</h3>
+          <div class="image"><span>No image</span></div>
+          <div class="values">
+            <div class="value"><small>Horizontal</small><b data-v="H">–</b></div>
+            <div class="value"><small>Vertical</small><b data-v="V">–</b></div>
+            <div class="value"><small>Torsion</small><b data-v="T">–</b></div>
+          </div>
+          <div class="thresholds"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card wide">
+      <h2>Live trace <span class="spacer"></span>
+        <span class="legend" style="text-transform:none;letter-spacing:0;font-weight:400">
+          <span><i style="background:var(--left)"></i>Left</span>
+          <span><i style="background:var(--right)"></i>Right</span>
+        </span>
+      </h2>
+      <div class="trace-controls" id="traceControls">
+        <span id="panelToggles"></span>
+        <label>Span
+          <select id="span">
+            <option value="2">2 s</option>
+            <option value="5">5 s</option>
+            <option value="10" selected>10 s</option>
+            <option value="30">30 s</option>
+            <option value="60">60 s</option>
+          </select>
+        </label>
+        <button id="pause" class="small">Pause</button>
+        <span class="muted" id="rate"></span>
+      </div>
+      <canvas id="trace"></canvas>
+    </section>
+
+    <section class="card wide">
+      <details class="settings" id="settingsBox">
+        <summary>Settings</summary>
+        <p class="muted">Changes apply right away, as in the settings window of OpenIris.</p>
+        <div class="settings-groups" id="settings"></div>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <span id="grabberStatus"></span>
+    <span id="processorStatus"></span>
+    <span id="recorderStatus"></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

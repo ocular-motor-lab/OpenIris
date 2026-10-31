@@ -4,11 +4,18 @@
        pupil and corneal reflection trackers use. -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Versions listed here also apply when a package comes indirectly, through another package. -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Emgu.CV" Version="4.1.1.3497" />
+    <!-- Web server of the remote control API and web client (MIT). -->
+    <PackageVersion Include="EmbedIO" Version="3.5.2" />
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />
     <PackageVersion Include="System.Text.Json" Version="10.0.14" />
+    <!-- Pinned so every project copies the same one into the shared bin folder: System.Text.Json
+         needs 4.6.2, while EmguCV and EmbedIO ask for 4.5.0, which used to overwrite it. -->
+    <PackageVersion Include="System.ValueTuple" Version="4.6.2" />
   </ItemGroup>
   <ItemGroup Label="Tests">
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

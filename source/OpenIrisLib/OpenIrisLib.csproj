@@ -32,6 +32,7 @@
        otherwise every plugin copies them into Plugins\. Projects that need EmguCV reference it themselves. -->
   <ItemGroup>
     <PackageReference Include="Emgu.CV" PrivateAssets="all" />
+    <PackageReference Include="EmbedIO" PrivateAssets="all" />
     <PackageReference Include="System.Text.Json" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +47,10 @@
     <Compile Update="UI\SelectVideoDialog.cs" SubType="Form" />
     <Compile Update="UI\SliderTextControl.cs" SubType="UserControl" />
     <Compile Update="UI\VideoPlayerUI.cs" SubType="UserControl" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- The web client, served by EyeTrackerWebServer from the embedded files. -->
+    <EmbeddedResource Include="RemoteServices\Web\**" />
   </ItemGroup>
   <ItemGroup>
     <!-- Native Lab Streaming Layer library (liblsl), copied next to the executable so the

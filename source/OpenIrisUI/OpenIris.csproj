@@ -20,6 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Emgu.CV" />
+    <!-- OpenIrisLib's web server. Referenced here too so the binding redirects it needs
+         (System.ValueTuple, for Swan.Lite) go into OpenIris.exe.config. -->
+    <PackageReference Include="EmbedIO" />
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>

@@ -4,13 +4,18 @@ OpenIris can be controlled over the network while it runs, from the same compute
 A stimulus program (MATLAB, Python, PsychoPy, Psychtoolbox…) can start and stop recordings, mark
 events in the data, read the latest eye position, and drive a calibration.
 
-There are two ways to do it:
+There are three ways to do it:
 
-- **Text commands over UDP or TCP** (recommended). Simple text messages that any language can send.
-  Replies with eye data are JSON.
-- **The .NET remote service**, used by `OpenIrisRemoteClient.dll` and the MATLAB class
-  `OpenIrisMatlabClient.m`. It gives access to a few more functions, but only works from .NET or
-  MATLAB on Windows.
+- **A web browser.** Open `http://<OpenIris computer>:9001/` on any computer, tablet or phone of the
+  network to see the eyes and a live trace, record, change settings, and run a full-screen
+  calibration. See [Web client](#web-client).
+- **The web API** (HTTP and JSON), used by the web client and by the MATLAB class
+  `OpenIrisMatlabClient.m`. Any language can use it. See [Web API](#web-api).
+- **Text commands over UDP or TCP.** Simple text messages, the fastest for events during an
+  experiment. Replies with eye data are JSON. See [Text commands](#text-commands-udp-and-tcp).
+
+The .NET remote service (`OpenIrisRemoteClient.dll`, port 9000) still works, but is going away:
+use the web API instead.
 
 OpenIris listens as soon as it starts; tracking does not need to be running. The log at startup
 shows which services started, for example `UDP server Waiting for requests in port 9003.`
@@ -23,7 +28,7 @@ section G, default 9000). Changing it requires restarting OpenIris.
 | Port | Default | Used for |
 | --- | --- | --- |
 | ServiceListeningPort | 9000 | .NET remote service (`net.tcp`), used by `OpenIrisRemoteClient.dll` |
-| ServiceListeningPort + 1 | 9001 | Web service (`http`), see [Browser](#from-a-web-browser) |
+| ServiceListeningPort + 1 | 9001 | Web client and web API (`http`), see [Web client](#web-client) |
 | ServiceListeningPort + 2 | 9002 | Text commands over **TCP** |
 | ServiceListeningPort + 3 | 9003 | Text commands over **UDP** |
 
@@ -208,47 +213,107 @@ progress, messages are ignored and reply `ack`.
 To synchronize eye data with a stimulus display, see also
 [OpenIrisSync](https://github.com/ocular-motor-lab/OpenIrisSync/wiki).
 
-## The .NET remote service
+## Web client
 
-`OpenIrisRemoteClient.dll` (in the OpenIris folder) connects to port 9000. Its class
-`OpenIris.OpenIrisClient(hostname, port)` offers, among others: `StartRecording`, `StopRecording`,
-`RecordEvent`, `GetCurrentData`, `WaitForNewData`, `ChangeSetting(name, value)`, `ResetReference`,
-the current status, and downloading recorded files.
+Open `http://localhost:9001/` on the OpenIris computer, or `http://<its address>:9001/` from another
+one (**Show IP / network info** in the OpenIris menus gives the address). The page shows:
 
-```csharp
-var openIris = new OpenIris.OpenIrisClient("127.0.0.1", 9000);
-openIris.ChangeSetting("SessionName", "Subject01");
-openIris.StartRecording();
-long frame = openIris.RecordEvent("StimulusOn");
-openIris.StopRecording();
+- Start and stop tracking and recording, the session name, and events.
+- The image of each eye with the tracking drawn on top, as in OpenIris, and the pupil and
+  reflection thresholds with buttons to change them.
+- The calibrated position of each eye and a **live trace** of horizontal, vertical and torsion
+  (also pupil size and position, and head velocity), with every frame, however fast the camera.
+- Calibrate, cancel and reset the reference, and the files of the last recording, to download.
+- All the settings, as in the settings window. Changes apply right away.
+
+Several browsers can be open at the same time.
+
+### Full-screen calibration and validation
+
+**Full-screen calibration** opens a page that shows calibration targets on the screen the subject
+looks at. Open it in a browser on the computer of that screen, move the window to that screen, and
+press **Calibrate**. The targets go full screen; the subject looks at the center of each one. Esc
+stops at any time.
+
+It uses the **Remote Linear** calibration (by Ryan Ressmeyer, see [Calibration](#calibration)) and
+switches OpenIris to it. Set the width of the screen and the viewing distance, so the targets are at
+the right angles, and the number of targets (5, 9 or 13), how far out they go, and how long each
+lasts. The positions are in degrees, up and right positive. At the end the subject looks at the
+center target, which becomes the zero reference.
+
+The result shows each target with the position the calibration gives for each eye. **Validate**
+shows the targets again (in a new random order) and compares them with the gaze: the mean and
+maximum error of each eye, in degrees, is the accuracy to report. The calibration error is lower than
+the real one, because the fit was made to those same points.
+
+## Web API
+
+The web client uses this API, and any program can too. Replies are JSON. A command that can't run
+replies with an error status and `{"error": "message"}`: 409 when it isn't possible now (for example
+recording while not tracking), 404 when something doesn't exist, 400 for a bad request. Values that
+don't exist, such as the position of an eye that wasn't found, are `null`.
+
+| Request | Does |
+| --- | --- |
+| `GET /api/status` | Tracking, recording, calibrating, frame rate, system, session name, version... |
+| `POST /api/tracking/start`, `/api/tracking/stop` | Start or stop tracking |
+| `POST /api/recording/start`, `/api/recording/stop` | Start or stop recording |
+| `POST /api/events` | Save the body (text) as an event; replies `{"FrameNumber": n}` |
+| `GET /api/data` | Data of the last frame: `Left`, `Right` (raw), `LeftCalibrated`, `RightCalibrated`, `Head`, `Extra` |
+| `GET /api/data/next` | The same, for the next frame (waits up to 1 s) |
+| `GET /api/images/left`, `/api/images/right` | Last image of the eye (JPEG), with the tracking drawn; `?overlay=false` without |
+| `GET /api/settings` | All the settings, with their group, description, type, value and options |
+| `PUT /api/settings/{name}` | Change a setting; the body is the value (JSON or text). Names as in the list: `SessionName`, `Tracking.DarkThresholdLeftEye`... |
+| `POST /api/reference/reset` | Reset the reference |
+| `POST /api/calibration/start`, `/cancel`, `/reset` | Start, cancel, or reset the calibration |
+| `POST /api/calibration/message` | Send the body (text) to the calibration, for example `FixStart:5,0`; replies `{"Reply": "ack"}` |
+| `GET /api/files/last` | Names of the files of the last recording |
+| `GET /api/files/{name}` | Download a file of the last recording (or of the data folder) |
+
+From Python, for example:
+
+```python
+import requests
+oi = "http://localhost:9001/api"
+requests.put(oi + "/settings/SessionName", json="Subject01")
+requests.post(oi + "/recording/start")
+frame = requests.post(oi + "/events", data="StimulusOn").json()["FrameNumber"]
+data = requests.get(oi + "/data").json()
+print(data["LeftCalibrated"]["HorizontalPosition"])
+requests.post(oi + "/recording/stop")
 ```
 
-From MATLAB on Windows, `OpenIrisMatlabClient.m` (in `source\EyeTrackerRemoteClient`) wraps it:
+### Live data
+
+The WebSocket `ws://<address>:9001/ws/data` sends every frame. First it sends the names of the
+columns, which are those of the [data file](data-file.md):
+`{"type": "columns", "columns": ["LeftFrameNumber", ...]}`. Then, about 30 times a second, the
+frames since the last message: `{"type": "data", "rows": [[...], [...]]}`.
+
+### MATLAB
+
+`OpenIrisMatlabClient.m` (in `source\EyeTrackerRemoteClient`) uses the web API. It needs no DLL
+and works on any system (MATLAB R2016b or later):
 
 ```matlab
 oi = OpenIrisMatlabClient;
-oi.openiris_folder = 'C:\OpenIris';   % Folder with OpenIrisRemoteClient.dll
-oi.Connect('127.0.0.1');
+oi.Connect('127.0.0.1');               % Or Connect() to use the address in openiris_folder\IP.txt
 oi.SetSessionName('Subject01');
 oi.StartRecording();
 frame = oi.RecordEvent('StimulusOn');
+data = oi.GetCurrentData();             % data.LeftCalibrated.HorizontalPosition, data.Left.Pupil.Center.X...
 oi.StopRecording();
+files = oi.DownloadFile();              % Into openiris_folder\DownloadedData
 ```
 
 With Psychtoolbox installed, `RecordEvent` starts each message with the `GetSecs` time, to help
-synchronize the stimulus and eye tracker clocks.
+synchronize the stimulus and eye tracker clocks. Also: `IsRecording`, `GetStatus`,
+`ChangeSetting(name, value)`, `WaitForNewData`, `ResetReference`, `StartCalibration`,
+`CalibrationMessage`, `CancelCalibration`.
 
-## From a web browser
+Scripts written for the old version of this class keep working. The difference: `GetCurrentData`
+returns a struct (`data.Left.Pupil.Center.X`) instead of a .NET object (`data.Item(0)...`).
 
-The web service (port 9001) accepts simple commands from a browser, for example
-`http://localhost:9001/EyeTrackerEndpoint/Web/StartRecording`.
-
-Windows only lets programs open this kind of port with permission. If the log shows
-`Error starting WEB service`, run this once in a Command Prompt opened as administrator (replace
-`username` with the Windows user that runs OpenIris), then restart OpenIris:
-
-```
-netsh http add urlacl url=http://+:9001/EyeTrackerEndpoint/ user=username
-```
-
-The other services don't need this.
+The URLs of the old browser commands (`http://localhost:9001/EyeTrackerEndpoint/Web/StartRecording`,
+`StopRecording`, `ResetReference`, `RecordEvent?message=...`, `GetFileWeb`, `StatusSummary`) also
+still work, and no longer need the `netsh http add urlacl` command.

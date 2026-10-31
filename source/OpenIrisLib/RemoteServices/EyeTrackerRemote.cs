@@ -35,7 +35,7 @@ namespace OpenIris
     /// https://learn.microsoft.com/en-us/dotnet/api/system.servicemodel.instancecontextmode?view=netframework-4.8.1
     /// </summary>
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-    public class EyeTrackerRemote : IEyeTrackerService, IEyeTrackerWebService
+    public class EyeTrackerRemote : IEyeTrackerService
     {
         protected EyeTracker eyeTracker;
 
@@ -534,87 +534,5 @@ namespace OpenIris
                     throw new NotImplementedException($"Unknown command '{command}'.");
             }
         }
-
-        public System.IO.Stream GetWebsite()
-        {
-            // https://blog.differentpla.net/blog/2010/06/20/returning-html-from-a-wcf-service/
-
-            string result =
-                @"<!DOCTYPE html>" +
-                @"<html> " +
-                @"<body> " +
-
-                @"<h1> Open Iris server</h1>" +
-
-
-                @"<form action = ""/"" method=""get"">" +
-                @"<p> <button formaction=""StartRecording"" formtarget=""framename"">Start recording</button></p>" +
-                @"<p> <button formaction=""StopRecording"" formtarget=""framename"">Stop recording</button></p>" +
-                @"<p> <button formaction=""GetFileWeb"" formtarget=""framename"">Get last File</button></p>" +
-                @"<iframe name = ""framename"" />" +
-                @"</form>" +
-
-                @"</body> " +
-                @"</html> ";
-
-
-            byte[] resultBytes = Encoding.UTF8.GetBytes(result);
-            // See http://blogs.msdn.com/b/justinjsmith/archive/2007/08/22/setting-http-headers-in-wcf-net-3-5.aspx
-            if (WebOperationContext.Current != null)
-                WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-            return new MemoryStream(resultBytes);
-        }
-
-        public System.IO.Stream GetFileWeb()
-        {
-            if (eyeTracker is null) throw new InvalidOperationException("Eye tracker is null.");
-
-            var request = new DownloadRequest();
-            try
-            {
-                Trace.WriteLine("Request to download last file");
-                var fileName = eyeTracker.Settings.LastRecordedFile;
-
-                Task.Run(async () =>
-                {
-                    while (eyeTracker.Recording)
-                    {
-                        Trace.WriteLine("Remote download file waiting for recording to finish.");
-                        await Task.Delay(1000);
-                    }
-                }).Wait();
-
-                FileInfo fileInfo = new FileInfo(fileName);
-
-                Stream stream;
-
-                // check if exists
-                if (fileInfo.Exists)
-                {
-                    // open stream
-                    stream = new FileStream(
-                        fileInfo.FullName,
-                        FileMode.Open,
-                        FileAccess.Read);
-                }
-                else
-                {
-                    stream = FileStream.Null;
-                }
-
-                if (WebOperationContext.Current != null)
-                    WebOperationContext.Current.OutgoingResponse.ContentType = "application/csv";
-
-                return stream;
-
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("ERROR with file download request: " + ex);
-            }
-
-            return FileStream.Null;
-        }
-
     }
 }

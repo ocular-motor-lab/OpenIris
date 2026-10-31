@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SubjectiveLabelingForm.cs">
+// <copyright file="ManualLabelingForm.cs">
 //     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
@@ -20,15 +20,15 @@ namespace OpenIris
     /// Window to label the videos: the images of both eyes, the markers, and the controls to move
     /// through the frames. Click places the selected marker, right click removes the closest one.
     /// </summary>
-    internal sealed class SubjectiveLabelingForm : Form
+    internal sealed class ManualLabelingForm : Form
     {
         private static readonly Color[] Colors =
         {
             Color.Lime, Color.Cyan, Color.Magenta, Color.Yellow, Color.OrangeRed, Color.DeepSkyBlue, Color.White, Color.Orange, Color.SpringGreen,
         };
 
-        private readonly EyeTrackingSystemSubjective system;
-        private readonly SubjectiveLabels labels;
+        private readonly EyeTrackingSystemManualLabeling system;
+        private readonly ManualLabels labels;
         private readonly EyeView leftView;
         private readonly EyeView rightView;
         private readonly DataGridView markersGrid;
@@ -49,12 +49,12 @@ namespace OpenIris
         private bool hasImage;
         private bool updatingGrid;
 
-        public SubjectiveLabelingForm(EyeTrackingSystemSubjective system, SubjectiveLabels labels)
+        public ManualLabelingForm(EyeTrackingSystemManualLabeling system, ManualLabels labels)
         {
             this.system = system;
             this.labels = labels;
 
-            Text = "Subjective labeling - " + System.IO.Path.GetFileName(labels.FileName);
+            Text = "Manual labeling - " + System.IO.Path.GetFileName(labels.FileName);
             Size = new Size(1300, 700);
             KeyPreview = true;
             StartPosition = FormStartPosition.CenterScreen;
@@ -107,7 +107,7 @@ namespace OpenIris
             foreach (var name in new[] { "Left eye", "Right eye" })
             {
                 var column = new DataGridViewComboBoxColumn { Name = name, HeaderText = name + " goes to", FillWeight = 30, FlatStyle = FlatStyle.Flat };
-                column.Items.AddRange(Enum.GetNames(typeof(SubjectiveMarkerTarget)));
+                column.Items.AddRange(Enum.GetNames(typeof(ManualLabelingMarkerTarget)));
                 markersGrid.Columns.Add(column);
             }
             markersGrid.CellValueChanged += (_, __) => SaveMarkers();
@@ -260,7 +260,7 @@ namespace OpenIris
         {
             updatingGrid = true;
             markersGrid.Rows.Clear();
-            foreach (var marker in system.SubjectiveSettings.Markers ?? new SubjectiveMarker[0])
+            foreach (var marker in system.LabelingSettings.Markers ?? new ManualLabelingMarker[0])
             {
                 markersGrid.Rows.Add(marker.Name, marker.LeftEye.ToString(), marker.RightEye.ToString());
             }
@@ -270,9 +270,9 @@ namespace OpenIris
         private void SaveMarkers()
         {
             if (updatingGrid) return;
-            system.SubjectiveSettings.Markers = markersGrid.Rows.Cast<DataGridViewRow>()
+            system.LabelingSettings.Markers = markersGrid.Rows.Cast<DataGridViewRow>()
                 .Where(r => !r.IsNewRow && !string.IsNullOrWhiteSpace(r.Cells[0].Value as string))
-                .Select(r => new SubjectiveMarker
+                .Select(r => new ManualLabelingMarker
                 {
                     Name = ((string)r.Cells[0].Value).Trim(),
                     LeftEye = ParseTarget(r.Cells[1].Value),
@@ -283,15 +283,15 @@ namespace OpenIris
             rightView.Invalidate();
         }
 
-        private static SubjectiveMarkerTarget ParseTarget(object? value) =>
-            Enum.TryParse<SubjectiveMarkerTarget>(value as string, out var target) ? target : SubjectiveMarkerTarget.None;
+        private static ManualLabelingMarkerTarget ParseTarget(object? value) =>
+            Enum.TryParse<ManualLabelingMarkerTarget>(value as string, out var target) ? target : ManualLabelingMarkerTarget.None;
 
         private string? SelectedMarker =>
             markersGrid.CurrentRow is DataGridViewRow row && !row.IsNewRow ? (row.Cells[0].Value as string)?.Trim() : null;
 
         private Color ColorOf(string marker)
         {
-            var names = (system.SubjectiveSettings.Markers ?? new SubjectiveMarker[0]).Select(m => m.Name).ToList();
+            var names = (system.LabelingSettings.Markers ?? new ManualLabelingMarker[0]).Select(m => m.Name).ToList();
             var index = names.IndexOf(marker);
             return index < 0 ? Color.Gray : Colors[index % Colors.Length];
         }
@@ -311,11 +311,11 @@ namespace OpenIris
             var marker = SelectedMarker;
             if (string.IsNullOrEmpty(marker))
             {
-                MessageBox.Show(this, "Select a marker first, or add one in the list.", "Subjective labeling");
+                MessageBox.Show(this, "Select a marker first, or add one in the list.", "Manual labeling");
                 return;
             }
 
-            labels.Set(new SubjectiveLabel(shownFrame, eye, marker!, location));
+            labels.Set(new ManualLabel(shownFrame, eye, marker!, location));
             if (advanceBox.Checked) Step(1);
         }
 
@@ -355,7 +355,7 @@ namespace OpenIris
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("ERROR saving the subjective labels: " + ex.Message);
+                Trace.WriteLine("ERROR saving the labels: " + ex.Message);
             }
         }
 
@@ -378,10 +378,10 @@ namespace OpenIris
         private sealed class EyeView : Panel
         {
             private readonly Eye eye;
-            private readonly SubjectiveLabelingForm form;
+            private readonly ManualLabelingForm form;
             private Bitmap? image;
 
-            public EyeView(Eye eye, SubjectiveLabelingForm form)
+            public EyeView(Eye eye, ManualLabelingForm form)
             {
                 this.eye = eye;
                 this.form = form;

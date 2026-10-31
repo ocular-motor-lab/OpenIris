@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SubjectiveTests.cs">
+// <copyright file="ManualLabelingTests.cs">
 //     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
@@ -15,11 +15,11 @@ namespace OpenIris.Tests
     using OpenIris.ImageGrabbing;
 
     /// <summary>
-    /// The Subjective system (BasicPlugins) puts the labels a person made into the data: processing
+    /// The Manual Labeling system (BasicPlugins) puts the labels a person made into the data: processing
     /// videos that have a labels file must write each marker where its settings say.
     /// </summary>
     [TestClass]
-    public class SubjectiveTests
+    public class ManualLabelingTests
     {
         [TestMethod]
         [Timeout(300000)]
@@ -47,7 +47,7 @@ namespace OpenIris.Tests
             var eyeTracker = EyeTracker.Create();
             try
             {
-                eyeTracker.Settings.EyeTrackerSystem = "Subjective";
+                eyeTracker.Settings.EyeTrackerSystem = "Manual Labeling";
                 eyeTracker.Settings.EyeTrackingPipeline = "Nothing";
                 eyeTracker.Settings.DataFolder = folder;
                 SetMarkers(eyeTracker.Settings.EyeTrackingSystemSettings,
@@ -58,7 +58,7 @@ namespace OpenIris.Tests
                 var processing = eyeTracker.ProcessVideo(new ProcessVideoOptions
                 {
                     VideoFileNames = new EyeCollection<string?>(left, right),
-                    EyeTrackingSystem = "Subjective",
+                    EyeTrackingSystem = "Manual Labeling",
                     CustomRange = new Range(0, 20),
                 });
                 Assert.AreSame(processing, await Task.WhenAny(processing, Task.Delay(TimeSpan.FromSeconds(120))), "Processing took too long.");
@@ -105,15 +105,15 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
-        /// Sets the markers of the Subjective settings: (name, left eye target, right eye target).
+        /// Sets the markers of the Manual Labeling settings: (name, left eye target, right eye target).
         /// Through reflection: OpenIris loads BasicPlugins from the Plugins folder, so the test can't
         /// use its types directly (they would be a second copy that doesn't match).
         /// </summary>
         private static void SetMarkers(object settings, params (string name, string left, string right)[] markers)
         {
             var plugin = settings.GetType().Assembly;
-            var markerType = plugin.GetType("OpenIris.SubjectiveMarker", true);
-            var targetType = plugin.GetType("OpenIris.SubjectiveMarkerTarget", true);
+            var markerType = plugin.GetType("OpenIris.ManualLabelingMarker", true);
+            var targetType = plugin.GetType("OpenIris.ManualLabelingMarkerTarget", true);
 
             var array = Array.CreateInstance(markerType, markers.Length);
             for (int i = 0; i < markers.Length; i++)

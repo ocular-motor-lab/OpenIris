@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="SubjectiveLabels.cs">
+// <copyright file="ManualLabels.cs">
 //     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
@@ -19,9 +19,9 @@ namespace OpenIris
     /// <summary>
     /// One label: a marker placed on one eye in one frame, in pixels of the eye image.
     /// </summary>
-    internal readonly struct SubjectiveLabel
+    internal readonly struct ManualLabel
     {
-        public SubjectiveLabel(ulong frameNumber, Eye eye, string marker, PointF location)
+        public ManualLabel(ulong frameNumber, Eye eye, string marker, PointF location)
         {
             FrameNumber = frameNumber;
             Eye = eye;
@@ -40,13 +40,13 @@ namespace OpenIris
     /// at most once per eye and frame. Used from the UI thread (labeling window) and the processing
     /// thread (PostProcessImagesAndData), so every access locks.
     /// </summary>
-    internal sealed class SubjectiveLabels
+    internal sealed class ManualLabels
     {
         private readonly object sync = new object();
-        private readonly Dictionary<(ulong frame, Eye eye), List<SubjectiveLabel>> labels = new Dictionary<(ulong, Eye), List<SubjectiveLabel>>();
+        private readonly Dictionary<(ulong frame, Eye eye), List<ManualLabel>> labels = new Dictionary<(ulong, Eye), List<ManualLabel>>();
         private bool changed;
 
-        private SubjectiveLabels(string fileName)
+        private ManualLabels(string fileName)
         {
             FileName = fileName;
         }
@@ -70,9 +70,9 @@ namespace OpenIris
         /// <summary>
         /// Loads the labels of a video, or starts empty if it has none yet.
         /// </summary>
-        public static SubjectiveLabels LoadForVideo(string videoFile)
+        public static ManualLabels LoadForVideo(string videoFile)
         {
-            var result = new SubjectiveLabels(FileNameForVideo(videoFile));
+            var result = new ManualLabels(FileNameForVideo(videoFile));
             if (!File.Exists(result.FileName)) return result;
 
             foreach (var line in File.ReadLines(result.FileName).Skip(1))
@@ -86,7 +86,7 @@ namespace OpenIris
                     && float.TryParse(parts[parts.Length - 2], NumberStyles.Float, CultureInfo.InvariantCulture, out var x)
                     && float.TryParse(parts[parts.Length - 1], NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
                 {
-                    result.SetWithoutEvent(new SubjectiveLabel(frame, eye, marker, new PointF(x, y)));
+                    result.SetWithoutEvent(new ManualLabel(frame, eye, marker, new PointF(x, y)));
                 }
             }
             return result;
@@ -95,30 +95,30 @@ namespace OpenIris
         /// <summary>
         /// Labels of one eye in one frame.
         /// </summary>
-        public SubjectiveLabel[] Get(ulong frameNumber, Eye eye)
+        public ManualLabel[] Get(ulong frameNumber, Eye eye)
         {
             lock (sync)
             {
-                return labels.TryGetValue((frameNumber, eye), out var list) ? list.ToArray() : new SubjectiveLabel[0];
+                return labels.TryGetValue((frameNumber, eye), out var list) ? list.ToArray() : new ManualLabel[0];
             }
         }
 
         /// <summary>
         /// Places a marker, replacing the same marker on that eye and frame.
         /// </summary>
-        public void Set(SubjectiveLabel label)
+        public void Set(ManualLabel label)
         {
             SetWithoutEvent(label);
             OnChanged();
         }
 
-        private void SetWithoutEvent(SubjectiveLabel label)
+        private void SetWithoutEvent(ManualLabel label)
         {
             lock (sync)
             {
                 if (!labels.TryGetValue((label.FrameNumber, label.Eye), out var list))
                 {
-                    labels[(label.FrameNumber, label.Eye)] = list = new List<SubjectiveLabel>();
+                    labels[(label.FrameNumber, label.Eye)] = list = new List<ManualLabel>();
                 }
                 list.RemoveAll(l => l.Marker == label.Marker);
                 list.Add(label);

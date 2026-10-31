@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------
-// <copyright file="EyeTrackingSystemSubjective.cs">
+// <copyright file="EyeTrackingSystemManualLabeling.cs">
 //     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
@@ -19,7 +19,7 @@ namespace OpenIris
     using OpenIris.ImageGrabbing;
 
     /// <summary>
-    /// Subjective eye tracking: a person labels the videos by clicking on the eye images. It replaces
+    /// Manual labeling: a person labels the videos by clicking on the eye images. It replaces
     /// the old SubjectiveTracker program.
     ///
     /// Play the videos with this system and a window opens to step through the frames and place the
@@ -33,26 +33,26 @@ namespace OpenIris
     /// for every frame, also again and again for the same frame while the video is paused. So a new
     /// label shows up in the data right away.
     /// </summary>
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Subjective", typeof(EyeTrackingSystemSettingsSubjective))]
-    public sealed class EyeTrackingSystemSubjective : EyeTrackingSystemBase
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Manual Labeling", typeof(EyeTrackingSystemSettingsManualLabeling))]
+    public sealed class EyeTrackingSystemManualLabeling : EyeTrackingSystemBase
     {
-        private SubjectiveLabels? labels;
-        private SubjectiveLabelingForm? form;
+        private ManualLabels? labels;
+        private ManualLabelingForm? form;
         private bool pausedAtStart;
 
         /// <summary>
         /// Markers of the labels: the ones in the saved settings of this system (the settings this
         /// system gets for videos are the defaults).
         /// </summary>
-        internal EyeTrackingSystemSettingsSubjective SubjectiveSettings =>
-            (EyeTracker.Create().Settings.AllEyeTrackerSystemSettings.TryGetValue("Subjective", out var saved) ? saved : Settings)
-                as EyeTrackingSystemSettingsSubjective ?? new EyeTrackingSystemSettingsSubjective();
+        internal EyeTrackingSystemSettingsManualLabeling LabelingSettings =>
+            (EyeTracker.Create().Settings.AllEyeTrackerSystemSettings.TryGetValue("Manual Labeling", out var saved) ? saved : Settings)
+                as EyeTrackingSystemSettingsManualLabeling ?? new EyeTrackingSystemSettingsManualLabeling();
 
         /// <summary>
         /// Only videos: there is nothing to label live.
         /// </summary>
         protected override EyeCollection<CameraEye?>? CreateAndStartCameras() =>
-            throw new OpenIrisException("The Subjective system labels videos: use Play video, not Start tracking.");
+            throw new OpenIrisException("The Manual Labeling system labels videos: use Play video, not Start tracking.");
 
         /// <summary>
         /// Opens the videos, loads their labels and, unless the videos are being processed, opens the
@@ -63,11 +63,11 @@ namespace OpenIris
             var videos = base.CreateVideos(fileNames);
 
             var firstVideo = fileNames.FirstOrDefault(f => !string.IsNullOrEmpty(f)) ?? throw new ArgumentException("No video.");
-            labels = SubjectiveLabels.LoadForVideo(firstVideo);
+            labels = ManualLabels.LoadForVideo(firstVideo);
 
             if (!EyeTracker.Create().PostProcessing)
             {
-                form = new SubjectiveLabelingForm(this, labels);
+                form = new ManualLabelingForm(this, labels);
                 form.Show();
             }
 
@@ -91,8 +91,8 @@ namespace OpenIris
                 player.Scroll((ulong)player.FrameRange.Begin);
             }
 
-            var markers = new Dictionary<string, SubjectiveMarker>();
-            foreach (var m in SubjectiveSettings.Markers ?? new SubjectiveMarker[0]) markers[m.Name ?? ""] = m;
+            var markers = new Dictionary<string, ManualLabelingMarker>();
+            foreach (var m in LabelingSettings.Markers ?? new ManualLabelingMarker[0]) markers[m.Name ?? ""] = m;
             var data = processedImages.Data;
             var eyeDataRaw = data.EyeDataRaw ?? new EyeCollection<EyeData?>(null, null);
             var extra = data.ExtraData;
@@ -108,9 +108,9 @@ namespace OpenIris
                     if (!markers.TryGetValue(label.Marker, out var marker)) continue;
 
                     var target = eye == Eye.Left ? marker.LeftEye : marker.RightEye;
-                    if (target == SubjectiveMarkerTarget.None) continue;
+                    if (target == ManualLabelingMarkerTarget.None) continue;
 
-                    if (target <= SubjectiveMarkerTarget.CR4)
+                    if (target <= ManualLabelingMarkerTarget.CR4)
                     {
                         eyeDataRaw[eye] = SetEyeData(eyeDataRaw[eye], image, target, label.Location);
                         changedEyeData = true;
@@ -138,7 +138,7 @@ namespace OpenIris
         /// Copy of the eye data of the pipeline (or new eye data, with the pipeline Nothing) with the
         /// pupil or a corneal reflection at the label.
         /// </summary>
-        private static EyeData SetEyeData(EyeData? pipelineData, ImageEye image, SubjectiveMarkerTarget target, PointF location)
+        private static EyeData SetEyeData(EyeData? pipelineData, ImageEye image, ManualLabelingMarkerTarget target, PointF location)
         {
             var data = pipelineData?.Copy() ?? new EyeData
             {
@@ -148,7 +148,7 @@ namespace OpenIris
             };
             data.ProcessFrameResult = ProcessFrameResult.Good;
 
-            if (target == SubjectiveMarkerTarget.Pupil)
+            if (target == ManualLabelingMarkerTarget.Pupil)
             {
                 // A click gives the center only. Keep the size the pipeline found, if any.
                 var size = pipelineData is null || pipelineData.Pupil.IsEmpty ? new SizeF(float.NaN, float.NaN) : pipelineData.Pupil.Size;
@@ -156,7 +156,7 @@ namespace OpenIris
             }
             else
             {
-                var index = target - SubjectiveMarkerTarget.CR1;
+                var index = target - ManualLabelingMarkerTarget.CR1;
                 var crs = (data.CornealReflections ?? new CornealReflectionData[0]).ToList();
                 while (crs.Count <= index) crs.Add(new CornealReflectionData());
                 crs[index] = new CornealReflectionData(location, new SizeF(1, 1), 0);
@@ -166,18 +166,18 @@ namespace OpenIris
             return data;
         }
 
-        private static ExtraData SetExtraData(ExtraData extra, SubjectiveMarkerTarget target, PointF location)
+        private static ExtraData SetExtraData(ExtraData extra, ManualLabelingMarkerTarget target, PointF location)
         {
             switch (target)
             {
-                case SubjectiveMarkerTarget.Double0and1: extra.Double0 = location.X; extra.Double1 = location.Y; break;
-                case SubjectiveMarkerTarget.Double2and3: extra.Double2 = location.X; extra.Double3 = location.Y; break;
-                case SubjectiveMarkerTarget.Double4and5: extra.Double4 = location.X; extra.Double5 = location.Y; break;
-                case SubjectiveMarkerTarget.Double6and7: extra.Double6 = location.X; extra.Double7 = location.Y; break;
-                case SubjectiveMarkerTarget.Int0and1: extra.Int0 = (int)Math.Round(location.X); extra.Int1 = (int)Math.Round(location.Y); break;
-                case SubjectiveMarkerTarget.Int2and3: extra.Int2 = (int)Math.Round(location.X); extra.Int3 = (int)Math.Round(location.Y); break;
-                case SubjectiveMarkerTarget.Int4and5: extra.Int4 = (int)Math.Round(location.X); extra.Int5 = (int)Math.Round(location.Y); break;
-                case SubjectiveMarkerTarget.Int6and7: extra.Int6 = (int)Math.Round(location.X); extra.Int7 = (int)Math.Round(location.Y); break;
+                case ManualLabelingMarkerTarget.Double0and1: extra.Double0 = location.X; extra.Double1 = location.Y; break;
+                case ManualLabelingMarkerTarget.Double2and3: extra.Double2 = location.X; extra.Double3 = location.Y; break;
+                case ManualLabelingMarkerTarget.Double4and5: extra.Double4 = location.X; extra.Double5 = location.Y; break;
+                case ManualLabelingMarkerTarget.Double6and7: extra.Double6 = location.X; extra.Double7 = location.Y; break;
+                case ManualLabelingMarkerTarget.Int0and1: extra.Int0 = (int)Math.Round(location.X); extra.Int1 = (int)Math.Round(location.Y); break;
+                case ManualLabelingMarkerTarget.Int2and3: extra.Int2 = (int)Math.Round(location.X); extra.Int3 = (int)Math.Round(location.Y); break;
+                case ManualLabelingMarkerTarget.Int4and5: extra.Int4 = (int)Math.Round(location.X); extra.Int5 = (int)Math.Round(location.Y); break;
+                case ManualLabelingMarkerTarget.Int6and7: extra.Int6 = (int)Math.Round(location.X); extra.Int7 = (int)Math.Round(location.Y); break;
             }
             return extra;
         }
@@ -193,7 +193,7 @@ namespace OpenIris
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("ERROR saving the subjective labels: " + ex.Message);
+                Trace.WriteLine("ERROR saving the labels: " + ex.Message);
             }
 
             var closingForm = form;
@@ -211,7 +211,7 @@ namespace OpenIris
     /// <summary>
     /// Where a marker goes in the data.
     /// </summary>
-    public enum SubjectiveMarkerTarget
+    public enum ManualLabelingMarkerTarget
     {
         /// <summary>Only in the labels file.</summary>
         None,
@@ -247,7 +247,7 @@ namespace OpenIris
     /// A kind of label, with its name and where it goes in the data for each eye.
     /// </summary>
     [Serializable]
-    public class SubjectiveMarker
+    public class ManualLabelingMarker
     {
         /// <summary>Name of the marker, as in the labels file.</summary>
         [Description("Name of the marker, as in the labels file.")]
@@ -255,32 +255,32 @@ namespace OpenIris
 
         /// <summary>Where the marker goes in the data when placed on the left eye.</summary>
         [Description("Where the marker goes in the data when placed on the left eye.")]
-        public SubjectiveMarkerTarget LeftEye { get; set; } = SubjectiveMarkerTarget.None;
+        public ManualLabelingMarkerTarget LeftEye { get; set; } = ManualLabelingMarkerTarget.None;
 
         /// <summary>Where the marker goes in the data when placed on the right eye.</summary>
         [Description("Where the marker goes in the data when placed on the right eye.")]
-        public SubjectiveMarkerTarget RightEye { get; set; } = SubjectiveMarkerTarget.None;
+        public ManualLabelingMarkerTarget RightEye { get; set; } = ManualLabelingMarkerTarget.None;
 
         /// <inheritdoc/>
         public override string ToString() => Name;
     }
 
     /// <summary>
-    /// Settings of the Subjective system.
+    /// Settings of the Manual Labeling system.
     /// </summary>
     [Serializable]
-    public class EyeTrackingSystemSettingsSubjective : EyeTrackingSystemSettings
+    public class EyeTrackingSystemSettingsManualLabeling : EyeTrackingSystemSettings
     {
         /// <summary>
         /// The markers. They can also be edited in the labeling window. An array, not a list: when
         /// loading the settings, the XML serializer would add the saved markers to the default ones.
         /// </summary>
-        [Category("Subjective"), Description("The markers to place, and where each goes in the data. They can also be edited in the labeling window.")]
-        public SubjectiveMarker[] Markers { get => markers; set => SetProperty(ref markers, value, nameof(Markers)); }
-        private SubjectiveMarker[] markers =
+        [Category("Manual labeling"), Description("The markers to place, and where each goes in the data. They can also be edited in the labeling window.")]
+        public ManualLabelingMarker[] Markers { get => markers; set => SetProperty(ref markers, value, nameof(Markers)); }
+        private ManualLabelingMarker[] markers =
         {
-            new SubjectiveMarker { Name = "Pupil", LeftEye = SubjectiveMarkerTarget.Pupil, RightEye = SubjectiveMarkerTarget.Pupil },
-            new SubjectiveMarker { Name = "CR", LeftEye = SubjectiveMarkerTarget.CR1, RightEye = SubjectiveMarkerTarget.CR1 },
+            new ManualLabelingMarker { Name = "Pupil", LeftEye = ManualLabelingMarkerTarget.Pupil, RightEye = ManualLabelingMarkerTarget.Pupil },
+            new ManualLabelingMarker { Name = "CR", LeftEye = ManualLabelingMarkerTarget.CR1, RightEye = ManualLabelingMarkerTarget.CR1 },
         };
     }
 }

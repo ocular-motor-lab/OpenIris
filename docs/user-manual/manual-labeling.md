@@ -1,6 +1,6 @@
 # Labeling videos by hand
 
-The **Subjective** eye tracking system lets a person label recorded videos frame by frame: click on
+The **Manual Labeling** eye tracking system lets a person label recorded videos frame by frame: click on
 the eye images to mark the pupil, a reflection, or anything else. The labels go into the data file
 like tracking data, so they can be analyzed the same way, or compared with what a tracking pipeline
 found. It replaces the old separate SubjectiveTracker program.
@@ -9,7 +9,7 @@ found. It replaces the old separate SubjectiveTracker program.
 
 1. In **Configuration**, choose the tracking pipeline. **Nothing** gives data with only the labels;
    a real pipeline (for example **JOM**) tracks as usual and the labels are added to its data.
-2. **Play video**, choose the left and right videos, and **Subjective** as the eye tracking system.
+2. **Play video**, choose the left and right videos, and **Manual Labeling** as the eye tracking system.
 3. The labeling window opens, paused at the first frame.
 
 | To | Do |
@@ -45,10 +45,10 @@ right eye gives `Double0` to `Double3` with its position on each eye. Frames wit
 what the pipeline found (zero with **Nothing**). The calibrated columns are computed again from the
 labeled pupil.
 
-The markers are saved in the settings of the Subjective system, so they stay the same from video to
+The markers are saved in the settings of the Manual Labeling system, so they stay the same from video to
 video. They can be edited in the labeling window or in **Configuration**.
 
 ## Writing the data file
 
-**Process video** with **Subjective** as the system writes the data file with the labels of every
+**Process video** with **Manual Labeling** as the system writes the data file with the labels of every
 frame, as for any other system (see [Playing and processing videos](processing-videos.md)).

@@ -163,7 +163,7 @@ end
 
 ### MATLAB class for TCP
 
-`OpenIrisTCP.m` (in `source\EyeTrackerRemoteClient`) wraps the commands over TCP, including waiting
+`OpenIrisTCP.m` (in the [`matlab`](https://github.com/ocular-motor-lab/OpenIris/tree/main/matlab) folder of the repository) wraps the commands over TCP, including waiting
 for complete replies:
 
 ```matlab
@@ -293,7 +293,7 @@ frames since the last message: `{"type": "data", "rows": [[...], [...]]}`.
 
 ### MATLAB
 
-`OpenIrisMatlabClient.m` (in `source\EyeTrackerRemoteClient`) uses the web API. It needs no DLL
+`OpenIrisMatlabClient.m` (in the [`matlab`](https://github.com/ocular-motor-lab/OpenIris/tree/main/matlab) folder) uses the web API. It needs no DLL
 and works on any system (MATLAB R2016b or later):
 
 ```matlab

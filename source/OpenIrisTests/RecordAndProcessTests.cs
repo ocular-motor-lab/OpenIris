@@ -28,7 +28,7 @@ namespace OpenIris.Tests
         [Timeout(300000)]
         public async Task RecordedVideoCanBeProcessedAndSaved()
         {
-            // EyeTracker loads and saves EyeTrackerSettings.xml in the current folder. Use a new
+            // EyeTracker loads and saves OpenIrisSettings.xml in the current folder. Use a new
             // temporary folder so the test starts from the default settings and never touches the
             // user's settings. The recordings go there too. It is kept if the test fails.
             var folder = Path.Combine(Path.GetTempPath(), "OpenIrisTests-" + Guid.NewGuid().ToString("N"));

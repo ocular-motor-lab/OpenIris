@@ -82,5 +82,33 @@ namespace OpenIris.Tests
                 File.Delete(path);
             }
         }
+
+        [TestMethod]
+        public void SettingsOfOlderVersionsAreReadAndSavedWithTheNewName()
+        {
+            PipelineHarness.EnsurePluginsLoaded();
+            var folder = Path.Combine(Path.GetTempPath(), "OpenIrisSettingsTest-" + System.Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(folder);
+            var previousFolder = Directory.GetCurrentDirectory();
+
+            try
+            {
+                new EyeTrackerSettings { SessionName = "FromOldFile" }.Save(Path.Combine(folder, "EyeTrackerSettings.xml"));
+                Directory.SetCurrentDirectory(folder);
+
+                var settings = EyeTrackerSettings.Load();
+                settings.Save();
+
+                Assert.AreEqual("FromOldFile", settings.SessionName);
+                Assert.IsTrue(File.Exists(Path.Combine(folder, EyeTrackerSettings.FileName)), "Saved with the new name.");
+                Assert.IsTrue(File.Exists(Path.Combine(folder, "EyeTrackerSettings.xml")), "The old file stays, for the older version.");
+                Assert.AreEqual("FromOldFile", EyeTrackerSettings.Load().SessionName, "Read back from the new file.");
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(previousFolder);
+                Directory.Delete(folder, true);
+            }
+        }
     }
 }

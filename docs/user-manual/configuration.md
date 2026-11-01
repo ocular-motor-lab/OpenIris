@@ -10,7 +10,9 @@ Open the configuration window with **File > Configuration…**. It has four colu
 ![The configuration window](../images/user-manual/configuration-window.png)
 
 Click a setting to see its description at the bottom of the column. Settings are saved automatically
-in `EyeTrackerSettings.xml`, in the OpenIris folder, and kept for the next session.
+in `OpenIrisSettings.xml`, in the OpenIris folder, and kept for the next session. (Versions up to
+0.2.0-alpha.1 used `EyeTrackerSettings.xml`; OpenIris reads it if there is no `OpenIrisSettings.xml`
+yet.)
 
 Some settings can only change while not tracking, for example the camera frame rate. Changing one of
 them while tracking stops the tracking; start it again to apply the change.

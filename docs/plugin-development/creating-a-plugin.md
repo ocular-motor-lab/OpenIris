@@ -127,7 +127,7 @@ change it once people use the plugin.
 ## Settings
 
 Each plugin has a settings class, given in its attribute. OpenIris shows its public properties in the
-configuration window and saves them in `EyeTrackerSettings.xml`. Inherit from the settings class of
+configuration window and saves them in `OpenIrisSettings.xml`. Inherit from the settings class of
 that kind of plugin (`EyeTrackingSystemSettings`, `EyeTrackingPipelineSettings` or
 `CalibrationSettings`) and write every property following this pattern:
 

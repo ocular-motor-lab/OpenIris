@@ -318,11 +318,34 @@ namespace OpenIris
 
 
         /// <summary>
-        /// Tries to load the settings from disk. If not possible loads the default settings
+        /// Name of the settings file, in the folder OpenIris starts in.
+        /// </summary>
+        public const string FileName = "OpenIrisSettings.xml";
+
+        /// <summary>
+        /// Name of the settings file of OpenIris 0.2.0-alpha.1 and earlier.
+        /// </summary>
+        private const string OldFileName = "EyeTrackerSettings.xml";
+
+        /// <summary>
+        /// Tries to load the settings from disk. If not possible loads the default settings.
         /// </summary>
         public static EyeTrackerSettings Load()
         {
-            return Load(Path.Combine(Directory.GetCurrentDirectory(), "EyeTrackerSettings.xml"));
+            var fileName = Path.Combine(Directory.GetCurrentDirectory(), FileName);
+            var oldFileName = Path.Combine(Directory.GetCurrentDirectory(), OldFileName);
+
+            // Settings of an older version: read them, and save them with the new name. The old file
+            // stays, for the older version.
+            if (!File.Exists(fileName) && File.Exists(oldFileName))
+            {
+                System.Diagnostics.Trace.WriteLine($"Reading the settings from {OldFileName}. They will be saved to {FileName}.");
+                var settings = Load(oldFileName);
+                settings.settingsPath = fileName;
+                return settings;
+            }
+
+            return Load(fileName);
         }
 
         /// <summary>

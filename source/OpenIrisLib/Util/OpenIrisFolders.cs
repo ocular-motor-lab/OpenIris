@@ -14,7 +14,7 @@ namespace OpenIris
     /// <summary>
     /// The folders of an OpenIris installation:
     /// <code>
-    /// OpenIris.exe, OpenIris.exe.config, EyeTrackerSettings.xml
+    /// OpenIris.exe, OpenIris.exe.config, OpenIrisSettings.xml
     /// lib\           the libraries (OpenIrisLib.dll, EmguCV...), found through probing in OpenIris.exe.config
     /// Plugins\       the plugins
     /// Logs\          the log files

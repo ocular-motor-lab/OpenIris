@@ -9,7 +9,9 @@ namespace OpenIris
 #nullable enable
 
     using System;
+    using System.Drawing;
     using System.Linq;
+    using System.Text;
 
     /// <summary>
     /// Class containing all the data related to one frame. No images.
@@ -87,116 +89,122 @@ namespace OpenIris
         /// <returns>The string with all the formated data.</returns>
         public string GetStringLine()
         {
-            var data = this;
-
-            var eyelidsLeft = data?.EyeDataRaw?[Eye.Left]?.Eyelids;
-            var eyelidsRight = data?.EyeDataRaw?[Eye.Right]?.Eyelids;
+            var eyelidsLeft = EyeDataRaw?[Eye.Left]?.Eyelids;
+            var eyelidsRight = EyeDataRaw?[Eye.Right]?.Eyelids;
 
             var leftUpperEyelid = (eyelidsLeft is null) ? 0 : eyelidsLeft.Upper[0].Y + eyelidsLeft.Upper[1].Y + eyelidsLeft.Upper[2].Y + eyelidsLeft.Upper[3].Y;
             var leftLowerEyelid = (eyelidsLeft is null) ? 0 : eyelidsLeft.Lower[0].Y + eyelidsLeft.Lower[1].Y + eyelidsLeft.Lower[2].Y + eyelidsLeft.Lower[3].Y;
             var rightUpperEyelid = (eyelidsRight is null) ? 0 : eyelidsRight.Upper[0].Y + eyelidsRight.Upper[1].Y + eyelidsRight.Upper[2].Y + eyelidsRight.Upper[3].Y;
             var rightLowerEyelid = (eyelidsRight is null) ? 0 : eyelidsRight.Lower[0].Y + eyelidsRight.Lower[1].Y + eyelidsRight.Lower[2].Y + eyelidsRight.Lower[3].Y;
 
-            var lcr = data?.EyeDataRaw?[Eye.Left]?.CornealReflections ?? new CornealReflectionData[5];
-            var rcr = data?.EyeDataRaw?[Eye.Right]?.CornealReflections ?? new CornealReflectionData[5];
-            lcr = lcr.Concat(new CornealReflectionData[5 - lcr.Length]).ToArray();
-            rcr = rcr.Concat(new CornealReflectionData[5 - rcr.Length]).ToArray();
+            var lcr = EyeDataRaw?[Eye.Left]?.CornealReflections;
+            var rcr = EyeDataRaw?[Eye.Right]?.CornealReflections;
 
-            var dataLeft = data?.EyeDataRaw?[Eye.Left] ?? new EyeData();
-            var dataRight = data?.EyeDataRaw?[Eye.Right] ?? new EyeData();
+            var dataLeft = EyeDataRaw?[Eye.Left] ?? new EyeData();
+            var dataRight = EyeDataRaw?[Eye.Right] ?? new EyeData();
 
-            var headData = data?.HeadDataRaw ?? new HeadData();
+            var headData = HeadDataRaw ?? new HeadData();
 
-            var extraData = data?.ExtraData ?? new ExtraData();
+            var extraData = ExtraData;
 
-            string line =
-                string.Format("{0}", dataLeft.Timestamp.FrameNumber) + " " +
-                string.Format("{0}", dataLeft.Timestamp.FrameNumberRaw) + " " +
-                string.Format("{0:0.0000}", dataLeft.Timestamp.Seconds) + " " +
-                string.Format("{0:0.0000}", dataLeft.Pupil.Center.X) + " " +
-                string.Format("{0:0.0000}", dataLeft.Pupil.Center.Y) + " " +
-                string.Format("{0:0.0000}", dataLeft.Pupil.Size.Width) + " " +
-                string.Format("{0:0.0000}", dataLeft.Pupil.Size.Height) + " " +
-                string.Format("{0:0.0000}", dataLeft.Pupil.Angle) + " " +
-                string.Format("{0:0.0000}", dataLeft.Iris.Radius) + " " +
-                string.Format("{0:0.0000}", dataLeft.TorsionAngle) + " " +
-                string.Format("{0:0.0000}", leftUpperEyelid) + " " +
-                string.Format("{0:0.0000}", leftLowerEyelid) + " " +
-                string.Format("{0:0.0000}", dataLeft.DataQuality) + " " +
-                string.Format("{0:0.0000}", lcr[0].Center.X) + " " +
-                string.Format("{0:0.0000}", lcr[0].Center.Y) + " " +
-                string.Format("{0:0.0000}", lcr[1].Center.X) + " " +
-                string.Format("{0:0.0000}", lcr[1].Center.Y) + " " +
-                string.Format("{0:0.0000}", lcr[2].Center.X) + " " +
-                string.Format("{0:0.0000}", lcr[2].Center.Y) + " " +
-                string.Format("{0:0.0000}", lcr[3].Center.X) + " " +
-                string.Format("{0:0.0000}", lcr[3].Center.Y) + " " +
-                string.Format("{0:0.0000}", lcr[4].Center.X) + " " +
-                string.Format("{0:0.0000}", lcr[4].Center.Y) + " " +
+            // One StringBuilder for the whole line. Each value is formatted from its own type (float,
+            // double, integer), as always: the text of the columns must not change.
+            var line = new StringBuilder(1024);
 
-                string.Format("{0}", dataRight.Timestamp.FrameNumber) + " " +
-                string.Format("{0}", dataRight.Timestamp.FrameNumberRaw) + " " +
-                string.Format("{0:0.0000}", dataRight.Timestamp.Seconds) + " " +
-                string.Format("{0:0.0000}", dataRight.Pupil.Center.X) + " " +
-                string.Format("{0:0.0000}", dataRight.Pupil.Center.Y) + " " +
-                string.Format("{0:0.0000}", dataRight.Pupil.Size.Width) + " " +
-                string.Format("{0:0.0000}", dataRight.Pupil.Size.Height) + " " +
-                string.Format("{0:0.0000}", dataRight.Pupil.Angle) + " " +
-                string.Format("{0:0.0000}", dataRight.Iris.Radius) + " " +
-                string.Format("{0:0.0000}", dataRight.TorsionAngle) + " " +
-                string.Format("{0:0.0000}", rightUpperEyelid) + " " +
-                string.Format("{0:0.0000}", rightLowerEyelid) + " " +
-                string.Format("{0:0.0000}", dataRight.DataQuality) + " " +
-                string.Format("{0:0.0000}", rcr[0].Center.X) + " " +
-                string.Format("{0:0.0000}", rcr[0].Center.Y) + " " +
-                string.Format("{0:0.0000}", rcr[1].Center.X) + " " +
-                string.Format("{0:0.0000}", rcr[1].Center.Y) + " " +
-                string.Format("{0:0.0000}", rcr[2].Center.X) + " " +
-                string.Format("{0:0.0000}", rcr[2].Center.Y) + " " +
-                string.Format("{0:0.0000}", rcr[3].Center.X) + " " +
-                string.Format("{0:0.0000}", rcr[3].Center.Y) + " " +
-                string.Format("{0:0.0000}", rcr[4].Center.X) + " " +
-                string.Format("{0:0.0000}", rcr[4].Center.Y) + " " +
+            Add(line, dataLeft.Timestamp.FrameNumber);
+            Add(line, dataLeft.Timestamp.FrameNumberRaw);
+            Add(line, dataLeft.Timestamp.Seconds);
+            Add(line, dataLeft.Pupil.Center.X);
+            Add(line, dataLeft.Pupil.Center.Y);
+            Add(line, dataLeft.Pupil.Size.Width);
+            Add(line, dataLeft.Pupil.Size.Height);
+            Add(line, dataLeft.Pupil.Angle);
+            Add(line, dataLeft.Iris.Radius);
+            Add(line, dataLeft.TorsionAngle);
+            Add(line, leftUpperEyelid);
+            Add(line, leftLowerEyelid);
+            Add(line, dataLeft.DataQuality);
+            for (int i = 0; i < 5; i++)
+            {
+                Add(line, CornealReflectionCenter(lcr, i).X);
+                Add(line, CornealReflectionCenter(lcr, i).Y);
+            }
 
-                string.Format("{0:0.0000}", headData.AccelerometerX) + " " +
-                string.Format("{0:0.0000}", headData.AccelerometerY) + " " +
-                string.Format("{0:0.0000}", headData.AccelerometerZ) + " " +
-                string.Format("{0:0.0000}", headData.GyroX) + " " +
-                string.Format("{0:0.0000}", headData.GyroY) + " " +
-                string.Format("{0:0.0000}", headData.GyroZ) + " " +
-                string.Format("{0:0.0000}", headData.MagnetometerX) + " " +
-                string.Format("{0:0.0000}", headData.MagnetometerY) + " " +
-                string.Format("{0:0.0000}", headData.MagnetometerZ) + " " +
+            Add(line, dataRight.Timestamp.FrameNumber);
+            Add(line, dataRight.Timestamp.FrameNumberRaw);
+            Add(line, dataRight.Timestamp.Seconds);
+            Add(line, dataRight.Pupil.Center.X);
+            Add(line, dataRight.Pupil.Center.Y);
+            Add(line, dataRight.Pupil.Size.Width);
+            Add(line, dataRight.Pupil.Size.Height);
+            Add(line, dataRight.Pupil.Angle);
+            Add(line, dataRight.Iris.Radius);
+            Add(line, dataRight.TorsionAngle);
+            Add(line, rightUpperEyelid);
+            Add(line, rightLowerEyelid);
+            Add(line, dataRight.DataQuality);
+            for (int i = 0; i < 5; i++)
+            {
+                Add(line, CornealReflectionCenter(rcr, i).X);
+                Add(line, CornealReflectionCenter(rcr, i).Y);
+            }
 
-                string.Format("{0}", extraData.Int0) + " " +
-                string.Format("{0}", extraData.Int1) + " " +
-                string.Format("{0}", extraData.Int2) + " " +
-                string.Format("{0}", extraData.Int3) + " " +
-                string.Format("{0}", extraData.Int4) + " " +
-                string.Format("{0}", extraData.Int5) + " " +
-                string.Format("{0}", extraData.Int6) + " " +
-                string.Format("{0}", extraData.Int7) + " " +
+            Add(line, headData.AccelerometerX);
+            Add(line, headData.AccelerometerY);
+            Add(line, headData.AccelerometerZ);
+            Add(line, headData.GyroX);
+            Add(line, headData.GyroY);
+            Add(line, headData.GyroZ);
+            Add(line, headData.MagnetometerX);
+            Add(line, headData.MagnetometerY);
+            Add(line, headData.MagnetometerZ);
 
-                string.Format("{0:0.0000}", extraData.Double0) + " " +
-                string.Format("{0:0.0000}", extraData.Double1) + " " +
-                string.Format("{0:0.0000}", extraData.Double2) + " " +
-                string.Format("{0:0.0000}", extraData.Double3) + " " +
-                string.Format("{0:0.0000}", extraData.Double4) + " " +
-                string.Format("{0:0.0000}", extraData.Double5) + " " +
-                string.Format("{0:0.0000}", extraData.Double6) + " " +
-                string.Format("{0:0.0000}", extraData.Double7) + " " +
+            Add(line, extraData.Int0);
+            Add(line, extraData.Int1);
+            Add(line, extraData.Int2);
+            Add(line, extraData.Int3);
+            Add(line, extraData.Int4);
+            Add(line, extraData.Int5);
+            Add(line, extraData.Int6);
+            Add(line, extraData.Int7);
 
-                string.Format("{0:0.0000}", dataLeft.Timestamp.TimeGrabbed) + " " +
-                string.Format("{0:0.0000}", dataRight.Timestamp.TimeGrabbed) + " " +
-                string.Format("{0:0.0000}", data?.TimeProcessed ?? 0.0);
+            Add(line, extraData.Double0);
+            Add(line, extraData.Double1);
+            Add(line, extraData.Double2);
+            Add(line, extraData.Double3);
+            Add(line, extraData.Double4);
+            Add(line, extraData.Double5);
+            Add(line, extraData.Double6);
+            Add(line, extraData.Double7);
+
+            Add(line, dataLeft.Timestamp.TimeGrabbed);
+            Add(line, dataRight.Timestamp.TimeGrabbed);
+            Add(line, TimeProcessed);
 
             foreach (var value in GetCalibratedAndRoiValues())
             {
-                line += " " + string.Format("{0:0.0000}", value);
+                Add(line, value);
             }
 
-            return line;
+            return line.ToString();
         }
+
+        // Write a value of the line, separated by a space from the previous one.
+        private static void Add(StringBuilder line, double value) => Separate(line).Append(value.ToString("0.0000"));
+
+        private static void Add(StringBuilder line, float value) => Separate(line).Append(value.ToString("0.0000"));
+
+        private static void Add(StringBuilder line, ulong value) => Separate(line).Append(value.ToString());
+
+        private static void Add(StringBuilder line, int value) => Separate(line).Append(value.ToString());
+
+        private static StringBuilder Separate(StringBuilder line) => line.Length == 0 ? line : line.Append(' ');
+
+        /// <summary>
+        /// Center of a corneal reflection, or 0, 0 if there are fewer.
+        /// </summary>
+        private static PointF CornealReflectionCenter(CornealReflectionData[]? reflections, int index)
+            => reflections != null && index < reflections.Length ? reflections[index].Center : PointF.Empty;
 
         /// <summary>
         /// Names of the columns added in 0.2: calibrated data and ROI. They go after the original
@@ -255,103 +263,106 @@ namespace OpenIris
         /// <returns>The array of values, one per column of the data file.</returns>
         public double[] GetDataArray()
         {
-            var data = this;
-
-            var eyelidsLeft = data?.EyeDataRaw?[Eye.Left]?.Eyelids;
-            var eyelidsRight = data?.EyeDataRaw?[Eye.Right]?.Eyelids;
+            var eyelidsLeft = EyeDataRaw?[Eye.Left]?.Eyelids;
+            var eyelidsRight = EyeDataRaw?[Eye.Right]?.Eyelids;
 
             var leftUpperEyelid = (eyelidsLeft is null) ? 0 : eyelidsLeft.Upper[0].Y + eyelidsLeft.Upper[1].Y + eyelidsLeft.Upper[2].Y + eyelidsLeft.Upper[3].Y;
             var leftLowerEyelid = (eyelidsLeft is null) ? 0 : eyelidsLeft.Lower[0].Y + eyelidsLeft.Lower[1].Y + eyelidsLeft.Lower[2].Y + eyelidsLeft.Lower[3].Y;
             var rightUpperEyelid = (eyelidsRight is null) ? 0 : eyelidsRight.Upper[0].Y + eyelidsRight.Upper[1].Y + eyelidsRight.Upper[2].Y + eyelidsRight.Upper[3].Y;
             var rightLowerEyelid = (eyelidsRight is null) ? 0 : eyelidsRight.Lower[0].Y + eyelidsRight.Lower[1].Y + eyelidsRight.Lower[2].Y + eyelidsRight.Lower[3].Y;
 
-            var lcr = data?.EyeDataRaw?[Eye.Left]?.CornealReflections ?? new CornealReflectionData[5];
-            var rcr = data?.EyeDataRaw?[Eye.Right]?.CornealReflections ?? new CornealReflectionData[5];
-            lcr = lcr.Concat(new CornealReflectionData[5 - lcr.Length]).ToArray();
-            rcr = rcr.Concat(new CornealReflectionData[5 - rcr.Length]).ToArray();
+            var lcr = EyeDataRaw?[Eye.Left]?.CornealReflections;
+            var rcr = EyeDataRaw?[Eye.Right]?.CornealReflections;
 
-            var dataLeft = data?.EyeDataRaw?[Eye.Left] ?? new EyeData();
-            var dataRight = data?.EyeDataRaw?[Eye.Right] ?? new EyeData();
+            var dataLeft = EyeDataRaw?[Eye.Left] ?? new EyeData();
+            var dataRight = EyeDataRaw?[Eye.Right] ?? new EyeData();
 
-            var headData = data?.HeadDataRaw ?? new HeadData();
+            var headData = HeadDataRaw ?? new HeadData();
 
-            var extraData = data?.ExtraData ?? new ExtraData();
+            var extraData = ExtraData;
 
-            var values = new double[]
+            var calibratedAndRoi = GetCalibratedAndRoiValues();
+            var values = new double[ColumnsUntil0_1 + calibratedAndRoi.Length];
+            int n = 0;
+
+            values[n++] = dataLeft.Timestamp.FrameNumber;
+            values[n++] = dataLeft.Timestamp.FrameNumberRaw;
+            values[n++] = dataLeft.Timestamp.Seconds;
+            values[n++] = dataLeft.Pupil.Center.X;
+            values[n++] = dataLeft.Pupil.Center.Y;
+            values[n++] = dataLeft.Pupil.Size.Width;
+            values[n++] = dataLeft.Pupil.Size.Height;
+            values[n++] = dataLeft.Pupil.Angle;
+            values[n++] = dataLeft.Iris.Radius;
+            values[n++] = dataLeft.TorsionAngle;
+            values[n++] = leftUpperEyelid;
+            values[n++] = leftLowerEyelid;
+            values[n++] = dataLeft.DataQuality;
+            for (int i = 0; i < 5; i++)
             {
-                dataLeft.Timestamp.FrameNumber,
-                dataLeft.Timestamp.FrameNumberRaw,
-                dataLeft.Timestamp.Seconds,
-                dataLeft.Pupil.Center.X,
-                dataLeft.Pupil.Center.Y,
-                dataLeft.Pupil.Size.Width,
-                dataLeft.Pupil.Size.Height,
-                dataLeft.Pupil.Angle,
-                dataLeft.Iris.Radius,
-                dataLeft.TorsionAngle,
-                leftUpperEyelid,
-                leftLowerEyelid,
-                dataLeft.DataQuality,
-                lcr[0].Center.X, lcr[0].Center.Y,
-                lcr[1].Center.X, lcr[1].Center.Y,
-                lcr[2].Center.X, lcr[2].Center.Y,
-                lcr[3].Center.X, lcr[3].Center.Y,
-                lcr[4].Center.X, lcr[4].Center.Y,
+                values[n++] = CornealReflectionCenter(lcr, i).X;
+                values[n++] = CornealReflectionCenter(lcr, i).Y;
+            }
 
-                dataRight.Timestamp.FrameNumber,
-                dataRight.Timestamp.FrameNumberRaw,
-                dataRight.Timestamp.Seconds,
-                dataRight.Pupil.Center.X,
-                dataRight.Pupil.Center.Y,
-                dataRight.Pupil.Size.Width,
-                dataRight.Pupil.Size.Height,
-                dataRight.Pupil.Angle,
-                dataRight.Iris.Radius,
-                dataRight.TorsionAngle,
-                rightUpperEyelid,
-                rightLowerEyelid,
-                dataRight.DataQuality,
-                rcr[0].Center.X, rcr[0].Center.Y,
-                rcr[1].Center.X, rcr[1].Center.Y,
-                rcr[2].Center.X, rcr[2].Center.Y,
-                rcr[3].Center.X, rcr[3].Center.Y,
-                rcr[4].Center.X, rcr[4].Center.Y,
+            values[n++] = dataRight.Timestamp.FrameNumber;
+            values[n++] = dataRight.Timestamp.FrameNumberRaw;
+            values[n++] = dataRight.Timestamp.Seconds;
+            values[n++] = dataRight.Pupil.Center.X;
+            values[n++] = dataRight.Pupil.Center.Y;
+            values[n++] = dataRight.Pupil.Size.Width;
+            values[n++] = dataRight.Pupil.Size.Height;
+            values[n++] = dataRight.Pupil.Angle;
+            values[n++] = dataRight.Iris.Radius;
+            values[n++] = dataRight.TorsionAngle;
+            values[n++] = rightUpperEyelid;
+            values[n++] = rightLowerEyelid;
+            values[n++] = dataRight.DataQuality;
+            for (int i = 0; i < 5; i++)
+            {
+                values[n++] = CornealReflectionCenter(rcr, i).X;
+                values[n++] = CornealReflectionCenter(rcr, i).Y;
+            }
 
-                headData.AccelerometerX,
-                headData.AccelerometerY,
-                headData.AccelerometerZ,
-                headData.GyroX,
-                headData.GyroY,
-                headData.GyroZ,
-                headData.MagnetometerX,
-                headData.MagnetometerY,
-                headData.MagnetometerZ,
+            values[n++] = headData.AccelerometerX;
+            values[n++] = headData.AccelerometerY;
+            values[n++] = headData.AccelerometerZ;
+            values[n++] = headData.GyroX;
+            values[n++] = headData.GyroY;
+            values[n++] = headData.GyroZ;
+            values[n++] = headData.MagnetometerX;
+            values[n++] = headData.MagnetometerY;
+            values[n++] = headData.MagnetometerZ;
 
-                extraData.Int0,
-                extraData.Int1,
-                extraData.Int2,
-                extraData.Int3,
-                extraData.Int4,
-                extraData.Int5,
-                extraData.Int6,
-                extraData.Int7,
+            values[n++] = extraData.Int0;
+            values[n++] = extraData.Int1;
+            values[n++] = extraData.Int2;
+            values[n++] = extraData.Int3;
+            values[n++] = extraData.Int4;
+            values[n++] = extraData.Int5;
+            values[n++] = extraData.Int6;
+            values[n++] = extraData.Int7;
 
-                extraData.Double0,
-                extraData.Double1,
-                extraData.Double2,
-                extraData.Double3,
-                extraData.Double4,
-                extraData.Double5,
-                extraData.Double6,
-                extraData.Double7,
+            values[n++] = extraData.Double0;
+            values[n++] = extraData.Double1;
+            values[n++] = extraData.Double2;
+            values[n++] = extraData.Double3;
+            values[n++] = extraData.Double4;
+            values[n++] = extraData.Double5;
+            values[n++] = extraData.Double6;
+            values[n++] = extraData.Double7;
 
-                dataLeft.Timestamp.TimeGrabbed,
-                dataRight.Timestamp.TimeGrabbed,
-                data?.TimeProcessed ?? 0.0,
-            };
+            values[n++] = dataLeft.Timestamp.TimeGrabbed;
+            values[n++] = dataRight.Timestamp.TimeGrabbed;
+            values[n++] = TimeProcessed;
 
-            return values.Concat(GetCalibratedAndRoiValues()).ToArray();
+            calibratedAndRoi.CopyTo(values, n);
+            return values;
         }
+
+        /// <summary>
+        /// Number of columns of the data files of OpenIris 0.1, before the calibrated data and ROI.
+        /// </summary>
+        private const int ColumnsUntil0_1 = 74;
 
         /// <summary>
         /// Gets the header for the data file.

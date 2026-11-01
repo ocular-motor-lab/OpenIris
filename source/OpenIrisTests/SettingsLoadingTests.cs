@@ -110,5 +110,44 @@ namespace OpenIris.Tests
                 Directory.Delete(folder, true);
             }
         }
+
+        /// <summary>
+        /// The pipelines convert sizes in mm into pixels with the eye tracking system's pixel scale. A
+        /// pipeline chosen for the first time used to keep the default (0.1 mm per pixel) instead.
+        /// </summary>
+        [TestMethod]
+        public void PipelinesGetTheSystemsPixelScale()
+        {
+            PipelineHarness.EnsurePluginsLoaded();
+            var settings = new EyeTrackerSettings();
+
+            // A pipeline chosen for the first time.
+            settings.EyeTrackingPipeline = "SimpleCentroid";
+            Assert.AreEqual(settings.EyeTrackingSystemSettings.MmPerPix, settings.TrackingPipelineSettings.MmPerPix, 1e-9);
+
+            // The system's scale changes.
+            settings.EyeTrackingSystemSettings.PixPerMm = 8;
+            Assert.AreEqual(1.0 / 8, settings.TrackingPipelineSettings.MmPerPix, 1e-9);
+
+            // A settings file without the settings of the selected pipeline.
+            var path = Path.Combine(Path.GetTempPath(), "OpenIrisSettingsTest-" + System.Guid.NewGuid().ToString("N") + ".xml");
+            try
+            {
+                settings.Save(path);
+                var xml = File.ReadAllText(path);
+                var start = xml.IndexOf("<AllTrackingPipelinesSettings>");
+                var end = xml.IndexOf("</AllTrackingPipelinesSettings>");
+                File.WriteAllText(path, xml.Substring(0, start) + "<AllTrackingPipelinesSettings>" + xml.Substring(end));
+
+                var loaded = EyeTrackerSettings.Load(path);
+
+                Assert.AreEqual("SimpleCentroid", loaded.EyeTrackingPipeline);
+                Assert.AreEqual(1.0 / 8, loaded.TrackingPipelineSettings.MmPerPix, 1e-9);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
     }
 }

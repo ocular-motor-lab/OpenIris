@@ -51,13 +51,6 @@ namespace OpenIris
 
                     AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
                     AllEyeTrackerSystemSettings[value].PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
-                    AllEyeTrackerSystemSettings[value].MmPerPixChanged += (o, e) =>
-                    {
-                        foreach (var t in AllTrackingPipelinesSettings.Values)
-                        {
-                            t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
-                        }
-                    };
                 }
 
                 if (value != eyeTrackerSystem)
@@ -65,12 +58,6 @@ namespace OpenIris
                     eyeTrackerSystem = value;
 
                     OnPropertyChanged(this, nameof(EyeTrackerSystem));
-                }
-
-                // Workaround (see #72): copy the system's pixel scale into the pipelines' settings.
-                foreach (var t in AllTrackingPipelinesSettings.Values)
-                {
-                    t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
                 }
             }
         }
@@ -129,12 +116,26 @@ namespace OpenIris
         private string eyeTrackingPipeline = "JOM";
 
         /// <summary>
-        /// This property will return the settings for the current pipeline. It will show in the UI but it
-        /// will not be serialized.
+        /// Settings of the current pipeline, with the pixel scale of the current eye tracking system.
+        /// Not serialized.
         /// </summary>
+        /// <remarks>
+        /// The pixel scale belongs to the eye tracking system, but the pipelines need it to turn sizes in
+        /// mm (pupil, reflections, iris) into pixels. It is handed over here, every time the settings are
+        /// requested, instead of being copied when something changes, so it is right whatever the order
+        /// in which settings are loaded or chosen.
+        /// </remarks>
         [XmlIgnore]
         [Browsable(false)]
-        public EyeTrackingPipelineSettings TrackingPipelineSettings => AllTrackingPipelinesSettings[eyeTrackingPipeline];
+        public EyeTrackingPipelineSettings TrackingPipelineSettings
+        {
+            get
+            {
+                var settings = AllTrackingPipelinesSettings[eyeTrackingPipeline];
+                settings.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
+                return settings;
+            }
+        }
 
         #endregion B) Choose a tracking pipeline
 
@@ -395,21 +396,6 @@ namespace OpenIris
             set
             {
                 SetPropertyArray(ref allEyeTrackerSystemsSettings, value, nameof(AllEyeTrackerSystemSettings));
-
-                // Workaround (see #72): copy the system's pixel scale into the pipelines' settings.
-                foreach (var set in value)
-                {
-                    set.Value.MmPerPixChanged += (o, e) =>
-                    {
-                        if (EyeTrackerSystem == set.Key)
-                        {
-                            foreach (var t in AllTrackingPipelinesSettings.Values)
-                            {
-                                t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
-                            }
-                        }
-                    };
-                }
             }
         }
         private EyeTrackerSettingsDictionary<EyeTrackingSystemSettings> allEyeTrackerSystemsSettings;

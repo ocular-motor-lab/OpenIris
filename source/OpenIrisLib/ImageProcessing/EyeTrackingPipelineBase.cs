@@ -125,12 +125,10 @@ namespace OpenIris
         public static Type[] GetDerivedTypes() => System.Reflection.Assembly.GetExecutingAssembly().GetTypes().Where(_ => _.IsSubclassOf(typeof(EyeTrackingPipelineSettings))).ToArray();
 
         /// <summary>
-        /// Gets or sets the minimum radius of the pupil. This is a bit complicated. 
-        /// The mm per pixel is a setting that depends on the eye tracking system, resolution of the cameras and distance to 
-        /// the eyes. Whenever the eye tracking system is changed it will also change this setting. That way all the settings
-        /// about eye properties can be set in milimiters (system independent) and then convert to pixels using this values.
-        /// That is, the pipelines need values in pixels but it is much easier and consistent to think in miliminters for sizes
-        /// of eye parts.
+        /// Gets or sets the size of a pixel in mm, to convert the sizes of the parts of the eye, which the
+        /// settings give in mm (system independent), into pixels. It belongs to the eye tracking system
+        /// (the cameras' resolution and distance to the eyes): EyeTrackerSettings.TrackingPipelineSettings
+        /// sets it from the system every time the settings are requested. Not saved.
         /// </summary>
         [XmlIgnore]
         [Browsable(false)]

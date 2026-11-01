@@ -105,25 +105,28 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Rewrites a video as a color AVI, named like the original plus "out2.avi".
+        /// Rewrites a video as an uncompressed color AVI, named like the original plus "out2.avi".
         /// </summary>
-        public static void ConvertVideoToRGB(string fileName) => CopyVideo(fileName, fileName + "out2.avi");
+        public static void ConvertVideoToRGB(string fileName) => CopyVideo(fileName, fileName + "out2.avi", compressionCode: 0);
 
         /// <summary>
-        /// Rewrites a video as MP4, named like the original plus "out2.mp4". It doesn't work yet (see #74).
+        /// Rewrites a video as MP4 (MPEG-4), named like the original plus "out2.mp4".
         /// </summary>
-        public static void ConvertToMP4(string fileName) => CopyVideo(fileName, fileName + "out2.mp4");
+        public static void ConvertToMP4(string fileName) => CopyVideo(fileName, fileName + "out2.mp4", VideoWriter.Fourcc('m', 'p', '4', 'v'));
 
-        private static void CopyVideo(string input, string output)
+        private static void CopyVideo(string input, string output, int compressionCode)
         {
             using var videoReader = new VideoCapture(input);
-            using var videoWriter = new VideoWriter(output, 100, new Size(videoReader.Width, videoReader.Height), true);
-            while (true)
-            {
-                var img = videoReader.QueryFrame();
-                if (img is null) return;
+            if (!videoReader.IsOpened) throw new InvalidOperationException($"Can't open the video {input}.");
 
-                videoWriter.Write(img);
+            var fps = videoReader.Get(CapProp.Fps);
+            using var videoWriter = new VideoWriter(output, compressionCode, fps > 0 ? fps : 30, new Size(videoReader.Width, videoReader.Height), isColor: true);
+            if (!videoWriter.IsOpened) throw new InvalidOperationException($"Can't write the video {output}.");
+
+            using var frame = new Mat();
+            while (videoReader.Read(frame) && !frame.IsEmpty)
+            {
+                videoWriter.Write(frame);
             }
         }
     }

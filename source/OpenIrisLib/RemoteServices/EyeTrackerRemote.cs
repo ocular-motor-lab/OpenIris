@@ -168,8 +168,8 @@ namespace OpenIris
         private byte[] ExecuteStringMessage(byte[] bytes)
         {
             byte[] bytesToSend = new byte[0];
+            // The TCP and UDP listeners pass only the bytes received.
             var stringMessage = Encoding.ASCII.GetString(bytes);
-            // Should this decode only the bytes received, GetString(bytes, 0, i)? (See #74.)
 
             var bar_idx = stringMessage.IndexOf('|');
 

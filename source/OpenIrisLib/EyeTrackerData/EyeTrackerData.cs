@@ -192,13 +192,11 @@ namespace OpenIris
             Add(line, calibratedLeft.TorsionalPosition);
             Add(line, calibratedLeft.PupilArea);
             Add(line, calibratedLeft.PercentOpening);
-            Add(line, calibratedLeft.DataQuality);
             Add(line, calibratedRight.HorizontalPosition);
             Add(line, calibratedRight.VerticalPosition);
             Add(line, calibratedRight.TorsionalPosition);
             Add(line, calibratedRight.PupilArea);
             Add(line, calibratedRight.PercentOpening);
-            Add(line, calibratedRight.DataQuality);
 
             Add(line, calibratedHead.Roll);
             Add(line, calibratedHead.Pitch);
@@ -349,13 +347,11 @@ namespace OpenIris
             values[n++] = calibratedLeft.TorsionalPosition;
             values[n++] = calibratedLeft.PupilArea;
             values[n++] = calibratedLeft.PercentOpening;
-            values[n++] = calibratedLeft.DataQuality;
             values[n++] = calibratedRight.HorizontalPosition;
             values[n++] = calibratedRight.VerticalPosition;
             values[n++] = calibratedRight.TorsionalPosition;
             values[n++] = calibratedRight.PupilArea;
             values[n++] = calibratedRight.PercentOpening;
-            values[n++] = calibratedRight.DataQuality;
 
             values[n++] = calibratedHead.Roll;
             values[n++] = calibratedHead.Pitch;
@@ -377,7 +373,7 @@ namespace OpenIris
         /// <summary>
         /// Number of columns of the data file.
         /// </summary>
-        private const int ColumnCount = 106;
+        private const int ColumnCount = 104;
 
         /// <summary>
         /// Gets the header for the data file.
@@ -466,18 +462,16 @@ namespace OpenIris
                   "DebugTimeGrabbedRight " +
                   "DebugTimeProcessed " +
 
-                  "LeftCalibratedHorizontal " +
-                  "LeftCalibratedVertical " +
-                  "LeftCalibratedTorsion " +
-                  "LeftCalibratedPupilArea " +
-                  "LeftCalibratedPercentOpening " +
-                  "LeftCalibratedDataQuality " +
-                  "RightCalibratedHorizontal " +
-                  "RightCalibratedVertical " +
-                  "RightCalibratedTorsion " +
-                  "RightCalibratedPupilArea " +
-                  "RightCalibratedPercentOpening " +
-                  "RightCalibratedDataQuality " +
+                  "LeftH " +
+                  "LeftV " +
+                  "LeftT " +
+                  "LeftPupilArea " +
+                  "LeftEyeOpening " +
+                  "RightH " +
+                  "RightV " +
+                  "RightT " +
+                  "RightPupilArea " +
+                  "RightEyeOpening " +
 
                   "HeadRoll " +
                   "HeadPitch " +

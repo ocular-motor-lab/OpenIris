@@ -42,7 +42,7 @@ namespace OpenIris.Tests
             Assert.AreEqual("Int0", header[55]);
             Assert.AreEqual("Double0", header[63]);
             Assert.AreEqual("DebugTimeProcessed", header[ColumnsUntil0_1 - 1]);
-            Assert.AreEqual("LeftCalibratedHorizontal", header[ColumnsUntil0_1]);
+            Assert.AreEqual("LeftH", header[ColumnsUntil0_1]);
         }
 
         private static string[] Split(string line) => line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

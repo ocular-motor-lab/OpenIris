@@ -80,15 +80,14 @@ These come twice, first for the left eye (columns starting with `Left`), then fo
 
 Added in version 0.2, after all the columns above, so code that reads older files keeps working.
 
-For each eye, `Left` first, then `Right`:
+For each eye, `Left` first, then `Right` (`LeftH`, `LeftV`, ... `RightEyeOpening`):
 
 | Column | Contents |
 | --- | --- |
-| `CalibratedHorizontal`, `CalibratedVertical` | Eye position in degrees, relative to the reference position of the calibration. Positive is up, and towards the left of the eye image. Without a calibration, relative to the center of the eye image, with an eye globe whose radius is the iris diameter. `NaN` if the pupil wasn't found. |
-| `CalibratedTorsion` | Torsion in degrees, as `Torsion`. |
-| `CalibratedPupilArea` | π × `PupilWidth` × `PupilHeight` converted to mm, taking the eye globe as 24 mm across. Because width and height are the full axes, this is four times the area of the pupil ellipse. |
-| `CalibratedPercentOpening` | How open the eyelids are, in percent of the opening at calibration. 0 without a calibration reference. |
-| `CalibratedDataQuality` | `DataQuality` in percent of its value at calibration. `NaN` without a calibration reference. |
+| `H`, `V` | Eye position in degrees, relative to the reference position of the calibration. Positive is up, and towards the left of the eye image. Without a calibration, relative to the center of the eye image, with an eye globe whose radius is the iris diameter. `NaN` if the pupil wasn't found. |
+| `T` | Torsion in degrees, as `Torsion`. |
+| `PupilArea` | π × `PupilWidth` × `PupilHeight` converted to mm, taking the eye globe as 24 mm across. Because width and height are the full axes, this is four times the area of the pupil ellipse. |
+| `EyeOpening` | How open the eyelids are, in percent of the opening at calibration. 0 without a calibration reference. |
 
 For the head:
 

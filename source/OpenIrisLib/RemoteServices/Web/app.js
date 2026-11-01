@@ -291,9 +291,9 @@ $("settingsBox").addEventListener("toggle", () => { if ($("settingsBox").open) r
 
 // Panels as in the OpenIris window. Signals are columns of the data file (docs/user-manual/data-file.md).
 const PANELS = [
-  { name: "Horizontal", unit: "deg", minSpan: 10, series: [["LeftCalibratedHorizontal", "left"], ["RightCalibratedHorizontal", "right"]], on: true },
-  { name: "Vertical", unit: "deg", minSpan: 10, series: [["LeftCalibratedVertical", "left"], ["RightCalibratedVertical", "right"]], on: true },
-  { name: "Torsion", unit: "deg", minSpan: 4, series: [["LeftCalibratedTorsion", "left"], ["RightCalibratedTorsion", "right"]], on: true },
+  { name: "Horizontal", unit: "deg", minSpan: 10, series: [["LeftH", "left"], ["RightH", "right"]], on: true },
+  { name: "Vertical", unit: "deg", minSpan: 10, series: [["LeftV", "left"], ["RightV", "right"]], on: true },
+  { name: "Torsion", unit: "deg", minSpan: 4, series: [["LeftT", "left"], ["RightT", "right"]], on: true },
   { name: "Pupil", unit: "px", minSpan: 10, series: [["LeftPupilWidth", "left"], ["RightPupilWidth", "right"]], on: false },
   { name: "Pupil X", unit: "px", minSpan: 10, series: [["LeftPupilX", "left"], ["RightPupilX", "right"]], on: false },
   { name: "Pupil Y", unit: "px", minSpan: 10, series: [["LeftPupilY", "left"], ["RightPupilY", "right"]], on: false },
@@ -390,9 +390,9 @@ function showLatestValues() {
   const show = (v) => (v === null || v === undefined ? "–" : v.toFixed(1) + "°");
   for (const eye of ["Left", "Right"]) {
     const box = $("eye" + eye);
-    box.querySelector("[data-v=H]").textContent = show(row[c[eye + "CalibratedHorizontal"]]);
-    box.querySelector("[data-v=V]").textContent = show(row[c[eye + "CalibratedVertical"]]);
-    box.querySelector("[data-v=T]").textContent = show(row[c[eye + "CalibratedTorsion"]]);
+    box.querySelector("[data-v=H]").textContent = show(row[c[eye + "H"]]);
+    box.querySelector("[data-v=V]").textContent = show(row[c[eye + "V"]]);
+    box.querySelector("[data-v=T]").textContent = show(row[c[eye + "T"]]);
   }
 }
 

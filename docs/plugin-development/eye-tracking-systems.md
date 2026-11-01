@@ -123,7 +123,9 @@ public class EyeTrackingSystemExample : EyeTrackingSystemBase
         {
             // Whether the camera sees both eyes, the left or the right one.
             WhichEye = settings.Eye,
-            // How the camera is mounted. Images are flipped and rotated accordingly.
+            // How the camera is mounted. Images are flipped and rotated so they show the eye as
+            // seen by someone facing the subject (mirrored if the camera sees the eye through a
+            // mirror). The signs of the calibrated data depend on it.
             CameraOrientation = CameraOrientation.Upright,
         };
 

@@ -57,32 +57,57 @@ namespace OpenIris
     }
 
     /// <summary>
-    /// Calibrated data. Calculated from the raw data using the CalibrationInfo.
+    /// Calibrated eye data, calculated from the raw data with the calibration
+    /// (CalibrationParameters.GetCalibratedEyeData).
     /// </summary>
+    /// <remarks>
+    /// <para>Coordinate convention, the same for the eyes and the head (see CalibratedHeadData):
+    /// positive is rightward, upward and clockwise, all from the subject's point of view.</para>
+    /// <list type="bullet">
+    /// <item>HorizontalPosition: degrees, positive when the eye looks to the subject's right.</item>
+    /// <item>VerticalPosition: degrees, positive when the eye looks up.</item>
+    /// <item>TorsionalPosition: degrees, positive when the eye rotates clockwise as the subject sees
+    /// it (the top of the eye moves towards the subject's right; counterclockwise in the image).</item>
+    /// </list>
+    /// <para>All three are relative to the eye at the calibration's reference, so 0 is the reference
+    /// position.</para>
+    /// <para>The signs and the zero are the contract. How the three angles combine into an
+    /// orientation (Fick, Helmholtz, rotation vectors...) is up to whatever calculates them, which
+    /// must say which one it uses. Today that is CalibrationParameters.GetCalibratedEyeData for all
+    /// the calibration methods: horizontal and vertical are each the arcsine of the pupil's
+    /// displacement on the eye globe of the calibration's eye model (pupil center minus globe center,
+    /// divided by the globe radius, in the image), minus the same for the reference. Calculated
+    /// separately, they are not Fick or Helmholtz angles, though all agree near the reference.</para>
+    /// <para>The signs assume the eye images show the eyes as seen by someone facing the subject (the
+    /// subject's right is the left of the image, up is up). Each eye tracking system makes its images
+    /// look like that with its camera orientation (CameraEye.CameraOrientation); a camera that sees
+    /// the eye through a mirror needs a mirrored orientation.</para>
+    /// </remarks>
     public struct CalibratedEyeData : IEquatable<CalibratedEyeData>
     {
         // TODO: MOVE TO TRANSFORMS then all the simple values can be getters out of the matrix.
 
         /// <summary>
         /// Gets or sets the horizontal position of the eye, in degrees, relative to the reference
-        /// position during calibration.
+        /// position during calibration. Positive towards the subject's right.
         /// </summary>
         public double HorizontalPosition { get; set; }
 
         /// <summary>
         /// Gets or sets the vertical position of the eye, in degrees, relative to the reference
-        /// position during calibration.
+        /// position during calibration. Positive up.
         /// </summary>
         public double VerticalPosition { get; set; }
 
         /// <summary>
         /// Gets or sets the torsional position of the eye, in degrees, relative to the reference
-        /// position during calibration.
+        /// position during calibration. Positive clockwise from the subject's point of view (the top
+        /// of the eye towards the subject's right).
         /// </summary>
         public double TorsionalPosition { get; set; }
 
         /// <summary>
-        /// Gets or sets the pupil Area, in squared milimeters.
+        /// Gets or sets the area of the pupil ellipse, in mm², taking the eye globe as 24 mm across.
         /// </summary>
         public double PupilArea { get; set; }
 
@@ -168,33 +193,62 @@ namespace OpenIris
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
     /// <summary>
-    /// Calibrated head data. Calculated from the raw data using the HeadCalibration.
-    /// Coordinate conventions according to Fetter and Haslwanter 1998: 
-    /// When the head is in its reference position, upright and facing straight 
-    /// ahead – the x-axis points forward, the y-axis left along the interaural 
-    /// line, and the z axis points up.
-    /// According to the right hand rule the positive rotation directions in this 
-    /// coordinate system are clockwise, down, and left(as seen from the subject’s viewpoint)
+    /// Calibrated head data, calculated from the raw head sensor data
+    /// (CalibrationParameters.GetCalibratedHeadData).
     /// </summary>
+    /// <remarks>
+    /// <para>Same convention as the eyes (see CalibratedEyeData): positive is rightward, upward and
+    /// clockwise, all from the subject's point of view. As for the eyes, the signs are the contract,
+    /// and how the angles combine (the order of the rotations) is up to whatever calculates them,
+    /// which must say which one it uses. With the head upright, facing straight ahead:</para>
+    /// <list type="bullet">
+    /// <item>X points to the subject's right, Y up, Z forward (out of the face). This is a
+    /// left-handed set of axes, the price of positive being right and up for both eyes and head.</item>
+    /// <item>Yaw: degrees, positive when the head turns to the subject's right (towards +X).</item>
+    /// <item>Pitch: degrees, positive when the head tilts up, chin up (towards +Y).</item>
+    /// <item>Roll: degrees, positive clockwise from the subject's point of view (right ear down).</item>
+    /// <item>Velocities: degrees per second, with the same signs.</item>
+    /// <item>Accelerations: g, along X, Y and Z.</item>
+    /// <item>X, Y, Z position: mm, relative to the head at calibration.</item>
+    /// </list>
+    /// <para>Systems without a head sensor leave everything at 0.</para>
+    /// </remarks>
     public struct CalibratedHeadData : IEquatable<CalibratedHeadData>
     {
+        /// <summary>Acceleration towards the subject's right (+X), in g.</summary>
         public double XAcceleration { get; set; }
+
+        /// <summary>Acceleration upwards (+Y), in g.</summary>
         public double YAcceleration { get; set; }
+
+        /// <summary>Acceleration forwards (+Z), in g.</summary>
         public double ZAcceleration { get; set; }
 
+        /// <summary>Roll in degrees, positive clockwise from the subject's point of view (right ear down).</summary>
         public double Roll { get; set; }
+
+        /// <summary>Pitch in degrees, positive chin up.</summary>
         public double Pitch { get; set; }
+
+        /// <summary>Yaw in degrees, positive turning to the subject's right.</summary>
         public double Yaw { get; set; }
 
+        /// <summary>Roll velocity in degrees per second, positive as Roll.</summary>
         public double RollVelocity { get; set; }
+
+        /// <summary>Pitch velocity in degrees per second, positive as Pitch.</summary>
         public double PitchVelocity { get; set; }
+
+        /// <summary>Yaw velocity in degrees per second, positive as Yaw.</summary>
         public double YawVelocity { get; set; }
 
-        /// <summary>
-        /// Position of the head, in mm, in the same axes. Systems that can't measure it leave it at 0.
-        /// </summary>
+        /// <summary>Position towards the subject's right, in mm, relative to the head at calibration.</summary>
         public double X { get; set; }
+
+        /// <summary>Position upwards, in mm, relative to the head at calibration.</summary>
         public double Y { get; set; }
+
+        /// <summary>Position forwards, in mm, relative to the head at calibration.</summary>
         public double Z { get; set; }
 
         /// <summary>

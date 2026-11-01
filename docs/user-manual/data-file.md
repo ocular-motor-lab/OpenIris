@@ -59,7 +59,7 @@ These come twice, first for the left eye (columns starting with `Left`), then fo
 | `PupilWidth`, `PupilHeight` | Length of the two axes of the ellipse fitted to the pupil, in pixels (the full axes, not the radius). |
 | `PupilAngle` | Angle of the pupil ellipse, in degrees. |
 | `IrisRadius` | The iris radius set in the tracking settings, in pixels. It is not measured. |
-| `Torsion` | Torsion, in degrees, relative to the reference image taken at calibration. 0 if torsion is off in the settings. `NaN` if torsion is on but there is no reference yet, for example before calibrating. |
+| `Torsion` | Torsion, in degrees, relative to the reference image taken at calibration, positive clockwise from the subject's point of view (see [Coordinate system](#coordinate-system)). 0 if torsion is off in the settings. `NaN` if torsion is on but there is no reference yet, for example before calibrating. |
 | `UpperEyelid`, `LowerEyelid` | Eyelid height: the **sum** of the y positions of four points on the eyelid, in pixels (divide by 4 for their average). 0 if eyelids weren't tracked. |
 | `DataQuality` | Quality of the torsion measurement, 0 to 100: how well the iris pattern matches the reference. 100 if torsion is off, 0 if the pupil wasn't found or there is no reference. Other pipelines may use it differently. |
 | `CR1X`, `CR1Y` … `CR5X`, `CR5Y` | Centers of up to five corneal reflections, in pixels, nearest to the pupil first. 0 for reflections not found. |
@@ -80,12 +80,60 @@ These come twice, first for the left eye (columns starting with `Left`), then fo
 
 Added in version 0.2, after all the columns above, so code that reads older files keeps working.
 
+### Coordinate system
+
+The eyes and the head use the same convention: **positive is rightward, upward and clockwise, all
+from the subject's point of view.**
+
+| Value | Unit | Positive when | Zero |
+| --- | --- | --- | --- |
+| Eye `H` | degrees | the eye looks to the subject's right | the eye at the calibration's reference |
+| Eye `V` | degrees | the eye looks up | the eye at the calibration's reference |
+| Eye `T` | degrees | the eye rotates clockwise as the subject sees it: the top of the eye moves towards the subject's right (counterclockwise in the eye image) | the iris at the calibration's reference |
+| `HeadYaw` | degrees | the head turns to the subject's right | the head upright, facing straight ahead |
+| `HeadPitch` | degrees | the head tilts up (chin up) | as above |
+| `HeadRoll` | degrees | the head rotates clockwise as the subject sees it (right ear down) | as above |
+| `HeadX`, `HeadY`, `HeadZ` | mm | the head moves to the subject's right (X), up (Y), forward (Z) | the head at calibration |
+
+The head's axes, with the head upright and facing straight ahead: X points to the subject's right,
+Y up, and Z forward, out of the face. The angular velocities have the same signs as the angles, in
+degrees per second, and the accelerations are in g along X, Y and Z.
+
+The signs and the zeros are the same for every eye tracking system and calibration method. How
+the three angles combine into an orientation (Fick, Helmholtz, rotation vectors...) is not fixed:
+it is up to each calibration method, which says which one it uses. All three angle definitions
+agree near the reference; they differ for large eye or head rotations.
+
+How the calibration methods included with OpenIris (Auto, Manual, Remote Linear) calculate the eye
+angles:
+
+- **H and V** are each the arcsine of the pupil's displacement on the eye globe: the distance from
+  the center of the globe (the calibration's eye model) to the center of the pupil, in the image,
+  divided by the radius of the globe. The value at the reference is subtracted. Horizontal and
+  vertical are calculated separately, so they are not Fick or Helmholtz angles.
+- **T** is the rotation of the iris pattern around the pupil, compared with the reference iris.
+- **The signs assume the eye images show the eyes as seen by someone facing the subject:** the
+  subject's right is the left of the image, and up is up. Each eye tracking system turns its images
+  that way with its camera orientation (for example **VideoOrientation** in Simulation). A camera
+  that sees the eye through a mirror needs a mirrored orientation. The Spinnaker systems assume the
+  cameras see the eyes directly.
+- **Without a calibration,** H and V are relative to the center of the eye image, with an eye globe
+  whose radius is the iris diameter, and T is `NaN` (there is no reference iris).
+
+> [!WARNING]
+> Only the Micromedical systems have a head sensor. Their calibrated head values haven't been
+> checked against this convention yet: the signs may differ, `HeadAccelerationX`/`Y`/`Z` are the
+> sensor's own axes, and `HeadYaw` can't really be measured with an accelerometer. Without a head
+> sensor all head columns are 0.
+
+### Columns
+
 For each eye, `Left` first, then `Right` (`LeftH`, `LeftV`, ... `RightEyeOpening`):
 
 | Column | Contents |
 | --- | --- |
-| `H`, `V` | Eye position in degrees, relative to the reference position of the calibration. Positive is up, and towards the subject's right. That requires the eye images to show the eyes as seen by someone facing the subject, so the subject's right is the left of the image: set the camera orientation of the eye tracking system accordingly (mirrored if the cameras see the eyes through a mirror). Without a calibration, relative to the center of the eye image, with an eye globe whose radius is the iris diameter. `NaN` if the pupil wasn't found. |
-| `T` | Torsion in degrees, as `Torsion`. |
+| `H`, `V` | Eye position in degrees, as above. `NaN` if the pupil wasn't found. |
+| `T` | Torsion in degrees, as above. The same value as `Torsion`. |
 | `PupilArea` | Area of the pupil ellipse in mm² (π × `PupilWidth` × `PupilHeight` / 4, converted to mm taking the eye globe as 24 mm across). |
 | `EyeOpening` | How open the eyelids are, in percent of the opening at calibration. 0 without a calibration reference. |
 
@@ -93,13 +141,10 @@ For the head:
 
 | Column | Contents |
 | --- | --- |
-| `HeadRoll`, `HeadPitch`, `HeadYaw` | Head orientation in degrees. |
-| `HeadRollVelocity`, `HeadPitchVelocity`, `HeadYawVelocity` | Head angular velocity. |
-| `HeadAccelerationX`, `HeadAccelerationY`, `HeadAccelerationZ` | Head acceleration. |
-| `HeadX`, `HeadY`, `HeadZ` | Head position in mm. No system included with OpenIris measures it yet: always 0. |
-
-The head columns follow Fetter and Haslwanter (1998): with the head upright and facing straight
-ahead, x points forward, y left and z up. They are 0 for systems without a head sensor.
+| `HeadRoll`, `HeadPitch`, `HeadYaw` | Head orientation in degrees, as above. |
+| `HeadRollVelocity`, `HeadPitchVelocity`, `HeadYawVelocity` | Head angular velocity in degrees per second, same signs. |
+| `HeadAccelerationX`, `HeadAccelerationY`, `HeadAccelerationZ` | Head acceleration in g, along X (right), Y (up) and Z (forward). |
+| `HeadX`, `HeadY`, `HeadZ` | Head position in mm, relative to calibration. No system included with OpenIris measures it yet: always 0. |
 
 ## Region of interest
 

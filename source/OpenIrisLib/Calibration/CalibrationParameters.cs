@@ -262,6 +262,12 @@ namespace OpenIris
             // Without a head sensor, all 0 (Atan2 of zeros would give ±180°).
             if (headData is null || headData.IsEmpty) return new CalibratedHeadData();
 
+            // TODO: not checked against the convention of CalibratedHeadData (positive right, up,
+            // clockwise; X right, Y up, Z forward). This was written for the Micromedical head
+            // sensor; its axes and signs need checking with the sensor. The accelerations are the
+            // sensor's own axes, and Yaw can't really come from the accelerometer (turning about the
+            // vertical doesn't change gravity).
+
             return new CalibratedHeadData
             {
                 XAcceleration = headData.AccelerometerX,

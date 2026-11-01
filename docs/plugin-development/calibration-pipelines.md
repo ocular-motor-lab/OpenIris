@@ -12,6 +12,14 @@ A calibration has two steps, run one after the other on the frames as they are p
 
 **Reset reference** runs only the second step.
 
+From the eye model and the reference, OpenIris calculates the calibrated data
+(`CalibrationParameters.GetCalibratedEyeData`). It must follow the
+[coordinate system](../user-manual/data-file.md#coordinate-system) of the data file: positive is
+rightward, upward and clockwise from the subject's point of view, and 0 is the reference. How the
+angles combine into an orientation (Fick, Helmholtz...) is up to the calibration. Today all
+calibrations share the same calculation; one that calculates the angles its own way must keep the
+signs and the zero, and say in its documentation which angles it uses.
+
 See [Creating a plugin](creating-a-plugin.md) first for the project setup.
 
 ## The calibration class

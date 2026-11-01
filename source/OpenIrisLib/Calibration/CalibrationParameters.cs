@@ -69,7 +69,7 @@ namespace OpenIris
                 var calibration = (CalibrationParameters)reader.Deserialize(xmlreader);
                 if (calibration.EyeCalibrationParameters.Count == 4)
                 {
-                    // TODO: HORRIBLE QUICK FIX. Needs to be done because the current initalization while serializing creates two empty items. Then, when deserializing it adds two more.
+                    // Workaround (see #72): the constructor creates two empty eye calibrations, and deserializing adds two more.
                     calibration.EyeCalibrationParameters = new EyeCollection<EyeCalibration>(calibration.EyeCalibrationParameters[2], calibration.EyeCalibrationParameters[3]);
                 }
                 return calibration;
@@ -262,11 +262,9 @@ namespace OpenIris
             // Without a head sensor, all 0 (Atan2 of zeros would give ±180°).
             if (headData is null || headData.IsEmpty) return new CalibratedHeadData();
 
-            // TODO: not checked against the convention of CalibratedHeadData (positive right, up,
-            // clockwise; X right, Y up, Z forward). This was written for the Micromedical head
-            // sensor; its axes and signs need checking with the sensor. The accelerations are the
-            // sensor's own axes, and Yaw can't really come from the accelerometer (turning about the
-            // vertical doesn't change gravity).
+            // Not yet checked against the convention of CalibratedHeadData (see #70). Written for
+            // the Micromedical head sensor: the accelerations are the sensor's own axes, and Yaw
+            // can't really come from the accelerometer.
 
             return new CalibratedHeadData
             {

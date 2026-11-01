@@ -262,7 +262,7 @@ namespace OpenIris
                 points[i].X = (int)Math.Round(Math.Cos(theta) * data.Iris.Radius);
                 points[i].Y = (int)Math.Round(Math.Sin(theta) * data.Iris.Radius);
 
-                // TODO: FIX THIS
+                // Needs checking (see #73).
                 if (!eyeModel.IsEmpty)
                 {
                     points[i] = RotatePoint(points[i], eyeModel, data.Pupil.Center);

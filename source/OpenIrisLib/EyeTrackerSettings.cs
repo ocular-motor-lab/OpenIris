@@ -67,8 +67,7 @@ namespace OpenIris
                     OnPropertyChanged(this, nameof(EyeTrackerSystem));
                 }
 
-                // TODO: very ugly line to just make sure the settings are updated properly
-                // Need to set the mm per pixel for the tracking settings
+                // Workaround (see #72): copy the system's pixel scale into the pipelines' settings.
                 foreach (var t in AllTrackingPipelinesSettings.Values)
                 {
                     t.MmPerPix = EyeTrackingSystemSettings.MmPerPix;
@@ -397,8 +396,7 @@ namespace OpenIris
             {
                 SetPropertyArray(ref allEyeTrackerSystemsSettings, value, nameof(AllEyeTrackerSystemSettings));
 
-                // TODO: very ugly line to just make sure the settings are updated properly
-                // Need to set the mm per pixel for the tracking settings
+                // Workaround (see #72): copy the system's pixel scale into the pipelines' settings.
                 foreach (var set in value)
                 {
                     set.Value.MmPerPixChanged += (o, e) =>

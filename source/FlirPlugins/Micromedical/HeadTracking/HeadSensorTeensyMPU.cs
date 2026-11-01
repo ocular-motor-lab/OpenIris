@@ -164,7 +164,7 @@ namespace OpenIris
             this.camera = camera;
 
             // Set GPIO 0 and 1 to outputs
-            // TODO: check if this is necessary. Doubt it.
+            // Possibly unnecessary (see #70).
             camera.SetGPIO(0, CameraEyeFlyCapture.GPIOMode.output);
             camera.SetGPIO(1, CameraEyeFlyCapture.GPIOMode.output);
 

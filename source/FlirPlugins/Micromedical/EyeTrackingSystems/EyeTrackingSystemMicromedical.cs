@@ -221,7 +221,7 @@ namespace OpenIris
             }
             set
             {
-                if (value != this.headSensorRotation) // TODO: Does not detect changes to the inside values
+                if (value != this.headSensorRotation) // Doesn't notice changes to the values inside (see #70).
                 {
                     this.headSensorRotation = value;
                     this.OnPropertyChanged(this, "headSensorRotation");

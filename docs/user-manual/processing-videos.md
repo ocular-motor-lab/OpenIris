@@ -38,7 +38,7 @@ depending on the computer and the settings.
 
 **Tools > Batch analysis** processes several videos in a row.
 
-<!-- TODO(Jorge): describe batch analysis. -->
+<!-- To write (#75): describe batch analysis. -->
 
 ## Other tools
 

@@ -171,7 +171,7 @@ namespace OpenIris.ImageProcessing
                 EyeTrackerDebug.AddImage("torsion2", imageEye.WhichEye, imageEyePolar);
 
                 // Apply the zero mask and add saturations to keep the range symmetric around zero
-                // TODO: this does not work very well for different sizes of sobel filter.
+                // Doesn't suit every size of Sobel filter (see #73).
                 var imageTorsion = imageEyePolar.Max(-100).Min(100).Convert<Gray, byte>();
                 EyeTrackerDebug.AddImage("torsion3", imageEye.WhichEye, imageTorsion);
 

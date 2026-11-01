@@ -22,5 +22,5 @@ Choose the method in the configuration (**CalibrationMethod**, General settings,
 | **Manual Calibration** | You set the eye model yourself, in a panel with controls for each eye. |
 | **Remote Linear** | Your stimulus program shows targets and tells OpenIris where they are; OpenIris fits a linear transformation from eye position to target position. See [Remote control](remote-control.md#calibration). |
 
-<!-- TODO(Jorge): when to use each method, step by step instructions, and how to check that a
+<!-- To write (#75): when to use each method, step by step instructions, and how to check that a
 calibration is good. -->

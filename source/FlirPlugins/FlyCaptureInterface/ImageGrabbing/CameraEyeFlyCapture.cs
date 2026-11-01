@@ -254,8 +254,7 @@ namespace OpenIris.ImageGrabbing
             SetEmbeddedInfo();
             SetCameraBuffer(BufferSize);
 
-            //// TODO: I would like to make this more consistent across cameras
-            //// right now it is a bit messy, when do they actually start to get images
+            // When cameras start delivering images differs between systems (see #65).
 
             camera.StartCapture();
             FrameRate = camera.GetProperty(PropertyType.FrameRate).absValue;
@@ -444,8 +443,7 @@ namespace OpenIris.ImageGrabbing
             var centerPupil = requestedCenter.Position;
             requestedCenter = (false, PointF.Empty);
 
-            // BIG TODO: make this compatible with other pixel modes. Right now it will only work
-            // with mode0
+            // Only works with pixel mode 0 (see #65).
 
             if (centerPupil.IsEmpty) return;
 
@@ -513,10 +511,8 @@ namespace OpenIris.ImageGrabbing
 
             if (camera == null) throw new InvalidOperationException("Camera is null");
 
-            // BIG TODO: make this compatible with other pixel modes. Right now it will only work
-            // with mode0
+            // Only works with pixel mode 0 (see #65).
 
-            // TODO: try this one the micromedical camera
             int step = 24;
 
             if (CameraOrientation.IsUpsideDown())

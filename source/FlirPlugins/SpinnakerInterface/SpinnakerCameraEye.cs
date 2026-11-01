@@ -68,7 +68,7 @@ namespace SpinnakerInterface
                 }
 
             // Attach menu item to our Trigger Toggle function.
-            // TODO: UPDATE :: OpenIris.UI.EyeTrackerGuiViewModel.PauseMenuItem.Click += new System.EventHandler( SpinnakerCameraEye.ToggleTriggers);
+            // Old user interface (see #71): OpenIris.UI.EyeTrackerGuiViewModel.PauseMenuItem.Click += new System.EventHandler( SpinnakerCameraEye.ToggleTriggers);
 
             return CAMLIST;
         }

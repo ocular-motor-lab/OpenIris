@@ -110,7 +110,7 @@ namespace OpenIris
         public static void ConvertVideoToRGB(string fileName) => CopyVideo(fileName, fileName + "out2.avi");
 
         /// <summary>
-        /// Rewrites a video as MP4, named like the original plus "out2.mp4". TODO: it does not work.
+        /// Rewrites a video as MP4, named like the original plus "out2.mp4". It doesn't work yet (see #74).
         /// </summary>
         public static void ConvertToMP4(string fileName) => CopyVideo(fileName, fileName + "out2.mp4");
 

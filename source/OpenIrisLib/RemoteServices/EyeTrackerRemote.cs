@@ -169,7 +169,7 @@ namespace OpenIris
         {
             byte[] bytesToSend = new byte[0];
             var stringMessage = Encoding.ASCII.GetString(bytes);
-            // var stringMessage = Encoding.ASCII.GetString(bytes, 0, i); TODO think how to optimize TCP
+            // Should this decode only the bytes received, GetString(bytes, 0, i)? (See #74.)
 
             var bar_idx = stringMessage.IndexOf('|');
 

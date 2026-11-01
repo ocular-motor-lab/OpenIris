@@ -86,5 +86,5 @@ See `OpenIrisWinForms\Calibration\CalibrationRemoteLinearUI.cs`.
 - `CalibrationRemoteLinear.cs`: a stimulus program shows targets and tells OpenIris where they are;
   OpenIris fits a linear transformation from eye position to target position.
 
-<!-- TODO(Jorge): explain how the eye model and reference are used, and which calibration to choose
+<!-- To write (#75): explain how the eye model and reference are used, and which calibration to choose
 when. -->

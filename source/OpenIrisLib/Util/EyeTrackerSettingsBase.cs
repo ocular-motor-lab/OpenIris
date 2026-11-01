@@ -14,11 +14,6 @@ namespace OpenIris
     using System.Linq;
 
 
-    //
-    // TODO: consider using ApplicateSettingsBase. I tried but I could not get it to serialized properly.
-    //
-
-
     /// <summary>
     /// Attribute used to indicate if a given settings requires the eye tracker to restart to take effect.
     /// </summary>

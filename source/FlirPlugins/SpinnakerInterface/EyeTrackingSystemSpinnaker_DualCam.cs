@@ -33,7 +33,7 @@ namespace SpinnakerInterface
             {
                 var cameraList = CameraEyeSpinnaker.FindCameras(2, settings.Eye, settings.LeftEyeCameraSerialNumber, settings.RightEyeCameraSerialNumber);
 
-                // TODO for Roksana add checks on the settings so things don't crash if somebody enters crazy numbers
+                // The settings aren't checked yet (see #71).
 
                 leftEyeCamera = new CameraEyeSpinnaker(
                 whichEye: Eye.Left,

@@ -59,7 +59,7 @@ namespace OpenIris.ImageProcessing
         /// <returns>The number of pixels of the iris radius.</returns>
         public IrisData FindIris(ImageEye imageEye, PupilData pupil, EyeTrackingPipelineJOMSettings trackingSettings)
         {
-            ////TODO: this should return more properties of the iris. Probably an ellipse or a custom object
+            // The iris isn't measured: the radius comes from the settings (see #73).
 
             // Use the value of the radius in the settings (coming from the UI)
             var irisRadius = (imageEye.WhichEye == Eye.Left) ? trackingSettings.IrisRadiusPixLeft : trackingSettings.IrisRadiusPixRight;

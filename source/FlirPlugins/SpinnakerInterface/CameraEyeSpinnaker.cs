@@ -157,7 +157,7 @@ namespace SpinnakerInterface
 
         public override void Stop()
         {
-            // TODO: potentially reset trigger settings here.
+            // Should this reset the trigger settings? (See #71.)
 
             // EndAcquisition throws if the camera never started streaming (for example, if
             // starting failed). That would hide the original error and leave the camera stuck.
@@ -423,8 +423,7 @@ namespace SpinnakerInterface
             }
 
 
-            // TODO:
-            // DO WE NEED THIS? cam.TriggerSource.FromString("Software");
+            // Needed? (See #71.) cam.TriggerSource.FromString("Software");
         }
 
         // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.

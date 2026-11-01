@@ -85,7 +85,7 @@ namespace OpenIris
     /// </remarks>
     public struct CalibratedEyeData : IEquatable<CalibratedEyeData>
     {
-        // TODO: MOVE TO TRANSFORMS then all the simple values can be getters out of the matrix.
+        // Could be stored as a transform, with these values as getters (see #61).
 
         /// <summary>
         /// Gets or sets the horizontal position of the eye, in degrees, relative to the reference

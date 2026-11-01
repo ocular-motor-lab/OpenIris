@@ -22,8 +22,8 @@
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Small sample videos played by the Simulation eye tracking system. -->
-    <None Include="..\..\sample-videos\*.mp4" Link="SampleVideos\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Sample videos: the eyes, played by the Simulation system, and the whole face, for the Webcam system. -->
+    <None Include="..\..\sample-videos\*.mp4;..\..\sample-videos\*.MOV" Link="SampleVideos\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="EyeTrackerAboutBox.cs" SubType="Form" />

@@ -11,7 +11,7 @@ too, and Simulation plays them instead.
 
 `Jorge-iPhone.MOV` is 20 seconds of the whole face, filmed with an iPhone (1920×1080, 30 fps). Play
 it with the **Webcam** eye tracking system (Play video) to demo webcam tracking: the Webcam face
-window shows the face mesh and the eye images cut out of it. It isn't copied next to `OpenIris.exe`;
-open it from this folder.
+window shows the face mesh and the eye images cut out of it. The build copies it to `SampleVideos`
+too, so it comes with OpenIris.
 
 [`sample-data`](../sample-data) has the output of processing these videos.

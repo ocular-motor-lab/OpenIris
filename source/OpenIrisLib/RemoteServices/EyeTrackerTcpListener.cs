@@ -73,9 +73,13 @@ namespace OpenIris
                         }
                     }
                 }
+                catch (SocketException e) when (e.SocketErrorCode == SocketError.Interrupted)
+                {
+                    // Stop() was called: OpenIris is closing.
+                }
                 catch (SocketException e)
                 {
-                    Console.WriteLine("SocketException: {0}", e);
+                    Trace.WriteLine("ERROR: TCP server: " + e.Message);
                 }
                 finally
                 {

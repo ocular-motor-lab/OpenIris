@@ -177,7 +177,7 @@ namespace OpenIris.ImageGrabbing
                 ?? throw new InvalidOperationException($"Could not read frame {timestamp.FrameNumber} of the video.");
             var grayImage = frame.ToImage<Gray, byte>();
 
-            var imageEye = new ImageEye(grayImage, WhichEye, timestamp, null);
+            var imageEye = new ImageEye(grayImage, WhichEye, timestamp, null) { Roi = new Rectangle(Point.Empty, grayImage.Size) };
             imageEye.CorrectOrientation(CameraOrientation);
 
             LastFrameNumber = (long)timestamp.FrameNumberRaw;

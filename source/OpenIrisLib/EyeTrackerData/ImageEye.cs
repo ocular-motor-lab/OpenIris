@@ -80,6 +80,14 @@ namespace OpenIris
         /// Gets Left or Right Eye.
         /// </summary>
         public Eye WhichEye { get; set; }
+
+        /// <summary>
+        /// Gets or sets where this image is in the full image of the camera, in the camera's pixels:
+        /// the window of the sensor for cameras that read only part of it, the part cut out for
+        /// systems that cut each eye out of a bigger image, or the whole frame. Empty if unknown.
+        /// Written in the RoiX, RoiY, RoiWidth and RoiHeight columns of the data file.
+        /// </summary>
+        public Rectangle Roi { get; set; }
         
         /// <summary>
         /// Gets the size of the image of the eye in pixels.
@@ -108,7 +116,7 @@ namespace OpenIris
         /// <returns>The copy.</returns>
         public ImageEye Copy(Rectangle roi)
         {
-            return new ImageEye(Image.Copy(roi), WhichEye, TimeStamp, ImageSourceData);
+            return new ImageEye(Image.Copy(roi), WhichEye, TimeStamp, ImageSourceData) { Roi = PartOfRoi(roi) };
         }
 
         /// <summary>
@@ -117,8 +125,14 @@ namespace OpenIris
         /// <returns>The copy.</returns>
         public ImageEye Copy()
         {
-            return new ImageEye(Image.Copy(), WhichEye, TimeStamp, ImageSourceData);
+            return new ImageEye(Image.Copy(), WhichEye, TimeStamp, ImageSourceData) { Roi = Roi };
         }
+
+        /// <summary>
+        /// The ROI of a part of this image, if this image's ROI is known.
+        /// </summary>
+        private Rectangle PartOfRoi(Rectangle part) =>
+            Roi.IsEmpty ? Rectangle.Empty : new Rectangle(Roi.X + part.X, Roi.Y + part.Y, part.Width, part.Height);
 
         /// <summary>
         /// Or when there are mirrors.
@@ -236,7 +250,7 @@ namespace OpenIris
             Image.ROI = new Rectangle();
             Image = imageTemp;
 
-            return new ImageEye(imageTemp, WhichEye, TimeStamp, ImageSourceData);
+            return new ImageEye(imageTemp, WhichEye, TimeStamp, ImageSourceData) { Roi = PartOfRoi(roi) };
         }
                 
         /// <summary>

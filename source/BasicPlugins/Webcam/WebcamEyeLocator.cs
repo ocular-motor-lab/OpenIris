@@ -93,8 +93,8 @@ namespace OpenIris
                 points[FaceMesh.LeftEyeInnerCorner], points[FaceMesh.LeftEyeOuterCorner], timestamp.Seconds, newFace);
 
             return new EyeCollection<ImageEye?>(
-                new ImageEye(leftEye.CutOut(image.Image, eyeImageSize), Eye.Left, timestamp, new EyeCrop(true, leftEye)),
-                new ImageEye(rightEye.CutOut(image.Image, eyeImageSize), Eye.Right, timestamp, new EyeCrop(true, rightEye)));
+                new ImageEye(leftEye.CutOut(image.Image, eyeImageSize), Eye.Left, timestamp, new EyeCrop(true, leftEye)) { Roi = leftEye.GetBoundingBox(image.Roi) },
+                new ImageEye(rightEye.CutOut(image.Image, eyeImageSize), Eye.Right, timestamp, new EyeCrop(true, rightEye)) { Roi = rightEye.GetBoundingBox(image.Roi) });
         }
 
         /// <summary>

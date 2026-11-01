@@ -98,6 +98,25 @@ namespace OpenIris.Tests
                 Assert.IsTrue(processed.All(n => n == processed[0]), "Processed frames lost.");
                 Assert.AreEqual(processed[0] + 1, File.ReadLines(dataFile).Count(), "Lines of the data file (with the header).");
 
+                // Each frame has the window of the sensor it was taken with: 720x450, at an offset
+                // that is a multiple of 4.
+                var dataLines = File.ReadAllLines(dataFile);
+                var columns = dataLines[0].Split(' ');
+                foreach (var line in dataLines.Skip(1).Select(l => l.Split(' ')))
+                {
+                    foreach (var eye in new[] { "Left", "Right" })
+                    {
+                        double Column(string name) => double.Parse(line[Array.IndexOf(columns, eye + name)], System.Globalization.CultureInfo.InvariantCulture);
+                        Assert.AreEqual(720, Column("RoiWidth"), eye + "RoiWidth");
+                        Assert.AreEqual(450, Column("RoiHeight"), eye + "RoiHeight");
+                        Assert.IsTrue(Column("RoiX") >= 0 && Column("RoiX") % 4 == 0, $"{eye}RoiX {Column("RoiX")}");
+                        Assert.IsTrue(Column("RoiY") >= 0 && Column("RoiY") % 4 == 0, $"{eye}RoiY {Column("RoiY")}");
+                    }
+                }
+
+                var first = dataLines[1].Split(' ');
+                TestContext.WriteLine($"ROI left ({first[Array.IndexOf(columns, "LeftRoiX")]}, {first[Array.IndexOf(columns, "LeftRoiY")]}), right ({first[Array.IndexOf(columns, "RightRoiX")]}, {first[Array.IndexOf(columns, "RightRoiY")]})");
+
                 if (recordVideo)
                 {
                     var raw = Counts(log, "RawFramesRecorder");

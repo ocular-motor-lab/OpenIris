@@ -90,6 +90,9 @@ namespace OpenIris.ImageGrabbing
             // Keep track of the last frame number
             LastFrameNumber = image.TimeStamp.FrameNumber;
 
+            // The whole frame, for cameras that don't say which part of the sensor they read.
+            if (image.Roi.IsEmpty) image.Roi = new Rectangle(Point.Empty, image.Size);
+
             image.CorrectOrientation(CameraOrientation);
 
             return image;

@@ -84,6 +84,16 @@ namespace OpenIris.Tests
                 var frameNumbers = videoFrames.Select(f => long.Parse(f[0])).ToArray();
                 Assert.IsTrue(frameNumbers.Zip(frameNumbers.Skip(1), (a, b) => b > a).All(x => x), "Frame numbers of -videoframes.txt should increase.");
 
+                // The ROI of each eye is the whole frame of the video it was played from.
+                var dataLines = File.ReadAllLines(rawLeft.Replace("-Left.avi", ".txt"));
+                var columns = dataLines[0].Split(' ');
+                foreach (var line in dataLines.Skip(1).Select(l => l.Split(' ')))
+                {
+                    Assert.AreEqual(0, double.Parse(line[Array.IndexOf(columns, "LeftRoiX")]), "LeftRoiX");
+                    Assert.AreEqual(eyeWidth, double.Parse(line[Array.IndexOf(columns, "LeftRoiWidth")]), "LeftRoiWidth");
+                    Assert.AreEqual(eyeWidth, double.Parse(line[Array.IndexOf(columns, "RightRoiWidth")]), "RightRoiWidth");
+                }
+
                 // Process the recording saving the processed video, as with Process Video in the menu.
                 await WithinLimit(
                     eyeTracker.ProcessVideo(new ProcessVideoOptions

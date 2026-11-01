@@ -113,6 +113,12 @@ namespace OpenIris
         /// </summary>
         public Size ImageSize { get; set; }
 
+        /// <summary>
+        /// Where the image was in the full image of the camera, in the camera's pixels (see
+        /// ImageEye.Roi). Empty if unknown.
+        /// </summary>
+        public Rectangle Roi { get; set; }
+
 
         /// <summary>
         /// Creates a copy of the Data.
@@ -125,6 +131,7 @@ namespace OpenIris
                 WhichEye = WhichEye,
                 Timestamp = Timestamp.Copy(),
                 ImageSize = ImageSize,
+                Roi = Roi,
                 ProcessFrameResult = ProcessFrameResult,
 
                 Pupil = Pupil,

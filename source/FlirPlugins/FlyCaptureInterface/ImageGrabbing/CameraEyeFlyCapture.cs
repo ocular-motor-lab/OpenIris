@@ -332,10 +332,12 @@ namespace OpenIris.ImageGrabbing
                     //// may be disposed and mess up with the image object
                     //// I actually don't understand very well why this works and never crashes. 
                     //// RawImage is inside a using so it should get disposed.
+                    var roiPosition = rawImage.imageMetadata.embeddedROIPosition;
                     var newImage = new ImageEye((int)rawImage.cols, (int)rawImage.rows, (int)rawImage.stride, (IntPtr)rawImage.data, timestamp)
                     {
                         WhichEye = WhichEye,
-                        ImageSourceData = rawImage
+                        ImageSourceData = rawImage,
+                        Roi = new Rectangle((int)(roiPosition >> 16), (int)(roiPosition & 0xFFFF), (int)rawImage.cols, (int)rawImage.rows),
                     };
 
                     return newImage;

@@ -152,7 +152,22 @@ Also added in version 0.2, after the calibrated data, for each eye (`Left` first
 
 | Column | Contents |
 | --- | --- |
-| `RoiX`, `RoiY`, `RoiWidth`, `RoiHeight` | Where the eye image is in the full camera image, in pixels. Reserved for a future version: always 0 for now. |
+| `RoiX`, `RoiY`, `RoiWidth`, `RoiHeight` | Where the eye image is in the full image of the camera, in the camera's pixels: X and Y of its top left corner, and its size. 0 if unknown. |
+
+What that is depends on the system:
+
+- **Cameras that read only a window of their sensor** (Spinnaker, FlyCapture): the window, as the
+  camera reports it with each frame. It changes when the window moves to follow the eye (the
+  arrows in the Set up tab), so add `RoiX` and `RoiY` to `PupilX` and `PupilY` to get positions on
+  the sensor.
+- **Systems that cut each eye out of a bigger image:** the part cut out. For the Webcam system,
+  which cuts a rotated square around each eye and scales it, it's the smallest rectangle around
+  that square, so it's approximate. 0 when the face isn't found.
+- **Other cameras, Simulation and videos:** the whole frame. When processing a recorded video,
+  that's the frame of the video, not the window of the camera that recorded it.
+
+These positions are in the camera's own image, before OpenIris rotates or mirrors it (see the
+camera orientation of the system); they match the eye image only for cameras that are upright.
 
 ## The events file
 

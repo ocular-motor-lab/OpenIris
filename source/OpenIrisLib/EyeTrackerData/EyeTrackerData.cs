@@ -211,12 +211,16 @@ namespace OpenIris
             Add(line, calibratedHead.Y);
             Add(line, calibratedHead.Z);
 
-            // ROI of each eye image in the camera image, in pixels (X, Y, width, height). Placeholders:
-            // no system passes its ROI along with the images yet.
-            for (int i = 0; i < 8; i++)
-            {
-                Add(line, 0.0);
-            }
+            // ROI of each eye image in the camera image, in pixels (X, Y, width, height). 0 if unknown.
+            // Formatted as decimals, as when these columns were placeholders.
+            Add(line, (double)dataLeft.Roi.X);
+            Add(line, (double)dataLeft.Roi.Y);
+            Add(line, (double)dataLeft.Roi.Width);
+            Add(line, (double)dataLeft.Roi.Height);
+            Add(line, (double)dataRight.Roi.X);
+            Add(line, (double)dataRight.Roi.Y);
+            Add(line, (double)dataRight.Roi.Width);
+            Add(line, (double)dataRight.Roi.Height);
 
             return line.ToString();
         }
@@ -366,7 +370,15 @@ namespace OpenIris
             values[n++] = calibratedHead.Y;
             values[n++] = calibratedHead.Z;
 
-            // The 8 ROI values stay 0 (see GetStringLine).
+            values[n++] = dataLeft.Roi.X;
+            values[n++] = dataLeft.Roi.Y;
+            values[n++] = dataLeft.Roi.Width;
+            values[n++] = dataLeft.Roi.Height;
+            values[n++] = dataRight.Roi.X;
+            values[n++] = dataRight.Roi.Y;
+            values[n++] = dataRight.Roi.Width;
+            values[n++] = dataRight.Roi.Height;
+
             return values;
         }
 

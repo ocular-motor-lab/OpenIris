@@ -225,6 +225,9 @@ namespace SpinnakerInterface
                     {
                         WhichEye = WhichEye,
                         ImageSourceData = (lastExposureEndLineStatusAll, rawImage),
+                        Roi = new Rectangle(
+                            roiChunks ? new Point((int)rawImage.ChunkData.OffsetX, (int)rawImage.ChunkData.OffsetY) : offset,
+                            new Size((int)rawImage.Width, (int)rawImage.Height)),
 
                     };
 
@@ -290,6 +293,11 @@ namespace SpinnakerInterface
         #region private methods
         // Initialize camera parameters. This sets up the camera to be a "slave" of the
         // frame triggers. Later, we pick one camera to be the "master".
+        /// <summary>
+        /// Whether the camera reports the position of the window in the sensor with each frame.
+        /// </summary>
+        private bool roiChunks;
+
         private void InitParameters()
         {
             camModelName = cam.DeviceModelName.Value;
@@ -322,6 +330,21 @@ namespace SpinnakerInterface
             cam.ChunkSelector.FromString("FrameID");
             cam.ChunkEnable.Value = true;
             cam.ChunkModeActive.Value = true;
+
+            // The position of the window in the sensor, with each frame: exact even for the frames
+            // taken just before the window moved, which are still in the camera's buffer.
+            try
+            {
+                cam.ChunkSelector.FromString("OffsetX");
+                cam.ChunkEnable.Value = true;
+                cam.ChunkSelector.FromString("OffsetY");
+                cam.ChunkEnable.Value = true;
+                roiChunks = true;
+            }
+            catch
+            {
+                roiChunks = false;
+            }
 
             // This saves the status of all 4 GPIO digital lines.
             try

@@ -41,6 +41,21 @@ namespace OpenIris
         public float Angle { get; }
 
         /// <summary>
+        /// The smallest rectangle around the square, in the coordinates of the camera's image: the
+        /// ROI of the eye image (approximate, since the square is rotated and scaled).
+        /// </summary>
+        /// <param name="imageRoi">ROI of the webcam image the square is in.</param>
+        public Rectangle GetBoundingBox(Rectangle imageRoi)
+        {
+            var half = Size / 2 * (Math.Abs(Math.Cos(Angle)) + Math.Abs(Math.Sin(Angle)));
+            var left = (int)Math.Floor(Center.X - half);
+            var top = (int)Math.Floor(Center.Y - half);
+            var right = (int)Math.Ceiling(Center.X + half);
+            var bottom = (int)Math.Ceiling(Center.Y + half);
+            return new Rectangle(imageRoi.X + left, imageRoi.Y + top, right - left, bottom - top);
+        }
+
+        /// <summary>
         /// Cuts the region out of an image.
         /// </summary>
         /// <param name="image">The webcam image.</param>

@@ -15,8 +15,8 @@ namespace OpenIris.Tests
     /// Checks that pipelines find the pupil (and reflection) where the synthetic eye drew them.
     /// Unlike the baselines, these limits say how accurate tracking must be, not that it is unchanged.
     /// The limits were set from the accuracy measured when the tests were written, plus a margin:
-    /// - JOM reads about 0.6 px right of and 0.55 px below the true center, consistently, for both
-    ///   pupil and reflection (it cancels out after calibration).
+    /// - JOM is within about 0.2 px for both pupil and reflection. (It used to read about 0.6 px
+    ///   right of and below the true center, from even-sized blurs and resized coordinates.)
     /// - SimpleCentroid is unbiased but drifts up to about 1.1 px when the reflection covers part of
     ///   the pupil, since it has no reflection mask.
     /// - SimplePupilCRBlobs is not tested here: it does not find the pupil in these images.
@@ -59,17 +59,21 @@ namespace OpenIris.Tests
                 var found = d.CornealReflections?.Where(cr => !cr.IsEmpty).ToList();
                 return found is null || found.Count == 0 ? double.PositiveInfinity : found.Min(cr => Distance(cr.Center, truth));
             }).ToList();
+            var offsets = data.Select((d, frame) => (truth: SyntheticEye.GetTruth(eye, frame).ReflectionCenter, d.CornealReflections))
+                .Where(x => x.CornealReflections?.Length > 0)
+                .Select(x => (x: x.CornealReflections![0].Center.X - x.truth.X, y: x.CornealReflections[0].Center.Y - x.truth.Y)).ToList();
             TestContext.WriteLine($"Reflection center error: mean {errors.Average():0.000} px, max {errors.Max():0.000} px, " +
+                $"mean offset ({offsets.Average(o => o.x):0.000}, {offsets.Average(o => o.y):0.000}) px, " +
                 $"found in {errors.Count(e => !double.IsInfinity(e))} of {errors.Count} frames");
 
             Assert.IsTrue(errors.Max() <= MaxReflectionErrorPixels, $"Reflection center off by up to {errors.Max():0.000} px (limit {MaxReflectionErrorPixels} px).");
         }
 
-        private const double MaxReflectionErrorPixels = 1.5;
+        private const double MaxReflectionErrorPixels = 0.3;
 
         private static class MaxPupilErrorPixels
         {
-            public const double Jom = 1.5;
+            public const double Jom = 0.3;
             public const double SimpleCentroid = 1.5;
         }
 

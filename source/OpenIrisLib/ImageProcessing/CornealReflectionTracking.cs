@@ -108,7 +108,8 @@ namespace OpenIris.ImageProcessing
 
             if (irisROI.Width == 0 || irisROI.Height == 0) return null;
 
-            var smoothBlurSize = blurSize + 1;
+            // Odd, because an even box blur shifts the image half a pixel right and down.
+            var smoothBlurSize = (blurSize + 1) | 1;
 
             Image<Gray, byte> imgBlurred = imageEye.Image.Copy(irisROI).SmoothBlur(smoothBlurSize, smoothBlurSize);
             Image<Gray, byte> imgResized;
@@ -174,6 +175,10 @@ namespace OpenIris.ImageProcessing
 
             var crs = new List<CornealReflectionData>();
 
+            // The actual scale of the resized image (its size was rounded).
+            var findBlobScaleX = (double)imgCRBinary.Width / irisROI.Width;
+            var findBlobScaleY = (double)imgCRBinary.Height / irisROI.Height;
+
             irisRadiusPix = (int) Math.Round(irisRadiusPix * scaleFactor_findBlob);
             maxBlobArea = maxBlobArea * Math.Pow(scaleFactor_findBlob, 2);
             minBlobArea = minBlobArea * Math.Pow(scaleFactor_findBlob, 2);
@@ -202,7 +207,9 @@ namespace OpenIris.ImageProcessing
                     if (score > 0.3)
                     {
                         crs.Add(new CornealReflectionData(
-                            new PointF((float) (blob.Centroid.X / scaleFactor_findBlob) + irisROI.X, (float) (blob.Centroid.Y / scaleFactor_findBlob) + irisROI.Y),
+                            new PointF(
+                                (float)ImageProcessingExtentionMethods.ResizedToOriginal(blob.Centroid.X, findBlobScaleX) + irisROI.X,
+                                (float)ImageProcessingExtentionMethods.ResizedToOriginal(blob.Centroid.Y, findBlobScaleY) + irisROI.Y),
                             new SizeF(blob.BoundingBox.Size),
                             (float)90.0));
                     }
@@ -216,18 +223,20 @@ namespace OpenIris.ImageProcessing
                         resizeWidth = blob.BoundingBox.Width / scaleFactor_findBlob;
                         resizeHeight = blob.BoundingBox.Height / scaleFactor_findBlob;
                         squareSize = Math.Max(resizeWidth, resizeHeight) * 1.2; // expand the square size to upsample the blob 
+                        var blobX = ImageProcessingExtentionMethods.ResizedToOriginal(blob.Centroid.X, findBlobScaleX) + irisROI.X;
+                        var blobY = ImageProcessingExtentionMethods.ResizedToOriginal(blob.Centroid.Y, findBlobScaleY) + irisROI.Y;
 
                         crROI = new Rectangle(
-                            (int)Math.Round(blob.Centroid.X / scaleFactor_findBlob + irisROI.X - squareSize),
-                            (int)Math.Round(blob.Centroid.Y / scaleFactor_findBlob + irisROI.Y - squareSize),
+                            (int)Math.Round(blobX - squareSize),
+                            (int)Math.Round(blobY - squareSize),
                             (int)Math.Round(squareSize * 2),
                             (int)Math.Round(squareSize * 2)
                         );
                         crROI.Intersect(new Rectangle(new Point(0, 0), imageEye.Size));
 
                         var crROI2 = new Rectangle(
-                            (int)Math.Round(blob.Centroid.X / scaleFactor_findBlob + irisROI.X - squareSize),
-                            (int)Math.Round(blob.Centroid.Y / scaleFactor_findBlob + irisROI.Y - squareSize),
+                            (int)Math.Round(blobX - squareSize),
+                            (int)Math.Round(blobY - squareSize),
                             (int)Math.Round(squareSize * 2 / 1.2),
                             (int)Math.Round(squareSize * 2 / 1.2)
                         );
@@ -267,8 +276,8 @@ namespace OpenIris.ImageProcessing
                         // find the center
                         var centerMass = upSampled_imgCRBinary.GetMoments(true).GravityCenter;
 
-                        var newX = centerMass.X / scaleFactor_findCenter + crROI.X;
-                        var newY = centerMass.Y / scaleFactor_findCenter + crROI.Y;
+                        var newX = ImageProcessingExtentionMethods.ResizedToOriginal(centerMass.X, (double)imgResized.Width / crROI.Width) + crROI.X;
+                        var newY = ImageProcessingExtentionMethods.ResizedToOriginal(centerMass.Y, (double)imgResized.Height / crROI.Height) + crROI.Y;
 
                         crs.Add(new CornealReflectionData(
                         new PointF((float)newX, (float)newY),

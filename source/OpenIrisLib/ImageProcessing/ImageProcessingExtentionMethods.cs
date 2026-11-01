@@ -18,6 +18,13 @@ namespace OpenIris.ImageProcessing
     public static class ImageProcessingExtentionMethods
     {
         /// <summary>
+        /// Converts a position found in a resized image back to the original image. OpenCV's Resize
+        /// aligns pixel centers, so x in an image resized by scale maps back to (x + 0.5) / scale - 0.5,
+        /// not x / scale (which is off by 0.5 - 0.5 / scale pixels).
+        /// </summary>
+        internal static double ResizedToOriginal(double x, double scale) => (x + 0.5) / scale - 0.5;
+
+        /// <summary>
         /// Gets the smallest rectangle that fits the ellipse within.
         /// </summary>
         /// <param name="ellipse">Ellipse to be fit.</param>

@@ -1,7 +1,7 @@
 # Image processing: known issues and planned improvements
 
-Found in October 2026 while writing the pipeline tests (`source/OpenIrisTests`). None of these has been
-changed yet. Fixing any of them **changes recorded data**, so each fix should:
+Found in October 2026 while writing the pipeline tests (`source/OpenIrisTests`). Items marked **Fixed**
+have been changed since. Fixing any of them **changes recorded data**, so each fix should:
 
 1. be made on its own branch;
 2. tighten the matching limit in `PipelineAccuracyTests` so the tests prove the improvement;
@@ -12,6 +12,10 @@ changed yet. Fixing any of them **changes recorded data**, so each fix should:
 Pixel numbers below assume the default scale of 6 pixels per mm.
 
 ## 1. Half-pixel offsets in JOM pupil and reflection positions (most important)
+
+**Fixed** (#52): odd blur sizes and `(x + 0.5) / s - 0.5`. On the synthetic eye the mean error went
+from 0.83 to 0.07 px for the pupil and from 1.06 to 0.06 px for the reflection; torsion and speed
+didn't change. The JOM accuracy limits are now 0.3 px.
 
 On the synthetic eye, JOM reports positions shifted right and down from the truth:
 
@@ -72,6 +76,9 @@ share the offset.
 - Then tighten the JOM accuracy limits in `PipelineAccuracyTests` from 1.5 px to about 0.2 px.
 
 ## 2. Reflection size limits use the wrong area formula
+
+**Fixed** (#53). Torsion didn't change; a tiny tear-film highlight at the upper eyelid is now found
+as a second reflection on some frames of the sample video.
 
 `CornealReflectionTracking.cs`, lines 60-61:
 

@@ -591,9 +591,10 @@ namespace OpenIris.ImageProcessing
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // -- Thresholding -- Get the binary image with the dark pixels
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
-            int blurSize = (int)Math.Max(Math.Round(2 * scaleFactor),1);
+            // Odd blur sizes, because an even box blur shifts the image half a pixel right and down.
+            int blurSize = 2 * (int)Math.Round(scaleFactor) + 1;
             var imgTemp = imageEye.Image.Copy(roiPupil).Resize(resizeWidth, resizeHeight, Emgu.CV.CvEnum.Inter.Cubic).SmoothBlur(blurSize, blurSize);
-            var imgPupilBinary = imgTemp.SmoothBlur(10, 10).ThresholdBinaryInv(new Gray(threshold), new Gray(255));
+            var imgPupilBinary = imgTemp.SmoothBlur(11, 11).ThresholdBinaryInv(new Gray(threshold), new Gray(255));
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
             // -- Image Closing and opening -- Remove little dots over threshold or little gaps under
@@ -685,7 +686,9 @@ namespace OpenIris.ImageProcessing
             float scaleFactorY = imgPupilBinary.Height / (float)roiPupil.Height;
 
             var pupil = new PupilData(
-                new PointF((pupilEllipse.Center.X / scaleFactorX) + (float)roiPupil.X, (pupilEllipse.Center.Y / scaleFactorY) + (float)roiPupil.Y),
+                new PointF(
+                    (float)ImageProcessingExtentionMethods.ResizedToOriginal(pupilEllipse.Center.X, scaleFactorX) + roiPupil.X,
+                    (float)ImageProcessingExtentionMethods.ResizedToOriginal(pupilEllipse.Center.Y, scaleFactorY) + roiPupil.Y),
                 new SizeF(pupilEllipse.Size.Width / scaleFactorX, pupilEllipse.Size.Height / scaleFactorY),
                 pupilEllipse.Angle - 90);
             return pupil;

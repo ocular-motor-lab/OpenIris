@@ -22,14 +22,15 @@ namespace OpenIris.Tests
     {
         public static readonly Size FrameSize = new Size(400, 400);
 
-        /// <summary>
-        /// Pixel scale that matches the default eye tracking system settings (6 pixels per mm).
-        /// </summary>
-        public const double MmPerPix = 1.0 / 6.0;
-
         private static readonly PointF EyeCenter = new PointF(200, 200);
         private const float ScleraRadius = 150;
         private const float IrisRadius = 80;
+
+        /// <summary>
+        /// Pixel scale that fits the drawing: the iris radius of a real eye is about 6 mm, so
+        /// 0.075 mm per pixel (about 13 pixels per mm). The pipelines' size limits are in mm.
+        /// </summary>
+        public const double MmPerPix = 6.0 / IrisRadius;
 
         /// <summary>
         /// Ground truth for one frame.
@@ -67,28 +68,33 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
+        /// Radius of the reflection, in pixels, unless another is asked for.
+        /// </summary>
+        public const float DefaultReflectionRadius = 5;
+
+        /// <summary>
         /// Draws frames 0 to count-1.
         /// </summary>
-        public static IEnumerable<ImageEye> Frames(Eye whichEye, int count)
+        public static IEnumerable<ImageEye> Frames(Eye whichEye, int count, float reflectionRadius = DefaultReflectionRadius)
         {
             for (int frame = 0; frame < count; frame++)
             {
-                yield return Draw(whichEye, frame);
+                yield return Draw(whichEye, frame, reflectionRadius);
             }
         }
 
         /// <summary>
         /// Gets one frame. Frames are drawn once and then copied, since several tests use the same ones.
         /// </summary>
-        public static ImageEye Draw(Eye whichEye, int frame)
+        public static ImageEye Draw(Eye whichEye, int frame, float reflectionRadius = DefaultReflectionRadius)
         {
             Image<Gray, byte> image;
             lock (Cache)
             {
-                if (!Cache.TryGetValue((whichEye, frame), out image))
+                if (!Cache.TryGetValue((whichEye, frame, reflectionRadius), out image))
                 {
-                    image = DrawImage(whichEye, frame);
-                    Cache.Add((whichEye, frame), image);
+                    image = DrawImage(whichEye, frame, reflectionRadius);
+                    Cache.Add((whichEye, frame, reflectionRadius), image);
                 }
             }
 
@@ -96,9 +102,9 @@ namespace OpenIris.Tests
             return new ImageEye(image.Copy(), whichEye, timestamp, null);
         }
 
-        private static readonly Dictionary<(Eye, int), Image<Gray, byte>> Cache = new Dictionary<(Eye, int), Image<Gray, byte>>();
+        private static readonly Dictionary<(Eye, int, float), Image<Gray, byte>> Cache = new Dictionary<(Eye, int, float), Image<Gray, byte>>();
 
-        private static Image<Gray, byte> DrawImage(Eye whichEye, int frame)
+        private static Image<Gray, byte> DrawImage(Eye whichEye, int frame, float reflectionRadius)
         {
             var truth = GetTruth(whichEye, frame);
             var image = new Image<Gray, byte>(FrameSize);
@@ -123,10 +129,10 @@ namespace OpenIris.Tests
             }
 
             FillCircle(image, truth.PupilCenter, truth.PupilRadius, 20);
-            // Big enough to survive the JOM reflection tracker's blur, half-size resize and threshold of 250.
-            FillCircle(image, truth.ReflectionCenter, 5, 255);
-
             AddNoise(image, seed: (whichEye == Eye.Left ? 0 : 100000) + frame, amplitude: 6);
+
+            // After the noise: a reflection saturates the camera, so it stays at 255.
+            FillCircle(image, truth.ReflectionCenter, reflectionRadius, 255);
             return image;
         }
 

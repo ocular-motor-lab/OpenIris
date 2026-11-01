@@ -130,7 +130,7 @@ namespace OpenIris.ImageProcessing
             foreach (var blob in detector.Detect(imageThreshold))
             {
                 // If area is too small
-                if (blob.Area < minPupArea * scaleDownX)
+                if (blob.Area < minPupArea * scaleDownX * scaleDownY)
                 {
                     continue;
                 }

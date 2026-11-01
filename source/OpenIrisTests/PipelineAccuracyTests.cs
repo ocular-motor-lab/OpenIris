@@ -46,12 +46,20 @@ namespace OpenIris.Tests
             Assert.IsTrue(errors.Max() <= maxError, $"Pupil center off by up to {errors.Max():0.000} px (limit {maxError} px).");
         }
 
+        /// <summary>
+        /// The default reflection (5 px radius), and a small one (2 px, just above the minimum size of
+        /// 0.1 mm), which used to be lost unless its center fell on a pixel (GitHub issue #54). The
+        /// small one has few pixels, so its center is less accurate.
+        /// </summary>
         [DataTestMethod]
-        [DataRow(Eye.Left)]
-        [DataRow(Eye.Right)]
-        public void JomFindsCornealReflection(Eye eye)
+        [DataRow(Eye.Left, SyntheticEye.DefaultReflectionRadius, 0.3)]
+        [DataRow(Eye.Right, SyntheticEye.DefaultReflectionRadius, 0.3)]
+        [DataRow(Eye.Left, 2f, 0.6)]
+        [DataRow(Eye.Right, 2f, 0.6)]
+        public void JomFindsCornealReflection(Eye eye, float reflectionRadius, double maxError)
         {
-            var data = PipelineHarness.RunSyntheticEye("JOM", eye, Frames);
+            var data = PipelineHarness.Run("JOM", eye, SyntheticEye.Frames(eye, Frames, reflectionRadius), SyntheticEye.MmPerPix,
+                configure: PipelineHarness.Thresholds(PipelineHarness.SyntheticEyeDarkThreshold));
 
             var errors = data.Select((d, frame) =>
             {
@@ -63,13 +71,11 @@ namespace OpenIris.Tests
                 .Where(x => x.CornealReflections?.Length > 0)
                 .Select(x => (x: x.CornealReflections![0].Center.X - x.truth.X, y: x.CornealReflections[0].Center.Y - x.truth.Y)).ToList();
             TestContext.WriteLine($"Reflection center error: mean {errors.Average():0.000} px, max {errors.Max():0.000} px, " +
-                $"mean offset ({offsets.Average(o => o.x):0.000}, {offsets.Average(o => o.y):0.000}) px, " +
+                $"mean offset ({offsets.Select(o => (double)o.x).DefaultIfEmpty(double.NaN).Average():0.000}, {offsets.Select(o => (double)o.y).DefaultIfEmpty(double.NaN).Average():0.000}) px, " +
                 $"found in {errors.Count(e => !double.IsInfinity(e))} of {errors.Count} frames");
 
-            Assert.IsTrue(errors.Max() <= MaxReflectionErrorPixels, $"Reflection center off by up to {errors.Max():0.000} px (limit {MaxReflectionErrorPixels} px).");
+            Assert.IsTrue(errors.Max() <= maxError, $"Reflection center off by up to {errors.Max():0.000} px (limit {maxError} px).");
         }
-
-        private const double MaxReflectionErrorPixels = 0.3;
 
         private static class MaxPupilErrorPixels
         {

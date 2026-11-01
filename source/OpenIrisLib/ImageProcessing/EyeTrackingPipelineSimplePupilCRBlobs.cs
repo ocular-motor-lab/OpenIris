@@ -182,12 +182,12 @@ namespace OpenIris
         [Browsable(false)]
         public double MaxCRRadPix { get { return maxCRRadmm / MmPerPix; } }
 
-        [Category("Corneal Reflection tracking settings"), Description("Minimum radius of the CR in mmms.")]
+        [Category("Corneal Reflection tracking settings"), Description("Minimum radius of the CR in mm.")]
         public double MinCRRadmm { get => minCRRadmm; set => SetProperty(ref minCRRadmm, value, nameof(MinCRRadmm)); }
-        private double minCRRadmm = 0.3;
+        private double minCRRadmm = 0.1;
 
-        [Category("Corneal Reflection tracking settings"), Description("Maximum radius of the CR in mms.")]
+        [Category("Corneal Reflection tracking settings"), Description("Maximum radius of the CR in mm (about a small pupil).")]
         public double MaxCRRadmm { get => maxCRRadmm; set => SetProperty(ref maxCRRadmm, value, nameof(MaxCRRadmm)); }
-        private double maxCRRadmm = 5;
+        private double maxCRRadmm = 1.5;
     }
 }

@@ -28,8 +28,9 @@ dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c Debug -p:Pla
   first run on each computer records a reference time in `Baselines\performance\` (not committed).
   Delete that file to record a new one. Skipped on GitHub.
 - **Measurements** (category Measurement, skipped on GitHub): they report numbers instead of
-  checking them. `TorsionMeasurementTests` prints how noisy torsion is, to compare a change before
-  and after; `PipelineTuningTests` sweeps the thresholds and reference frames used above. Run them
+  checking them. `TrackingMeasurementTests` prints the accuracy and precision of the pupil, the
+  reflection and torsion, to compare a change before and after; `PipelineTuningTests` sweeps the
+  thresholds used above. Run them
   with `--filter "TestCategory=Measurement" --logger "console;verbosity=detailed"`.
 - **Record and process** (`RecordAndProcessTests`): runs OpenIris without the user interface, as a
   user would. It tracks with the Simulation system, records about 1.5 seconds of raw video, then

@@ -42,7 +42,7 @@ namespace OpenIris.Tests
 
             var calibration = new EyeCalibration(Eye.Left);
             var milliseconds = new double[frames.Count];
-            using (var pipeline = PipelineHarness.CreatePipeline("JOM", Eye.Left, SyntheticEye.MmPerPix))
+            using (var pipeline = PipelineHarness.CreatePipeline("JOM", Eye.Left, PipelineHarness.SampleVideoMmPerPix))
             {
                 var stopwatch = new Stopwatch();
                 for (int i = 0; i < frames.Count; i++)

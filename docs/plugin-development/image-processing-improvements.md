@@ -98,6 +98,16 @@ bright spots (for example reflections on glasses) through. The settings may need
 
 ## 3. Small reflections are missed between pixels
 
+**Fixed** (#54). The minimum size was checked in the half-size image, where a small reflection is
+only a few pixels, and the blur (3 px) could pull a 2 px reflection below the threshold. Now the
+first stage thresholds before reducing, the minimum size is checked at full size without blur, and
+the blurs are no wider than the reflection. The default size limits are now 0.1 to 1.5 mm radius
+(were 0.3 to 5). The synthetic eye now has a realistic scale (0.075 mm per pixel, iris radius
+6 mm) and a saturated reflection; at that scale the old code found its 5 px reflection in only
+about half the frames. A 2 px reflection is now found in every frame (mean error 0.13 px).
+The quick pupil search also scaled its minimum area by the scale instead of its square, which lost
+the smallest synthetic pupils.
+
 A 3 px-radius reflection on the synthetic eye was found in only 1 of 100 frames: the one whose center
 fell exactly on a pixel. The first stage blurs, shrinks the image to half size and thresholds at 250,
 which pulls a small reflection's peak below the threshold unless it's centered on a pixel. The

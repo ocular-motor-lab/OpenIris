@@ -46,6 +46,11 @@ namespace OpenIris.Tests
         public const int SampleVideoDarkThreshold = 70;
 
         /// <summary>
+        /// Pixel scale of the sample videos: the Simulation system's default (6 pixels per mm).
+        /// </summary>
+        public const double SampleVideoMmPerPix = 0.075;
+
+        /// <summary>
         /// Frame of the sample videos used as the calibration's reference, the same for both eyes
         /// because they are calibrated together: both pupils are round (the eyes look at the
         /// cameras), and torsion is less noisy than with frame 0.
@@ -60,11 +65,10 @@ namespace OpenIris.Tests
                 configure: configure ?? Thresholds(SyntheticEyeDarkThreshold));
 
         /// <summary>
-        /// Processes the first frames of a sample video, calibrated with its reference frame. Same
-        /// pixel scale as the Simulation system's default settings.
+        /// Processes the first frames of a sample video, calibrated with its reference frame.
         /// </summary>
         public static List<EyeData> RunSampleVideo(string pipelineName, Eye whichEye, int count, int? referenceFrame = null, Action<EyeTrackingPipelineSettings>? configure = null) =>
-            Run(pipelineName, whichEye, ReadVideo(SampleVideo(whichEye), whichEye, count), SyntheticEye.MmPerPix, eyeModelFromReference: true,
+            Run(pipelineName, whichEye, ReadVideo(SampleVideo(whichEye), whichEye, count), SampleVideoMmPerPix, eyeModelFromReference: true,
                 reference: ReadFrame(SampleVideo(whichEye), whichEye, referenceFrame ?? SampleVideoReference),
                 configure: configure ?? Thresholds(SampleVideoDarkThreshold));
 

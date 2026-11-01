@@ -65,7 +65,7 @@ Everything is built into `bin\x64\Debug\` (or `bin\x64\Release\`):
 - `Plugins\`: the plugin DLLs (eye tracking systems, pipelines, calibrations), which OpenIris loads at
   startup;
 - `SampleVideos\`: the videos Simulation plays;
-- when OpenIris runs from there, its settings (`OpenIrisSettings.xml`) and `Logs\`, with its log
+- when OpenIris runs from there, its settings (`OpenIrisSettings.xml` and `Settings\`) and `Logs\`, with its log
   files (`OpenIrisLog-*.Log`).
 
 To build from the command line, open a **Developer PowerShell for Visual Studio** in the repository

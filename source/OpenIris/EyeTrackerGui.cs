@@ -49,7 +49,8 @@ namespace OpenIris.UI
         /// <summary>
         /// Initializes a new instance of the EyeTrackerGui class
         /// </summary>
-        public EyeTrackerGui()
+        /// <param name="profile">Settings profile to start with. If null, the one used last.</param>
+        public EyeTrackerGui(string? profile = null)
         {
             InitializeComponent();
 
@@ -69,7 +70,7 @@ namespace OpenIris.UI
 
             try
             {
-                eyeTracker = EyeTracker.Create();
+                eyeTracker = EyeTracker.Create(profile);
 
             }
             catch(Exception ex)
@@ -118,6 +119,7 @@ namespace OpenIris.UI
             var settings = eyeTracker.Settings;
             if (settings is null) return;
 
+            UpdateTitle();
             Hide();
 
             try
@@ -160,6 +162,7 @@ namespace OpenIris.UI
                 eyeTrackerUICommands.StartTrackingCommand.Bind(buttonStartTracking);
 
                 eyeTrackerUICommands.EditSettingsCommand.Bind(configurationToolStripMenuItem);
+                AddSettingsProfilesMenu();
 
                 //eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
                 //eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
@@ -343,8 +346,83 @@ namespace OpenIris.UI
             }
         }
 
+        /// <summary>
+        /// Shows the settings profile in the title of the window.
+        /// </summary>
+        private void UpdateTitle() => Text = $"OpenIris - {eyeTracker.Settings.Profile}";
+
+        /// <summary>
+        /// The Settings profile menu, after Configuration: the profiles, to switch between them, and
+        /// to save, rename or delete them.
+        /// </summary>
+        private void AddSettingsProfilesMenu()
+        {
+            var menu = new ToolStripMenuItem("Settings profile");
+            fileToolStripMenuItem.DropDownItems.Insert(fileToolStripMenuItem.DropDownItems.IndexOf(configurationToolStripMenuItem) + 1, menu);
+            menu.DropDownItems.Add(new ToolStripMenuItem("(empty)"));
+
+            void Try(Action action)
+            {
+                try
+                {
+                    action();
+                }
+                catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException || ex is System.IO.IOException)
+                {
+                    MessageBox.Show(this, ex.Message, "Settings profile", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+
+            menu.DropDownOpening += (o, e) =>
+            {
+                var settings = eyeTracker.Settings;
+                menu.DropDownItems.Clear();
+                foreach (var profile in settings.Profiles)
+                {
+                    var item = new ToolStripMenuItem(profile)
+                    {
+                        Checked = profile == settings.Profile,
+                        Enabled = eyeTracker.NotStarted || profile == settings.Profile,
+                        ToolTipText = eyeTracker.NotStarted ? null : "Stop tracking to switch profiles.",
+                    };
+                    item.Click += (_, __) => Try(() => eyeTracker.SwitchSettingsProfile(profile));
+                    menu.DropDownItems.Add(item);
+                }
+
+                menu.DropDownItems.Add(new ToolStripSeparator());
+                menu.DropDownItems.Add("Save as new profile ...", null, (_, __) =>
+                {
+                    var name = TextInputDialog.Show(this, "Save as new profile", "Name of the new profile, with the current settings:");
+                    if (name != null) Try(() => settings.SaveProfileAs(name));
+                });
+                menu.DropDownItems.Add("Rename this profile ...", null, (_, __) =>
+                {
+                    var name = TextInputDialog.Show(this, "Rename profile", $"New name of the profile '{settings.Profile}':", settings.Profile);
+                    if (name != null) Try(() => settings.RenameProfile(settings.Profile, name));
+                });
+                var delete = new ToolStripMenuItem("Delete profile");
+                foreach (var profile in settings.Profiles.Where(p => p != settings.Profile))
+                {
+                    delete.DropDownItems.Add(profile, null, (_, __) =>
+                    {
+                        if (MessageBox.Show(this, $"Delete the settings profile '{profile}'?", "Delete profile", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
+                        {
+                            Try(() => settings.DeleteProfile(profile));
+                        }
+                    });
+                }
+                delete.Enabled = delete.DropDownItems.Count > 0;
+                menu.DropDownItems.Add(delete);
+            };
+        }
+
         private void EyeTracker_Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(EyeTrackerSettings.Profile))
+            {
+                BeginInvoke(new Action(UpdateTitle));
+            }
+
             // Check if the property that changed was SessionName
             if (e.PropertyName == nameof(EyeTrackerSettings.SessionName))
             {

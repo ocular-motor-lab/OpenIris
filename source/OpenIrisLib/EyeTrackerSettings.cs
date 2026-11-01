@@ -21,7 +21,7 @@ namespace OpenIris
     /// offer a nice gui.
     /// </summary>
     [Serializable]
-    public sealed class EyeTrackerSettings : EyeTrackerSettingsBase
+    public sealed partial class EyeTrackerSettings : EyeTrackerSettingsBase
     {
         #region A) Choose an eye tracking system plugin"
 
@@ -191,8 +191,9 @@ namespace OpenIris
 
         #region D) General settings
 
-        [Category("D) General settings"), Description("Maximum number of processing threads.")]
+        [Category("D) General settings"), Description("Maximum number of processing threads. Shared by all profiles.")]
         [NeedsRestarting(true)]
+        [SharedSetting]
         public int MaxNumberOfProcessingThreads { get => maxNumberOfProcessingThreads; set => SetProperty(ref maxNumberOfProcessingThreads, value, nameof(MaxNumberOfProcessingThreads)); }
         private int maxNumberOfProcessingThreads = 1; // Default value
 
@@ -201,8 +202,9 @@ namespace OpenIris
         private bool debug = false; // Default value
 
 
-        [Category("D) General settings"), Description("Gets the size of the buffer.")]
+        [Category("D) General settings"), Description("Gets the size of the buffer. Shared by all profiles.")]
         [NeedsRestarting]
+        [SharedSetting]
         public int BufferSize { get => bufferSize; set => SetProperty(ref bufferSize, value, nameof(BufferSize)); }
         private int bufferSize = 100; // Default value
 
@@ -214,12 +216,14 @@ namespace OpenIris
         public string SessionName { get => sessionName; set => SetProperty(ref sessionName, value, nameof(SessionName)); }
         private string sessionName = "OpenIris"; // Default value
 
-        [Category("E) Recording settings"), Description("Folder where data is saved")]
+        [Category("E) Recording settings"), Description("Folder where data is saved. Shared by all profiles.")]
+        [SharedSetting]
         public string DataFolder { get => dataFolder; set => SetProperty(ref dataFolder, value, nameof(DataFolder)); }
         private string dataFolder = @"C:\OpenIrisData"; // Default value
 
         [Browsable(false)]
         [Category("E) Recording settings"), Description("Last file saved.")]
+        [SharedSetting]
         public string LastRecordedFile { get => lastRecordedFile; set => SetProperty(ref lastRecordedFile, value, nameof(LastRecordedFile)); }
         private string lastRecordedFile = string.Empty; // Default value
 
@@ -243,8 +247,9 @@ namespace OpenIris
 
         #region G) Network settings
 
-        [Category("G) Network "), Description("TCP port where the host is listening")]
+        [Category("G) Network "), Description("TCP port where the host is listening. Shared by all profiles.")]
         [NeedsRestarting]
+        [SharedSetting]
         public int ServiceListeningPort { get => serviceListeningPort; set => SetProperty(ref serviceListeningPort, value, nameof(ServiceListeningPort)); }
         private int serviceListeningPort = 9000; // Default value
 
@@ -256,7 +261,8 @@ namespace OpenIris
         public bool StreamToLsl { get => streamToLsl; set => SetProperty(ref streamToLsl, value, nameof(StreamToLsl)); }
         private bool streamToLsl = false; // Default value
 
-        [Category("H) LSL streaming"), Description("Name of the LSL stream (outlet) advertised on the network.")]
+        [Category("H) LSL streaming"), Description("Name of the LSL stream (outlet) advertised on the network. Shared by all profiles.")]
+        [SharedSetting]
         public string LslStreamName { get => lslStreamName; set => SetProperty(ref lslStreamName, value, nameof(LslStreamName)); }
         private string lslStreamName = "OpenIris"; // Default value
 
@@ -274,6 +280,7 @@ namespace OpenIris
         /// Folder of the last video selected to play or process.
         /// </summary>
         [Browsable(false)]
+        [SharedSetting]
         public string LastVideoFolder { get; set; }
 
         /// <summary>
@@ -285,11 +292,6 @@ namespace OpenIris
         #endregion
 
         #region Setting loading and saving, including plugin settings
-
-        /// <summary>
-        /// Path of the file.
-        /// </summary>
-        private string settingsPath = "";
 
         public EyeTrackerSettings()
             : this(false)
@@ -318,38 +320,8 @@ namespace OpenIris
 
 
         /// <summary>
-        /// Name of the settings file, in the folder OpenIris starts in.
-        /// </summary>
-        public const string FileName = "OpenIrisSettings.xml";
-
-        /// <summary>
-        /// Name of the settings file of OpenIris 0.2.0-alpha.1 and earlier.
-        /// </summary>
-        private const string OldFileName = "EyeTrackerSettings.xml";
-
-        /// <summary>
-        /// Tries to load the settings from disk. If not possible loads the default settings.
-        /// </summary>
-        public static EyeTrackerSettings Load()
-        {
-            var fileName = Path.Combine(Directory.GetCurrentDirectory(), FileName);
-            var oldFileName = Path.Combine(Directory.GetCurrentDirectory(), OldFileName);
-
-            // Settings of an older version: read them, and save them with the new name. The old file
-            // stays, for the older version.
-            if (!File.Exists(fileName) && File.Exists(oldFileName))
-            {
-                System.Diagnostics.Trace.WriteLine($"Reading the settings from {OldFileName}. They will be saved to {FileName}.");
-                var settings = Load(oldFileName);
-                settings.settingsPath = fileName;
-                return settings;
-            }
-
-            return Load(fileName);
-        }
-
-        /// <summary>
-        /// Loads the settings from a file. Settings of plugins that are no longer installed are
+        /// Loads all the settings, shared ones included, from one file, such as the copy saved with
+        /// each recording. Settings of plugins that are no longer installed are
         /// skipped, and if the selected system, pipeline or calibration is one of them, the default
         /// is used instead.
         /// </summary>
@@ -358,8 +330,8 @@ namespace OpenIris
         {
             if (!File.Exists(settingsFileName))
             {
-                System.Diagnostics.Trace.WriteLine("No settings file yet, using the default settings. They will be saved to " + settingsFileName + " when OpenIris closes.");
-                return new EyeTrackerSettings { settingsPath = settingsFileName };
+                System.Diagnostics.Trace.WriteLine("No settings file " + settingsFileName + ", using the default settings.");
+                return new EyeTrackerSettings();
             }
 
             try
@@ -370,7 +342,6 @@ namespace OpenIris
                 using var xmlreader = XmlReader.Create(file);
 
                 var settings = (EyeTrackerSettings)reader.Deserialize(xmlreader);
-                settings.settingsPath = settingsFileName;
 
                 // The selected plugins are read before the lists of settings, which then replace the
                 // defaults the selection added. Selecting them again adds the defaults back for any
@@ -393,15 +364,7 @@ namespace OpenIris
                 System.Diagnostics.Trace.WriteLine("Error loading settings going to defaults. " + ex);
             }
 
-            return new EyeTrackerSettings { settingsPath = settingsFileName };
-        }
-
-        /// <summary>
-        /// Saves the current settings to disk on the same path it was loaded.
-        /// </summary>
-        public void Save()
-        {
-            Save(settingsPath);
+            return new EyeTrackerSettings();
         }
 
         /// <summary>

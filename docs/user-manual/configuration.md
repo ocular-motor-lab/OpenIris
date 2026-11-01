@@ -10,12 +10,42 @@ Open the configuration window with **File > Configuration…**. It has four colu
 ![The configuration window](../images/user-manual/configuration-window.png)
 
 Click a setting to see its description at the bottom of the column. Settings are saved automatically
-in `OpenIrisSettings.xml`, in the OpenIris folder, and kept for the next session. (Versions up to
-0.2.0-alpha.1 used `EyeTrackerSettings.xml`; OpenIris reads it if there is no `OpenIrisSettings.xml`
-yet.)
+in the active [settings profile](#settings-profiles) and kept for the next session.
 
 Some settings can only change while not tracking, for example the camera frame rate. Changing one of
 them while tracking stops the tracking; start it again to apply the change.
+
+## Settings profiles
+
+A profile is a complete configuration: the eye tracking system, the pipeline, the calibration method
+and all their settings. Keep one profile for each setup used on a computer (for example "Lab rig",
+"Webcam pilot", "Patient room") and switch between them instead of changing each setting.
+
+Under **File > Settings profile**:
+
+- click a profile to switch to it (only while not tracking, because the eye tracking system may
+  change);
+- **Save as new profile…** saves the current settings with a new name and switches to it;
+- **Rename this profile…** and **Delete profile** (any but the active one).
+
+The title of the main window shows the active profile. OpenIris starts with the profile used last. To
+start with another one, for example from a shortcut, add `--profile "Lab rig"` to the command line
+of `OpenIris.exe`. The [web client](remote-control.md#web-client) can also switch profiles.
+
+A few settings belong to the computer rather than to a setup, so they stay the same when switching
+profiles: **DataFolder**, **ServiceListeningPort**, **MaxNumberOfProcessingThreads**,
+**BufferSize** and **LslStreamName**. Their descriptions say "Shared by all profiles".
+
+The files, in the OpenIris folder:
+
+| File | Contents |
+| --- | --- |
+| `OpenIrisSettings.xml` | The shared settings and the active profile. |
+| `Settings\NAME.xml` | One file per profile, with all the other settings. |
+
+A profile file can be copied to another computer: it doesn't change that computer's data folder or
+ports. The first time, OpenIris turns the settings of older versions (`EyeTrackerSettings.xml`) into
+the profile **Default**, and leaves the old file as it was.
 
 ## General settings
 

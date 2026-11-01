@@ -42,6 +42,15 @@ namespace OpenIris
         }
     }
 
+    /// <summary>
+    /// Marks a setting of <see cref="EyeTrackerSettings"/> that belongs to the computer rather than to
+    /// a settings profile: it is saved in OpenIrisSettings.xml and stays the same when switching profiles.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
+    public sealed class SharedSettingAttribute : Attribute
+    {
+    }
+
     [Serializable]
     public class EyeTrackerSettingsBase : INotifyPropertyChanged
     {

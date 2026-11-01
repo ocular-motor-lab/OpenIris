@@ -17,7 +17,7 @@ namespace OpenIris.UI
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             // Write crashes to the log. Without this an exception on a background thread closes
             // OpenIris without leaving any trace.
@@ -27,7 +27,21 @@ namespace OpenIris.UI
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new EyeTrackerGui());
+            Application.Run(new EyeTrackerGui(GetProfile(args)));
+        }
+
+        /// <summary>
+        /// The settings profile to start with: --profile NAME or --profile=NAME, or null.
+        /// </summary>
+        private static string GetProfile(string[] args)
+        {
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].StartsWith("--profile=", StringComparison.OrdinalIgnoreCase)) return args[i].Substring("--profile=".Length);
+                if (string.Equals(args[i], "--profile", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length) return args[i + 1];
+            }
+
+            return null;
         }
 
         /// <summary>

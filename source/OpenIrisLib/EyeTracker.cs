@@ -31,7 +31,7 @@ namespace OpenIris
         /// That should not be a problem. The only way to access an EyeTracker object
         /// is by the static Start method and that one will call init appropriately.
         /// </summary>
-        private EyeTracker()
+        private EyeTracker(string? profile)
         {
             DataBuffer = new EyeTrackerDataBuffer();
             Calibration = CalibrationParameters.Default;
@@ -56,7 +56,7 @@ namespace OpenIris
 
                 // Load settings. Needs to happen after the plugins have been initialized to properly
                 // load the settings of each plugin
-                Settings = EyeTrackerSettings.Load();
+                Settings = profile is null ? EyeTrackerSettings.Load() : EyeTrackerSettings.LoadFromFolder(Directory.GetCurrentDirectory(), profile);
 
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
@@ -73,11 +73,24 @@ namespace OpenIris
         /// <summary>
         /// Initializes an instance of the EyeTracker class.
         /// </summary>
-        public static EyeTracker Create()
+        /// <param name="profile">Settings profile to start with. If null, the one used last.</param>
+        public static EyeTracker Create(string? profile = null)
         {
-            eyeTracker ??= new EyeTracker();
+            eyeTracker ??= new EyeTracker(profile);
 
             return eyeTracker;
+        }
+
+        /// <summary>
+        /// Switches to another settings profile. Only while not tracking, because the eye tracking
+        /// system may change.
+        /// </summary>
+        /// <param name="name">Name of the profile.</param>
+        public void SwitchSettingsProfile(string name)
+        {
+            if (!NotStarted) throw new InvalidOperationException("Stop tracking before switching the settings profile.");
+
+            Settings.SwitchProfile(name);
         }
 
         /// <summary>

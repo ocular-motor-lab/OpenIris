@@ -64,6 +64,7 @@ namespace OpenIris
                 Eye = settings.EyeTrackingSystemSettings.Eye,
                 settings.EyeTrackingPipeline,
                 settings.CalibrationMethod,
+                settings.Profile,
                 settings.SessionName,
                 settings.DataFolder,
                 settings.LastRecordedFile,
@@ -284,21 +285,71 @@ namespace OpenIris
         [Route(HttpVerbs.Put, "/settings/{name}")]
         public async Task<object> ChangeSetting(string name)
         {
-            var body = await HttpContext.GetRequestBodyAsStringAsync().ConfigureAwait(false) ?? "";
-            var text = body;
-            try
-            {
-                using var json = JsonDocument.Parse(body);
-                text = json.RootElement.ValueKind == JsonValueKind.String ? json.RootElement.GetString() ?? "" : json.RootElement.GetRawText();
-            }
-            catch (JsonException)
-            {
-                // Plain text.
-            }
-
+            var text = await ReadTextAsync().ConfigureAwait(false);
             server.OnUiThread(() => SetSetting(name, text));
             return Ok();
         }
+
+        /// <summary>
+        /// The body of the request as text: a JSON value, or plain text.
+        /// </summary>
+        private async Task<string> ReadTextAsync()
+        {
+            var body = await HttpContext.GetRequestBodyAsStringAsync().ConfigureAwait(false) ?? "";
+            try
+            {
+                using var json = JsonDocument.Parse(body);
+                return json.RootElement.ValueKind == JsonValueKind.String ? json.RootElement.GetString() ?? "" : json.RootElement.GetRawText();
+            }
+            catch (JsonException)
+            {
+                return body;
+            }
+        }
+
+        #region Settings profiles
+
+        /// <summary>
+        /// The settings profiles: the active one and all of them.
+        /// </summary>
+        [Route(HttpVerbs.Get, "/profiles")]
+        public object GetProfiles() => server.OnUiThread(() => new { Active = eyeTracker.Settings.Profile, Profiles = eyeTracker.Settings.Profiles });
+
+        /// <summary>
+        /// Switches to another profile. The body is its name. Only while not tracking.
+        /// </summary>
+        [Route(HttpVerbs.Put, "/profiles/active")]
+        public async Task<object> SwitchProfile()
+        {
+            var name = await ReadTextAsync().ConfigureAwait(false);
+            server.OnUiThread(() => ProfileCommand(() => eyeTracker.SwitchSettingsProfile(name)));
+            return GetProfiles();
+        }
+
+        /// <summary>
+        /// Saves the current settings as a new profile, which becomes the active one. The body is its name.
+        /// </summary>
+        [Route(HttpVerbs.Post, "/profiles")]
+        public async Task<object> SaveProfileAs()
+        {
+            var name = await ReadTextAsync().ConfigureAwait(false);
+            server.OnUiThread(() => ProfileCommand(() => eyeTracker.Settings.SaveProfileAs(name)));
+            return GetProfiles();
+        }
+
+        private static void ProfileCommand(Action command)
+        {
+            try
+            {
+                command();
+            }
+            catch (ArgumentException ex)
+            {
+                throw HttpException.BadRequest(ex.Message);
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// Sets a setting from its text, converted as the settings window does. Also used by the

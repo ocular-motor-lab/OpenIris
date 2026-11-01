@@ -16,7 +16,7 @@ services and the tests all control OpenIris through it. While tracking, it owns:
 | `HeadTracker` | Reads head movement data, for systems that have it. |
 | `RecordingSession` | Saves data, events and videos to disk while recording. |
 | `CalibrationSession` | Runs the [calibration](calibration-pipelines.md) while calibrating. |
-| `Settings` | All settings, including each plugin's, saved in `OpenIrisSettings.xml`. |
+| `Settings` | All settings, including each plugin's, saved in the active [settings profile](../user-manual/configuration.md#settings-profiles) (`Settings\NAME.xml`), except the ones marked `[SharedSetting]`, saved in `OpenIrisSettings.xml`. |
 
 ## The path of a frame
 

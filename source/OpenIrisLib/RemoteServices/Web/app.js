@@ -61,7 +61,7 @@ function renderStatus() {
   const s = status;
   state.textContent = s.Recording ? "Recording" : s.Calibrating ? "Calibrating" : s.Tracking ? "Tracking" : s.Processing ? "Processing video" : "Not tracking";
   state.className = "pill " + (s.Recording ? "rec" : s.Tracking ? "ok" : "");
-  $("info").textContent = [s.EyeTrackerSystem, s.EyeTrackingPipeline, "Calibration: " + s.CalibrationMethod, s.Version].filter(Boolean).join(" · ");
+  $("info").textContent = ["Profile: " + s.Profile, s.EyeTrackerSystem, s.EyeTrackingPipeline, "Calibration: " + s.CalibrationMethod, s.Version].filter(Boolean).join(" · ");
   document.title = (s.Recording ? "● " : "") + "OpenIris";
 
   $("startTracking").disabled = !s.NotStarted;
@@ -72,6 +72,15 @@ function renderStatus() {
   $("startCalibration").disabled = !s.Tracking || s.Calibrating;
   $("cancelCalibration").disabled = !s.Calibrating;
   $("resetReference").disabled = !s.Tracking || s.Calibrating;
+  $("profile").disabled = !s.NotStarted;
+  $("saveProfileAs").disabled = false;
+
+  // Another profile, chosen here, in the OpenIris window or by another client: other settings.
+  if (s.Profile !== shownProfile) {
+    shownProfile = s.Profile;
+    refreshProfiles();
+    refreshSettings();
+  }
 
   const sessionName = $("sessionName");
   if (document.activeElement !== sessionName) sessionName.value = s.SessionName || "";
@@ -285,6 +294,38 @@ function settingRow(s) {
 }
 
 $("settingsBox").addEventListener("toggle", () => { if ($("settingsBox").open) renderSettings(); });
+
+// Settings profiles: switch to another (only while not tracking), or save the settings as a new one.
+
+let shownProfile = null;
+
+async function refreshProfiles() {
+  let profiles;
+  try {
+    profiles = await api("GET", "/profiles");
+  } catch (error) {
+    return;
+  }
+  $("profile").replaceChildren(...profiles.Profiles.map((name) => new Option(name, name, false, name === profiles.Active)));
+}
+
+$("profile").addEventListener("change", async () => {
+  showError(null);
+  try {
+    await api("PUT", "/profiles/active", JSON.stringify($("profile").value));
+  } catch (error) {
+    showError(error);
+  }
+  await refreshProfiles();
+  await refreshStatus();
+});
+
+command("saveProfileAs", async () => {
+  const name = prompt("Name of the new profile, with the current settings:");
+  if (!name) return;
+  await api("POST", "/profiles", JSON.stringify(name));
+  await refreshProfiles();
+});
 
 // ---------------------------------------------------------------------------------------------
 // Live trace

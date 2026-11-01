@@ -15,6 +15,7 @@ namespace OpenIris
     /// The folders of an OpenIris installation:
     /// <code>
     /// OpenIris.exe, OpenIris.exe.config, OpenIrisSettings.xml
+    /// Settings\      the settings profiles
     /// lib\           the libraries (OpenIrisLib.dll, EmguCV...), found through probing in OpenIris.exe.config
     /// Plugins\       the plugins
     /// Logs\          the log files

@@ -265,6 +265,9 @@ don't exist, such as the position of an eye that wasn't found, are `null`.
 | `GET /api/images/left`, `/api/images/right` | Last image of the eye (JPEG), with the tracking drawn; `?overlay=false` without |
 | `GET /api/settings` | All the settings, with their group, description, type, value and options |
 | `PUT /api/settings/{name}` | Change a setting; the body is the value (JSON or text). Names as in the list: `SessionName`, `Tracking.DarkThresholdLeftEye`... |
+| `GET /api/profiles` | The [settings profiles](configuration.md#settings-profiles): `Active` and `Profiles` |
+| `PUT /api/profiles/active` | Switch to another profile; the body is its name. Only while not tracking |
+| `POST /api/profiles` | Save the current settings as a new profile, which becomes the active one; the body is its name |
 | `POST /api/reference/reset` | Reset the reference |
 | `POST /api/calibration/start`, `/cancel`, `/reset` | Start, cancel, or reset the calibration |
 | `POST /api/calibration/message` | Send the body (text) to the calibration, for example `FixStart:5,0`; replies `{"Reply": "ack"}` |

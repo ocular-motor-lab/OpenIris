@@ -56,15 +56,17 @@ classdef OpenIrisTCP  < handle
         end
 
         function Send(this, command)
-            % Sends a command that has no reply.
-            write(this.t, uint8(command));
+            % Sends a command that has no reply. Commands end with a newline, so OpenIris can tell
+            % them apart when several arrive together. That needs OpenIris 0.2 or later: older
+            % versions don't recognize a command that ends with a newline.
+            write(this.t, uint8([command newline]));
         end
 
         function reply = Ask(this, command, isJson)
             % Sends a command and returns its reply. TCP doesn't separate messages, so keep reading
             % until the reply is complete.
             flush(this.t);
-            write(this.t, uint8(command));
+            write(this.t, uint8([command newline]));
             reply = '';
             started = tic;
             while toc(started) < this.timeout

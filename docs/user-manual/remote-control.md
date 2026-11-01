@@ -61,7 +61,12 @@ log. (Before version 0.1.6, it stopped the UDP or TCP listener until OpenIris wa
   and the reply goes back to the address and port the command came from. Use this unless you have a
   reason not to.
 - **TCP (port 9002)** keeps a connection open. OpenIris serves one connection at a time. TCP does not
-  separate messages, so send one command and read its reply before sending the next one.
+  keep messages apart, so **end each command with a newline** (`\n`): then several commands can be
+  sent one after another, even without waiting for replies, and each runs separately. Text without
+  any newline is taken as one command, as before version 0.2; then wait for each reply before
+  sending the next command, and leave time after commands that have none. (OpenIris before 0.2
+  doesn't accept the newline, so a client that sends it needs 0.2 or later. An event message
+  can't contain a newline.)
 
 ### The data reply (GETDATA, WAITFORDATA)
 
@@ -164,7 +169,9 @@ end
 ### MATLAB class for TCP
 
 `OpenIrisTCP.m` (in the [`matlab`](https://github.com/ocular-motor-lab/OpenIris/tree/main/matlab) folder of the repository) wraps the commands over TCP, including waiting
-for complete replies:
+for complete replies. It ends each command with a newline, so commands sent one right after another
+(as `SetSessionName` and `StartRecording` below) stay separate. Use the one from the same release as
+OpenIris:
 
 ```matlab
 oi = OpenIrisTCP;

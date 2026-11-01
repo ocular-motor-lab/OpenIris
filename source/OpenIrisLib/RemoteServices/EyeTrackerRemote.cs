@@ -168,8 +168,8 @@ namespace OpenIris
         private byte[] ExecuteStringMessage(byte[] bytes)
         {
             byte[] bytesToSend = new byte[0];
-            // The TCP and UDP listeners pass only the bytes received.
-            var stringMessage = Encoding.ASCII.GetString(bytes);
+            // One command, without the newline that may end it.
+            var stringMessage = Encoding.ASCII.GetString(bytes).TrimEnd('\r', '\n');
 
             var bar_idx = stringMessage.IndexOf('|');
 

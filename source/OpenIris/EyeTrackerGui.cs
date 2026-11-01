@@ -424,8 +424,11 @@ namespace OpenIris.UI
 
                 var eyes = new Eye[] { Eye.Left, Eye.Right };
 
-                // Change the pipeline UIs if necessary
-                if (pipelineUI?.name != eyeTracker.Settings.EyeTrackingPipeline)
+                // Change the pipeline UIs if necessary. The processor creates the pipelines with the
+                // first frame: wait for them, or the quick settings would never show.
+                var pipelinesForUI = eyeTracker.ImageProcessor?.PipelineForUI;
+                if (pipelinesForUI != null &&
+                    (pipelineUI?.name != eyeTracker.Settings.EyeTrackingPipeline || pipelineUI?.pipelines != pipelinesForUI))
                 {
                     // Clear the two panels for quick settings
                     foreach (var c in panels[Eye.Left].Controls )
@@ -442,7 +445,7 @@ namespace OpenIris.UI
                     panels[Eye.Right].Controls.Clear();
                     // end clear the quick settings
 
-                    pipelineUI = (eyeTracker.Settings.EyeTrackingPipeline, eyeTracker.ImageProcessor?.PipelineForUI);
+                    pipelineUI = (eyeTracker.Settings.EyeTrackingPipeline, pipelinesForUI);
 
                     foreach (var eye in eyes)
                     {

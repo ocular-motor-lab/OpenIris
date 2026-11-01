@@ -84,7 +84,7 @@ For each eye, `Left` first, then `Right` (`LeftH`, `LeftV`, ... `RightEyeOpening
 
 | Column | Contents |
 | --- | --- |
-| `H`, `V` | Eye position in degrees, relative to the reference position of the calibration. Positive is up, and towards the left of the eye image. Without a calibration, relative to the center of the eye image, with an eye globe whose radius is the iris diameter. `NaN` if the pupil wasn't found. |
+| `H`, `V` | Eye position in degrees, relative to the reference position of the calibration. Positive is up, and towards the subject's right. That requires the eye images to show the eyes as seen by someone facing the subject, so the subject's right is the left of the image: set the camera orientation of the eye tracking system accordingly (mirrored if the cameras see the eyes through a mirror). Without a calibration, relative to the center of the eye image, with an eye globe whose radius is the iris diameter. `NaN` if the pupil wasn't found. |
 | `T` | Torsion in degrees, as `Torsion`. |
 | `PupilArea` | Area of the pupil ellipse in mm² (π × `PupilWidth` × `PupilHeight` / 4, converted to mm taking the eye globe as 24 mm across). |
 | `EyeOpening` | How open the eyelids are, in percent of the opening at calibration. 0 without a calibration reference. |

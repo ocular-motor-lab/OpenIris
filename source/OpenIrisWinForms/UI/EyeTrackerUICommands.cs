@@ -82,7 +82,11 @@ namespace OpenIris
                 {
                     PlayVideoOptions? options = SelectVideoDialog.SelectVideo(eyeTracker.Settings);
                     if (options is null) return;
-                    await eyeTracker.PlayVideo(options);
+
+                    // The window of the system the videos were recorded with, as when tracking live.
+                    using var playingTask = eyeTracker.PlayVideo(options);
+                    using var eyeTrackingSystemUI = PluginViews.OpenSystemWindow(eyeTracker.VideoPlayer?.RecordingSystem);
+                    await playingTask;
                 },
                 canExecute: () => eyeTracker.NotStarted); 
             

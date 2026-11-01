@@ -24,6 +24,12 @@ namespace OpenIris
         private VideoPlayerState state;
 
         private readonly EyeTrackingSystemBase eyeTrackingSystem;
+
+        /// <summary>
+        /// The eye tracking system the videos were recorded with, which prepares their images.
+        /// </summary>
+        public EyeTrackingSystemBase RecordingSystem => eyeTrackingSystem;
+
         private Timer? frameRateTimer;
         private ulong lastFrameNumber;
         private (bool isOn, ulong frameNumber) scrolling;

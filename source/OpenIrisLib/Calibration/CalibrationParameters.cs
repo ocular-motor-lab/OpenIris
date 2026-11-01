@@ -36,7 +36,23 @@ namespace OpenIris
         /// <summary>
         /// Calibration parameters for Eye data.
         /// </summary>
+        [XmlIgnore]
         public EyeCollection<EyeCalibration> EyeCalibrationParameters { get; set; }
+
+        /// <summary>
+        /// The eye calibrations as saved in the file (same XML as EyeCalibrationParameters). An array,
+        /// because when reading the file .NET adds the eyes to an existing collection (the two the
+        /// constructor creates) but replaces an array.
+        /// </summary>
+        [XmlArray(nameof(EyeCalibrationParameters))]
+        [XmlArrayItem(nameof(EyeCalibration))]
+        [System.ComponentModel.Browsable(false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public EyeCalibration[] EyeCalibrationParametersForXml
+        {
+            get => System.Linq.Enumerable.ToArray(EyeCalibrationParameters);
+            set => EyeCalibrationParameters = new EyeCollection<EyeCalibration>(value);
+        }
 
         /// <summary>
         /// Gets calibration info for the head.
@@ -66,13 +82,7 @@ namespace OpenIris
                 var reader = new XmlSerializer(typeof(CalibrationParameters), EyeTrackerPluginManager.ExtraSettingsTypesForXML?.ToArray());
                 using var file = new StreamReader(fileName);
                 using var xmlreader = XmlReader.Create(file);
-                var calibration = (CalibrationParameters)reader.Deserialize(xmlreader);
-                if (calibration.EyeCalibrationParameters.Count == 4)
-                {
-                    // Workaround (see #72): the constructor creates two empty eye calibrations, and deserializing adds two more.
-                    calibration.EyeCalibrationParameters = new EyeCollection<EyeCalibration>(calibration.EyeCalibrationParameters[2], calibration.EyeCalibrationParameters[3]);
-                }
-                return calibration;
+                return (CalibrationParameters)reader.Deserialize(xmlreader);
             }
             catch (IOException ex)
             {

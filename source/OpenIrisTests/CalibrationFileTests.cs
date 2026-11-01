@@ -14,8 +14,9 @@ namespace OpenIris.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     /// <summary>
-    /// The torsion reference image is saved in calibration files as a BMP. OpenIris used to write and
-    /// read it with System.Drawing (Windows only) and now uses OpenCV: files must work both ways.
+    /// Calibration files: they load with exactly the two eyes that were saved, and the torsion
+    /// reference image, saved as a BMP, works both ways: OpenIris used to write and read it with
+    /// System.Drawing (Windows only) and now uses OpenCV.
     /// </summary>
     [TestClass]
     public class CalibrationFileTests
@@ -81,6 +82,35 @@ namespace OpenIris.Tests
             var calibration = new EyeCalibration { ImageTorsionReferenceSerialized = saved };
 
             AssertSameImage(image, calibration.ImageTorsionReference);
+        }
+
+        /// <summary>
+        /// Reading used to add the two eyes in the file to the two the constructor creates.
+        /// </summary>
+        [TestMethod]
+        public void LoadedCalibrationHasTheTwoSavedEyes()
+        {
+            PipelineHarness.EnsurePluginsLoaded();
+            var path = Path.Combine(Path.GetTempPath(), "OpenIrisCalibrationTest-" + System.Guid.NewGuid().ToString("N") + ".cal");
+            try
+            {
+                var saved = new CalibrationParameters();
+                saved.EyeCalibrationParameters[Eye.Left].SetEyeModel(new EyePhysicalModel(new PointF(100, 110), 120));
+                saved.EyeCalibrationParameters[Eye.Right].SetEyeModel(new EyePhysicalModel(new PointF(200, 210), 130));
+                saved.Save(path);
+
+                var loaded = CalibrationParameters.Load(path);
+
+                Assert.AreEqual(2, loaded.EyeCalibrationParameters.Count);
+                Assert.AreEqual(Eye.Left, loaded.EyeCalibrationParameters[Eye.Left].WhichEye);
+                Assert.AreEqual(new PointF(100, 110), loaded.EyeCalibrationParameters[Eye.Left].EyePhysicalModel.Center);
+                Assert.AreEqual(Eye.Right, loaded.EyeCalibrationParameters[Eye.Right].WhichEye);
+                Assert.AreEqual(new PointF(200, 210), loaded.EyeCalibrationParameters[Eye.Right].EyePhysicalModel.Center);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
         }
     }
 }

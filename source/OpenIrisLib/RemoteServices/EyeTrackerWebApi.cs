@@ -303,7 +303,12 @@ namespace OpenIris
             }
             catch (JsonException)
             {
-                return body;
+                // Not JSON, but in quotes: a Windows path typed by hand ("D:\data"), whose
+                // backslashes aren't valid JSON. Without the quotes.
+                var trimmed = body.Trim();
+                return trimmed.Length >= 2 && trimmed[0] == '"' && trimmed[trimmed.Length - 1] == '"'
+                    ? trimmed.Substring(1, trimmed.Length - 2)
+                    : body;
             }
         }
 

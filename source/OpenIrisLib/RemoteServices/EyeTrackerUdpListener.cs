@@ -55,9 +55,13 @@ namespace OpenIris
                         }
                     }
                 }
+                catch (SocketException e) when (e.SocketErrorCode == SocketError.Interrupted)
+                {
+                    // The socket was closed: OpenIris is closing.
+                }
                 catch (SocketException e)
                 {
-                    Trace.WriteLine("SocketException: " + e);
+                    Trace.WriteLine("ERROR: UDP server: " + e.Message);
                 }
                 finally
                 {

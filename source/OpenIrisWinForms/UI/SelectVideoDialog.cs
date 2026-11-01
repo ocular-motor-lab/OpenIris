@@ -19,6 +19,18 @@ namespace OpenIris.UI
     public partial class SelectVideoDialog : Form
     {
         /// <summary>
+        /// Filter of the file dialogs for videos: the usual video files, or any file.
+        /// </summary>
+        public static string VideoFileFilter
+        {
+            get
+            {
+                var patterns = string.Join(";", VideoTools.VideoExtensions.Select(e => "*" + e));
+                return $"Video files ({patterns})|{patterns}|All files (*.*)|*.*";
+            }
+        }
+
+        /// <summary>
         /// Modes for the dialog.
         /// </summary>
         public enum Mode
@@ -223,7 +235,7 @@ namespace OpenIris.UI
                 }
             }
 
-            openFileDialog1.Filter = "Video Files (*.avi;*.mpg;*.mp4)|*.avi;*.mpg;*.mp4|All files (*.*)|*.*";
+            openFileDialog1.Filter = VideoFileFilter;
             openFileDialog1.FilterIndex = 1;
 
             openFileDialog1.Multiselect = false;

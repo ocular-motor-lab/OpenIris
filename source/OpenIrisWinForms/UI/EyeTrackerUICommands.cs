@@ -249,7 +249,7 @@ namespace OpenIris
             ConvertVideoToRGBCommand = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
-                    using var dialog = new OpenFileDialog();
+                    using var dialog = new OpenFileDialog { Filter = SelectVideoDialog.VideoFileFilter };
                     if (dialog.ShowDialog() != DialogResult.OK) return;
 
                     VideoTools.ConvertVideoToRGB(dialog.FileName);
@@ -269,7 +269,7 @@ namespace OpenIris
             ConvertVideoToMp4 = new EyeTrackerUICommand(
                 execute: async _ =>
                 {
-                    using var dialog = new OpenFileDialog();
+                    using var dialog = new OpenFileDialog { Filter = SelectVideoDialog.VideoFileFilter };
                     if (dialog.ShowDialog() != DialogResult.OK) return;
 
                     VideoTools.ConvertToMP4(dialog.FileName);

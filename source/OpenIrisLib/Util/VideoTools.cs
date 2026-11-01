@@ -21,6 +21,14 @@ namespace OpenIris
     public static class VideoTools
     {
         /// <summary>
+        /// Extensions of the usual video files, which OpenCV reads through ffmpeg. Others may work too.
+        /// </summary>
+        public static readonly string[] VideoExtensions =
+        {
+            ".avi", ".mp4", ".m4v", ".mov", ".mkv", ".wmv", ".mpg", ".mpeg", ".webm", ".flv", ".3gp", ".mts", ".m2ts", ".ts",
+        };
+
+        /// <summary>
         /// Copies a range of frames of the videos of each eye to new videos, named like the
         /// originals plus "trim.avi".
         /// </summary>

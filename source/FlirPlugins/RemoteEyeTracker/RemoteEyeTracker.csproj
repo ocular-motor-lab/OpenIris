@@ -1,19 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <RootNamespace>PointGreyInterface</RootNamespace>
-    <AssemblyName>PointGreyInterface</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>$(OpenIrisPluginsDir)</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FlyCapture2Managed_v140">
-      <HintPath>FlyCapture2Managed_v140.dll</HintPath>
+      <HintPath>..\FlyCaptureInterface\FlyCapture2Managed_v140.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
+    <ProjectReference Include="..\FlyCaptureInterface\FlyCaptureInterface.csproj" />
+    <ProjectReference Include="..\..\OpenIrisLib\OpenIrisLib.csproj">
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

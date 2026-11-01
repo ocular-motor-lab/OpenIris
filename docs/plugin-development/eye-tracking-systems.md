@@ -163,7 +163,7 @@ or one per eye (`new EyeCollection<CameraEye?>(left, right)`, with `null` for an
 | --- | --- |
 | `PreProcessImages(images)` | Prepare the images before processing. Most often: split the image of one camera that sees both eyes into one image per eye (see below). Also called for videos. |
 | `PostProcessImagesAndData(imagesAndData)` | Add data to each frame after processing, for example fill `imagesAndData.Data.ExtraData` with values from `ImageSourceData`. The extra data is saved in the data file and sent to [remote clients](../user-manual/remote-control.md). |
-| `CreateVideos(fileNames)` | Open the videos recorded with this system, if they need something special. Return your own class inheriting `VideoEye` and override `GrabImageEyeFromVideo`, for example to read timestamps the camera embeds in the pixels (see `FlyCaptureInterface\ImageGrabbing\VideoEyeFlyCapture.cs`). |
+| `CreateVideos(fileNames)` | Open the videos recorded with this system, if they need something special. Return your own class inheriting `VideoEye` and override `GrabImageEyeFromVideo`, for example to read timestamps the camera embeds in the pixels (see `FlirPlugins\FlyCaptureInterface\ImageGrabbing\VideoEyeFlyCapture.cs`). |
 | `CreateHeadDataSourceWithCameras()`, `CreateHeadDataSourceWithVideos()` | Provide head movement data, for systems with a head sensor. |
 | `OpenEyeTrackingSystemUI` | Return a window with controls specific to this system. |
 | `GetToolStripMenuItems()` | Add items to the menu (see below). |

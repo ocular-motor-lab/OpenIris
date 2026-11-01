@@ -27,7 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FlyCaptureInterface\FlyCaptureInterface.csproj" />
-    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
+    <ProjectReference Include="..\..\OpenIrisLib\OpenIrisLib.csproj">
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

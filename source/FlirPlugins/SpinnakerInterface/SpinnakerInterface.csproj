@@ -27,7 +27,7 @@
     <Compile Update="SpinnakerUI.cs" SubType="Form" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
+    <ProjectReference Include="..\..\OpenIrisLib\OpenIrisLib.csproj">
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

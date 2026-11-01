@@ -56,8 +56,8 @@ namespace OpenIris.ImageProcessing
             int blurSize = (int)Math.Ceiling(trackingSettings.MinCRRadPix/2); //if not divided by 2, it only picks very small ones and by increasing the minCRRadPix it will make the cr vanish in opening and closing
             //if (blurSize == 0) { blurSize = 1; }
             var threshold = (imageEye.WhichEye == Eye.Left) ? trackingSettings.BrightThresholdLeftEye : trackingSettings.BrightThresholdRightEye;
-            var maxBlobArea = trackingSettings.MaxCRRadPix * Math.PI * Math.PI;
-            var minBlobArea = trackingSettings.MinCRRadPix * Math.PI * Math.PI;
+            var maxBlobArea = Math.PI * Math.Pow(trackingSettings.MaxCRRadPix, 2);
+            var minBlobArea = Math.PI * Math.Pow(trackingSettings.MinCRRadPix, 2);
             var irisRadiusPix =  (int) Math.Round( (imageEye.WhichEye == Eye.Left) ? trackingSettings.IrisRadiusPixLeft : trackingSettings.IrisRadiusPixRight);
 
             //for low resolution camera image the downsample will remove the corneal reflection

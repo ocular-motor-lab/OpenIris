@@ -90,7 +90,7 @@ namespace OpenIris.Tests
                 Assert.AreEqual(0, Number(status.GetProperty("ProcessorStatus").GetString()!, @"Dropped:(\d+)"), "Frames dropped by the processing.");
 
                 // The recording's log: frames to record >> not dropped >> recorded, for each recorder.
-                var dataFile = Directory.GetFiles(folder, "CameraTest-*.txt", SearchOption.AllDirectories).Single(f => !f.Contains("-events"));
+                var dataFile = Directory.GetFiles(folder, "CameraTest-*.txt", SearchOption.AllDirectories).Single(f => !f.Contains("-events") && !f.Contains("-videoframes"));
                 var log = File.ReadAllText(dataFile.Replace(".txt", "-log.log"));
                 var processed = Counts(log, "ProcessedFramesRecorder");
                 TestContext.WriteLine($"Processed frames recorder: {string.Join(" >> ", processed)}");
@@ -108,6 +108,11 @@ namespace OpenIris.Tests
                         var video = new FileInfo(dataFile.Replace(".txt", $"-{eye}.avi"));
                         Assert.IsTrue(video.Exists && video.Length > 0, $"No {eye} raw video.");
                     }
+
+                    // Every frame has its place in both videos in -videoframes.txt.
+                    var videoFrames = File.ReadAllLines(dataFile.Replace(".txt", "-videoframes.txt")).Skip(1).ToArray();
+                    Assert.AreEqual(raw[2], videoFrames.Length, "Lines in -videoframes.txt.");
+                    Assert.IsFalse(videoFrames.Any(l => l.Contains("NaN")), "Frames missing from a raw video.");
                 }
 
                 keepFolder = false;

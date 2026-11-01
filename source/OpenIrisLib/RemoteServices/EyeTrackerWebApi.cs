@@ -435,7 +435,8 @@ namespace OpenIris
         #region Files
 
         /// <summary>
-        /// The files of the last recording that exist: data, calibration and events.
+        /// The files of the last recording that exist: data, calibration, events and where each frame
+        /// is in the raw videos.
         /// </summary>
         [Route(HttpVerbs.Get, "/files/last")]
         public object GetLastFiles()
@@ -443,7 +444,7 @@ namespace OpenIris
             var dataFile = eyeTracker.Settings.LastRecordedFile;
             if (string.IsNullOrEmpty(dataFile)) return new { Recording = eyeTracker.Recording, Files = new string[0] };
 
-            var files = new[] { dataFile, dataFile.Replace(".txt", ".cal"), dataFile.Replace(".txt", "-events.txt") }
+            var files = new[] { dataFile, dataFile.Replace(".txt", ".cal"), dataFile.Replace(".txt", "-events.txt"), dataFile.Replace(".txt", "-videoframes.txt") }
                 .Where(File.Exists)
                 .Select(Path.GetFileName)
                 .ToArray();

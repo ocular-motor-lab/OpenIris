@@ -38,3 +38,6 @@ using System.Runtime.InteropServices;
 //[assembly: AssemblyFileVersion("1.2.*.*")]
 
 [assembly: CLSCompliant(false)]
+
+// The tests use internal classes, such as RecordingSession.
+[assembly: InternalsVisibleTo("OpenIrisTests")]

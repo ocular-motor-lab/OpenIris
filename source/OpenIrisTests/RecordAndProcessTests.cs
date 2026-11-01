@@ -75,6 +75,15 @@ namespace OpenIris.Tests
                 Assert.IsTrue(recordedFrames >= 10, $"Only {recordedFrames} frames were recorded in {rawLeft}.");
                 Assert.AreEqual(recordedFrames, ReadVideo(rawRight).frames, "The left and right recordings have a different number of frames.");
 
+                // Every frame in the videos is in -videoframes.txt, in order. (The data file may not
+                // have them all: processing can drop frames the raw videos have.)
+                var videoFrames = File.ReadAllLines(rawLeft.Replace("-Left.avi", "-videoframes.txt")).Skip(1).Select(l => l.Split(' ')).ToArray();
+                Assert.AreEqual(recordedFrames, videoFrames.Length, "Lines in -videoframes.txt.");
+                CollectionAssert.AreEqual(Enumerable.Range(0, recordedFrames).Select(i => i.ToString()).ToArray(), videoFrames.Select(f => f[1]).ToArray());
+                CollectionAssert.AreEqual(Enumerable.Range(0, recordedFrames).Select(i => i.ToString()).ToArray(), videoFrames.Select(f => f[2]).ToArray());
+                var frameNumbers = videoFrames.Select(f => long.Parse(f[0])).ToArray();
+                Assert.IsTrue(frameNumbers.Zip(frameNumbers.Skip(1), (a, b) => b > a).All(x => x), "Frame numbers of -videoframes.txt should increase.");
+
                 // Process the recording saving the processed video, as with Process Video in the menu.
                 await WithinLimit(
                     eyeTracker.ProcessVideo(new ProcessVideoOptions

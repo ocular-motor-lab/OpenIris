@@ -101,7 +101,7 @@
         end
 
         function files = DownloadFile(this, ~)
-            % Downloads the data, calibration and events files of the last recording into
+            % Downloads the data, calibration, events and video frames files of the last recording into
             % openiris_folder\DownloadedData. Waits for the recording to stop. Returns the paths.
             while ( this.IsRecording() )
                 pause(0.5);

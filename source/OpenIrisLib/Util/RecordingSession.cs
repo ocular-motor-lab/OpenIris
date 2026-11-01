@@ -13,6 +13,7 @@ namespace OpenIris
     using System;
     using System.Diagnostics;
     using System.Drawing;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -40,6 +41,9 @@ namespace OpenIris
         private EyeCollection<VideoWriter?>? rawVideoWriters;
         private VideoWriter? processedVideoWriter;
         private readonly System.Collections.Generic.Dictionary<Eye, Mat> rawFrameBuffers = new();
+        private Size rawVideoSize;
+        private readonly int[] rawVideoFrameCounts = new int[2];
+        private StreamWriter? rawVideoFramesFile;
         private Mat? processedFrameBuffer;
         private StreamWriter? eventFile;
         private StreamWriter? dataFile;
@@ -197,6 +201,8 @@ namespace OpenIris
                     rawVideoWriters = null;
                     foreach (var buffer in rawFrameBuffers.Values) buffer.Dispose();
                     rawFrameBuffers.Clear();
+                    rawVideoFramesFile?.Dispose();
+                    rawVideoFramesFile = null;
 
                     dataFile?.Dispose();
                     dataFile = null;
@@ -339,16 +345,29 @@ namespace OpenIris
             // up time of the consumer is fast and it can receive items in the queue very quickly.
             // Also, it allows for reading the frame size directly from the images, no need to pass
             // it as a parameter.
-            rawVideoWriters ??= new EyeCollection<VideoWriter?>(
+            if (rawVideoWriters is null)
+            {
+                // Both videos have the same size.
+                var sizes = imagesEye.images.Where(im => im is not null).Select(im => im!.Size).Distinct().ToArray();
+                if (sizes.Length > 1) throw new InvalidOperationException("The left and right images must have the same size to record videos.");
+                rawVideoSize = sizes.FirstOrDefault();
+
+                rawVideoWriters = new EyeCollection<VideoWriter?>(
                     imagesEye.images.Select(im => (im is null) ? null :
                         new VideoWriter(
                            fileName: DataFileName.Replace(".txt", "-" + im.WhichEye + ".avi"),
                            compressionCode: 0,
                            fps: imagesEye.frameRate / options.DecimateRatioRawVideo,
-                           size: im.Size,
+                           size: rawVideoSize,
                            isColor: false)).ToArray());
 
-            // Record the images
+                rawVideoFramesFile = new StreamWriter(DataFileName.Replace(".txt", "-videoframes.txt"));
+                rawVideoFramesFile.WriteLine("FrameNumber LeftVideoFrame RightVideoFrame");
+            }
+
+            // Record the images, and where each one went in its video. Frames that aren't written
+            // are NaN, so a video frame can always be matched with its line of data.
+            var positions = new string[] { "NaN", "NaN" };
             foreach (var image in imagesEye.images)
             {
                 if (image is null) continue;
@@ -356,9 +375,16 @@ namespace OpenIris
                 var writer = rawVideoWriters[image.WhichEye];
                 if (writer is null) continue;
 
+                // VideoWriter silently drops frames of a different size than the video's.
+                if (image.Size != rawVideoSize) continue;
+
                 if (!rawFrameBuffers.TryGetValue(image.WhichEye, out var buffer)) rawFrameBuffers[image.WhichEye] = buffer = new Mat();
                 VideoTools.WriteFrame(writer, image.Image, buffer);
+
+                positions[(int)image.WhichEye] = rawVideoFrameCounts[(int)image.WhichEye]++.ToString(CultureInfo.InvariantCulture);
             }
+
+            rawVideoFramesFile?.WriteLine($"{imagesEye.images.GetFrameNumber()} {positions[0]} {positions[1]}");
             return true;
         }
 
@@ -450,6 +476,7 @@ namespace OpenIris
             processedFramesRecorder.Dispose();
             eventRecorder.Dispose();
             rawVideoWriters?.ForEach(v => v?.Dispose());
+            rawVideoFramesFile?.Dispose();
             processedVideoWriter?.Dispose();
             eventFile?.Dispose();
             dataFile?.Dispose();

@@ -121,3 +121,23 @@ Time=2026-10-30-14:35:10.123 FrameNumber=1520  Message=TrialStart Data=...
 `FrameNumber` is the `LeftFrameNumber` of the last frame received when the event arrived
 (`RightFrameNumber` if only the right eye is tracked), so events can be matched to the lines of the
 data file.
+
+## The video frames file
+
+With **RecordVideo** on, the `…-videoframes.txt` file says where each frame is in the raw videos
+(`…-Left.avi`, `…-Right.avi`), one line per frame written to them:
+
+```
+FrameNumber LeftVideoFrame RightVideoFrame
+1520 0 0
+1521 1 1
+1523 2 NaN
+```
+
+- `FrameNumber` is the `LeftFrameNumber` of the frame (`RightFrameNumber` if only the right eye is
+  tracked), as in the events file, so each line matches a line of the data file.
+- `LeftVideoFrame` and `RightVideoFrame` are the positions of the frame in each video, counting from
+  0 (add 1 for MATLAB's `read`). `NaN` means the frame isn't in that video: that eye had no image
+  for it, or its size changed during the recording.
+- Frames of the data file that aren't listed aren't in the videos: OpenIris couldn't write them fast
+  enough (the video **drops** in the status bar), or **DecimateVideoRatio** skipped them.

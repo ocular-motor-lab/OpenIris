@@ -33,8 +33,6 @@ namespace SpinnakerInterface
             {
                 var cameraList = CameraEyeSpinnaker.FindCameras(2, settings.Eye, settings.LeftEyeCameraSerialNumber, settings.RightEyeCameraSerialNumber);
 
-                // The settings aren't checked yet (see #71).
-
                 leftEyeCamera = new CameraEyeSpinnaker(
                 whichEye: Eye.Left,
                 camera: cameraList[0],

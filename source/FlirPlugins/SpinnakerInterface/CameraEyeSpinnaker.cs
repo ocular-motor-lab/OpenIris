@@ -157,14 +157,16 @@ namespace SpinnakerInterface
 
         public override void Stop()
         {
-            // Should this reset the trigger settings? (See #71.)
-
             // EndAcquisition throws if the camera never started streaming (for example, if
             // starting failed). That would hide the original error and leave the camera stuck.
             if (cam.IsStreaming())
             {
                 cam.EndAcquisition();
             }
+
+            // Leave the camera taking images on its own, not waiting for trigger pulses, so other
+            // software (SpinView) finds it working. Start sets the triggers again.
+            try { cam.TriggerMode.FromString("Off"); } catch { }
         }
 
         protected override ImageEye GrabImageFromCamera()
@@ -344,6 +346,15 @@ namespace SpinnakerInterface
             cam.ExposureTime.Value = 1e6 / FrameRate - 500;
 
             cam.AcquisitionFrameRateEnable.Value = true;
+
+            // A clear message instead of Spinnaker's, if the camera can't go this fast at this size.
+            var maxFrameRate = cam.AcquisitionFrameRate.Max;
+            if (FrameRate > maxFrameRate)
+            {
+                throw new InvalidOperationException(
+                    $"The {WhichEye} camera can take at most {Math.Floor(maxFrameRate)} frames per second at {FrameSize.Width}x{FrameSize.Height} pixels, not {FrameRate}.");
+            }
+
             cam.AcquisitionFrameRate.Value = FrameRate;
         }
         private void InitParameters_TriggerSettings()
@@ -365,9 +376,9 @@ namespace SpinnakerInterface
                     break;
                 case TriggerMode.Slave:
                     //# Trigger Settings
-                    // Slave must have higher aquisition rate that master or else risk falling behind due to clock skew
-                    //cam.AcquisitionFrameRateEnable.Value = false;
-                    cam.AcquisitionFrameRate.Value = FrameRate + 50;
+                    // Slave must have higher aquisition rate that master or else risk falling behind due to clock skew.
+                    // No more than the camera allows: the master's triggers set the actual rate anyway.
+                    cam.AcquisitionFrameRate.Value = Math.Min(FrameRate + 50, cam.AcquisitionFrameRate.Max);
 
                     cam.LineSelector.FromString(TRIGGER_LINE);
                     try { cam.V3_3Enable.Value = false; } catch { }
@@ -422,8 +433,6 @@ namespace SpinnakerInterface
                     break;
             }
 
-
-            // Needed? (See #71.) cam.TriggerSource.FromString("Software");
         }
 
         // Make sure ROI is a multiple of 4 pixels, and is properly bounded between 0 and maxROI_Offset.

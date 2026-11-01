@@ -50,12 +50,12 @@ namespace OpenIris
             var range = options.CustomRange;
             if (range.IsEmpty)
             {
-                range = new Range(0, (long)Math.Round(videoReaderLeft.GetCaptureProperty(CapProp.FrameCount)));
+                range = new Range(0, (long)Math.Round(videoReaderLeft.Get(CapProp.FrameCount)));
             }
 
             var taskLeft = Task.Run(() =>
             {
-                videoReaderLeft.SetCaptureProperty(CapProp.PosFrames, (double)range.Begin);
+                videoReaderLeft.Set(CapProp.PosFrames, (double)range.Begin);
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var img = videoReaderLeft.QueryFrame();
@@ -63,22 +63,22 @@ namespace OpenIris
 
                     videoWriterLeft.Write(img);
 
-                    if (videoReaderLeft.GetCaptureProperty(CapProp.PosFrames) > range.End) break;
+                    if (videoReaderLeft.Get(CapProp.PosFrames) > range.End) break;
 
-                    var percent = (int)Math.Round((videoReaderLeft.GetCaptureProperty(CapProp.PosFrames) - range.Begin) / (range.End - range.Begin) * 100);
+                    var percent = (int)Math.Round((videoReaderLeft.Get(CapProp.PosFrames) - range.Begin) / (range.End - range.Begin) * 100);
                     progress?.Report(percent);
                 }
             });
             var taskRight = Task.Run(() =>
             {
-                videoReaderRight.SetCaptureProperty(CapProp.PosFrames, (double)range.Begin);
+                videoReaderRight.Set(CapProp.PosFrames, (double)range.Begin);
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var img = videoReaderRight.QueryFrame();
                     if (img is null) return;
 
                     videoWriterRight.Write(img);
-                    if (videoReaderRight.GetCaptureProperty(CapProp.PosFrames) > range.End) break;
+                    if (videoReaderRight.Get(CapProp.PosFrames) > range.End) break;
                 }
             });
 

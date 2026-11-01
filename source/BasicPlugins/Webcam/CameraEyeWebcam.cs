@@ -46,24 +46,24 @@ namespace OpenIris
             // The order matters with OpenCV 4.1's DirectShow: frame rate, size, then format. Setting
             // the frame rate restarts the webcam in its default format, and a format set before the
             // size is lost (tested with a C920).
-            if (requestedFrameRate > 0) capture.SetCaptureProperty(CapProp.Fps, requestedFrameRate);
+            if (requestedFrameRate > 0) capture.Set(CapProp.Fps, requestedFrameRate);
 
             if (!requestedSize.IsEmpty)
             {
-                capture.SetCaptureProperty(CapProp.FrameWidth, requestedSize.Width);
-                capture.SetCaptureProperty(CapProp.FrameHeight, requestedSize.Height);
+                capture.Set(CapProp.FrameWidth, requestedSize.Width);
+                capture.Set(CapProp.FrameHeight, requestedSize.Height);
             }
 
             // Webcams send their high resolutions at full frame rate only compressed: a C920 gives
             // 1280x720 at 30 fps in MJPG but 10 fps in YUY2, the one DirectShow picks by default.
-            capture.SetCaptureProperty(CapProp.FourCC, VideoWriter.Fourcc('M', 'J', 'P', 'G'));
+            capture.Set(CapProp.FourCC, VideoWriter.Fourcc('M', 'J', 'P', 'G'));
 
             WebcamInfo.LogOpened(capture);
 
             FrameSize = new Size(
-                (int)capture.GetCaptureProperty(CapProp.FrameWidth),
-                (int)capture.GetCaptureProperty(CapProp.FrameHeight));
-            var frameRate = capture.GetCaptureProperty(CapProp.Fps);
+                (int)capture.Get(CapProp.FrameWidth),
+                (int)capture.Get(CapProp.FrameHeight));
+            var frameRate = capture.Get(CapProp.Fps);
             FrameRate = frameRate > 0 ? frameRate : requestedFrameRate > 0 ? requestedFrameRate : 30;
         }
 

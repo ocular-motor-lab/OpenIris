@@ -400,7 +400,7 @@ namespace OpenIris.Calibration
             var left_cal = new Mat();
             var left_ret = CvInvoke.Solve(X_left, Y_left, left_cal, DecompMethod.Svd);
 
-            if (left_ret != 0)
+            if (left_ret)
             {
                 settings.LeftGxx = left_cal.GetValue(0, 0);
                 settings.LeftGxy = left_cal.GetValue(0, 1);
@@ -429,7 +429,7 @@ namespace OpenIris.Calibration
             var right_cal = new Mat();
             var right_ret = CvInvoke.Solve(X_right, Y_right, right_cal, DecompMethod.Svd);
 
-            if (right_ret != 0)
+            if (right_ret)
             {
                 settings.RightGxx = right_cal.GetValue(0, 0);
                 settings.RightGxy = right_cal.GetValue(0, 1);

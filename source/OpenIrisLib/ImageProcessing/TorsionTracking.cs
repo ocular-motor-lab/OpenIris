@@ -402,7 +402,7 @@ namespace OpenIris.ImageProcessing
         internal static void ApplyMaskNoise(Image<Gray, byte> image, Image<Gray, byte> mask)
         {
             // Increase the mask by eroding the mask image. This will reduce the edge effects of the filter.
-            var se21 = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Ellipse, new Size(15, 31), new Point(8, 16));
+            var se21 = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.MorphShapes.Ellipse, new Size(15, 31), new Point(8, 16));
             CvInvoke.Erode(mask, mask, se21, new Point(-1, -1), 1, Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(0));
 
             // Random generator for noise mask

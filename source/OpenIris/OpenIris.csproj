@@ -16,6 +16,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Emgu.CV" />
+    <!-- The native OpenCV, copied to lib\. -->
+    <PackageReference Include="Emgu.CV.runtime.windows" />
+    <PackageReference Include="Emgu.CV.Bitmap" />
+    <PackageReference Include="Emgu.CV.UI" />
     <!-- OpenIrisLib's web server. Referenced here too so the binding redirects it needs
          (System.ValueTuple, for Swan.Lite) go into OpenIris.exe.config. -->
     <PackageReference Include="EmbedIO" />

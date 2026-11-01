@@ -25,9 +25,20 @@ namespace OpenIris
     public static class OpenIrisFolders
     {
         /// <summary>
-        /// Folder of the program (OpenIris.exe), or of the tests.
+        /// Folder of the program (OpenIris.exe): the one with lib\OpenIrisLib.dll. Found from OpenIrisLib,
+        /// not from the running program, so it also works when another program uses OpenIrisLib. If
+        /// OpenIrisLib isn't in a lib folder (the tests), its own folder.
         /// </summary>
-        public static string Program => AppDomain.CurrentDomain.BaseDirectory;
+        public static string Program
+        {
+            get
+            {
+                var libraries = Libraries;
+                return string.Equals(Path.GetFileName(libraries), "lib", StringComparison.OrdinalIgnoreCase)
+                    ? Path.GetDirectoryName(libraries)
+                    : libraries;
+            }
+        }
 
         /// <summary>
         /// Folder of the libraries, where OpenIrisLib.dll is.

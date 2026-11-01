@@ -1,10 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- So NuGet copies the native OpenCV (runtimes\win-x64\native) next to the tests, as for OpenIris.exe. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <!-- Tests build into their own folder, not next to OpenIris.exe. -->
     <OutputPath>bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
@@ -14,6 +17,8 @@
     <PackageReference Include="MSTest.TestFramework" />
     <!-- OpenIrisLib keeps its packages private, so reference the ones it needs at run time here. -->
     <PackageReference Include="Emgu.CV" />
+    <PackageReference Include="Emgu.CV.runtime.windows" />
+    <PackageReference Include="Emgu.CV.Bitmap" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
   <ItemGroup>

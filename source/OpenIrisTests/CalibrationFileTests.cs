@@ -52,7 +52,8 @@ namespace OpenIris.Tests
         {
             using var image = TestImage();
             using var ms = new MemoryStream();
-            image.Bitmap.Save(ms, ImageFormat.Bmp);
+            using var bitmap = image.ToBitmap();
+            bitmap.Save(ms, ImageFormat.Bmp);
 
             var calibration = new EyeCalibration { ImageTorsionReferenceSerialized = ms.ToArray() };
 
@@ -68,7 +69,7 @@ namespace OpenIris.Tests
             using var ms = new MemoryStream(calibration.ImageTorsionReferenceSerialized!);
             using var bitmap = new Bitmap(ms);
 
-            AssertSameImage(image, new Image<Gray, byte>(bitmap));
+            AssertSameImage(image, bitmap.ToImage<Gray, byte>());
         }
 
         [TestMethod]

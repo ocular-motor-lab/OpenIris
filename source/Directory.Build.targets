@@ -1,0 +1,11 @@
+<Project>
+  <!-- Imported after each project file, so it sees the project's own settings (Directory.Build.props
+       comes before). -->
+
+  <!-- Plugins build into Plugins\ and don't copy NuGet packages there: OpenIris already has them in
+       lib\ (EmguCV, System.Text.Json...), and two copies of a library cause load errors. A plugin's own
+       DLLs (camera drivers...) are references, not packages, and are still copied. -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true' and '$(OutputPath)' == '$(OpenIrisPluginsDir)'">
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+</Project>

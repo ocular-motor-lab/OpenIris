@@ -61,8 +61,8 @@ namespace OpenIris
             try
             {
                 Trace.WriteLine(
-                    $"Webcam opened: {capture.GetCaptureProperty(CapProp.FrameWidth)}x{capture.GetCaptureProperty(CapProp.FrameHeight)}" +
-                    $" at {capture.GetCaptureProperty(CapProp.Fps):0.##} fps (as reported by the webcam), format {FourCCToString((int)capture.GetCaptureProperty(CapProp.FourCC))}");
+                    $"Webcam opened: {capture.Get(CapProp.FrameWidth)}x{capture.Get(CapProp.FrameHeight)}" +
+                    $" at {capture.Get(CapProp.Fps):0.##} fps (as reported by the webcam), format {FourCCToString((int)capture.Get(CapProp.FourCC))}");
 
                 var controls = new[]
                 {
@@ -74,7 +74,7 @@ namespace OpenIris
 
                 // DirectShow gives -1 for the controls a webcam doesn't have.
                 var values = controls
-                    .Select(control => (control, value: capture.GetCaptureProperty(control)))
+                    .Select(control => (control, value: capture.Get(control)))
                     .Where(x => x.value != -1)
                     .Select(x => $"{x.control} {x.value:0.##}");
                 Trace.WriteLine("Webcam settings: " + string.Join(", ", values));

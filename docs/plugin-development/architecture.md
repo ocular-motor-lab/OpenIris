@@ -90,6 +90,5 @@ another operating system, would look for its own kind of views of the same plugi
 
 Images are EmguCV `Image<Gray, byte>` objects. OpenIris doesn't dispose frame images explicitly; the
 .NET garbage collector frees them when no longer used. Code that reads image pixels through a raw
-pointer must keep the image object alive while doing so (`GC.KeepAlive`), and should not use
-`Image.Bitmap` from another thread or after the image may be gone: for gray images it shares the
-image's memory instead of copying it (use `ToBitmap()` for a copy).
+pointer must keep the image object alive while doing so (`GC.KeepAlive`). To show an image in a
+window, convert it with `ToBitmap()` (from the Emgu.CV.Bitmap package), which makes a copy.

@@ -399,7 +399,7 @@ namespace OpenIris.ImageProcessing
                 var maskROIpupil = mask.Copy(roiPupil).Resize(imgPupilBinary.Width, imgPupilBinary.Height, Emgu.CV.CvEnum.Inter.Nearest);
                 int maskErodeSize = imgPupilBinary.Width / 10;
                 int maskErodeCenter = (int)Math.Floor(maskErodeSize / 2.0);
-                var maskErodeKernel = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Ellipse, new Size(maskErodeSize, maskErodeSize), new Point(maskErodeCenter, maskErodeCenter));
+                var maskErodeKernel = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.MorphShapes.Ellipse, new Size(maskErodeSize, maskErodeSize), new Point(maskErodeCenter, maskErodeCenter));
                 CvInvoke.Erode(maskROIpupil, maskROIpupil, maskErodeKernel, new Point(maskErodeCenter, maskErodeCenter), 1, Emgu.CV.CvEnum.BorderType.Constant, new MCvScalar(0));
 
                 // Go trhough the points in the countour in reverese order to avoid problems when deleting
@@ -603,7 +603,7 @@ namespace OpenIris.ImageProcessing
             {
                 int size = 2 * (int)Math.Round(2 * (desiredMaxSize / 50.0)) + 1;
                 int center = (int)Math.Floor(size / 2.0);
-                var kernel = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Ellipse, new Size(size, size), new Point(center, center));
+                var kernel = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.MorphShapes.Ellipse, new Size(size, size), new Point(center, center));
                 CvInvoke.Erode(imgPupilBinary, imgPupilBinary, kernel, new Point(center, center), 1, Emgu.CV.CvEnum.BorderType.Constant, new MCvScalar(0));
                 CvInvoke.Dilate(imgPupilBinary, imgPupilBinary, kernel, new Point(center, center), 1, Emgu.CV.CvEnum.BorderType.Constant, new MCvScalar(0));
             }
@@ -612,7 +612,7 @@ namespace OpenIris.ImageProcessing
             {
                 int size = 2 * (int)Math.Round(2 * (desiredMaxSize / 50.0)) + 1;
                 int center = (int)Math.Floor(size / 2.0);
-                var kernel = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.ElementShape.Ellipse, new Size(size, size), new Point(center, center));
+                var kernel = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.MorphShapes.Ellipse, new Size(size, size), new Point(center, center));
                 CvInvoke.Dilate(imgPupilBinary, imgPupilBinary, kernel, new Point(center, center), 1, Emgu.CV.CvEnum.BorderType.Constant, new MCvScalar(0));
                 CvInvoke.Erode(imgPupilBinary, imgPupilBinary, kernel, new Point(center, center), 1, Emgu.CV.CvEnum.BorderType.Constant, new MCvScalar(0));
             }

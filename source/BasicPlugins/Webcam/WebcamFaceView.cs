@@ -38,7 +38,7 @@ namespace OpenIris
         private readonly object frameLock = new object();
         private volatile bool wantsFrame = true;
         private Frame? frame;
-        private Image<Bgr, byte>? shown;
+        private Bitmap? shown;
 
         public WebcamFaceView()
         {
@@ -101,9 +101,11 @@ namespace OpenIris
 
                 foreach (var region in toDraw.EyeRegions) DrawSquare(color, region, EyeColor, thickness * 2);
 
-                pictureBox.Image = color.Bitmap;
+                // ToBitmap copies the image: the previous bitmap can go once the new one is shown.
+                pictureBox.Image = color.ToBitmap();
+                color.Dispose();
                 shown?.Dispose();
-                shown = color;
+                shown = (Bitmap)pictureBox.Image;
             }
 
             status.Text = toDraw.Mesh != null

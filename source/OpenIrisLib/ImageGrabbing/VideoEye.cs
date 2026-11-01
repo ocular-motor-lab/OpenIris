@@ -43,11 +43,11 @@ namespace OpenIris.ImageGrabbing
         {
             WhichEye = whichEye;
             Video = new VideoCapture(fileName);
-            FrameRate = Video.GetCaptureProperty(CapProp.Fps);
-            NumberOfFrames = (long)Video.GetCaptureProperty(CapProp.FrameCount);
+            FrameRate = Video.Get(CapProp.Fps);
+            NumberOfFrames = (long)Video.Get(CapProp.FrameCount);
             FrameSize = new Size(
-                        (int)Video.GetCaptureProperty(CapProp.FrameWidth),
-                        (int)Video.GetCaptureProperty(CapProp.FrameHeight));
+                        (int)Video.Get(CapProp.FrameWidth),
+                        (int)Video.Get(CapProp.FrameHeight));
         }
         
         /// <summary>
@@ -131,9 +131,9 @@ namespace OpenIris.ImageGrabbing
         /// <param name="frameNumber">Frame number to scroll to.</param>
         public void Scroll(ulong frameNumber)
         {
-            if (frameNumber != Video.GetCaptureProperty(CapProp.PosFrames))
+            if (frameNumber != Video.Get(CapProp.PosFrames))
             {
-                Video.SetCaptureProperty(CapProp.PosFrames, (double)frameNumber);
+                Video.Set(CapProp.PosFrames, (double)frameNumber);
             }
         }
 
@@ -167,9 +167,9 @@ namespace OpenIris.ImageGrabbing
         {
             // Set up the timestamp for the image
             var timestamp = new ImageEyeTimestamp(
-                seconds: Video.GetCaptureProperty(CapProp.PosMsec) / 1000,
-                frameNumber: (ulong)Video.GetCaptureProperty(CapProp.PosFrames),
-                frameNumberRaw: (ulong)Video.GetCaptureProperty(CapProp.PosFrames));
+                seconds: Video.Get(CapProp.PosMsec) / 1000,
+                frameNumber: (ulong)Video.Get(CapProp.PosFrames),
+                frameNumberRaw: (ulong)Video.Get(CapProp.PosFrames));
 
             // Retrieve the new frame. Pass the image itself to ImageEye, not grayImage.Bitmap: that
             // Bitmap shares grayImage's memory, which the GC can free while it is still being copied.

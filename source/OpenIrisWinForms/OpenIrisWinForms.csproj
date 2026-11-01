@@ -29,6 +29,8 @@
   <!-- PrivateAssets="all": don't flow to the plugins that reference this library, as in OpenIrisLib. -->
   <ItemGroup>
     <PackageReference Include="Emgu.CV" PrivateAssets="all" />
+    <PackageReference Include="Emgu.CV.Bitmap" PrivateAssets="all" />
+    <PackageReference Include="Emgu.CV.UI" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Calibration\CalibrationPipelineManualUI.cs" SubType="UserControl" />

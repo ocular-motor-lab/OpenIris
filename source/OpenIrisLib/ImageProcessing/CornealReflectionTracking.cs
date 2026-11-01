@@ -141,7 +141,7 @@ namespace OpenIris.ImageProcessing
                 int kernelSize = (int)Math.Round(blurSize * scaleFactor_findBlob);
                 kernelSize = kernelSize == 0 ? 1 : kernelSize;
                 //var kernelSize = resizeBlur;
-                var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(kernelSize, kernelSize), new Point(-1, -1));
+                var kernel = CvInvoke.GetStructuringElement(MorphShapes.Ellipse, new Size(kernelSize, kernelSize), new Point(-1, -1));
                 var center = new Point(-1, -1);
                 var one = new MCvScalar(1);
                 if (openImage)

@@ -101,7 +101,7 @@ namespace OpenIris.ImageProcessing
             // Optimize the blobs by removing small white or black spots
             ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            var kernel = CvInvoke.GetStructuringElement(ElementShape.Ellipse, new Size(3, 3), new Point(1, 1));
+            var kernel = CvInvoke.GetStructuringElement(MorphShapes.Ellipse, new Size(3, 3), new Point(1, 1));
             var center = new Point(-1, -1);
             var one = new MCvScalar(1);
 

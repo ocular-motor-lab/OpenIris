@@ -38,8 +38,10 @@ into the `Plugins` folder of an OpenIris installation:
     <!-- Only for plugins with windows or panels: -->
     <Reference Include="OpenIrisWinForms" HintPath="$(OpenIrisFolder)lib\OpenIrisWinForms.dll" Private="false" />
     <Reference Include="System.Windows.Forms" />
-    <!-- Same EmguCV version as OpenIris. Compile against it only: OpenIris provides it at run time. -->
-    <PackageReference Include="Emgu.CV" Version="4.1.1.3497" IncludeAssets="compile" />
+    <!-- Same EmguCV version as OpenIris. Compile against it only: OpenIris provides it at run time.
+         Add Emgu.CV.Bitmap (images to System.Drawing bitmaps) or Emgu.CV.UI (image box) the same way
+         if the plugin uses them. -->
+    <PackageReference Include="Emgu.CV" Version="4.12.0.5764" IncludeAssets="compile" />
   </ItemGroup>
 </Project>
 ```

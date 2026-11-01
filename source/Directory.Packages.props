@@ -1,14 +1,18 @@
 <Project>
   <!-- Central package versions: projects reference a package without a version and get the one listed here.
-       EmguCV is pinned to 4.1.1.3497 because later releases dropped Emgu.CV.Cvb (CvBlob), which the
-       pupil and corneal reflection trackers use. -->
+       EmguCV 4.12 is the newest version with native packages for Windows, Linux and macOS. -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <!-- Versions listed here also apply when a package comes indirectly, through another package. -->
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Emgu.CV" Version="4.1.1.3497" />
+    <!-- EmguCV: the library, the native OpenCV for Windows, conversions to System.Drawing bitmaps, and the
+         Windows Forms image box. -->
+    <PackageVersion Include="Emgu.CV" Version="4.12.0.5764" />
+    <PackageVersion Include="Emgu.CV.runtime.windows" Version="4.12.0.5764" />
+    <PackageVersion Include="Emgu.CV.Bitmap" Version="4.12.0.5764" />
+    <PackageVersion Include="Emgu.CV.UI" Version="4.12.0.5764" />
     <!-- Web server of the remote control API and web client (MIT). -->
     <PackageVersion Include="EmbedIO" Version="3.5.2" />
     <PackageVersion Include="GitVersion.MsBuild" Version="5.12.0" />

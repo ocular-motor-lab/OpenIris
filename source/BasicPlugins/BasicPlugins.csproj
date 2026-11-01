@@ -9,6 +9,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Emgu.CV" />
+    <PackageReference Include="Emgu.CV.Bitmap" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="SyntheticEyes\SyntheticEyesUI.cs" SubType="Form" />

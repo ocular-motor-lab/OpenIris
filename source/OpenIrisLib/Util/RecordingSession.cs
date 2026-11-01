@@ -339,15 +339,18 @@ namespace OpenIris
                            fileName: DataFileName.Replace(".txt", "-" + im.WhichEye + ".avi"),
                            compressionCode: 0,
                            fps: imagesEye.frameRate / options.DecimateRatioRawVideo,
-                           size: imagesEye.images.GetFrameSize(),
+                           size: im.Size,
                            isColor: false)).ToArray());
 
-            // Record the images
+            // Record the images. Write the image itself, not a temporary Mat of it (image.Image.Mat):
+            // the garbage collector could free that Mat while OpenCV is still writing it, which
+            // crashed now and then with EmguCV 4.12.
             foreach (var image in imagesEye.images)
             {
                 if (image is null) continue;
 
-                rawVideoWriters[image.WhichEye]?.Write(image.Image.Mat);
+                rawVideoWriters[image.WhichEye]?.Write(image.Image);
+                GC.KeepAlive(image.Image);
             }
             return true;
         }
@@ -409,7 +412,8 @@ namespace OpenIris
                             size: imageForVideo.Size,
                             isColor: true);
 
-                processedVideoWriter.Write(imageForVideo.Mat);
+                processedVideoWriter.Write(imageForVideo);
+                GC.KeepAlive(imageForVideo);
             }
             return true;
         }

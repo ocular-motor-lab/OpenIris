@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="PipelineRegressionTests.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -28,7 +28,7 @@ namespace OpenIris.Tests
         [DataRow("SimpleCentroid", Eye.Right)]
         public void SyntheticEyeMatchesBaseline(string pipeline, Eye eye)
         {
-            var data = PipelineHarness.Run(pipeline, eye, SyntheticEye.Frames(eye, SyntheticFrames), SyntheticEye.MmPerPix);
+            var data = PipelineHarness.RunSyntheticEye(pipeline, eye, SyntheticFrames);
 
             Baseline.Check($"synthetic-{pipeline}-{eye}", data);
         }
@@ -45,8 +45,7 @@ namespace OpenIris.Tests
         [DataRow("SimpleCentroid", Eye.Right)]
         public void SampleVideoMatchesBaseline(string pipeline, Eye eye)
         {
-            // Same pixel scale as the Simulation system's default settings.
-            var data = PipelineHarness.Run(pipeline, eye, PipelineHarness.ReadVideo(PipelineHarness.SampleVideo(eye), eye, VideoFrames), SyntheticEye.MmPerPix);
+            var data = PipelineHarness.RunSampleVideo(pipeline, eye, VideoFrames);
 
             Baseline.Check($"video-{pipeline}-{eye}", data);
         }

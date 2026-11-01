@@ -17,11 +17,20 @@ dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c Debug -p:Pla
   - 100 frames of a synthetic eye drawn by `SyntheticEye.cs`.
   - The first 300 frames of the sample videos in `sample-videos`, at the root of the repository
     (the ones the Simulation system plays).
+
+  Each run is calibrated, so torsion is measured: the reference is the first frame of the
+  synthetic eye, and frame 346 of the videos for both eyes (calibrated together), where the eyes
+  look at the cameras. The pupil thresholds are tuned for each (40 for the synthetic eye, 70 for
+  the videos), and the torsion noise has a fixed seed so results repeat exactly. All of this is in `PipelineHarness.cs`.
 - **Accuracy** (`PipelineAccuracyTests`): the pupil and reflection must be found within 1.5 pixels
   of where the synthetic eye drew them.
 - **Speed** (`PipelinePerformanceTests`): the JOM pipeline must not get more than 25% slower. The
   first run on each computer records a reference time in `Baselines\performance\` (not committed).
   Delete that file to record a new one. Skipped on GitHub.
+- **Measurements** (category Measurement, skipped on GitHub): they report numbers instead of
+  checking them. `TorsionMeasurementTests` prints how noisy torsion is, to compare a change before
+  and after; `PipelineTuningTests` sweeps the thresholds and reference frames used above. Run them
+  with `--filter "TestCategory=Measurement" --logger "console;verbosity=detailed"`.
 - **Record and process** (`RecordAndProcessTests`): runs OpenIris without the user interface, as a
   user would. It tracks with the Simulation system, records about 1.5 seconds of raw video, then
   processes that recording with "Save processed video" and checks the processed video has the

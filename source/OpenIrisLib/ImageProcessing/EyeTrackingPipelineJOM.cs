@@ -300,6 +300,13 @@ namespace OpenIris
         public double MaxTorsion { get => maxTorsion; set => SetProperty(ref maxTorsion, value, nameof(MaxTorsion)); }
         private double maxTorsion = 25;
 
+        /// <summary>
+        /// Gets or sets the seed of the noise that fills the masked parts of the iris.
+        /// </summary>
+        [Category("Torsion settings"), Description("Seed of the random noise that fills the masked parts of the iris (eyelids, reflections). 0: different every time. Any other value: processing the same video again gives exactly the same torsion.")]
+        public int TorsionNoiseSeed { get => torsionNoiseSeed; set => SetProperty(ref torsionNoiseSeed, value, nameof(TorsionNoiseSeed)); }
+        private int torsionNoiseSeed = 0;
+
         #endregion Torsion tracking settings
     }
 }

@@ -20,6 +20,9 @@ namespace OpenIris.ImageProcessing
     /// </summary>
     public class TorsionTracking
     {
+        private Random? noiseRandom;
+        private int noiseSeed;
+
         /// <summary>
         /// Calculate the angle between the current iris and the reference.
         /// </summary>
@@ -48,7 +51,14 @@ namespace OpenIris.ImageProcessing
                 return 0.0;
             }
 
-            imageTorsion = GetTorsionImage(imageEye, eyeModel, mask, pupil, iris, trackingSettings);
+            // With a seed, the noise repeats from run to run (for tests) but still changes from frame to frame.
+            if (trackingSettings.TorsionNoiseSeed != noiseSeed)
+            {
+                noiseSeed = trackingSettings.TorsionNoiseSeed;
+                noiseRandom = (noiseSeed == 0) ? null : new Random(noiseSeed);
+            }
+
+            imageTorsion = GetTorsionImage(imageEye, eyeModel, mask, pupil, iris, trackingSettings, noiseRandom);
 
             dataQuality = 0;
 
@@ -96,8 +106,9 @@ namespace OpenIris.ImageProcessing
         /// <param name="pupil">Pupil ellipse.</param>
         /// <param name="iris">Iris circle.</param>
         /// <param name="trackingSettings">Configuration parameters.</param>
+        /// <param name="noiseRandom">Random generator for the noise in the masked pixels. A new one if null.</param>
         /// <returns>The iris image used to calculate torsion.</returns>
-        public static Image<Gray, byte>? GetTorsionImage(ImageEye imageEye, EyePhysicalModel eyeModel, Image<Gray, byte>? mask, PupilData pupil, IrisData iris, EyeTrackingPipelineJOMSettings trackingSettings)
+        public static Image<Gray, byte>? GetTorsionImage(ImageEye imageEye, EyePhysicalModel eyeModel, Image<Gray, byte>? mask, PupilData pupil, IrisData iris, EyeTrackingPipelineJOMSettings trackingSettings, Random? noiseRandom = null)
         {
             try
             {
@@ -165,7 +176,7 @@ namespace OpenIris.ImageProcessing
                 EyeTrackerDebug.AddImage("torsion3", imageEye.WhichEye, imageTorsion);
 
                 // Apply the noise mask
-                ApplyMaskNoise(imageTorsion, imageIrisPolarMask);
+                ApplyMaskNoise(imageTorsion, imageIrisPolarMask, noiseRandom);
                 EyeTrackerDebug.AddImage("torsion4", imageEye.WhichEye, imageTorsion);
 
                 return imageTorsion;
@@ -398,15 +409,16 @@ namespace OpenIris.ImageProcessing
         /// </summary>
         /// <param name="image">Current image.</param>
         /// <param name="mask">Current mask.</param>
+        /// <param name="random">Random generator for the noise. A new one if null.</param>
         /// <returns>Masked image.</returns>
-        internal static void ApplyMaskNoise(Image<Gray, byte> image, Image<Gray, byte> mask)
+        internal static void ApplyMaskNoise(Image<Gray, byte> image, Image<Gray, byte> mask, Random? random = null)
         {
             // Increase the mask by eroding the mask image. This will reduce the edge effects of the filter.
             var se21 = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.MorphShapes.Ellipse, new Size(15, 31), new Point(8, 16));
             CvInvoke.Erode(mask, mask, se21, new Point(-1, -1), 1, Emgu.CV.CvEnum.BorderType.Default, new MCvScalar(0));
 
             // Random generator for noise mask
-            var r = new Random();
+            var r = random ?? new Random();
             var wh = mask.Width * mask.Height;
 
             unsafe

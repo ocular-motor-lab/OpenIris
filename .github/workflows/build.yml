@@ -29,7 +29,7 @@ jobs:
         run: msbuild source/OpenIris.sln -restore -p:RestorePackagesConfig=true -p:Configuration=${{ matrix.configuration }} -p:Platform=x64 -m -nologo -v:m
 
       - name: Test
-        run: dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c ${{ matrix.configuration }} -p:Platform=x64 --filter "TestCategory!=Hardware" --logger "console;verbosity=normal"
+        run: dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c ${{ matrix.configuration }} -p:Platform=x64 --filter "TestCategory!=Hardware&TestCategory!=Measurement" --logger "console;verbosity=normal"
 
       # When a baseline test fails, it writes the full new output next to the test assembly.
       - name: Upload output of failed baseline tests

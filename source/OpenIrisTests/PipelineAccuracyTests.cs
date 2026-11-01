@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="PipelineAccuracyTests.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -35,7 +35,7 @@ namespace OpenIris.Tests
         [DataRow("SimpleCentroid", Eye.Right, MaxPupilErrorPixels.SimpleCentroid)]
         public void FindsPupilCenter(string pipeline, Eye eye, double maxError)
         {
-            var data = PipelineHarness.Run(pipeline, eye, SyntheticEye.Frames(eye, Frames), SyntheticEye.MmPerPix);
+            var data = PipelineHarness.RunSyntheticEye(pipeline, eye, Frames);
 
             var truths = data.Select((d, frame) => SyntheticEye.GetTruth(eye, frame).PupilCenter).ToList();
             var errors = data.Select((d, frame) => Distance(d.Pupil.Center, truths[frame])).ToList();
@@ -51,7 +51,7 @@ namespace OpenIris.Tests
         [DataRow(Eye.Right)]
         public void JomFindsCornealReflection(Eye eye)
         {
-            var data = PipelineHarness.Run("JOM", eye, SyntheticEye.Frames(eye, Frames), SyntheticEye.MmPerPix);
+            var data = PipelineHarness.RunSyntheticEye("JOM", eye, Frames);
 
             var errors = data.Select((d, frame) =>
             {

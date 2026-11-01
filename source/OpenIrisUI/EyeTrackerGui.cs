@@ -191,6 +191,7 @@ namespace OpenIris.UI
                 eyeTrackerUICommands.ChangeDataFolderCommand.Bind(buttonSelectFolder);
 
                 eyeTrackerUICommands.TrimVideosCommand.Bind(trimVideosToolStripMenuItem);
+                eyeTrackerUICommands.LabelVideosCommand.Bind(labelVideosToolStripMenuItem);
                 eyeTrackerUICommands.ConvertVideoToRGBCommand.Bind(convertVideoToRGBToolStripMenuItem);
                 eyeTrackerUICommands.ConvertVideoToMp4.Bind(convertVideoToMP4ToolStripMenuItem); 
 

@@ -14,7 +14,7 @@ OpenIris, see the [plugin development manual](../plugin-development/README.md).)
 6. [Playing and processing videos](processing-videos.md)
 7. [Webcam tracking](webcam-tracking.md): eye tracking with an ordinary webcam, no special hardware.
 8. [Labeling videos by hand](manual-labeling.md): marking the pupil or anything else frame by
-   frame, into the data file.
+   frame, with the tool in the Tools menu.
 9. [Remote control](remote-control.md): controlling OpenIris from MATLAB, Python or your stimulus
    program.
 10. [Plugins](plugins.md): recommended plugins, such as OpenIrisDPI, and how to install them.

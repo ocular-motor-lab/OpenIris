@@ -124,7 +124,7 @@ namespace OpenIris
             // videos cannot be moved or deleted while OpenIris is running.
             Videos.ForEach(video => video?.Dispose());
 
-            // The system of the videos (Manual Labeling saves its labels and closes its window here).
+            // The system of the videos, which may hold its own resources.
             eyeTrackingSystem?.Dispose();
         }
 

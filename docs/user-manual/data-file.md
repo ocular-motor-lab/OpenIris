@@ -71,8 +71,8 @@ These come twice, first for the left eye (columns starting with `Left`), then fo
 | `AccelerometerX`, `AccelerometerY`, `AccelerometerZ` | Head sensor accelerometer, in the units of the sensor. Only with eye tracking systems that have a head sensor (the Micromedical systems); 0 otherwise. |
 | `GyroX`, `GyroY`, `GyroZ` | Head sensor gyroscope, as above. |
 | `MagnetometerX`, `MagnetometerY`, `MagnetometerZ` | Head sensor magnetometer, as above. |
-| `Int0` … `Int7` | Whole numbers that depend on the eye tracking system. With the Spinnaker systems, `Int0` and `Int1` are the state of the input lines of the left and right camera at the end of the exposure of each frame, one bit per line. Use them to synchronize with other equipment (see [Hardware](hardware.md#synchronizing-with-other-hardware)). The Manual Labeling system can put labels here (see [Labeling videos by hand](manual-labeling.md)). |
-| `Double0` … `Double7` | Decimal numbers that depend on the eye tracking system. The Manual Labeling system can put labels here (see [Labeling videos by hand](manual-labeling.md)). |
+| `Int0` … `Int7` | Whole numbers that depend on the eye tracking system. With the Spinnaker systems, `Int0` and `Int1` are the state of the input lines of the left and right camera at the end of the exposure of each frame, one bit per line. Use them to synchronize with other equipment (see [Hardware](hardware.md#synchronizing-with-other-hardware)). |
+| `Double0` … `Double7` | Decimal numbers that depend on the eye tracking system. None of the systems included with OpenIris use them. |
 | `DebugTimeGrabbedLeft`, `DebugTimeGrabbedRight` | When OpenIris received the frame of each eye, in seconds since OpenIris started. |
 | `DebugTimeProcessed` | When OpenIris finished processing the frame, in seconds since OpenIris started. The difference with the time grabbed is the processing delay. These three are computer times, for checking delays only: use `Seconds` for timing. |
 

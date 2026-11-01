@@ -4,7 +4,7 @@
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace OpenIris
+namespace OpenIris.UI
 {
 #nullable enable
 
@@ -19,7 +19,7 @@ namespace OpenIris
     /// <summary>
     /// One label: a marker placed on one eye in one frame, in pixels of the eye image.
     /// </summary>
-    internal readonly struct ManualLabel
+    public readonly struct ManualLabel
     {
         public ManualLabel(ulong frameNumber, Eye eye, string marker, PointF location)
         {
@@ -37,10 +37,9 @@ namespace OpenIris
 
     /// <summary>
     /// The labels of a video, saved next to it as a CSV file: Frame,Eye,Marker,X,Y. Each marker is
-    /// at most once per eye and frame. Used from the UI thread (labeling window) and the processing
-    /// thread (PostProcessImagesAndData), so every access locks.
+    /// at most once per eye and frame.
     /// </summary>
-    internal sealed class ManualLabels
+    public sealed class ManualLabels
     {
         private readonly object sync = new object();
         private readonly Dictionary<(ulong frame, Eye eye), List<ManualLabel>> labels = new Dictionary<(ulong, Eye), List<ManualLabel>>();

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <LangVersion>9.0</LangVersion>
@@ -22,8 +22,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj" />
-    <!-- Built first and copied to Plugins (below), where OpenIris loads it, for the Manual Labeling test. -->
-    <ProjectReference Include="..\BasicPlugins\BasicPlugins.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Baselines\**" />
@@ -31,6 +29,5 @@
   <!-- EyeTrackerPluginManager.Init expects a Plugins folder next to OpenIrisLib.dll, even in safe mode. -->
   <Target Name="CreatePluginsFolder" AfterTargets="Build">
     <MakeDir Directories="$(OutDir)Plugins" />
-    <Copy SourceFiles="$(OpenIrisPluginsDir)BasicPlugins.dll" DestinationFolder="$(OutDir)Plugins" SkipUnchangedFiles="true" />
   </Target>
 </Project>

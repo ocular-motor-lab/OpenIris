@@ -276,6 +276,12 @@ namespace OpenIris
         [Browsable(false)]
         public string LastVideoFolder { get; set; }
 
+        /// <summary>
+        /// Markers of the tool to label videos by hand (Tools menu).
+        /// </summary>
+        [Browsable(false)]
+        public string[] LabelingMarkers { get; set; } = { "Pupil", "CR" };
+
         #endregion
 
         #region Setting loading and saving, including plugin settings

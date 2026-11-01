@@ -1,16 +1,15 @@
 # Labeling videos by hand
 
-The **Manual Labeling** eye tracking system lets a person label recorded videos frame by frame: click on
-the eye images to mark the pupil, a reflection, or anything else. The labels go into the data file
-like tracking data, so they can be analyzed the same way, or compared with what a tracking pipeline
-found. It replaces the old separate SubjectiveTracker program.
+**Tools > Label videos by hand** opens a window to label recorded videos frame by frame: click on
+the eye images to mark the pupil, a reflection, or anything else. It replaces the old separate
+SubjectiveTracker program. It only reads the videos: OpenIris doesn't need to be tracking, and
+nothing is recorded.
 
 ## Labeling
 
-1. In **Configuration**, choose the tracking pipeline. **Nothing** gives data with only the labels;
-   a real pipeline (for example **JOM**) tracks as usual and the labels are added to its data.
-2. **Play video**, choose the left and right videos, and **Manual Labeling** as the eye tracking system.
-3. The labeling window opens, paused at the first frame.
+1. **Tools > Label videos by hand**, and choose the videos: left and right, or only one.
+2. The window shows the first frame of each eye, and the list of markers. Type a name in the empty
+   row to add a marker (for example `Pupil`, `CR`, `Tip`). The markers are remembered for next time.
 
 | To | Do |
 | --- | --- |
@@ -20,35 +19,40 @@ found. It replaces the old separate SubjectiveTracker program.
 | Go back to labeled frames | **◀ labeled** and **labeled ▶**. |
 | Play or pause | Space. |
 
-The labels are saved as you go, next to the left video, in `VIDEO-labels.csv` (one line per marker:
-`Frame,Eye,Marker,X,Y`, in pixels of the eye image). Playing the same video again loads them, to
-continue or correct.
-
 Use AVI videos (OpenIris records AVI). Moving to a given frame of an MP4 video is not exact with the
 video library OpenIris uses now, so labels could end up on the wrong frame.
 
-## Markers and the data file
+## The labels file
 
-The markers have free names. For each one, the list says where it goes in the data, separately for
-each eye:
+The labels are saved as you go, next to the left video (or the only one), in `VIDEO-labels.csv`.
+Opening the same videos again loads them, to continue or correct. The file has one line per marker:
 
-| Goes to | In the data file |
+| Column | Meaning |
 | --- | --- |
-| None | Only in the labels file. |
-| Pupil | `LeftPupilX`, `LeftPupilY` (or `Right...`), instead of what the pipeline found. The pupil size stays the pipeline's, or is NaN with **Nothing**. |
-| CR1 … CR4 | `LeftCR1X`, `LeftCR1Y`... instead of what the pipeline found. |
-| Double0and1 … Double6and7 | X and Y in two of the `Double` columns. |
-| Int0and1 … Int6and7 | X and Y, rounded, in two of the `Int` columns. |
+| `Frame` | Frame number in the video, from 0. The same as `LeftFrameNumber` and `RightFrameNumber` in the [data file](data-file.md) of the processed video. |
+| `Eye` | `Left`, `Right`, or `Both` for a single video with both eyes. |
+| `Marker` | Name of the marker. |
+| `X`, `Y` | Position in pixels of the eye image, with (0, 0) the center of the top left pixel. |
 
-So, for example, a marker **Tip** that goes to Double0and1 for the left eye and Double2and3 for the
-right eye gives `Double0` to `Double3` with its position on each eye. Frames without a marker keep
-what the pipeline found (zero with **Nothing**). The calibrated columns are computed again from the
-labeled pupil.
+To use the labels with the data of a processed video, match them by frame number:
 
-The markers are saved in the settings of the Manual Labeling system, so they stay the same from video to
-video. They can be edited in the labeling window or in **Configuration**.
+=== "MATLAB"
 
-## Writing the data file
+    ```matlab
+    labels = readtable('Subject-Left-labels.csv');
+    pupil = labels(strcmp(labels.Marker, 'Pupil') & strcmp(labels.Eye, 'Left'), :);
+    % data: the data file, read as in "The data file"
+    [~, rows] = ismember(pupil.Frame, data.LeftFrameNumber);
+    errorX = data.LeftPupilX(rows(rows > 0)) - pupil.X(rows > 0);
+    ```
 
-**Process video** with **Manual Labeling** as the system writes the data file with the labels of every
-frame, as for any other system (see [Playing and processing videos](processing-videos.md)).
+=== "Python"
+
+    ```python
+    import pandas as pd
+    labels = pd.read_csv("Subject-Left-labels.csv")
+    pupil = labels[(labels.Marker == "Pupil") & (labels.Eye == "Left")]
+    # data: the data file, read as in "The data file"
+    merged = pupil.merge(data, left_on="Frame", right_on="LeftFrameNumber")
+    error_x = merged.LeftPupilX - merged.X
+    ```

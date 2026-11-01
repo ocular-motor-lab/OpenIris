@@ -56,6 +56,7 @@ namespace OpenIris
         public EyeTrackerUICommand ChangeDataFolderCommand;
 
         public EyeTrackerUICommand TrimVideosCommand;
+        public EyeTrackerUICommand LabelVideosCommand;
         public EyeTrackerUICommand ConvertVideoToRGBCommand;
         public EyeTrackerUICommand ConvertVideoToMp4;
 
@@ -236,6 +237,16 @@ namespace OpenIris
 
             ConvertVideoToRGBCommand = new EyeTrackerUICommand(
                 execute: _ => VideoTools.ConvertVideoToRGB(),
+                canExecute: () => true);
+
+            LabelVideosCommand = new EyeTrackerUICommand(
+                execute: async _ =>
+                {
+                    var options = SelectVideoDialog.SelectVideo(eyeTracker.Settings, SelectVideoDialog.Mode.Simple);
+                    if (options?.VideoFileNames is null) return;
+
+                    new ManualLabelingForm(options.VideoFileNames, eyeTracker.Settings).Show();
+                },
                 canExecute: () => true);
 
             ConvertVideoToMp4 = new EyeTrackerUICommand(

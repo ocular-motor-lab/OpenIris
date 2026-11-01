@@ -14,6 +14,7 @@ namespace OpenIris
     using System.Threading.Tasks;
     using Emgu.CV;
     using Emgu.CV.CvEnum;
+    using Emgu.CV.Structure;
 
     /// <summary>
     /// Tools to cut and convert videos. The Tools menu of the user interface uses them.
@@ -27,6 +28,24 @@ namespace OpenIris
         {
             ".avi", ".mp4", ".m4v", ".mov", ".mkv", ".wmv", ".mpg", ".mpeg", ".webm", ".flv", ".3gp", ".mts", ".m2ts", ".ts",
         };
+
+        /// <summary>
+        /// Writes an EmguCV image to a video. Use it instead of writer.Write(image) or
+        /// writer.Write(image.Mat): FFmpeg, which writes the videos, reads frames with instructions that
+        /// need memory aligned to 16-64 bytes, and EmguCV images keep their pixels in .NET arrays,
+        /// aligned only to 8 bytes. Writing them directly crashes (access violation) now and then. The
+        /// frame is copied into a Mat that OpenCV allocated.
+        /// </summary>
+        /// <param name="writer">The video.</param>
+        /// <param name="image">The frame.</param>
+        /// <param name="buffer">Mat for the copy. Keep it from frame to frame, and dispose it with the video.</param>
+        public static void WriteFrame<TColor>(VideoWriter writer, Image<TColor, byte> image, Mat buffer)
+            where TColor : struct, IColor
+        {
+            image.Mat.CopyTo(buffer);
+            GC.KeepAlive(image);
+            writer.Write(buffer);
+        }
 
         /// <summary>
         /// Copies a range of frames of the videos of each eye to new videos, named like the

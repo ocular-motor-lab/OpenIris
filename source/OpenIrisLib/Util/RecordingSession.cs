@@ -39,6 +39,8 @@ namespace OpenIris
 
         private EyeCollection<VideoWriter?>? rawVideoWriters;
         private VideoWriter? processedVideoWriter;
+        private readonly System.Collections.Generic.Dictionary<Eye, Mat> rawFrameBuffers = new();
+        private Mat? processedFrameBuffer;
         private StreamWriter? eventFile;
         private StreamWriter? dataFile;
         private EyeTrackerLog? log;
@@ -193,12 +195,16 @@ namespace OpenIris
                 {
                     rawVideoWriters?.ForEach(v => v?.Dispose());
                     rawVideoWriters = null;
+                    foreach (var buffer in rawFrameBuffers.Values) buffer.Dispose();
+                    rawFrameBuffers.Clear();
 
                     dataFile?.Dispose();
                     dataFile = null;
 
                     processedVideoWriter?.Dispose();
                     processedVideoWriter = null;
+                    processedFrameBuffer?.Dispose();
+                    processedFrameBuffer = null;
 
                     eventFile?.Dispose();
                     eventFile = null;
@@ -342,15 +348,16 @@ namespace OpenIris
                            size: im.Size,
                            isColor: false)).ToArray());
 
-            // Record the images. Write the image itself, not a temporary Mat of it (image.Image.Mat):
-            // the garbage collector could free that Mat while OpenCV is still writing it, which
-            // crashed now and then with EmguCV 4.12.
+            // Record the images
             foreach (var image in imagesEye.images)
             {
                 if (image is null) continue;
 
-                rawVideoWriters[image.WhichEye]?.Write(image.Image);
-                GC.KeepAlive(image.Image);
+                var writer = rawVideoWriters[image.WhichEye];
+                if (writer is null) continue;
+
+                if (!rawFrameBuffers.TryGetValue(image.WhichEye, out var buffer)) rawFrameBuffers[image.WhichEye] = buffer = new Mat();
+                VideoTools.WriteFrame(writer, image.Image, buffer);
             }
             return true;
         }
@@ -412,8 +419,7 @@ namespace OpenIris
                             size: imageForVideo.Size,
                             isColor: true);
 
-                processedVideoWriter.Write(imageForVideo);
-                GC.KeepAlive(imageForVideo);
+                VideoTools.WriteFrame(processedVideoWriter, imageForVideo, processedFrameBuffer ??= new Mat());
             }
             return true;
         }

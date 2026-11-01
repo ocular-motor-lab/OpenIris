@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="Lsl.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley. All rights reserved.
 // </copyright>
@@ -14,7 +14,7 @@ namespace OpenIris
     /// Minimal P/Invoke bindings for the Lab Streaming Layer native library (lsl.dll).
     ///
     /// Only the small subset of the C API needed to publish an outlet of double samples is
-    /// declared here. The native library (lsl.dll) must be present next to the executable.
+    /// declared here. The native library (lsl.dll) is in the folder of the libraries (lib\).
     /// See https://github.com/sccn/liblsl for the full API.
     /// </summary>
     internal static class Lsl
@@ -23,6 +23,19 @@ namespace OpenIris
         /// Name of the native library. The 64 bit Windows build of liblsl 1.x ships as "lsl.dll".
         /// </summary>
         private const string LibraryName = "lsl";
+
+        /// <summary>
+        /// Loads lsl.dll from the folder of the libraries. Windows doesn't look for it there, but once
+        /// it is loaded, the DllImports below use it.
+        /// </summary>
+        static Lsl()
+        {
+            var file = System.IO.Path.Combine(OpenIrisFolders.Libraries, LibraryName + ".dll");
+            if (System.IO.File.Exists(file)) LoadLibrary(file);
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern IntPtr LoadLibrary(string fileName);
 
         /// <summary>
         /// Channel format constants (lsl_channel_format_t). Only double64 is used here.

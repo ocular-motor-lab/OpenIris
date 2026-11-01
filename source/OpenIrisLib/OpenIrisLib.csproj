@@ -5,6 +5,7 @@
     <AssemblyName>OpenIrisLib</AssemblyName>
     <!-- The library itself is AnyCPU even in the x64 configuration. -->
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <OutputPath>$(OpenIrisLibDir)</OutputPath>
     <LangVersion>9.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- AssemblyVersion("1.3.*") uses a wildcard, which is incompatible with deterministic builds. -->

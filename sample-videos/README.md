@@ -6,6 +6,7 @@ folder next to `OpenIris.exe`, where the **Simulation** eye tracking system play
 use them.
 
 The full quality recordings, `JorgeLeft.avi` and `JorgeRight.avi` (about 335 MB each), are too large
-for git. If you have them, put both here (git ignores them) and Simulation plays them instead.
+for git. If you have them, put both here (git ignores them): the build copies them to `SampleVideos`
+too, and Simulation plays them instead.
 
 [`sample-data`](../sample-data) has the output of processing these videos.

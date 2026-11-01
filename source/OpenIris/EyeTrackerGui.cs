@@ -210,7 +210,7 @@ namespace OpenIris.UI
                 linkLabelDataFolder2.Click += (o, e) => Process.Start("explorer.exe", settings.DataFolder);
 
                 openSoundRecorderToolStripMenuItem.Click += (o, e) => Process.Start("SoundRecorder.exe");
-                openLogFolderToolStripMenuItem.Click += (o, e) => Process.Start("explorer.exe", System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location));
+                openLogFolderToolStripMenuItem.Click += (o, e) => Process.Start("explorer.exe", OpenIrisFolders.Logs);
                 showIPNetworkInfoToolStripMenuItem.Click += (o, e) => MessageBox.Show(EyeTrackerRemoteServices.GetIPAddresses());
                 aboutToolStripMenuItem.Click += (o, e) => new EyeTrackerAboutBox().ShowDialog();
 

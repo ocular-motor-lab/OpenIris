@@ -6,9 +6,6 @@
     <ApplicationIcon>OpenIris.ico</ApplicationIcon>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
   </PropertyGroup>
@@ -36,9 +33,29 @@
   </ItemGroup>
   <!-- The full quality sample videos, if both are in sample-videos (gitignored). Simulation plays them instead of the MP4s. -->
   <ItemGroup Condition="Exists('..\..\sample-videos\JorgeLeft.avi') And Exists('..\..\sample-videos\JorgeRight.avi')">
-    <Content Include="..\..\sample-videos\JorgeLeft.avi" Link="JorgeLeft.avi" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\..\sample-videos\JorgeRight.avi" Link="JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\sample-videos\JorgeLeft.avi" Link="SampleVideos\JorgeLeft.avi" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\sample-videos\JorgeRight.avi" Link="SampleVideos\JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <!-- Everything OpenIris.exe uses goes in lib\ (App.config tells .NET to look there), so its folder only
+       has the program, its configuration and settings files, and folders (and the sample videos). -->
+  <Target Name="PutLibrariesInLib" BeforeTargets="_CopyFilesMarkedCopyLocal">
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Update="@(ReferenceCopyLocalPaths)" DestinationSubDirectory="lib\%(ReferenceCopyLocalPaths.DestinationSubDirectory)" />
+    </ItemGroup>
+  </Target>
+  <PropertyGroup>
+    <SampleVideosDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\sample-videos\'))</SampleVideosDir>
+  </PropertyGroup>
+  <Target Name="PutFilesToCopyInLib" AfterTargets="GetCopyToOutputDirectoryItems">
+    <ItemGroup>
+      <_OpenIrisToLib Include="@(_SourceItemsToCopyToOutputDirectory)" Condition="'%(_SourceItemsToCopyToOutputDirectory.RootDir)%(_SourceItemsToCopyToOutputDirectory.Directory)' != '$(SampleVideosDir)'" />
+      <_SourceItemsToCopyToOutputDirectory Remove="@(_OpenIrisToLib)" />
+      <_SourceItemsToCopyToOutputDirectory Include="@(_OpenIrisToLib)" TargetPath="lib\%(_OpenIrisToLib.TargetPath)" />
+      <_OpenIrisToLibAlways Include="@(_SourceItemsToCopyToOutputDirectoryAlways)" Condition="'%(_SourceItemsToCopyToOutputDirectoryAlways.RootDir)%(_SourceItemsToCopyToOutputDirectoryAlways.Directory)' != '$(SampleVideosDir)'" />
+      <_SourceItemsToCopyToOutputDirectoryAlways Remove="@(_OpenIrisToLibAlways)" />
+      <_SourceItemsToCopyToOutputDirectoryAlways Include="@(_OpenIrisToLibAlways)" TargetPath="lib\%(_OpenIrisToLibAlways.TargetPath)" />
+    </ItemGroup>
+  </Target>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj" />
     <ProjectReference Include="..\OpenIrisWinForms\OpenIrisWinForms.csproj" />

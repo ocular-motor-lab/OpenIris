@@ -40,8 +40,7 @@ namespace OpenIris
             {
                 EyeTrackerDebug.Init();
 
-                EyeTrackerLog.Create(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                    $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
+                EyeTrackerLog.Create(Path.Combine(OpenIrisFolders.Logs, $"OpenIrisLog-{DateTime.Now:yyyyMMMdd-HHmmss}.Log"));
                 try
                 {
                     // Initialize the object that loads the different eye tracking system objects. It can

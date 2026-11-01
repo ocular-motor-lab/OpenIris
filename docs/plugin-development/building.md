@@ -43,7 +43,7 @@ tracking system plays them, and the tests use them too.
 
 The same recordings also exist in full quality, `JorgeLeft.avi` and `JorgeRight.avi` (about 335 MB
 each, too large for git). They are optional: if you put both in `sample-videos` too (git ignores
-them there), the build copies them next to `OpenIris.exe` and Simulation plays them instead of the
+them there), the build copies them to `SampleVideos` too and Simulation plays them instead of the
 MP4s.
 
 `sample-data` has the files OpenIris writes when processing the MP4s with the JOM pipeline, as an
@@ -59,11 +59,14 @@ example of the output.
 
 Everything is built into `bin\x64\Debug\` (or `bin\x64\Release\`):
 
-- `OpenIris.exe`, `OpenIrisLib.dll`, `OpenIrisWinForms.dll` and the libraries they use;
+- `OpenIris.exe` and `OpenIris.exe.config`;
+- `lib\`: `OpenIrisLib.dll`, `OpenIrisWinForms.dll` and the libraries they use (OpenIris.exe.config
+  tells .NET to look there);
 - `Plugins\`: the plugin DLLs (eye tracking systems, pipelines, calibrations), which OpenIris loads at
   startup;
-- when OpenIris runs from there, its settings (`EyeTrackerSettings.xml`) and its log files
-  (`OpenIrisLog-*.Log`).
+- `SampleVideos\`: the videos Simulation plays;
+- when OpenIris runs from there, its settings (`EyeTrackerSettings.xml`) and `Logs\`, with its log
+  files (`OpenIrisLog-*.Log`).
 
 To build from the command line, open a **Developer PowerShell for Visual Studio** in the repository
 folder and run:

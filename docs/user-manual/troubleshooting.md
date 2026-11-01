@@ -1,7 +1,7 @@
 # Troubleshooting
 
 Check the **Log** tab first: most problems leave a message there. The log is also saved to a file,
-`OpenIrisLog-<date>.Log`, in the OpenIris folder (**Tools > Open log folder**), and each recording
+`OpenIrisLog-<date>.Log`, in the `Logs` folder of OpenIris (**Tools > Open log folder**), and each recording
 has its own log.
 
 ## The eye tracking system I need isn't in the list

@@ -37,7 +37,7 @@ namespace OpenIris
                     resolvingFromPath = true;
                 }
 
-                var pluginFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Plugins");
+                var pluginFolder = OpenIrisFolders.Plugins;
 
                 // An aggregate catalog that combines multiple catalogs
                 // Adds all the parts found in all assemblies in the same directory as the executing program

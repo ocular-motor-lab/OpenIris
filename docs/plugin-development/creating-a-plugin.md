@@ -33,10 +33,10 @@ into the `Plugins` folder of an OpenIris installation:
   </PropertyGroup>
   <ItemGroup>
     <!-- Private=false: OpenIris already has these, don't copy them into Plugins. -->
-    <Reference Include="OpenIrisLib" HintPath="$(OpenIrisFolder)OpenIrisLib.dll" Private="false" />
+    <Reference Include="OpenIrisLib" HintPath="$(OpenIrisFolder)lib\OpenIrisLib.dll" Private="false" />
     <Reference Include="System.ComponentModel.Composition" />
     <!-- Only for plugins with windows or panels: -->
-    <Reference Include="OpenIrisWinForms" HintPath="$(OpenIrisFolder)OpenIrisWinForms.dll" Private="false" />
+    <Reference Include="OpenIrisWinForms" HintPath="$(OpenIrisFolder)lib\OpenIrisWinForms.dll" Private="false" />
     <Reference Include="System.Windows.Forms" />
     <!-- Same EmguCV version as OpenIris. Compile against it only: OpenIris provides it at run time. -->
     <PackageReference Include="Emgu.CV" Version="4.1.1.3497" IncludeAssets="compile" />

@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <!-- Settings shared by every SDK-style project under source\. MSBuild imports this file automatically,
        before the project file itself, so a project can still override anything set here.
        Legacy (non-SDK) projects, if one is ever added, are left alone. -->
@@ -11,8 +11,10 @@
     <LangVersion>8.0</LangVersion>
     <!-- AssemblyInfo.cs files are kept in each project. -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <!-- Everything builds into one folder next to OpenIris.exe; plugins add Plugins\ (see OpenIrisPluginsDir). -->
+    <!-- OpenIris.exe builds into OpenIrisBinDir, the libraries into lib\ (OpenIrisLibDir) and the plugins
+         into Plugins\ (OpenIrisPluginsDir), so the folder of OpenIris.exe stays tidy. -->
     <OpenIrisBinDir>$(MSBuildThisFileDirectory)..\bin\x64\$(Configuration)\</OpenIrisBinDir>
+    <OpenIrisLibDir>$(OpenIrisBinDir)lib\</OpenIrisLibDir>
     <OpenIrisPluginsDir>$(OpenIrisBinDir)Plugins\</OpenIrisPluginsDir>
     <OutputPath>$(OpenIrisBinDir)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>

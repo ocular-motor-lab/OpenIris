@@ -96,7 +96,7 @@ To make a release:
 
 ## When OpenIris crashes
 
-- Unhandled errors are written to the OpenIris log (`OpenIrisLog-*.Log`, next to `OpenIris.exe`) as
+- Unhandled errors are written to the OpenIris log (`OpenIrisLog-*.Log`, in the `Logs` folder next to `OpenIris.exe`) as
   a line starting with `FATAL ERROR:`, with the stack trace.
 - Some crashes inside native libraries (OpenCV, camera drivers) close OpenIris before it can log
   anything. To capture those, have Windows save a crash dump: run once, in a Command Prompt opened as

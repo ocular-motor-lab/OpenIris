@@ -59,7 +59,7 @@ example of the output.
 
 Everything is built into `bin\x64\Debug\` (or `bin\x64\Release\`):
 
-- `OpenIris.exe`, `OpenIrisLib.dll` and the libraries they use;
+- `OpenIris.exe`, `OpenIrisLib.dll`, `OpenIrisWinForms.dll` and the libraries they use;
 - `Plugins\`: the plugin DLLs (eye tracking systems, pipelines, calibrations), which OpenIris loads at
   startup;
 - when OpenIris runs from there, its settings (`EyeTrackerSettings.xml`) and its log files
@@ -77,6 +77,7 @@ msbuild source\OpenIris.sln -restore -p:Configuration=Release -p:Platform=x64
 | Project | What it is |
 | --- | --- |
 | **OpenIrisLib** | The core: grabbing, processing, recording, calibration, remote control, the base classes for plugins, and the built-in Simulation system and pipelines. |
+| **OpenIrisWinForms** | The Windows Forms parts: the controls, dialogs and tools of the main window, the calibration panels, and the base classes for plugin windows. OpenIrisLib doesn't use Windows Forms, so it can run without a Windows user interface. |
 | **OpenIris** (`OpenIrisUI`) | The main program, `OpenIris.exe`. |
 | **BasicPlugins** | Plugins without special hardware: the webcam and Synthetic Eyes systems. |
 | **SpinnakerInterface**, **FlyCaptureInterface**, **Micromedical**, **RemoteEyeTracker** (in `FlirPlugins\`) | Eye tracking systems for FLIR (formerly Point Grey) cameras: Spinnaker, FlyCapture, and the Micromedical and remote systems built on them. Separate projects because SpinnakerInterface only builds with the Spinnaker SDK installed. |

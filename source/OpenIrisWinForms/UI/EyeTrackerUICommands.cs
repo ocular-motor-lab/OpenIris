@@ -13,6 +13,7 @@ namespace OpenIris
     using OpenIris.UI;
     using OpenIris.ImageGrabbing;
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows.Forms;
     using System.Collections.Generic;
@@ -67,7 +68,7 @@ namespace OpenIris
                     {
                         // If the eye tracking system has an specific, UI open it.
                         using var trackingTask = eyeTracker.StartTracking();
-                        using var eyeTrackingSystemUI = eyeTracker.EyeTrackingSystem?.OpenEyeTrackingSystemUI;
+                        using var eyeTrackingSystemUI = PluginViews.OpenSystemWindow(eyeTracker.EyeTrackingSystem);
                         await trackingTask;
                     },
                     canExecute: () => eyeTracker.NotStarted);
@@ -231,12 +232,24 @@ namespace OpenIris
                     var options = SelectVideoDialog.SelectVideoForProcessing(eyeTracker.Settings);
                     if (options?.VideoFileNames is null) return;
 
-                    await VideoTools.TrimVideosCommandExecute(options);
+                    using var progressDialog = new ProgressBarDialog();
+                    using var cancellation = new CancellationTokenSource();
+                    progressDialog.Cancelled += (o, e) => cancellation.Cancel();
+                    progressDialog.Show();
+
+                    await VideoTools.TrimVideos(options, new Progress<int>(percent => progressDialog.Progress = percent), cancellation.Token);
+                    progressDialog.Close();
                 },
                 canExecute: () => true);
 
             ConvertVideoToRGBCommand = new EyeTrackerUICommand(
-                execute: _ => VideoTools.ConvertVideoToRGB(),
+                execute: async _ =>
+                {
+                    using var dialog = new OpenFileDialog();
+                    if (dialog.ShowDialog() != DialogResult.OK) return;
+
+                    VideoTools.ConvertVideoToRGB(dialog.FileName);
+                },
                 canExecute: () => true);
 
             LabelVideosCommand = new EyeTrackerUICommand(
@@ -250,7 +263,13 @@ namespace OpenIris
                 canExecute: () => true);
 
             ConvertVideoToMp4 = new EyeTrackerUICommand(
-                execute: _ => VideoTools.ConvertToMP4(),
+                execute: async _ =>
+                {
+                    using var dialog = new OpenFileDialog();
+                    if (dialog.ShowDialog() != DialogResult.OK) return;
+
+                    VideoTools.ConvertToMP4(dialog.FileName);
+                },
                 canExecute: () => true);
         }
 

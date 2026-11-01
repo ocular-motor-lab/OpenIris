@@ -38,7 +38,12 @@ namespace OpenIris
         private BlockingCollection<EyeTrackerImagesAndData>? inputBuffer;
 
         /// <summary>
-        /// User interface of the calibration.
+        /// The calibration method. User interfaces read its state to show it.
+        /// </summary>
+        public CalibrationPipelineBase Pipeline => calibrationPipeline;
+
+        /// <summary>
+        /// User interface of the calibration, if the calibration method provides one itself.
         /// </summary>
         public ICalibrationUIControl? GetCalibrationUI()
         {

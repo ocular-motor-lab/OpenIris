@@ -13,7 +13,6 @@ namespace OpenIris
     using System.Drawing;
     using System.Linq;
     using System.Runtime.Serialization;
-    using System.Windows.Forms;
     using OpenIris.ImageGrabbing;
 
     /// <summary>
@@ -164,16 +163,15 @@ namespace OpenIris
         public virtual EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData procesedImages) => procesedImages;
 
         /// <summary>
-        /// Opens a custom UI for this eye tracking system.
+        /// Gets the actions of this system that the user can run. The Windows user interface shows
+        /// them in the System menu.
         /// </summary>
-        /// <returns></returns>
-        public virtual Form? OpenEyeTrackingSystemUI => null;
-
-        /// <summary>
-        /// Gets custom menu items for this system to show in the main window
-        /// </summary>
-        /// <returns></returns>
-        public virtual ToolStripMenuItem[]? GetToolStripMenuItems() => null;
+        /// <remarks>
+        /// To give the system a window, don't open it here: export a view for the user interface
+        /// instead (in the Windows user interface, an EyeTrackingSystemWindow), so the system itself
+        /// doesn't depend on any user interface library.
+        /// </remarks>
+        public virtual EyeTrackingSystemCommand[]? GetCommands() => null;
 
         /// <summary>
         /// Gets a value indicating weather the cameras can move the ROI.

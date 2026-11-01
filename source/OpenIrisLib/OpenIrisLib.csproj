@@ -9,8 +9,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- AssemblyVersion("1.3.*") uses a wildcard, which is incompatible with deterministic builds. -->
     <Deterministic>false</Deterministic>
-    <!-- Name form resources after the form class, as legacy projects did (SDK default is off for .NET Framework). -->
-    <EmbeddedResourceUseDependentUponConvention>true</EmbeddedResourceUseDependentUponConvention>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -23,8 +21,6 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Forms.DataVisualization" />
   </ItemGroup>
   <!-- PrivateAssets="all": don't flow these packages to projects that reference OpenIrisLib (as with packages.config),
        otherwise every plugin copies them into Plugins\. Projects that need EmguCV reference it themselves. -->
@@ -32,19 +28,6 @@
     <PackageReference Include="Emgu.CV" PrivateAssets="all" />
     <PackageReference Include="EmbedIO" PrivateAssets="all" />
     <PackageReference Include="System.Text.Json" PrivateAssets="all" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Calibration\CalibrationPipelineManualUI.cs" SubType="UserControl" />
-    <Compile Update="Calibration\CalibrationRemoteLinearUI.cs" SubType="UserControl" />
-    <Compile Update="UI\BatchAnalysis.cs" SubType="Form" />
-    <Compile Update="UI\DebugImagesPanel.cs" SubType="UserControl" />
-    <Compile Update="UI\EyeTrackerSettingsForm.cs" SubType="Form" />
-    <Compile Update="UI\EyeTrackerTrace.cs" SubType="UserControl" />
-    <Compile Update="UI\ImageEyeBox.cs" SubType="UserControl" />
-    <Compile Update="UI\ProgressBarDialog.cs" SubType="Form" />
-    <Compile Update="UI\SelectVideoDialog.cs" SubType="Form" />
-    <Compile Update="UI\SliderTextControl.cs" SubType="UserControl" />
-    <Compile Update="UI\VideoPlayerUI.cs" SubType="UserControl" />
   </ItemGroup>
   <ItemGroup>
     <!-- The web client, served by EyeTrackerWebServer from the embedded files. -->

@@ -9,11 +9,11 @@ namespace OpenIris
 #nullable enable
 
     using Emgu.CV;
+    using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
+    using Emgu.CV.Util;
     using System;
     using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
     using System.Xml.Serialization;
 
     /// <summary>
@@ -86,7 +86,8 @@ namespace OpenIris
         public Image<Gray, byte>? ImageTorsionReference { get; set; }
 
         /// <summary>
-        /// Torsion image in byte format to work with serialization.
+        /// Torsion image in byte format to work with serialization: a BMP file, as calibration files
+        /// have always had.
         /// </summary>
         // http://stackoverflow.com/questions/1907077/serialize-a-bitmap-in-c-net-to-xml
         [XmlElement("ImageTorsionReference")]
@@ -97,10 +98,9 @@ namespace OpenIris
                 // serialize
                 if (ImageTorsionReference is null) return null;
 
-                using var ms = new MemoryStream();
-
-                ImageTorsionReference.Bitmap.Save(ms, ImageFormat.Bmp);
-                return ms.ToArray();
+                using var buffer = new VectorOfByte();
+                CvInvoke.Imencode(".bmp", ImageTorsionReference, buffer);
+                return buffer.ToArray();
             }
             set
             {
@@ -109,9 +109,9 @@ namespace OpenIris
                 // deserialize
                 if (value != null)
                 {
-                    using var ms = new MemoryStream(value);
-
-                    ImageTorsionReference = new Image<Gray, byte>(new Bitmap(ms));
+                    using var mat = new Mat();
+                    CvInvoke.Imdecode(value, ImreadModes.Grayscale, mat);
+                    ImageTorsionReference = mat.ToImage<Gray, byte>();
                 }
             }
         }

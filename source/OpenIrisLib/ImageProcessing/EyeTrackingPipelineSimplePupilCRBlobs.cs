@@ -18,7 +18,6 @@ namespace OpenIris
     using System.Drawing;
     using System.Linq;
     using System.Collections.Generic;
-    using OpenIris.UI;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye

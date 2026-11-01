@@ -9,6 +9,7 @@ namespace OpenIris.EyeTrackingSystems
 #nullable enable
 
     using System;
+    using System.ComponentModel.Composition;
     using System.Drawing;
     using System.Drawing.Drawing2D;
     using System.Windows.Forms;
@@ -22,26 +23,24 @@ namespace OpenIris.EyeTrackingSystems
     /// </summary>
     public partial class SyntheticEyesUI : Form
     {
+        private readonly EyeTrackingSystemSyntheticEyes system;
         private Group[] groups = new Group[0];
-        private EyeRotation rotation = EyeRotation.Primary;
+        private EyeRotation rotation;
 
         /// <summary>
         /// Initializes the window.
         /// </summary>
-        public SyntheticEyesUI()
+        /// <param name="system">The system whose eyes the window moves.</param>
+        public SyntheticEyesUI(EyeTrackingSystemSyntheticEyes system)
         {
+            this.system = system;
+            rotation = system.Rotation;
             InitializeComponent();
             panel1.Paint += Pad_Paint;
             panel1.MouseDown += panel1_MouseMove;
             panel1.Resize += (_, __) => panel1.Invalidate();
             typeof(Panel).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.SetValue(panel1, true);
         }
-
-        /// <summary>
-        /// Current orientation of the eyes. Read from the camera threads: EyeRotation is immutable,
-        /// so reading the reference is enough.
-        /// </summary>
-        public EyeRotation Rotation => rotation;
 
         /// <summary>
         /// The sliders of one coordinate system and its conversions.
@@ -101,6 +100,8 @@ namespace OpenIris.EyeTrackingSystems
                         SetRotation(group.From(group.Sliders[0].Value, group.Sliders[1].Value, group.Sliders[2].Value), group);
                 }
             }
+
+            SetRotation(rotation);
         }
 
         /// <summary>
@@ -110,6 +111,7 @@ namespace OpenIris.EyeTrackingSystems
         private void SetRotation(EyeRotation newRotation, Group? source = null)
         {
             rotation = newRotation;
+            system.Rotation = newRotation;
 
             foreach (var group in groups)
             {
@@ -189,5 +191,20 @@ namespace OpenIris.EyeTrackingSystems
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Opens the window of the synthetic eyes when tracking starts.
+    /// </summary>
+    [Export(typeof(IEyeTrackingSystemWindow))]
+    public sealed class SyntheticEyesWindow : EyeTrackingSystemWindow<EyeTrackingSystemSyntheticEyes>
+    {
+        /// <inheritdoc/>
+        protected override Form Open(EyeTrackingSystemSyntheticEyes system)
+        {
+            var window = new SyntheticEyesUI(system);
+            window.Show();
+            return window;
+        }
     }
 }

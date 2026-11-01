@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="WebcamFaceView.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -9,12 +9,14 @@ namespace OpenIris
 #nullable enable
 
     using System;
+    using System.ComponentModel.Composition;
     using System.Drawing;
     using System.Linq;
     using System.Windows.Forms;
     using Emgu.CV;
     using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
+    using OpenIris.UI;
 
     /// <summary>
     /// Window with the whole webcam image, the face mesh and the regions cut out as eye images, to
@@ -149,6 +151,27 @@ namespace OpenIris
             public float Score { get; }
             public RotatedSquare? FaceRegion { get; }
             public RotatedSquare[] EyeRegions { get; }
+        }
+    }
+
+    /// <summary>
+    /// Opens the window with the whole face when tracking from the webcam starts, if the settings
+    /// ask for it. OpenIris closes it when tracking stops.
+    /// </summary>
+    [Export(typeof(IEyeTrackingSystemWindow))]
+    public sealed class WebcamFaceWindow : EyeTrackingSystemWindow<EyeTrackingSystemWebcam>
+    {
+        /// <inheritdoc/>
+        protected override Form? Open(EyeTrackingSystemWebcam system)
+        {
+            if (!((EyeTrackingSystemWebcamSettings)system.Settings).ShowFaceView) return null;
+
+            var view = new WebcamFaceView();
+            system.FaceProcessed += view.Offer;
+            view.FormClosed += (_, __) => system.FaceProcessed -= view.Offer;
+            view.Disposed += (_, __) => system.FaceProcessed -= view.Offer;
+            view.Show();
+            return view;
         }
     }
 }

@@ -240,7 +240,7 @@ namespace OpenIris
             {
                 using var image = overlay == "false"
                     ? imageEye.Image.Convert<Bgr, byte>()
-                    : UI.ImageEyeBox.DrawAllData(imageEye, imagesAndData.Calibration.EyeCalibrationParameters[whichEye], imagesAndData.TrackingSettings);
+                    : EyeImageOverlay.DrawAllData(imageEye, imagesAndData.Calibration.EyeCalibrationParameters[whichEye], imagesAndData.TrackingSettings);
                 if (image is null) throw HttpException.NotFound("No image.");
 
                 using var buffer = new VectorOfByte();

@@ -21,24 +21,23 @@ namespace OpenIris.Calibration
 
         #region ICalibrationUI Members
 
-        public ICalibrationUIControl? GetCalibrationUI() => this;
-
-        public String status = "Waiting";
-        public List<FixationGridViewRow> fix_data = new List<FixationGridViewRow>();
+        private readonly CalibrationPipelineRemoteLinear pipeline;
 
         /// <summary>
-        /// Updates the UI with the image from last frame and current calibration.
+        /// Updates the UI with the state of the calibration.
         /// </summary>
         public void UpdateUI()
         {
-            this.label1.Text = $"Status: {status}";
-            this.label2.Text = $"Num Fixations: {fix_data.Count}";
-            this.dataGridView1.DataSource = this.fix_data;
+            var fixations = pipeline.Fixations;
+            this.label1.Text = $"Status: {pipeline.Status}";
+            this.label2.Text = $"Num Fixations: {fixations.Count}";
+            if (this.dataGridView1.DataSource != fixations) this.dataGridView1.DataSource = fixations;
         }
 
         #endregion ICalibrationUI Members
-        public CalibrationRemoteLinearUI()
+        public CalibrationRemoteLinearUI(CalibrationPipelineRemoteLinear pipeline)
         {
+            this.pipeline = pipeline;
             InitializeComponent();
         }
 
@@ -58,14 +57,11 @@ namespace OpenIris.Calibration
         }
     }
 
-    public class FixationGridViewRow
+    /// <summary>
+    /// Shows the remote linear calibration in its tab.
+    /// </summary>
+    internal sealed class CalibrationRemoteLinearPanel : UI.CalibrationPanel<CalibrationPipelineRemoteLinear>
     {
-        public int FixNum { get; set; }
-        public float FixX { get; set; }
-        public float FixY { get; set; }
-        public float? LeftX { get; set; }
-        public float? LeftY { get; set; }
-        public float? RightX { get; set; }
-        public float? RightY { get; set; }
+        protected override ICalibrationUIControl Create(CalibrationPipelineRemoteLinear pipeline) => new CalibrationRemoteLinearUI(pipeline);
     }
 }

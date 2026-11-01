@@ -1,106 +1,25 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="ImageEyeBox.cs">
-//     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
+// <copyright file="EyeImageOverlay.cs">
+//     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
 //-----------------------------------------------------------------------
-namespace OpenIris.UI
+namespace OpenIris
 {
 #nullable enable
 
     using System;
     using System.Drawing;
-    using System.Windows.Forms;
     using Emgu.CV;
     using Emgu.CV.Structure;
-    using OpenIris;
     using OpenIris.ImageProcessing;
 
     /// <summary>
-    /// Control that displays the image of the eye.
+    /// Draws the tracking data (pupil, reflections, eyelids, thresholds...) over the image of an eye.
+    /// Used by the user interface, the web client and the processed videos.
     /// </summary>
-    public partial class ImageEyeBox : UserControl
+    public static class EyeImageOverlay
     {
-        /// <summary>
-        /// Initializes a new instance of the EyeTrackerImageEyeBox class.
-        /// </summary>
-        public ImageEyeBox()
-        {
-            this.InitializeComponent();
-        }
-
-        /// <summary>
-        /// Updates the image in the control.
-        /// </summary>
-        /// <param name="imageEye">New image to draw.</param>
-        /// <param name="eyeGlobe"></param>
-        /// <param name="thresholdDark">Threshold dark.</param>
-        /// <param name="threshdoldBright">Threshold bright.</param>
-        /// <param name="croppingBox">Cropping rectangle where to search for a pupil.</param>
-        /// <param name="mmPerPix">Resolution of the image in mm per pix.</param>
-        public void UpdateImageEyeBox(ImageEye imageEye, EyePhysicalModel eyeGlobe, int thresholdDark, int threshdoldBright, Rectangle croppingBox, double mmPerPix)
-        {
-            if (imageEye is not null)
-            {
-                imageBoxEye.SuspendLayout();
-                // Draw image of the eye with tracking information
-                var image = imageEye.Image.Convert<Bgr, byte>();
-                var eyeData = imageEye.EyeData ?? new EyeData();
-                ImageEyeBox.DrawAllData(image, eyeData, eyeGlobe, thresholdDark, threshdoldBright, croppingBox, mmPerPix);
-
-                imageBoxEye.Image = image;
-                imageBoxEye.ResumeLayout();
-            }
-        }
-
-
-        /// <summary>
-        /// Updates the image in the control.
-        /// </summary>
-        /// <param name="imageEye">New image to draw.</param>
-        public void UpdateImageEyeBox(ImageEye? imageEye)
-        {
-            if (imageEye is null) return;
-         
-            imageBoxEye.SuspendLayout();
-
-            Image<Bgr, byte> imageEyeColor = imageEye.Image.Convert<Bgr, byte>();
-            imageBoxEye.Image = imageEyeColor;
-
-            imageBoxEye.ResumeLayout();
-        }
-
-
-        /// <summary>
-        /// Updates the image in the control.
-        /// </summary>
-        /// <param name="imageEye">New image to draw.</param>
-        /// <param name="calibration"></param>
-        /// <param name="settings"></param>
-        public void UpdateImageEyeBox(ImageEye imageEye, EyeCalibration calibration, EyeTrackingPipelineSettings settings)
-        {
-            this.imageBoxEye.SuspendLayout();
-
-            if (imageEye != null)
-            {
-                // Draw image of the eye with tracking information
-                var imageEyeColor = ImageEyeBox.DrawAllData(imageEye, calibration, settings);
-
-                this.imageBoxEye.Image = imageEyeColor;
-            }
-
-            imageBoxEye.ResumeLayout();
-        }
-
-        /// <summary>
-        /// Resets the image to blank.
-        /// </summary>
-        public void ResetImage()
-        {
-            imageBoxEye.Image = null;
-        }
-
-
         /// <summary>
         /// Gets the image with data overlay for display.
         /// </summary>
@@ -141,28 +60,28 @@ namespace OpenIris.UI
 
             if (thresholdDark > 0)
             {
-                ImageEyeBox.DrawThresdholds(image, thresholdDark, threshdoldBright);
+                DrawThresdholds(image, thresholdDark, threshdoldBright);
 
                 // Draw eyelids
-                ImageEyeBox.DrawEyelids(image, data, eyeGlobe);
+                DrawEyelids(image, data, eyeGlobe);
             }
 
-            ImageEyeBox.DrawEyeGlobe(image, eyeGlobe, false);
+            DrawEyeGlobe(image, eyeGlobe, false);
 
             if (!croppingRectangle.IsEmpty)
             {
-                ImageEyeBox.DrawCroppingBox(image, croppingRectangle);
+                DrawCroppingBox(image, croppingRectangle);
             }
 
-            ImageEyeBox.DrawPupil(image, data);
+            DrawPupil(image, data);
 
-            ImageEyeBox.DrawCR(image, data);
+            DrawCR(image, data);
 
-            ImageEyeBox.DrawIris(image, data, eyeGlobe);
+            DrawIris(image, data, eyeGlobe);
 
-            ImageEyeBox.DrawCross(image, data);
+            DrawCross(image, data);
 
-            ImageEyeBox.DrawMMScale(image, mmPerPix);
+            DrawMMScale(image, mmPerPix);
         }
 
         /// <summary>

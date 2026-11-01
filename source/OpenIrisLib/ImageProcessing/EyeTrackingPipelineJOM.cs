@@ -15,10 +15,7 @@ namespace OpenIris
     using System.ComponentModel;
     using System.ComponentModel.Composition;
     using OpenIris.ImageProcessing;
-    using System.Windows.Forms;
     using System.Collections.Generic;
-    using Emgu.CV.UI;
-    using OpenIris.UI;
 
     /// <summary>
     /// Class in charge of processing images and tracking the pupil and iris to obtain the eye

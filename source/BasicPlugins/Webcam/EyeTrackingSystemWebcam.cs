@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EyeTrackingSystemWebcam.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -8,11 +8,13 @@ namespace OpenIris
 {
 #nullable enable
 
+    using System;
     using System.ComponentModel;
     using System.ComponentModel.Composition;
     using System.Drawing;
     using System.Linq;
-    using System.Windows.Forms;
+    using Emgu.CV;
+    using Emgu.CV.Structure;
     using OpenIris.ImageGrabbing;
 
     /// <summary>
@@ -26,7 +28,12 @@ namespace OpenIris
         private readonly object trackerLock = new object();
         private CameraEyeWebcam? camera;
         private WebcamEyeLocator? tracker;
-        private volatile WebcamFaceView? faceView;
+
+        /// <summary>
+        /// Raised from the processing thread after looking for the eyes in each image of the face.
+        /// The face window (WebcamFaceWindow) shows it.
+        /// </summary>
+        internal event Action<Image<Gray, byte>, WebcamEyeLocator, EyeCollection<ImageEye?>>? FaceProcessed;
 
         protected override EyeCollection<CameraEye?>? CreateAndStartCameras()
         {
@@ -58,33 +65,14 @@ namespace OpenIris
             }
 
             var eyes = tracker.Process(face);
-            faceView?.Offer(face.Image, tracker, eyes);
+            FaceProcessed?.Invoke(face.Image, tracker, eyes);
             if (Settings.Eye == Eye.Left) eyes[Eye.Right] = null;
             if (Settings.Eye == Eye.Right) eyes[Eye.Left] = null;
             return eyes;
         }
 
-        /// <summary>
-        /// Opens the window with the whole face when tracking from the webcam starts. OpenIris
-        /// closes it when tracking stops.
-        /// </summary>
-        public override Form? OpenEyeTrackingSystemUI
-        {
-            get
-            {
-                if (!((EyeTrackingSystemWebcamSettings)Settings).ShowFaceView) return null;
-
-                var view = new WebcamFaceView();
-                view.FormClosed += (_, __) => faceView = null;
-                view.Show();
-                faceView = view;
-                return view;
-            }
-        }
-
         public override void Dispose()
         {
-            faceView = null;
             camera?.Stop();
             camera?.Dispose();
             camera = null;

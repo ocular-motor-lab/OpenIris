@@ -36,19 +36,6 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Initializes a new instance of the ImageEye class.
-        /// </summary>
-        /// <param name="bitmap">Bitmap of the image.</param>
-        /// <param name="whichEye">The eye.</param>
-        /// <param name="timeStamp">The timestamp.</param>
-        public ImageEye(Bitmap bitmap, Eye whichEye, ImageEyeTimestamp timeStamp)
-        {
-            Image = new Image<Gray, byte>(bitmap);
-            WhichEye = whichEye;
-            TimeStamp = timeStamp;
-        }
-
-        /// <summary>
         /// Initializes an image directly with a pointer to the data. This is the fastest and recommended constructor.
         /// For images captured with a camera. 
         /// </summary>

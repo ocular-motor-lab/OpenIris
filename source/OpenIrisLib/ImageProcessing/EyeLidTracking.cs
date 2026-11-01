@@ -13,7 +13,6 @@ namespace OpenIris.ImageProcessing
     using Emgu.CV;
     using Emgu.CV.Structure;
     using Emgu.CV.Util;
-    using OpenIris.UI;
 
     /// <summary>
     /// Tracks the eyelids using the Hough transform. It finds four segments of the eyelids independently around the pupil.
@@ -316,7 +315,7 @@ namespace OpenIris.ImageProcessing
                     Eyelids = eyelidData,
                 };
 
-                ImageEyeBox.DrawEyelids(imageDebugParabola, data, eyeGlobe);
+                EyeImageOverlay.DrawEyelids(imageDebugParabola, data, eyeGlobe);
                 EyeTrackerDebug.AddImage("EyelidParabolas", imageEye.WhichEye, imageDebugParabola);
             }
 

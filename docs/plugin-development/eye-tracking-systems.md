@@ -165,8 +165,7 @@ or one per eye (`new EyeCollection<CameraEye?>(left, right)`, with `null` for an
 | `PostProcessImagesAndData(imagesAndData)` | Add data to each frame after processing, for example fill `imagesAndData.Data.ExtraData` with values from `ImageSourceData`. The extra data is saved in the data file and sent to [remote clients](../user-manual/remote-control.md). |
 | `CreateVideos(fileNames)` | Open the videos recorded with this system, if they need something special. Return your own class inheriting `VideoEye` and override `GrabImageEyeFromVideo`, for example to read timestamps the camera embeds in the pixels (see `FlirPlugins\FlyCaptureInterface\ImageGrabbing\VideoEyeFlyCapture.cs`). |
 | `CreateHeadDataSourceWithCameras()`, `CreateHeadDataSourceWithVideos()` | Provide head movement data, for systems with a head sensor. |
-| `OpenEyeTrackingSystemUI` | Return a window with controls specific to this system. |
-| `GetToolStripMenuItems()` | Add items to the menu (see below). |
+| `GetCommands()` | Add actions the user can run, shown in the **System** menu (see below). |
 | `SaveCameraMove()`, `SaveCameraExposure()` | Save the camera position or exposure in the settings after the user changes them, so they are kept for the next session. |
 
 Splitting the image of one camera into one image per eye:
@@ -187,16 +186,45 @@ public override EyeCollection<ImageEye?> PreProcessImages(EyeCollection<ImageEye
 }
 ```
 
-Adding a menu item:
+Adding a command to the **System** menu, with an optional keyboard shortcut:
 
 ```csharp
-public override ToolStripMenuItem[]? GetToolStripMenuItems()
+public override EyeTrackingSystemCommand[]? GetCommands()
 {
-    var item = new ToolStripMenuItem { Text = "Example action", ShortcutKeys = Keys.F11 };
-    item.Click += (o, e) => MessageBox.Show("Example action");
-    return new[] { item };
+    return new[]
+    {
+        new EyeTrackingSystemCommand("Auto exposure once", () => camera.AutoExposureOnce(), "F10"),
+    };
 }
 ```
+
+Commands don't depend on any user interface library, so other user interfaces can offer them too.
+
+### A window for the system
+
+The system class itself doesn't open windows: that keeps it free of Windows Forms, so the same system
+can run where there is no Windows user interface. To give the system a window, export a view class
+next to it. OpenIris opens the window when tracking starts and closes it when tracking stops:
+
+```csharp
+[Export(typeof(IEyeTrackingSystemWindow))]
+public sealed class ExampleSystemWindow : EyeTrackingSystemWindow<EyeTrackingSystemExample>
+{
+    protected override Form? Open(EyeTrackingSystemExample system)
+    {
+        var window = new ExampleSystemForm(system);
+        window.Show();
+        return window;
+    }
+}
+```
+
+The window talks to the system through the system's own properties, methods and events. For
+example, the window of the Synthetic Eyes system sets the system's `Rotation`, and the Webcam
+system raises an event with each image of the face, which its window shows
+(`BasicPlugins\SyntheticEyes\SyntheticEyesUI.cs`, `BasicPlugins\Webcam\WebcamFaceView.cs`). The view
+classes are in `OpenIrisWinForms.dll`: reference it, as well as OpenIrisLib (see
+[Creating a plugin](creating-a-plugin.md)).
 
 ## 3. Try it
 

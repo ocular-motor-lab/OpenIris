@@ -489,28 +489,24 @@ namespace OpenIris.Calibration
     [Export(typeof(CalibrationPipelineBase)), PluginDescription("Remote Linear", typeof(CalibrationSettingsRemoteLinear))]
     public class CalibrationPipelineRemoteLinear : CalibrationPipelineBase
     {
-        private CalibrationRemoteLinearUI? ui;
         private LinearCalibrator calibrator = new LinearCalibrator();
 
+        /// <summary>
+        /// Whether the calibration is collecting a fixation ("Fixating") or not ("Waiting"), for the
+        /// user interface.
+        /// </summary>
+        public string Status { get; private set; } = "Waiting";
 
         /// <summary>
-        /// User interface of the calibration.
+        /// The fixations collected so far, for the user interface.
         /// </summary>
-        public override ICalibrationUIControl? GetCalibrationUI()
-        {
-            return ui;
-        }
+        public List<FixationGridViewRow> Fixations { get; private set; } = new List<FixationGridViewRow>();
 
         /// <summary>
         /// Pushes EyeData to the calibrator 
         /// </summary>
         public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(ImageEye image, EyeTrackingPipelineSettings processingSettings)
         {
-            if (ui is null)
-            {
-                ui = new CalibrationRemoteLinearUI();
-            }
-
             if (!(image.EyeData is null))
             {
                 calibrator.PushData(image.EyeData);
@@ -524,8 +520,6 @@ namespace OpenIris.Calibration
         /// </summary>
         public override (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
-            ui = null; // No UI for resetting reference
-
             if (image == null) return (false, null);
 
             if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
@@ -589,8 +583,7 @@ namespace OpenIris.Calibration
                     var y = float.Parse(pt[1]);
                     calibrator.StartFixation(new PointF(x, y));
 
-                    if (ui != null)
-                        ui.status = calibrator.in_fixation ? "Fixating" : "Waiting";
+                    Status = calibrator.in_fixation ? "Fixating" : "Waiting";
                 }
                 catch (Exception ex)
                 {
@@ -602,20 +595,14 @@ namespace OpenIris.Calibration
             {
                 var settings = Settings as CalibrationSettingsRemoteLinear ?? throw new ArgumentNullException(nameof(Settings));
                 calibrator.StopFixation();
-                if (ui != null)
-                {
-                    ui.fix_data = calibrator.GetUIData(settings.SignalSource, settings.SignalReference);
-                    ui.status = calibrator.in_fixation ? "Fixating" : "Waiting";
-                }
+                Fixations = calibrator.GetUIData(settings.SignalSource, settings.SignalReference);
+                Status = calibrator.in_fixation ? "Fixating" : "Waiting";
                 return "ack";
             }
             else if (message.Equals("FixAbort", StringComparison.InvariantCultureIgnoreCase))
             {
                 calibrator.AbortFixation();
-                if (ui != null)
-                {
-                    ui.status = calibrator.in_fixation ? "Fixating" : "Waiting";
-                }
+                Status = calibrator.in_fixation ? "Fixating" : "Waiting";
                 return "ack";
             }
             else if (message.Equals("Complete", StringComparison.InvariantCultureIgnoreCase))
@@ -694,5 +681,19 @@ namespace OpenIris.Calibration
         [Category("Parameters"), Description("Gain Gyy (Right Eye)")]
         public double RightGyy { get => rightGyy; set => SetProperty(ref rightGyy, value, nameof(RightGyy)); }
         private double rightGyy = 1.0;
+    }
+
+    /// <summary>
+    /// One fixation of the remote linear calibration, as shown in the user interface.
+    /// </summary>
+    public class FixationGridViewRow
+    {
+        public int FixNum { get; set; }
+        public float FixX { get; set; }
+        public float FixY { get; set; }
+        public float? LeftX { get; set; }
+        public float? LeftY { get; set; }
+        public float? RightX { get; set; }
+        public float? RightY { get; set; }
     }
 }

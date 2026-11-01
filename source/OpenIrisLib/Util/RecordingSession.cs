@@ -10,7 +10,6 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Structure;
-    using OpenIris.UI;
     using System;
     using System.Diagnostics;
     using System.Drawing;
@@ -388,9 +387,9 @@ namespace OpenIris
                     if (eyeData is null) continue;
 
                     var eyeModel = images.dataAndImages.Calibration.EyeCalibrationParameters[eyeData.WhichEye].EyePhysicalModel;
-                    if (processedVideoOptions.AddPupilCross) ImageEyeBox.DrawCross(imageColor, eyeData);
-                    if (processedVideoOptions.AddCRCross) ImageEyeBox.DrawCR(imageColor, eyeData);
-                    if (processedVideoOptions.AddEyelids) ImageEyeBox.DrawEyelids(imageColor, eyeData, eyeModel);
+                    if (processedVideoOptions.AddPupilCross) EyeImageOverlay.DrawCross(imageColor, eyeData);
+                    if (processedVideoOptions.AddCRCross) EyeImageOverlay.DrawCR(imageColor, eyeData);
+                    if (processedVideoOptions.AddEyelids) EyeImageOverlay.DrawEyelids(imageColor, eyeData, eyeModel);
                 }
 
                 using var imageForVideo = imagesColor.Count() switch

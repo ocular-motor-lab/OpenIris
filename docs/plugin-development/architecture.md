@@ -76,6 +76,16 @@ the `Plugins` folder (see [Creating a plugin](creating-a-plugin.md#how-openiris-
 configuration window lists them, and `Settings` keeps the settings of each one, so switching between
 systems or pipelines keeps their settings.
 
+## The user interface
+
+OpenIrisLib, which has `EyeTracker` and the base classes for plugins, doesn't use Windows Forms. The
+main window and everything else on screen are in OpenIrisWinForms and OpenIris.exe. Plugins follow
+the same split: a system or calibration class has no windows; it exposes its state, and separate view
+classes show it ([a system's window](eye-tracking-systems.md#a-window-for-the-system),
+[a calibration panel](calibration-pipelines.md#a-panel-in-the-calibration-tab)). The user interface
+finds them with `EyeTrackerPluginManager.GetExports<T>()`. Another user interface, for example on
+another operating system, would look for its own kind of views of the same plugins.
+
 ## Images and memory
 
 Images are EmguCV `Image<Gray, byte>` objects. OpenIris doesn't dispose frame images explicitly; the

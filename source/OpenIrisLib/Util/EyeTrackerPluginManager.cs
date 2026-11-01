@@ -42,9 +42,10 @@ namespace OpenIris
                 // An aggregate catalog that combines multiple catalogs
                 // Adds all the parts found in all assemblies in the same directory as the executing program
                 // and in the plugin directory
-                using var catalog = new AggregateCatalog();
-                using var assemblyCatalog = new AssemblyCatalog(Assembly.GetExecutingAssembly());
-                using var pluginCatalog = new DirectoryCatalog(pluginFolder);
+                // Kept for GetExports, for the life of the program.
+                var catalog = new AggregateCatalog();
+                var assemblyCatalog = new AssemblyCatalog(Assembly.GetExecutingAssembly());
+                var pluginCatalog = new DirectoryCatalog(pluginFolder);
 
                 catalog.Catalogs.Add(assemblyCatalog);
                 if (!safeMode)
@@ -55,6 +56,7 @@ namespace OpenIris
                 EyeTrackingsyStemFactory = new EyeTrackerPluginLoader<EyeTrackingSystemBase, IEyeTrackingSystemMetadata>(catalog);
                 CalibrationPipelineFactory = new EyeTrackerPluginLoader<CalibrationPipelineBase, IEyeTrackerPluginMetadata>(catalog);
                 EyeTrackingPipelineFactory = new EyeTrackerPluginLoader<EyeTrackingPipelineBase, IEyeTrackerPluginMetadata>(catalog);
+                container = new CompositionContainer(catalog);
 
                 ExtraSettingsTypesForXML = new List<Type>();
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingsyStemFactory.ClassesAvaiable.Select(t => t.SettingsType));
@@ -64,6 +66,27 @@ namespace OpenIris
             catch (Exception ex)
             {
                 throw new PluginManagerException("ERROR loading plugins", ex);
+            }
+        }
+
+        private static CompositionContainer? container;
+
+        /// <summary>
+        /// Gets every part exported as type T by OpenIris and the plugins. User interfaces use it to
+        /// find what plugins provide for them, such as the windows of eye tracking systems, without
+        /// the core knowing about any user interface library.
+        /// </summary>
+        /// <typeparam name="T">Type the parts are exported as.</typeparam>
+        public static IEnumerable<T> GetExports<T>()
+        {
+            try
+            {
+                return container?.GetExportedValues<T>() ?? Enumerable.Empty<T>();
+            }
+            catch (Exception ex) when (ex is CompositionException || ex is ReflectionTypeLoadException)
+            {
+                Trace.WriteLine($"ERROR loading the plugin parts of type {typeof(T).Name}: {ex.Message}");
+                return Enumerable.Empty<T>();
             }
         }
 

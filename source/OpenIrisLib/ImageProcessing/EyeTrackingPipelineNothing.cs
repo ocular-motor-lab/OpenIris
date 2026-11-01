@@ -10,7 +10,6 @@ namespace OpenIris
 
     using Emgu.CV;
     using Emgu.CV.Structure;
-    using OpenIris.UI;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Composition;

@@ -11,7 +11,6 @@ namespace OpenIris.Tests
     using System.IO;
     using System.Linq;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using OpenIris.UI;
 
     /// <summary>
     /// The labels file of the tool to label videos by hand (Tools menu).

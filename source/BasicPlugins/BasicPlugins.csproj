@@ -25,5 +25,8 @@
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\OpenIrisWinForms\OpenIrisWinForms.csproj">
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
 </Project>

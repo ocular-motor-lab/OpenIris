@@ -48,14 +48,33 @@ collect data over many frames (for example while the subject looks at targets) b
 
 | Method | Use it to |
 | --- | --- |
-| `GetCalibrationUI()` | Show a panel in a Calibration tab of the main window while calibrating, with instructions or progress. Return a control implementing `ICalibrationUIControl`. |
+| `GetCalibrationUI()` | Show a panel in a Calibration tab of the main window while calibrating, with instructions or progress. Return a `UserControl` implementing `ICalibrationUIControl`. Better: export a panel class instead (see below). |
 | `HandleRemoteMessage(message)` | Receive messages from a stimulus program during calibration, sent with the `CALIBRATION\|message` remote command (see [Remote control](../user-manual/remote-control.md#calibration)). Return the reply. |
 | `Dispose()` | Release resources. |
+
+## A panel in the Calibration tab
+
+To show instructions or progress in a Calibration tab while calibrating, keep the state in the
+calibration class (public properties), and export a panel class that shows it. That way the
+calibration class doesn't depend on Windows Forms. The panel classes are in `OpenIrisWinForms.dll`:
+
+```csharp
+[Export(typeof(ICalibrationPanel))]
+public sealed class ExampleCalibrationPanel : CalibrationPanel<CalibrationPipelineExample>
+{
+    protected override ICalibrationUIControl? Create(CalibrationPipelineExample pipeline) => new ExampleCalibrationControl(pipeline);
+}
+```
+
+`ExampleCalibrationControl` is a `UserControl` implementing `ICalibrationUIControl`. OpenIris calls
+its `UpdateUI()` regularly on the user interface thread, where it reads the state of the pipeline.
+See `OpenIrisWinForms\Calibration\CalibrationRemoteLinearUI.cs`.
 
 ## Examples in the source code
 
 - `CalibrationPipelineAuto.cs`: the minimal calibration above.
-- `CalibrationPipelineManual.cs`: the user sets the eye model by hand, with a panel of controls.
+- `CalibrationPipelineManual.cs`: the user sets the eye model by hand, with a panel of controls
+  (`OpenIrisWinForms\Calibration\CalibrationPipelineManualUI.cs`).
 - `CalibrationRemoteLinear.cs`: a stimulus program shows targets and tells OpenIris where they are;
   OpenIris fits a linear transformation from eye position to target position.
 

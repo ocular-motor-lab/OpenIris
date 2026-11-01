@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EyeTrackerGui.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -324,7 +324,7 @@ namespace OpenIris.UI
                 if (systemToolStripMenuItem.Tag == null || systemToolStripMenuItem.Tag != eyeTracker.EyeTrackingSystem)
                 {
                     systemToolStripMenuItem.DropDownItems.Clear();
-                    var items = eyeTracker.EyeTrackingSystem.GetToolStripMenuItems();
+                    var items = PluginViews.CreateMenuItems(eyeTracker.EyeTrackingSystem);
                     if (items != null)
                     {
                         systemToolStripMenuItem.DropDownItems.AddRange(items);
@@ -541,7 +541,7 @@ namespace OpenIris.UI
             {
                 // Calibration just started
 
-                calibrationUI = (eyeTracker.Settings.CalibrationMethod, eyeTracker.CalibrationSession?.GetCalibrationUI());
+                calibrationUI = (eyeTracker.Settings.CalibrationMethod, PluginViews.CreateCalibrationPanel(eyeTracker.CalibrationSession));
 
                 if (calibrationUI?.control is UserControl calibrationControl)
                 {

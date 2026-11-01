@@ -15,7 +15,6 @@ namespace OpenIris
     using System.Drawing;
     using System.Linq;
     using System.Collections.Generic;
-    using OpenIris.UI;
     using System.Runtime.Serialization;
     using System.Xml.Serialization;
 
@@ -94,7 +93,7 @@ namespace OpenIris
         {
             if (dataAndImages is null) return null;
 
-            return ImageEyeBox.DrawAllData(
+            return EyeImageOverlay.DrawAllData(
                                     dataAndImages.Images[whichEye],
                                     dataAndImages.Calibration.EyeCalibrationParameters[whichEye],
                                     dataAndImages.TrackingSettings);

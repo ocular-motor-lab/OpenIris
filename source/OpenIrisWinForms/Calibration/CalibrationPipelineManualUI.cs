@@ -23,10 +23,7 @@ namespace OpenIris.Calibration
     public partial class CalibrationPipelineManualUI : UserControl, ICalibrationUIControl
     {
         private readonly EyeCollection<Emgu.CV.UI.ImageBox> imageBoxes;
-        public EyeCollection<ImageEye?> lastImages;
-        public EyeCollection<EyePhysicalModel>? eyeModels;
-
-        public ICalibrationUIControl? GetCalibrationUI() => this;
+        private readonly CalibrationPipelineManual pipeline;
 
         /// <summary>
         /// Indicates weather the calibration was cancelled.
@@ -36,9 +33,9 @@ namespace OpenIris.Calibration
         /// <summary>
         /// 
         /// </summary>
-        public CalibrationPipelineManualUI()
+        public CalibrationPipelineManualUI(CalibrationPipelineManual pipeline)
         {
-            lastImages = new EyeCollection<ImageEye?>(null, null);
+            this.pipeline = pipeline;
 
             InitializeComponent();
 
@@ -102,13 +99,13 @@ namespace OpenIris.Calibration
         /// </summary>
         public void UpdateUI()
         {
-            foreach (var image in lastImages)
+            foreach (var image in pipeline.LastImages)
             {
                 if (image != null)
                 {
                     var imageColor = image.Image.Convert<Bgr, byte>();
 
-                    ImageEyeBox.DrawEyeGlobe(imageColor, GetEyeGlobe(image.WhichEye), true);
+                    EyeImageOverlay.DrawEyeGlobe(imageColor, GetEyeGlobe(image.WhichEye), true);
 
                     imageBoxes[image.WhichEye].Image = imageColor;
                 }
@@ -120,13 +117,13 @@ namespace OpenIris.Calibration
 
         private void buttonAccept_Click(object sender, EventArgs e)
         {
-            eyeModels = new EyeCollection<EyePhysicalModel>(GetEyeGlobe(Eye.Left), GetEyeGlobe(Eye.Right));
+            pipeline.EyeModels = new EyeCollection<EyePhysicalModel>(GetEyeGlobe(Eye.Left), GetEyeGlobe(Eye.Right));
         }
 
         private void buttonAuto_Click(object sender, EventArgs e)
         {
-            var lastImageLeftEye = lastImages[Eye.Left];
-            var lastImageRightEye = lastImages[Eye.Right];
+            var lastImageLeftEye = pipeline.LastImages[Eye.Left];
+            var lastImageRightEye = pipeline.LastImages[Eye.Right];
 
             if (lastImageLeftEye != null)
             {
@@ -196,5 +193,13 @@ namespace OpenIris.Calibration
         {
 
         }
+    }
+
+    /// <summary>
+    /// Shows the manual calibration in its tab.
+    /// </summary>
+    internal sealed class CalibrationPipelineManualPanel : CalibrationPanel<CalibrationPipelineManual>
+    {
+        protected override ICalibrationUIControl Create(CalibrationPipelineManual pipeline) => new CalibrationPipelineManualUI(pipeline);
     }
 }

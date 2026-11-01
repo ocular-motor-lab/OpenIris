@@ -8,7 +8,6 @@ using OpenIris;
 using OpenIris.ImageGrabbing;
 using System.ComponentModel.Composition;
 using SpinnakerNET;
-using System.Windows.Forms;
 
 namespace SpinnakerInterface
 {
@@ -32,25 +31,14 @@ namespace SpinnakerInterface
         //}
 
         // These show up in the "System" menu in the GUI.
-        public override ToolStripMenuItem[] GetToolStripMenuItems()
+        public override EyeTrackingSystemCommand[] GetCommands()
         {
-            var menu_autoexposure = new ToolStripMenuItem();
-            menu_autoexposure.Text = "Auto Exposure Once";
-            menu_autoexposure.ShortcutKeys = Keys.F10;
-            menu_autoexposure.Click += (o, e) =>
-            { foreach (var CAM in SpinnakerCameraEye.CAMLIST) CAM.AutoExposureOnce(); };
-
-            var menu_togtrig = new ToolStripMenuItem();
-            menu_togtrig.Text = "Toggle Camera Triggers";
-            menu_togtrig.ShortcutKeys = Keys.F12;
-            menu_togtrig.Click += (o, e) =>
+            return new[]
             {
-                SpinnakerCameraEye.ToggleTriggers();
-            };
-
-            return new ToolStripMenuItem[]
-            {
-                menu_autoexposure, menu_togtrig
+                new EyeTrackingSystemCommand("Auto Exposure Once",
+                    () => { foreach (var CAM in SpinnakerCameraEye.CAMLIST) CAM.AutoExposureOnce(); },
+                    "F10"),
+                new EyeTrackingSystemCommand("Toggle Camera Triggers", SpinnakerCameraEye.ToggleTriggers, "F12"),
             };
         }
     } 

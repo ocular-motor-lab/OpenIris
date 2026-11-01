@@ -35,6 +35,8 @@ into the `Plugins` folder of an OpenIris installation:
     <!-- Private=false: OpenIris already has these, don't copy them into Plugins. -->
     <Reference Include="OpenIrisLib" HintPath="$(OpenIrisFolder)OpenIrisLib.dll" Private="false" />
     <Reference Include="System.ComponentModel.Composition" />
+    <!-- Only for plugins with windows or panels: -->
+    <Reference Include="OpenIrisWinForms" HintPath="$(OpenIrisFolder)OpenIrisWinForms.dll" Private="false" />
     <Reference Include="System.Windows.Forms" />
     <!-- Same EmguCV version as OpenIris. Compile against it only: OpenIris provides it at run time. -->
     <PackageReference Include="Emgu.CV" Version="4.1.1.3497" IncludeAssets="compile" />
@@ -94,6 +96,10 @@ setup of an existing plugin project such as `BasicPlugins\BasicPlugins.csproj`:
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">
+      <Private>False</Private>
+    </ProjectReference>
+    <!-- Only for plugins with windows or panels. -->
+    <ProjectReference Include="..\OpenIrisWinForms\OpenIrisWinForms.csproj">
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

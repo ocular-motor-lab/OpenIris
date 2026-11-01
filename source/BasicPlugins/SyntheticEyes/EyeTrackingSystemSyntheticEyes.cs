@@ -7,7 +7,6 @@
 namespace OpenIris
 {
     using System.ComponentModel.Composition;
-    using System.Windows.Forms;
     using OpenIris.EyeTrackingSystems;
     using OpenIris.ImageGrabbing;
 
@@ -18,45 +17,34 @@ namespace OpenIris
     [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Synthetic Eyes")]
     public class EyeTrackingSystemSyntheticEyes : EyeTrackingSystemBase
     {
-        private readonly SyntheticEyesUI window = new SyntheticEyesUI();
         private readonly SyntheticEyeRenderer renderer = new SyntheticEyeRenderer();
+        private volatile EyeRotation rotation = EyeRotation.Primary;
+
+        /// <summary>
+        /// Orientation of both eyes. The window (SyntheticEyesWindow) sets it, the cameras read it
+        /// from their threads: EyeRotation is immutable, so reading the reference is enough.
+        /// </summary>
+        public EyeRotation Rotation { get => rotation; set => rotation = value; }
 
         /// <summary>
         /// Gets the cameras: one for each eye, both looking the same way.
         /// </summary>
         protected override EyeCollection<CameraEye> CreateAndStartCameras()
         {
-            var cameraLeft = new CameraEyeSynthetic(Eye.Left, renderer, () => window.Rotation);
+            var cameraLeft = new CameraEyeSynthetic(Eye.Left, renderer, () => Rotation);
             cameraLeft.Start();
 
-            var cameraRight = new CameraEyeSynthetic(Eye.Right, renderer, () => window.Rotation);
+            var cameraRight = new CameraEyeSynthetic(Eye.Right, renderer, () => Rotation);
             cameraRight.Start();
 
             return new EyeCollection<CameraEye>(cameraLeft, cameraRight);
         }
 
         /// <summary>
-        /// The window to set the orientation of the eyes.
-        /// </summary>
-        public override Form OpenEyeTrackingSystemUI
-        {
-            get
-            {
-                window.Show();
-                return window;
-            }
-        }
-
-        /// <summary>
-        /// Closes the window and frees the images.
+        /// Frees the images.
         /// </summary>
         public override void Dispose()
         {
-            if (!window.IsDisposed)
-            {
-                if (window.InvokeRequired) window.BeginInvoke(new System.Action(window.Close));
-                else window.Close();
-            }
             renderer.Dispose();
             base.Dispose();
         }

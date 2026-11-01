@@ -191,15 +191,10 @@ namespace OpenIris
                     data.TorsionalPosition = double.NaN;
                 }
 
-                // Pupil area in mm2 asuming 24 mm eyeblobe
-                if (!calibrationInfo.EyePhysicalModel.IsEmpty)
-                {
-                    data.PupilArea = (eyeData.Pupil.Size.Width / calibrationInfo.EyePhysicalModel.Radius * 12) * (eyeData.Pupil.Size.Height / calibrationInfo.EyePhysicalModel.Radius * 12) * Math.PI;
-                }
-                else
-                {
-                    data.PupilArea = (eyeData.Pupil.Size.Width / eyeData.Iris.Radius * 12) * (eyeData.Pupil.Size.Height / eyeData.Iris.Radius * 12) * Math.PI;
-                }
+                // Pupil area in mm² assuming a 24 mm eye globe. Width and height are the full axes of
+                // the ellipse, so its area is π·w·h/4.
+                var globeRadiusPixels = calibrationInfo.EyePhysicalModel.IsEmpty ? eyeData.Iris.Radius : calibrationInfo.EyePhysicalModel.Radius;
+                data.PupilArea = Math.PI / 4 * (eyeData.Pupil.Size.Width / globeRadiusPixels * 12) * (eyeData.Pupil.Size.Height / globeRadiusPixels * 12);
 
                 if (calibrationInfo.HasReference)
                 {

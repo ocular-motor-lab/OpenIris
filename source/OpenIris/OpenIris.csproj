@@ -45,6 +45,9 @@
   <Target Name="PutLibrariesInLib" BeforeTargets="_CopyFilesMarkedCopyLocal">
     <ItemGroup>
       <ReferenceCopyLocalPaths Update="@(ReferenceCopyLocalPaths)" DestinationSubDirectory="lib\%(ReferenceCopyLocalPaths.DestinationSubDirectory)" />
+      <!-- The native DLLs (OpenCV and the C++ runtime it uses) in lib\x64\, where EmguCV looks for
+           them. In lib\ it still finds them, but only after logging that it failed to load them. -->
+      <ReferenceCopyLocalPaths Update="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.AssetType)' == 'native'" DestinationSubDirectory="lib\x64\" />
     </ItemGroup>
   </Target>
   <PropertyGroup>

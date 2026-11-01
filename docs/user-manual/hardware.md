@@ -67,6 +67,10 @@ The **Spinnaker Dual Camera** system needs the two cameras wired together, so th
 other and both take each image at the same time. FLIR's application note:
 [Configuring synchronized capture with multiple cameras](https://www.flir.com/support-center/iis/machine-vision/application-note/configuring-synchronized-capture-with-multiple-cameras/).
 
+The Spinnaker systems assume the cameras look at the eyes directly, not through a mirror, so the
+images show the eyes as seen by someone facing the subject. The sign of the calibrated horizontal
+position depends on it (see [The data file](data-file.md#calibrated-data)).
+
 No extra circuitry or resistors are needed, and all cameras are wired the same way: the software can
 pick any camera as the master. The wires of the GPIO cable (the line numbers are the ones the
 software uses, not the connector pins):

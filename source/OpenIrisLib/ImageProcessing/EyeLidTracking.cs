@@ -410,7 +410,7 @@ namespace OpenIris.ImageProcessing
 
             // Low pass filter in the horizontal direction and high pass second order filter in the 
             // vertical direction
-            image = image.SmoothBlur(4, 4);
+            image = image.SmoothBlur(5, 5); // Odd, so it doesn't shift the image.
             var sob1 = image.Sobel(0, 2, 5).Convert<Gray, byte>();
             var sob2 = image.Sobel(2, 0, 5).Convert<Gray, byte>();
 

@@ -397,7 +397,8 @@ namespace OpenIris.ImageProcessing
             if (ELLIPSE_FITTING_DO_MASK && mask != null)
             {
                 var maskROIpupil = mask.Copy(roiPupil).Resize(imgPupilBinary.Width, imgPupilBinary.Height, Emgu.CV.CvEnum.Inter.Nearest);
-                int maskErodeSize = imgPupilBinary.Width / 10;
+                // Odd (rounded down), so the erosion is centered and doesn't shift the mask half a pixel.
+                int maskErodeSize = ((imgPupilBinary.Width / 10) - 1) | 1;
                 int maskErodeCenter = (int)Math.Floor(maskErodeSize / 2.0);
                 var maskErodeKernel = CvInvoke.GetStructuringElement(Emgu.CV.CvEnum.MorphShapes.Ellipse, new Size(maskErodeSize, maskErodeSize), new Point(maskErodeCenter, maskErodeCenter));
                 CvInvoke.Erode(maskROIpupil, maskROIpupil, maskErodeKernel, new Point(maskErodeCenter, maskErodeCenter), 1, Emgu.CV.CvEnum.BorderType.Constant, new MCvScalar(0));

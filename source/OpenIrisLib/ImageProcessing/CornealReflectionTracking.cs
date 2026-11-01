@@ -185,10 +185,14 @@ namespace OpenIris.ImageProcessing
 
             var crROI = new Rectangle();
 
+            // The pupil in the resized image. Not always the center of the search region: the region
+            // is clipped at the edges of the image.
+            var pupilX = (pupilAprox.Center.X - irisROI.X + 0.5) * findBlobScaleX - 0.5;
+            var pupilY = (pupilAprox.Center.Y - irisROI.Y + 0.5) * findBlobScaleY - 0.5;
+
             foreach (var blob in detector.Detect(imgCRBinary))
             {
-
-                var distanceToPupil = Math.Sqrt(Math.Pow(Math.Abs(blob.Centroid.X) - irisRadiusPix, 2) + Math.Pow(Math.Abs(blob.Centroid.Y) - irisRadiusPix, 2));
+                var distanceToPupil = Math.Sqrt(Math.Pow(blob.Centroid.X - pupilX, 2) + Math.Pow(blob.Centroid.Y - pupilY, 2));
 
                 // If area is too small
                 if (blob.Area > maxBlobArea || blob.Area < minBlobArea || distanceToPupil > irisRadiusPix)

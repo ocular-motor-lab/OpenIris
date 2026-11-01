@@ -119,6 +119,12 @@ fix item 2.
 
 ## 5. Smaller items
 
+**Fixed** (#56): the pupil mask erosion is 19 px instead of 20, the eyelid blur 5
+instead of 4, and the reflection search measures the distance from the pupil. Only the pupil mask
+changes results, on the few synthetic frames where the reflection overlaps the pupil edge. Two
+items turned out to be fine already: `VideoEye` does check for null first, and `Erode` is called
+with anchor (-1, -1), which centers the kernel whatever the structuring element's anchor.
+
 - **Torsion mask erosion** (`TorsionTracking.cs:404`): a 15×31 kernel with anchor (8, 16). The centered
   anchor is (7, 15), so the mask shifts by 1 px. It affects which pixels are used, not the angle
   directly.

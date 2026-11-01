@@ -22,8 +22,6 @@ namespace OpenIris.Tests
         [DataTestMethod]
         [DataRow("JOM", Eye.Left)]
         [DataRow("JOM", Eye.Right)]
-        [DataRow("SimplePupilCRBlobs", Eye.Left)]
-        [DataRow("SimplePupilCRBlobs", Eye.Right)]
         [DataRow("SimpleCentroid", Eye.Left)]
         [DataRow("SimpleCentroid", Eye.Right)]
         public void SyntheticEyeMatchesBaseline(string pipeline, Eye eye)
@@ -39,8 +37,6 @@ namespace OpenIris.Tests
         [DataTestMethod]
         [DataRow("JOM", Eye.Left)]
         [DataRow("JOM", Eye.Right)]
-        [DataRow("SimplePupilCRBlobs", Eye.Left)]
-        [DataRow("SimplePupilCRBlobs", Eye.Right)]
         [DataRow("SimpleCentroid", Eye.Left)]
         [DataRow("SimpleCentroid", Eye.Right)]
         public void SampleVideoMatchesBaseline(string pipeline, Eye eye)

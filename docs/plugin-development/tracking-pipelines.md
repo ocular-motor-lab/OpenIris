@@ -1,8 +1,8 @@
 # Tracking pipelines
 
 A tracking pipeline processes one image of one eye and returns the eye data: pupil, corneal
-reflections, iris, eyelids, torsion. OpenIris comes with several (JOM, SimpleCentroid,
-SimplePupilCRBlobs); a plugin can add new ones.
+reflections, iris, eyelids, torsion. OpenIris comes with two (JOM and SimpleCentroid); a
+plugin can add new ones.
 
 See [Creating a plugin](creating-a-plugin.md) first for the project setup.
 

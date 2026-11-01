@@ -1,6 +1,6 @@
 # OpenIris tests
 
-These tests check that the eye tracking pipelines (JOM, SimpleCentroid, SimplePupilCRBlobs) still
+These tests check that the eye tracking pipelines (JOM, SimpleCentroid) still
 produce the same results after a code change. They don't need cameras.
 
 Run them from Visual Studio's Test Explorer, or from the command line after building the solution:

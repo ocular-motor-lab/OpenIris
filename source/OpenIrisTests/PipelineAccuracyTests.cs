@@ -19,7 +19,6 @@ namespace OpenIris.Tests
     ///   right of and below the true center, from even-sized blurs and resized coordinates.)
     /// - SimpleCentroid is unbiased but drifts up to about 1.1 px when the reflection covers part of
     ///   the pupil, since it has no reflection mask.
-    /// - SimplePupilCRBlobs is not tested here: it does not find the pupil in these images.
     /// </summary>
     [TestClass]
     public class PipelineAccuracyTests

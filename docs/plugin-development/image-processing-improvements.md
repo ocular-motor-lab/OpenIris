@@ -119,6 +119,9 @@ fix item 2.
 
 ## 4. SimplePupilCRBlobs pipeline doesn't work
 
+**Removed** (#55). It was an unfinished experiment: its reflection tracking was commented out. Its
+settings class, `EyeTrackingPipelinePupilCRSettings`, stays: the JOM settings inherit from it.
+
 - **Synthetic eye:** it never finds the pupil, and reports every frame as Good at (0, 0).
 - **Sample video:** it reports a pupil about 15 px wide, somewhere other than where JOM finds a pupil
   about 61 px wide.

@@ -86,5 +86,38 @@ See `OpenIrisWinForms\Calibration\CalibrationRemoteLinearUI.cs`.
 - `CalibrationRemoteLinear.cs`: a stimulus program shows targets and tells OpenIris where they are;
   OpenIris fits a linear transformation from eye position to target position.
 
-<!-- To write (#75): explain how the eye model and reference are used, and which calibration to choose
-when. -->
+## How the eye model and the reference are used
+
+A calibration produces an `EyeCalibration` for each eye, saved in the `.cal` file:
+
+- **The eye model** (`EyePhysicalModel`): the center of the eyeball in the image and its radius, in
+  pixels. `ProcessForEyeModel` returns it.
+- **The reference**: the eye data of a frame where the subject looks straight ahead
+  (`ReferenceData`), and its torsion image (`ImageTorsionReference`). `ProcessForReference`
+  returns that frame.
+
+`CalibrationParameters.GetCalibratedEyeData` turns the pupil position into angles with the eye
+model: the horizontal angle of the pupil is `asin((pupilX - centerX) / radius)`, and the same for
+vertical. The calibrated position is that angle minus the angle of the reference pupil, so it is 0
+when looking straight ahead, with the sign changed to OpenIris's convention (positive to the
+subject's right and up, see [The data file](../user-manual/data-file.md#coordinate-system)): the
+images show the eye as someone facing the subject sees it, with y down.
+
+- Without an eye model, it uses one centered on the current pupil, with twice the iris radius.
+- Without a reference, the reference is the center of the image.
+- Torsion comes from the tracking pipeline, which receives the `EyeCalibration` in `Process` and
+  measures the iris pattern against `ImageTorsionReference`. Without a reference image, torsion is
+  `NaN`.
+- The pupil area in mm² takes the eye model's radius as 12 mm.
+
+## Which calibration to choose
+
+- **Auto** sets the eye model as centered on the pupil when the subject looks straight ahead, with
+  twice the iris radius, and takes that same frame as the reference. Enough when each camera faces
+  its eye roughly straight on.
+- **Manual** lets the user set the eye model on the image, for cameras that see the eye at an angle.
+- **Remote Linear** fits a linear transformation from eye position to target position, but the fit
+  isn't applied to the data yet, and it sets no eye model (#61).
+
+A new calibration usually changes how the eye model is found (from several gaze positions, for
+example) and keeps the reference as Auto does: the first frame tracked well.

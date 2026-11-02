@@ -83,9 +83,34 @@ foreach ($left in Get-ChildItem D:\Data\*\*-Left.avi) {
 
 ## Batch analysis
 
-**Tools > Batch analysis** processes several videos in a row.
+**Tools > Batch analysis** processes several recordings in a row, in OpenIris, so you can watch
+each one being processed (on the **Set up** tab). For batches run from a script, without watching,
+see [From the command line](#from-the-command-line).
 
-<!-- To write (#75): describe batch analysis. -->
+1. **Add session** selects a recording, with the same options as **Process video**. Repeat for each
+   recording; **Remove session** takes the selected ones out of the list.
+2. **Start** processes them one after the other. The **Progress** column says **Processing**,
+   **Completed**, or **Failed** with the reason; a recording that fails doesn't stop the others.
+
+The tracking uses the settings of the active profile, as with **Process video**. A recording
+without a calibration file is processed without calibration (not with the previous recording's).
+
+**Save batch description** saves the list in a text file, to process the same recordings again
+later with **Load batch description**. The file has the folder of the recordings on the first line,
+the eye tracking system on the second, the calibration file (in that folder) on the third, blank
+for none, and then
+one recording per line, by name, without `-Left.avi` or `-Right.avi`:
+
+```
+D:\Data\Experiment1
+Spinnaker Dual Camera
+S01.cal
+S01-2026Nov01-101500
+S02-2026Nov01-113000
+```
+
+Recordings loaded this way use the same calibration file and system, and don't save the processed
+video.
 
 ## Other tools
 

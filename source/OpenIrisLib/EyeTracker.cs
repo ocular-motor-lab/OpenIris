@@ -31,7 +31,7 @@ namespace OpenIris
         /// That should not be a problem. The only way to access an EyeTracker object
         /// is by the static Start method and that one will call init appropriately.
         /// </summary>
-        private EyeTracker(string? profile)
+        private EyeTracker(string? profile, bool startRemoteServices)
         {
             DataBuffer = new EyeTrackerDataBuffer();
             Calibration = CalibrationParameters.Default;
@@ -60,7 +60,7 @@ namespace OpenIris
 
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
-                EyeTrackerRemoteServices.Start(this);
+                if (startRemoteServices) EyeTrackerRemoteServices.Start(this);
             }
             catch (Exception ex)
             {
@@ -74,9 +74,12 @@ namespace OpenIris
         /// Initializes an instance of the EyeTracker class.
         /// </summary>
         /// <param name="profile">Settings profile to start with. If null, the one used last.</param>
-        public static EyeTracker Create(string? profile = null)
+        /// <param name="startRemoteServices">Whether to start the remote control servers (web API,
+        /// TCP, UDP). Not for programs that run next to OpenIris, such as OpenIrisProcess: the ports
+        /// would be taken.</param>
+        public static EyeTracker Create(string? profile = null, bool startRemoteServices = true)
         {
-            eyeTracker ??= new EyeTracker(profile);
+            eyeTracker ??= new EyeTracker(profile, startRemoteServices);
 
             return eyeTracker;
         }

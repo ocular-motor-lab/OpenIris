@@ -34,6 +34,53 @@ plus the processed video if selected.
 Processing doesn't drop frames, so it can run slower or faster than the original frame rate,
 depending on the computer and the settings.
 
+## From the command line
+
+`OpenIrisProcess.exe`, next to `OpenIris.exe`, does what **Process video** does, from a command
+line or a script: to process many recordings, or the same ones with other settings. It uses the
+settings profiles of OpenIris, and OpenIris can be open at the same time.
+
+```
+OpenIrisProcess --profile "Spinnaker Dual Camera torsion" --calibration D:\Data\S01\S01.cal D:\Data\S01\S01-Left.avi D:\Data\S01\S01-Right.avi
+```
+
+| Option | |
+| --- | --- |
+| `VIDEO [VIDEO]` | One video with both eyes, or the left and right videos (`NAME-Left.avi` and `NAME-Right.avi`, or left first). |
+| `--profile NAME` | The [settings profile](configuration.md#settings-profiles) with the pipeline and its settings. Default: the one used last. |
+| `--system NAME` | The eye tracking system the videos were recorded with. Default: the profile's. |
+| `--calibration FILE` | Optional: a calibration (`.cal`) for the calibrated data. |
+| `--output FOLDER` | Where to save the data. Default: the data folder. |
+| `--range FIRST-LAST` | Only these video frames, counting from 0. |
+| `--save-video` | Also save the processed video. |
+| `--verbose` | Show the log while processing. |
+
+It prints the progress and, at the end, the data file. The results are the same as with **Process
+video**. The exit code is 0 if the recording was processed, 1 for wrong arguments, and 2 if
+processing failed, so scripts can tell which recordings failed. The settings aren't changed.
+
+For example, to process every recording in a folder, from MATLAB:
+
+```matlab
+exe = 'C:\OpenIris\OpenIrisProcess.exe';
+files = dir('D:\Data\*\*-Left.avi');
+for i = 1:numel(files)
+    left = fullfile(files(i).folder, files(i).name);
+    right = strrep(left, '-Left.avi', '-Right.avi');
+    status = system(sprintf('"%s" --profile "Spinnaker Dual Camera" "%s" "%s"', exe, left, right));
+    if status ~= 0, fprintf('Failed: %s\n', left); end
+end
+```
+
+Or from PowerShell:
+
+```powershell
+foreach ($left in Get-ChildItem D:\Data\*\*-Left.avi) {
+    C:\OpenIris\OpenIrisProcess.exe --profile "Spinnaker Dual Camera" $left.FullName ($left.FullName -replace '-Left', '-Right')
+    if ($LASTEXITCODE -ne 0) { "Failed: $left" }
+}
+```
+
 ## Batch analysis
 
 **Tools > Batch analysis** processes several videos in a row.

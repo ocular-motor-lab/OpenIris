@@ -66,7 +66,7 @@ $productVersion = (Get-Item (Join-Path $bin 'OpenIris.exe')).VersionInfo.Product
 if ($productVersion -ne $version -and -not $productVersion.StartsWith("$version+")) {
     Fail "OpenIris.exe reports version $productVersion, not $version."
 }
-$expected = 'OpenIris.exe', 'lib\OpenIrisLib.dll', 'lib\OpenIrisWinForms.dll',
+$expected = 'OpenIris.exe', 'OpenIrisProcess.exe', 'lib\OpenIrisLib.dll', 'lib\OpenIrisWinForms.dll',
     'Plugins\BasicPlugins.dll', 'Plugins\SpinnakerInterface.dll', 'Plugins\PointGreyInterface.dll',
     'Plugins\RemoteEyeTracker.dll', 'Plugins\Micromedical.dll', 'Plugins\MccDaq.dll', 'Plugins\FTD2XX_NET.dll'
 foreach ($file in $expected) {

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- OpenIrisProcess.exe: processes recorded videos from the command line, for scripts. It goes next to
+       OpenIris.exe and uses the same libraries (lib\), plugins and settings profiles. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>OpenIris.Process</RootNamespace>
+    <AssemblyName>OpenIrisProcess</AssemblyName>
+    <ApplicationIcon>..\OpenIris\OpenIris.ico</ApplicationIcon>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- What OpenIrisLib and the plugins need at run time, as for OpenIris.exe. -->
+    <PackageReference Include="Emgu.CV" />
+    <PackageReference Include="Emgu.CV.runtime.windows" />
+    <PackageReference Include="Emgu.CV.Bitmap" />
+    <PackageReference Include="EmbedIO" />
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj" />
+  </ItemGroup>
+  <Import Project="..\OpenIrisProgram.targets" />
+</Project>

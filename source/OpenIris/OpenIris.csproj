@@ -40,29 +40,8 @@
     <Content Include="..\..\sample-videos\JorgeLeft.avi" Link="SampleVideos\JorgeLeft.avi" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\..\sample-videos\JorgeRight.avi" Link="SampleVideos\JorgeRight.avi" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-  <!-- Everything OpenIris.exe uses goes in lib\ (App.config tells .NET to look there), so its folder only
-       has the program, its configuration and settings files, and folders (and the sample videos). -->
-  <Target Name="PutLibrariesInLib" BeforeTargets="_CopyFilesMarkedCopyLocal">
-    <ItemGroup>
-      <ReferenceCopyLocalPaths Update="@(ReferenceCopyLocalPaths)" DestinationSubDirectory="lib\%(ReferenceCopyLocalPaths.DestinationSubDirectory)" />
-      <!-- The native DLLs (OpenCV and the C++ runtime it uses) in lib\x64\, where EmguCV looks for
-           them. In lib\ it still finds them, but only after logging that it failed to load them. -->
-      <ReferenceCopyLocalPaths Update="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.AssetType)' == 'native'" DestinationSubDirectory="lib\x64\" />
-    </ItemGroup>
-  </Target>
-  <PropertyGroup>
-    <SampleVideosDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..\sample-videos\'))</SampleVideosDir>
-  </PropertyGroup>
-  <Target Name="PutFilesToCopyInLib" AfterTargets="GetCopyToOutputDirectoryItems">
-    <ItemGroup>
-      <_OpenIrisToLib Include="@(_SourceItemsToCopyToOutputDirectory)" Condition="'%(_SourceItemsToCopyToOutputDirectory.RootDir)%(_SourceItemsToCopyToOutputDirectory.Directory)' != '$(SampleVideosDir)'" />
-      <_SourceItemsToCopyToOutputDirectory Remove="@(_OpenIrisToLib)" />
-      <_SourceItemsToCopyToOutputDirectory Include="@(_OpenIrisToLib)" TargetPath="lib\%(_OpenIrisToLib.TargetPath)" />
-      <_OpenIrisToLibAlways Include="@(_SourceItemsToCopyToOutputDirectoryAlways)" Condition="'%(_SourceItemsToCopyToOutputDirectoryAlways.RootDir)%(_SourceItemsToCopyToOutputDirectoryAlways.Directory)' != '$(SampleVideosDir)'" />
-      <_SourceItemsToCopyToOutputDirectoryAlways Remove="@(_OpenIrisToLibAlways)" />
-      <_SourceItemsToCopyToOutputDirectoryAlways Include="@(_OpenIrisToLibAlways)" TargetPath="lib\%(_OpenIrisToLibAlways.TargetPath)" />
-    </ItemGroup>
-  </Target>
+  <!-- Everything the program uses goes in lib\ (shared with OpenIrisProcess.exe). -->
+  <Import Project="..\OpenIrisProgram.targets" />
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj" />
     <ProjectReference Include="..\OpenIrisWinForms\OpenIrisWinForms.csproj" />

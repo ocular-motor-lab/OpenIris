@@ -216,7 +216,12 @@ namespace OpenIris.UI
             Array.Sort(availableSystems);
 
             systemComboBox.DataSource = availableSystems;
-            systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.LastVideoEyeTrackerSystem);
+
+            // The system of the active profile; if it isn't installed, the last one used for a video;
+            // otherwise the first, so it is never blank.
+            var index = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
+            if (index < 0) index = systemComboBox.FindStringExact(settings.LastVideoEyeTrackerSystem);
+            systemComboBox.SelectedIndex = index < 0 && systemComboBox.Items.Count > 0 ? 0 : index;
         }
 
         /// <summary>

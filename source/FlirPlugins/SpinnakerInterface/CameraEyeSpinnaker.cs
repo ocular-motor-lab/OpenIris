@@ -315,6 +315,16 @@ namespace SpinnakerInterface
             cam.BinningVertical.Value = 1;
             cam.OffsetX.Value = 0;
             cam.OffsetY.Value = 0;
+
+            // A clear message instead of Spinnaker's, if the image size doesn't fit the sensor.
+            if (FrameSize.Width < cam.Width.Min || FrameSize.Width > cam.WidthMax.Value || FrameSize.Width % cam.Width.Increment != 0 ||
+                FrameSize.Height < cam.Height.Min || FrameSize.Height > cam.HeightMax.Value || FrameSize.Height % cam.Height.Increment != 0)
+            {
+                throw new InvalidOperationException(
+                    $"The {WhichEye} camera takes images of at most {cam.WidthMax.Value}x{cam.HeightMax.Value} pixels, with a width that is a multiple of {cam.Width.Increment} " +
+                    $"and a height that is a multiple of {cam.Height.Increment}, not {FrameSize.Width}x{FrameSize.Height}.");
+            }
+
             cam.Width.Value = FrameSize.Width;
             cam.Height.Value = FrameSize.Height;
 

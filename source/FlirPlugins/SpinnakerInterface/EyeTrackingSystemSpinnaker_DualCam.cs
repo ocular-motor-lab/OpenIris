@@ -38,14 +38,14 @@ namespace SpinnakerInterface
                 camera: cameraList[0],
                 frameRate: (double)settings.FrameRate,
                 gain: (int)settings.Gain,
-                roi: new Rectangle { X=settings.LeftOffset.X, Y=settings.LeftOffset.Y, Width = 720, Height = 450 });
+                roi: new Rectangle { X=settings.LeftOffset.X, Y=settings.LeftOffset.Y, Width = settings.FrameWidth, Height = settings.FrameHeight });
 
                 rightEyeCamera = new CameraEyeSpinnaker(
                 whichEye: Eye.Right,
                 camera: cameraList[1],
                 frameRate: (double)settings.FrameRate,
                 gain: (int)settings.Gain,
-                roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = 720, Height = 450 });
+                roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = settings.FrameWidth, Height = settings.FrameHeight });
 
                 settings.LeftEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
                 settings.RightEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();
@@ -135,6 +135,18 @@ namespace SpinnakerInterface
         [Category("Camera properties"), Description("RightEye - CameraSerialNumber")]
         public string RightEyeCameraSerialNumber { get => this.rightEyeCameraSerialNumber; set => SetProperty(ref rightEyeCameraSerialNumber, value, nameof(RightEyeCameraSerialNumber)); }
         private string rightEyeCameraSerialNumber = null;
+
+        // The part of the sensor that is read. A smaller image, in particular a shorter one, allows
+        // a higher frame rate; the limits are in the user manual (configuration.md).
+        [NeedsRestarting]
+        [Category("Camera properties"), Description("Width of the images in pixels: the part of the sensor that is read. The camera sets the limits (for example a multiple of 4, at most 720, for the Blackfly S BFS-U3-04S2M).")]
+        public int FrameWidth { get => frameWidth; set => SetProperty(ref frameWidth, value, nameof(FrameWidth)); }
+        private int frameWidth = 720;
+
+        [NeedsRestarting]
+        [Category("Camera properties"), Description("Height of the images in pixels: the part of the sensor that is read. The camera sets the limits (for example a multiple of 2, at most 540, for the Blackfly S BFS-U3-04S2M). Shorter images allow higher frame rates.")]
+        public int FrameHeight { get => frameHeight; set => SetProperty(ref frameHeight, value, nameof(FrameHeight)); }
+        private int frameHeight = 450;
 
         //[NeedsRestarting]
         [ReadOnly(true)]

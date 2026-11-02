@@ -69,8 +69,42 @@ the profile **Default**, and leaves the old file as it was.
 These depend on the eye tracking system. For the Spinnaker (FLIR) systems:
 
 - **Serial numbers**: which camera is which eye. If left and right are swapped, swap the numbers.
-- **FrameRate**: FLIR cameras can record up to 500 Hz. OpenIris can track the pupil and corneal
-  reflection and save videos at 500 Hz; with torsion, up to about 250 Hz without dropping frames.
+- **FrameRate**: how fast a camera can go depends on its model and the image size (see below); the
+  Blackfly S BFS-U3-04S2M records up to about 500 Hz at the default size. OpenIris can track the pupil and corneal reflection and save videos at
+  500 Hz; with torsion, up to about 250 Hz without dropping frames.
+- **FrameWidth** and **FrameHeight** (Spinnaker Dual Camera only): the size of the images in pixels,
+  720×450 by default. The cameras read only that part of the sensor, so a smaller image shows a
+  smaller part of the face at the same scale (PixPerMm doesn't change), and it allows a higher frame
+  rate. The window can still be moved and centered on the eye while tracking.
+
+  The camera sets the limits: the largest size, the steps of the width and height, and the maximum
+  frame rate for each size. The maximum frame rate depends almost only on the height, because the
+  sensor is read row by row. For the Blackfly S BFS-U3-04S2M (sensor of 720×540 pixels), the width
+  has to be a multiple of 4 and the height a multiple of 2, and these are the maximum frame rates
+  (measured):
+
+  | Image size | Maximum frame rate |
+  |---|---|
+  | 720×540 (whole sensor) | 436 Hz |
+  | 640×480 | 486 Hz |
+  | 720×450 (default) | 516 Hz |
+  | 640×400 | 574 Hz |
+  | 640×360 | 631 Hz |
+  | 480×300 | 741 Hz |
+  | 320×240 | 897 Hz |
+
+  Set **FrameRate** a little below the maximum, about 3% (for example 500 Hz at 720×450): the
+  camera that follows the other's trigger needs to be able to go slightly faster, in case the two
+  clocks differ. If the size doesn't fit the camera, or the frame rate is too high for the size,
+  OpenIris says so when tracking starts. Faster frame rates also need a fast enough computer to
+  process every frame (keep **Debug** off, see [General settings](#general-settings), and watch the
+  drops in the status bar).
+
+  The Blackfly S BFS-U3-16S2M has a larger sensor, 1440×1080 pixels, up to 226 Hz with the whole
+  sensor (FLIR's specification), and faster with shorter images. For it, or any other model,
+  SpinView shows the limits: in its features, set **Width** and **Height** (with OpenIris closed),
+  and **Acquisition Frame Rate** shows the maximum for that size. The default 720×450 works on both
+  models; on the larger sensor it's a smaller part of it, centered.
 - **Gain**: when increasing the frame rate, the exposure time gets shorter, so increase the gain to
   keep the image bright enough.
 - **PixPerMm**: how many pixels per millimeter in the image. A larger value expects a larger iris.

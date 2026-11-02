@@ -295,7 +295,8 @@ namespace OpenIris.ImageGrabbing
 
                 numberFramesGrabbed++;
 
-                // Not 100% why this is necessary
+                // Copy the pixels out of the driver's buffer, which the driver fills again with later
+                // frames (see #69). The ImageEye wraps this copy, and keeps it alive with ImageSourceData.
                 var rawImage = new ManagedImage();
                 rawImageRetrieved.Convert(rawImageRetrieved.pixelFormat, rawImage);
 
@@ -328,10 +329,7 @@ namespace OpenIris.ImageGrabbing
 
                 unsafe
                 {
-                    //// This seems ok so far memorywise. I am afraid the rawImage object 
-                    //// may be disposed and mess up with the image object
-                    //// I actually don't understand very well why this works and never crashes. 
-                    //// RawImage is inside a using so it should get disposed.
+                    // Only to get the pointer to the pixels of the copy (rawImage.data is a byte*).
                     var roiPosition = rawImage.imageMetadata.embeddedROIPosition;
                     var newImage = new ImageEye((int)rawImage.cols, (int)rawImage.rows, (int)rawImage.stride, (IntPtr)rawImage.data, timestamp)
                     {

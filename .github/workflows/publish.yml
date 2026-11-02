@@ -1,5 +1,6 @@
 # Publishes the NuGet packages of OpenIrisLib and OpenIrisWinForms to nuget.org when a version is
-# tagged (for example 0.2.0 or 0.2.0-alpha.3). Their version is the tag's, computed by GitVersion.
+# tagged (for example 0.2.0 or 0.2.0-alpha.3). Their version is the tag. It can also be run by hand
+# (Actions > Publish NuGet packages > Run workflow) for a tag that is already pushed.
 #
 # nuget.org trusts this workflow through a Trusted Publishing policy (package owner jotero, repository
 # ocular-motor-lab/OpenIris, workflow publish.yml, environment nuget), so no API key is stored. Don't
@@ -11,6 +12,15 @@ on:
   push:
     tags:
       - '[0-9]*.[0-9]*.[0-9]*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Version tag to publish (for example 0.2.0-alpha.3)
+        required: true
+
+env:
+  # Not GitVersion's: on a tag it reads the tag as a branch, which gave 0.2.0-tags-0-2-0-alpha-3.1.
+  VERSION: ${{ inputs.tag || github.ref_name }}
 
 jobs:
   publish:
@@ -23,14 +33,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # GitVersion needs the full history to compute the version number.
+          ref: refs/tags/${{ env.VERSION }}
+          fetch-depth: 0 # GitVersion needs the full history, even if its version isn't used.
 
       - uses: microsoft/setup-msbuild@v2
 
       - name: Pack
         run: |
-          msbuild source/OpenIrisLib/OpenIrisLib.csproj -restore -t:Pack -p:Configuration=Release -p:Platform=x64 -p:PackageOutputPath=${{ github.workspace }}\packages\ -nologo -v:m
-          msbuild source/OpenIrisWinForms/OpenIrisWinForms.csproj -restore -t:Pack -p:Configuration=Release -p:Platform=x64 -p:PackageOutputPath=${{ github.workspace }}\packages\ -nologo -v:m
+          msbuild source/OpenIrisLib/OpenIrisLib.csproj -restore -t:Pack -p:Configuration=Release -p:Platform=x64 -p:PackageVersion=${{ env.VERSION }} -p:PackageOutputPath=${{ github.workspace }}\packages\ -nologo -v:m
+          msbuild source/OpenIrisWinForms/OpenIrisWinForms.csproj -restore -t:Pack -p:Configuration=Release -p:Platform=x64 -p:PackageVersion=${{ env.VERSION }} -p:PackageOutputPath=${{ github.workspace }}\packages\ -nologo -v:m
 
       - uses: actions/upload-artifact@v4
         with:

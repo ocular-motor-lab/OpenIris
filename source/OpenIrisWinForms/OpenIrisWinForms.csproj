@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- The Windows Forms parts of OpenIris: the controls, dialogs and tools that OpenIris.exe and the
        plugins with windows use. OpenIrisLib itself doesn't depend on Windows Forms. -->
+  <Import Project="..\OpenIrisPackage.props" />
   <PropertyGroup>
+    <Description>The Windows Forms parts of OpenIris, an open-source eye tracker: controls, dialogs and the base classes for the windows of plugins.</Description>
     <OutputType>Library</OutputType>
     <RootNamespace>OpenIris</RootNamespace>
     <AssemblyName>OpenIrisWinForms</AssemblyName>
@@ -14,9 +16,6 @@
     <!-- Name form resources after the form class, as legacy projects did (SDK default is off for .NET Framework). -->
     <EmbeddedResourceUseDependentUponConvention>true</EmbeddedResourceUseDependentUponConvention>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DebugType>none</DebugType>
   </PropertyGroup>
@@ -26,11 +25,12 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
   </ItemGroup>
-  <!-- PrivateAssets="all": don't flow to the plugins that reference this library, as in OpenIrisLib. -->
+  <!-- For compiling only in the plugins that reference this library, as in OpenIrisLib: OpenIris has the
+       DLLs in lib\, and its windows API uses their types. -->
   <ItemGroup>
-    <PackageReference Include="Emgu.CV" PrivateAssets="all" />
-    <PackageReference Include="Emgu.CV.Bitmap" PrivateAssets="all" />
-    <PackageReference Include="Emgu.CV.UI" PrivateAssets="all" />
+    <PackageReference Include="Emgu.CV" PrivateAssets="runtime;build;buildTransitive;native;contentFiles;analyzers" />
+    <PackageReference Include="Emgu.CV.Bitmap" PrivateAssets="runtime;build;buildTransitive;native;contentFiles;analyzers" />
+    <PackageReference Include="Emgu.CV.UI" PrivateAssets="runtime;build;buildTransitive;native;contentFiles;analyzers" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Calibration\CalibrationPipelineManualUI.cs" SubType="UserControl" />

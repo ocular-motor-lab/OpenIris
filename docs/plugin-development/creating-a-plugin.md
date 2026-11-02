@@ -15,8 +15,11 @@ solution (see the end of this page).
 
 ## A plugin project
 
-Plugins are .NET Framework 4.8 class libraries for x64. This project file builds a plugin straight
-into the `Plugins` folder of an OpenIris installation:
+Plugins are .NET Framework 4.8 class libraries for x64. They build against the NuGet packages
+[OpenIrisLib](https://www.nuget.org/packages/OpenIrisLib) and, for plugins with windows or panels,
+[OpenIrisWinForms](https://www.nuget.org/packages/OpenIrisWinForms). Each OpenIris version has
+packages with the same version number. This project file builds a plugin straight into the `Plugins`
+folder of an OpenIris installation:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -32,27 +35,38 @@ into the `Plugins` folder of an OpenIris installation:
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Private=false: OpenIris already has these, don't copy them into Plugins. -->
-    <Reference Include="OpenIrisLib" HintPath="$(OpenIrisFolder)lib\OpenIrisLib.dll" Private="false" />
+    <!-- The version of the OpenIris the plugin runs in. ExcludeAssets="runtime": OpenIris provides
+         these libraries, and the EmguCV they bring, so they aren't copied into Plugins. -->
+    <PackageReference Include="OpenIrisLib" Version="0.2.0" ExcludeAssets="runtime" />
     <Reference Include="System.ComponentModel.Composition" />
     <!-- Only for plugins with windows or panels: -->
-    <Reference Include="OpenIrisWinForms" HintPath="$(OpenIrisFolder)lib\OpenIrisWinForms.dll" Private="false" />
+    <PackageReference Include="OpenIrisWinForms" Version="0.2.0" ExcludeAssets="runtime" />
     <Reference Include="System.Windows.Forms" />
-    <!-- Same EmguCV version as OpenIris. Compile against it only: OpenIris provides it at run time.
-         Add Emgu.CV.Bitmap (images to System.Drawing bitmaps) or Emgu.CV.UI (image box) the same way
-         if the plugin uses them. -->
-    <PackageReference Include="Emgu.CV" Version="4.12.0.5764" IncludeAssets="compile" />
   </ItemGroup>
 </Project>
 ```
 
-Change `OpenIrisFolder` to your OpenIris folder. Things to keep:
+Change `OpenIrisFolder` to your OpenIris folder, and the versions to its version (Help > About).
+Things to keep:
 
-- **The EmguCV version must match OpenIris's.** The version OpenIris uses is in
-  `source\Directory.Packages.props`. If your plugin needs other NuGet packages, OpenIris must not
-  already use a different version of them.
-- **Don't copy OpenIris's own DLLs into `Plugins`** (`Private="false"`, `IncludeAssets="compile"`).
-  Two copies of the same library cause hard-to-understand errors.
+- **Don't copy OpenIris's own DLLs into `Plugins`.** Two copies of the same library cause
+  hard-to-understand errors. With `ExcludeAssets="runtime"` on both packages, the build output is
+  only your plugin's DLL. If you use OpenIrisWinForms, reference OpenIrisLib too, with the same
+  setting: otherwise OpenIrisLib comes through OpenIrisWinForms and is copied.
+- **EmguCV comes with the packages**, the same version as OpenIris, for compiling only. If your
+  plugin needs other NuGet packages, OpenIris must not already use a different version of them (the
+  versions OpenIris uses are in `source\Directory.Packages.props`).
+
+### Without the NuGet packages
+
+To build against an OpenIris that isn't published, such as your own build of it, reference its DLLs
+instead of the packages, with `Private="false"` and EmguCV for compiling only:
+
+```xml
+    <Reference Include="OpenIrisLib" HintPath="$(OpenIrisFolder)lib\OpenIrisLib.dll" Private="false" />
+    <Reference Include="OpenIrisWinForms" HintPath="$(OpenIrisFolder)lib\OpenIrisWinForms.dll" Private="false" />
+    <PackageReference Include="Emgu.CV" Version="4.12.0.5764" IncludeAssets="compile" />
+```
 
 ### Debugging the plugin in OpenIris
 

@@ -9,7 +9,9 @@
   <ItemGroup>
     <!-- EmguCV: the library, the native OpenCV for Windows, conversions to System.Drawing bitmaps, and the
          Windows Forms image box. -->
-    <PackageVersion Include="Emgu.CV" Version="4.12.0.5764" />
+    <!-- Exactly this version: the OpenIris NuGet packages pass it on to plugins, which must compile
+         against the EmguCV that OpenIris provides at run time. -->
+    <PackageVersion Include="Emgu.CV" Version="[4.12.0.5764]" />
     <PackageVersion Include="Emgu.CV.runtime.windows" Version="4.12.0.5764" />
     <PackageVersion Include="Emgu.CV.Bitmap" Version="4.12.0.5764" />
     <PackageVersion Include="Emgu.CV.UI" Version="4.12.0.5764" />

@@ -1,0 +1,47 @@
+# Publishes the NuGet packages of OpenIrisLib and OpenIrisWinForms to nuget.org when a version is
+# tagged (for example 0.2.0 or 0.2.0-alpha.3). Their version is the tag's, computed by GitVersion.
+#
+# nuget.org trusts this workflow through a Trusted Publishing policy (package owner jotero, repository
+# ocular-motor-lab/OpenIris, workflow publish.yml, environment nuget), so no API key is stored. Don't
+# rename this file or the environment: the policy would stop matching. Versions published to nuget.org
+# can't be deleted, only unlisted.
+name: Publish NuGet packages
+
+on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
+
+jobs:
+  publish:
+    runs-on: windows-2022
+    environment: nuget
+    permissions:
+      contents: read
+      id-token: write # For the Trusted Publishing login.
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # GitVersion needs the full history to compute the version number.
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Pack
+        run: |
+          msbuild source/OpenIrisLib/OpenIrisLib.csproj -restore -t:Pack -p:Configuration=Release -p:Platform=x64 -p:PackageOutputPath=${{ github.workspace }}\packages\ -nologo -v:m
+          msbuild source/OpenIrisWinForms/OpenIrisWinForms.csproj -restore -t:Pack -p:Configuration=Release -p:Platform=x64 -p:PackageOutputPath=${{ github.workspace }}\packages\ -nologo -v:m
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: packages/*.nupkg
+
+      - name: Log in to nuget.org
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: jotero
+
+      - name: Push
+        run: dotnet nuget push "packages\*.nupkg" --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

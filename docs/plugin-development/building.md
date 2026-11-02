@@ -105,3 +105,18 @@ result shows next to each commit and pull request, and in the **Actions** tab of
 The speed test is skipped there, because timing on shared build servers isn't meaningful.
 
 The workflow is in `.github/workflows/build.yml`.
+
+## NuGet packages
+
+OpenIrisLib and OpenIrisWinForms are also NuGet packages, for plugins built outside the solution (see
+[Creating a plugin](creating-a-plugin.md)). Their settings are in `source\OpenIrisPackage.props`, and
+their version is the OpenIris version.
+
+Pushing a version tag (for example `0.2.0`) publishes them to nuget.org, through
+`.github/workflows/publish.yml`. nuget.org trusts that workflow through a Trusted Publishing policy,
+so no API key is stored; the workflow file and its `nuget` environment must keep their names. Versions
+published to nuget.org can't be deleted, only unlisted, so try a package first with a local feed:
+
+```
+msbuild source\OpenIrisLib\OpenIrisLib.csproj -restore -t:Pack -p:Configuration=Release -p:Platform=x64 -p:PackageOutputPath=C:\LocalFeed\
+```

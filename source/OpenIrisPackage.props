@@ -1,0 +1,26 @@
+<Project>
+  <!-- NuGet package settings shared by OpenIrisLib and OpenIrisWinForms, the libraries that plugins build
+       against. The packages are published to nuget.org by .github/workflows/publish.yml when a version is
+       tagged. Plugins reference them with ExcludeAssets="runtime": OpenIris provides the libraries at run
+       time, so they must not be copied into Plugins (see docs/plugin-development/creating-a-plugin.md). -->
+  <PropertyGroup>
+    <Authors>Jorge Otero-Millan</Authors>
+    <Company>Ocular Motor Lab, University of California, Berkeley</Company>
+    <Copyright>Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley</Copyright>
+    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/ocular-motor-lab/OpenIris</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ocular-motor-lab/OpenIris</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>eye-tracking;eye-tracker;video-oculography;pupil;openiris</PackageTags>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- The documentation of the API, for IntelliSense in the plugins. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\docs\images\logo-512.png" Pack="true" PackagePath="logo.png" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)PackageReadme.md" Pack="true" PackagePath="README.md" Visible="false" />
+    <!-- The package version is the OpenIris version, computed from the tags as for OpenIris.exe. -->
+    <PackageReference Include="GitVersion.MsBuild" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

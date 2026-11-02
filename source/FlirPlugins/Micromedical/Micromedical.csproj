@@ -19,12 +19,6 @@
   <ItemGroup>
     <PackageReference Include="Emgu.CV" />
   </ItemGroup>
-  <!-- Copy-to-output items (not just copy-local references) also flow through OpenIris' solution build
-       dependency on this project, which puts these DLLs next to OpenIris.exe as the legacy project did. -->
-  <ItemGroup>
-    <None Update="MccDaq.dll" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="FTD2XX_NET.dll" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FlyCaptureInterface\FlyCaptureInterface.csproj" />
     <ProjectReference Include="..\..\OpenIrisLib\OpenIrisLib.csproj">

@@ -138,6 +138,7 @@ namespace OpenIris
         {
             var eyeReferences = new EyeCollection<ImageEye?>(null, null);
             var hasReference = new EyeCollection<bool>(whichEyeToCalibrate == Eye.Right, whichEyeToCalibrate == Eye.Left);
+            HeadData? referenceHead = null;
 
             // Start with the current calibration and clear the References
             // Make a copy so we don't mess with the processing pipelines
@@ -158,6 +159,9 @@ namespace OpenIris
                             // Keep processing images until the buffer is marked as complete and empty
                             foreach (var data in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                             {
+                                // The head at the reference: the head angles are relative to it.
+                                referenceHead = data.Data?.HeadDataRaw;
+
                                 foreach (var imageEye in data.Images)
                                 {
                                     if (imageEye is null || hasReference[imageEye.WhichEye]) continue;
@@ -198,6 +202,9 @@ namespace OpenIris
                     {
                         tempCalibration.EyeCalibrationParameters[Eye.Left].SetReference(eyeReferences[Eye.Left]);
                         tempCalibration.EyeCalibrationParameters[Eye.Right].SetReference(eyeReferences[Eye.Right]);
+
+                        // A new object: the copy above shares the head calibration with the current one.
+                        tempCalibration.HeadCalibrationParameters = new HeadCalibration { ReferenceHeadData = referenceHead ?? new HeadData() };
                         return tempCalibration;
                     }
                 }

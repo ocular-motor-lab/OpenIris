@@ -93,7 +93,7 @@ from the subject's point of view.**
 | `HeadYaw` | degrees | the head turns to the subject's right | the head upright, facing straight ahead |
 | `HeadPitch` | degrees | the head tilts up (chin up) | as above |
 | `HeadRoll` | degrees | the head rotates clockwise as the subject sees it (right ear down) | as above |
-| `HeadX`, `HeadY`, `HeadZ` | mm | the head moves to the subject's right (X), up (Y), forward (Z) | the head at calibration |
+| `HeadX`, `HeadY`, `HeadZ` | mm | the head moves to the subject's right (X), up (Y), forward (Z) | depends on the system (see below) |
 
 The head's axes, with the head upright and facing straight ahead: X points to the subject's right,
 Y up, and Z forward, out of the face. The angular velocities have the same signs as the angles, in
@@ -120,11 +120,19 @@ angles:
 - **Without a calibration,** H and V are relative to the center of the eye image, with an eye globe
   whose radius is the iris diameter, and T is `NaN` (there is no reference iris).
 
-> [!WARNING]
-> Only the Micromedical systems have a head sensor. Their calibrated head values haven't been
-> checked against this convention yet: the signs may differ, `HeadAccelerationX`/`Y`/`Z` are the
-> sensor's own axes, and `HeadYaw` can't really be measured with an accelerometer. Without a head
-> sensor all head columns are 0.
+Two kinds of systems measure the head:
+
+- **The Webcam system** estimates the head pose from the face it finds in each image (see
+  [Webcam tracking](webcam-tracking.md#head-pose)). The angles are relative to the head at the
+  reference (**Calibrate** or **Reset reference**), or to facing the camera before there is one.
+  The position is from the camera: `HeadX` to the subject's right and `HeadY` up, from the
+  camera's axis, and `HeadZ` the distance to the camera. All `NaN` in frames where the face isn't
+  found. The angles combine in Fick order: yaw, then pitch, then roll.
+- **The Micromedical systems** have a head sensor. Their calibrated head values haven't been
+  checked against this convention yet: the signs may differ, `HeadAccelerationX`/`Y`/`Z` are the
+  sensor's own axes, and `HeadYaw` can't really be measured with an accelerometer.
+
+With other systems, all head columns are 0.
 
 ### Columns
 
@@ -144,7 +152,7 @@ For the head:
 | `HeadRoll`, `HeadPitch`, `HeadYaw` | Head orientation in degrees, as above. |
 | `HeadRollVelocity`, `HeadPitchVelocity`, `HeadYawVelocity` | Head angular velocity in degrees per second, same signs. |
 | `HeadAccelerationX`, `HeadAccelerationY`, `HeadAccelerationZ` | Head acceleration in g, along X (right), Y (up) and Z (forward). |
-| `HeadX`, `HeadY`, `HeadZ` | Head position in mm, relative to calibration. No system included with OpenIris measures it yet: always 0. |
+| `HeadX`, `HeadY`, `HeadZ` | Head position in mm: from the camera with the Webcam system (above); 0 with other systems. |
 
 ## Region of interest
 

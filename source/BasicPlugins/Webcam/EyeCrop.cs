@@ -141,5 +141,10 @@ namespace OpenIris
         /// Region of the webcam image the eye image shows.
         /// </summary>
         public RotatedSquare Region { get; }
+
+        /// <summary>
+        /// Pose of the head in the webcam image (see FacePose), or null if the face was not found.
+        /// </summary>
+        public HeadData? HeadPose { get; set; }
     }
 }

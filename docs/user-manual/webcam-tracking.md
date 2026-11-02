@@ -50,6 +50,7 @@ Settings of the Webcam system:
 | `FrameRate` | 30 | Frame rate to ask for. Most webcams give 30 fps. |
 | `EyeImageSize` | 128 | Size in pixels of each eye image. |
 | `ShowFaceView` | on | Open the Webcam face window when tracking starts. |
+| `HorizontalFieldOfView` | 65 | Horizontal field of view of the webcam in degrees, for the head position (see below). |
 
 ## The data
 
@@ -59,6 +60,22 @@ Because the eye images follow the head, head movements mostly don't change the i
 
 Recordings save the whole webcam image. They can be [processed again](processing-videos.md)
 choosing the Webcam system.
+
+### Head pose
+
+From the face it finds, OpenIris also estimates the pose of the head, fitting a generic face to six
+points: the nose tip, the chin, the outer corners of the eyes and the corners of the mouth. It fills
+the head columns of the [data file](data-file.md#calibrated-data):
+
+- `HeadYaw`, `HeadPitch` and `HeadRoll`, in degrees, relative to the head at the reference:
+  **Calibrate** or **Reset reference** zero them, with the eyes. Before there is a reference, they are
+  relative to facing the camera. Expect an accuracy of a few degrees.
+- `HeadX`, `HeadY` and `HeadZ`, in mm, from the camera: to the subject's right, up, and the distance
+  to the camera. The distance is approximate: it depends on `HorizontalFieldOfView`, the field of
+  view of the webcam across the image as recorded (narrower for a phone video recorded upright). Set
+  it from the webcam's specifications to get closer distances. It also assumes an average face.
+
+In frames where the face isn't found, the head columns are `NaN`.
 
 ## Limitations
 

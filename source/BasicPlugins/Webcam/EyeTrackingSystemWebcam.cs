@@ -65,10 +65,38 @@ namespace OpenIris
             }
 
             var eyes = tracker.Process(face);
+
+            // The head pose, carried with the eye images to PostProcessImagesAndData.
+            if (tracker.LastMesh is PointF[] mesh)
+            {
+                var points = new[] { FaceMesh.NoseTip, FaceMesh.Chin, FaceMesh.RightEyeOuterCorner, FaceMesh.LeftEyeOuterCorner, FaceMesh.MouthRightCorner, FaceMesh.MouthLeftCorner }
+                    .Select(i => mesh[i]).ToArray();
+                var pose = FacePose.Estimate(points, face.Size, settings.HorizontalFieldOfView);
+                foreach (var eye in eyes)
+                {
+                    if (eye?.ImageSourceData is EyeCrop crop) crop.HeadPose = pose;
+                }
+            }
+
             FaceProcessed?.Invoke(face.Image, tracker, eyes);
             if (Settings.Eye == Eye.Left) eyes[Eye.Right] = null;
             if (Settings.Eye == Eye.Right) eyes[Eye.Left] = null;
             return eyes;
+        }
+
+        /// <summary>
+        /// Fills in the head data from the pose of the face: the angles relative to the head at the
+        /// reference (taken with the eye reference), and the position from the camera. NaN when the
+        /// face wasn't found.
+        /// </summary>
+        public override EyeTrackerImagesAndData PostProcessImagesAndData(EyeTrackerImagesAndData processedImages)
+        {
+            var crop = processedImages.Images.Select(image => image?.ImageSourceData as EyeCrop).FirstOrDefault(c => c != null);
+            if (crop is null || processedImages.Data is null) return processedImages;
+
+            processedImages.Data.HeadDataRaw = crop.HeadPose;
+            processedImages.Data.HeadDataCalibrated = FacePose.Calibrated(crop.HeadPose, processedImages.Calibration?.HeadCalibrationParameters?.ReferenceHeadData);
+            return processedImages;
         }
 
         public override void Dispose()
@@ -121,6 +149,10 @@ namespace OpenIris
 
         [Category("Webcam"), Description("Open a window with the whole webcam image, the face mesh and the regions cut out as eye images when tracking starts.")]
         public bool ShowFaceView { get => showFaceView; set => SetProperty(ref showFaceView, value, nameof(ShowFaceView)); }
+
+        [Category("Webcam"), Description("Horizontal field of view of the webcam, in degrees, for the head position: the distance to the camera scales with it. Most webcams are between 55 and 80. The head angles barely depend on it.")]
+        public double HorizontalFieldOfView { get => horizontalFieldOfView; set => SetProperty(ref horizontalFieldOfView, value, nameof(HorizontalFieldOfView)); }
+        private double horizontalFieldOfView = 65;
         private bool showFaceView = true;
     }
 }

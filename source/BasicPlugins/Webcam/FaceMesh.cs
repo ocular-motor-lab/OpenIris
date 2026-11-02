@@ -27,6 +27,12 @@ namespace OpenIris
         public const int LeftEyeInnerCorner = 362;
         public const int LeftEyeOuterCorner = 263;
 
+        // For the head pose (FacePose): nose tip, chin and the corners of the mouth (subject's right, left).
+        public const int NoseTip = 1;
+        public const int Chin = 152;
+        public const int MouthRightCorner = 61;
+        public const int MouthLeftCorner = 291;
+
         private readonly NeuralNetwork network = new NeuralNetwork("face_landmark.onnx", InputSize, "landmarks", "scores");
 
         /// <summary>

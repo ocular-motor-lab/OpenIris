@@ -209,7 +209,7 @@ namespace OpenIris
     /// <item>Roll: degrees, positive clockwise from the subject's point of view (right ear down).</item>
     /// <item>Velocities: degrees per second, with the same signs.</item>
     /// <item>Accelerations: g, along X, Y and Z.</item>
-    /// <item>X, Y, Z position: mm, relative to the head at calibration.</item>
+    /// <item>X, Y, Z position: mm. Where from depends on the system: the Webcam system (FacePose) gives it from the camera, with Z the distance to the camera.</item>
     /// </list>
     /// <para>Systems without a head sensor leave everything at 0.</para>
     /// </remarks>
@@ -242,13 +242,13 @@ namespace OpenIris
         /// <summary>Yaw velocity in degrees per second, positive as Yaw.</summary>
         public double YawVelocity { get; set; }
 
-        /// <summary>Position towards the subject's right, in mm, relative to the head at calibration.</summary>
+        /// <summary>Position towards the subject's right, in mm (from where depends on the system).</summary>
         public double X { get; set; }
 
-        /// <summary>Position upwards, in mm, relative to the head at calibration.</summary>
+        /// <summary>Position upwards, in mm (from where depends on the system).</summary>
         public double Y { get; set; }
 
-        /// <summary>Position forwards, in mm, relative to the head at calibration.</summary>
+        /// <summary>Position forwards, in mm (from where depends on the system; the distance to the camera for the Webcam system).</summary>
         public double Z { get; set; }
 
         /// <summary>

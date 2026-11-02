@@ -6,7 +6,8 @@ positions into eye rotation angles, and to measure torsion against the reference
 
 - **Calibrate** (on the **Set up** tab, or **Calibration > Calibrate**) runs the whole calibration.
 - **Reset reference** only takes a new reference, keeping the eye model. Use it when the subject
-  looks straight ahead again after a break, or after moving the cameras slightly.
+  looks straight ahead again after a break, or after moving the cameras slightly. With systems that
+  measure the head pose (Webcam), the reference also zeroes the head angles.
 - **Calibration > Cancel calibration** stops a calibration in progress.
 - **Calibration > Reset calibration** goes back to the default calibration.
 - **Calibration > Save calibration…** and **Load calibration…** save and reuse a calibration. Each

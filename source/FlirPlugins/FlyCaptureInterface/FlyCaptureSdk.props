@@ -1,0 +1,18 @@
+<Project>
+  <!-- The FlyCapture SDK's .NET library, for the plugins that use FlyCapture cameras (FlyCaptureInterface,
+       RemoteEyeTracker, Micromedical). As for Spinnaker, it must match the native FlyCapture libraries of
+       the installed SDK, and FLIR's license doesn't allow redistributing it. So it isn't copied
+       (Private=False): at run time OpenIris loads it from the installed SDK, through PATH (see
+       EyeTrackerPluginManager.LoadFromPath). -->
+  <PropertyGroup>
+    <!-- Folder of the installed FlyCapture SDK's .NET library. Override it with -p:FlyCaptureSdkDir=... -->
+    <FlyCaptureSdkDir Condition="'$(FlyCaptureSdkDir)' == ''">$(ProgramW6432)\Point Grey Research\FlyCapture2\bin64\vs2015\</FlyCaptureSdkDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FlyCapture2Managed_v140">
+      <HintPath>$(FlyCaptureSdkDir)FlyCapture2Managed_v140.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+  </ItemGroup>
+</Project>

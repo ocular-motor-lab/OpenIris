@@ -1,0 +1,8 @@
+<Project>
+  <!-- Imported when the FlyCapture SDK isn't installed (for example on GitHub's build machines): skip
+       the plugins that use it with a warning instead of failing the whole build. -->
+  <Target Name="Build">
+    <Warning Text="The FlyCapture SDK isn't installed ($(FlyCaptureSdkDir)FlyCapture2Managed_v140.dll not found), so the $(MSBuildProjectName) plugin isn't built. Install the FlyCapture SDK, or set FlyCaptureSdkDir to the folder with FlyCapture2Managed_v140.dll." />
+  </Target>
+  <Target Name="Rebuild" DependsOnTargets="Build" />
+</Project>

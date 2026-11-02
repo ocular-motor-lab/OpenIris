@@ -14,6 +14,10 @@
 
   > [!NOTE]
   > OpenIris 0.1.6 and earlier need exactly version 3.0.0.118 of the Spinnaker SDK.
+- **For older FLIR (Point Grey) cameras that use FlyCapture** (the Flycapture Single Camera,
+  RemoteGrasshoppercs and Micromedical systems): install the FlyCapture SDK, version 2.13.3.61, the
+  last one, from FLIR's website. OpenIris uses its .NET library (`FlyCapture2Managed_v140.dll`)
+  from the installed SDK.
 
 See [Hardware](hardware.md) for the cameras, lenses and illuminators we use.
 

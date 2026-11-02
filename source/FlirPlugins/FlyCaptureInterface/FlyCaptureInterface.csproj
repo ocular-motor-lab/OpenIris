@@ -1,4 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <!-- The SDK is imported explicitly (not <Project Sdk=...>) so that SkipWithoutFlyCaptureSdk.targets,
+       imported after it, can replace the build targets when the FlyCapture SDK isn't installed. -->
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="FlyCaptureSdk.props" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <RootNamespace>PointGreyInterface</RootNamespace>
@@ -7,9 +11,6 @@
     <OutputPath>$(OpenIrisPluginsDir)</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FlyCapture2Managed_v140">
-      <HintPath>FlyCapture2Managed_v140.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.Composition" />
   </ItemGroup>
   <ItemGroup>
@@ -17,4 +18,6 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="SkipWithoutFlyCaptureSdk.targets" Condition="!Exists('$(FlyCaptureSdkDir)FlyCapture2Managed_v140.dll')" />
 </Project>

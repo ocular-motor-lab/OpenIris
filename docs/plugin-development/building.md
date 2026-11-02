@@ -83,7 +83,7 @@ msbuild source\OpenIris.sln -restore -p:Configuration=Release -p:Platform=x64
 | **OpenIrisWinForms** | The Windows Forms parts: the controls, dialogs and tools of the main window, the calibration panels, and the base classes for plugin windows. OpenIrisLib doesn't use Windows Forms, so it can run without a Windows user interface. |
 | **OpenIris** | The main program, `OpenIris.exe`. |
 | **BasicPlugins** | Plugins without special hardware: the webcam and Synthetic Eyes systems. |
-| **SpinnakerInterface**, **FlyCaptureInterface**, **Micromedical**, **RemoteEyeTracker** (in `FlirPlugins\`) | Eye tracking systems for FLIR (formerly Point Grey) cameras: Spinnaker, FlyCapture, and the Micromedical and remote systems built on them. Separate projects because SpinnakerInterface only builds with the Spinnaker SDK installed. |
+| **SpinnakerInterface**, **FlyCaptureInterface**, **Micromedical**, **RemoteEyeTracker** (in `FlirPlugins\`) | Eye tracking systems for FLIR (formerly Point Grey) cameras: Spinnaker, FlyCapture, and the Micromedical and remote systems built on them. Separate projects because they need the camera SDKs to build: SpinnakerInterface the Spinnaker SDK, the other three the FlyCapture SDK. Without an SDK, its plugins are skipped with a warning. |
 | **OpenIrisTests** | The automated tests (see [Testing](contributing.md#tests)). |
 | Others | Small tools and test programs (video player, etc.). |
 

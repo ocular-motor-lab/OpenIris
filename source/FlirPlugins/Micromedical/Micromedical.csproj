@@ -1,4 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
+  <!-- The SDK is imported explicitly, as in FlyCaptureInterface, so the plugin is skipped when the
+       FlyCapture SDK isn't installed. -->
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="..\FlyCaptureInterface\FlyCaptureSdk.props" />
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <OutputPath>$(OpenIrisPluginsDir)</OutputPath>
@@ -25,4 +29,6 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="..\FlyCaptureInterface\SkipWithoutFlyCaptureSdk.targets" Condition="!Exists('$(FlyCaptureSdkDir)FlyCapture2Managed_v140.dll')" />
 </Project>

@@ -151,6 +151,13 @@ namespace SpinnakerInterface
 
         public override void Start()
         {
+            // A camera left acquiring by a program that closed without stopping it (a crash) keeps its
+            // settings locked, and starting failed until it was unplugged: stop that acquisition (#32).
+            if (!cam.IsStreaming())
+            {
+                try { cam.AcquisitionStop.Execute(); } catch (SpinnakerException) { }
+            }
+
             InitParameters();
             InitParameters_TriggerSettings();
         }

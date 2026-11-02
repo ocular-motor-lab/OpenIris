@@ -44,8 +44,18 @@ namespace OpenIris
         {
             image.Mat.CopyTo(buffer);
             GC.KeepAlive(image);
-            writer.Write(buffer);
+            lock (FfmpegLock)
+            {
+                writer.Write(buffer);
+            }
         }
+
+        /// <summary>
+        /// Lock around the calls into FFmpeg that read and write videos at the same time, from different
+        /// threads (playing a video while recording another): writing a frame while a video was being
+        /// read crashed now and then inside FFmpeg (access violation, #32).
+        /// </summary>
+        internal static readonly object FfmpegLock = new object();
 
         /// <summary>
         /// Copies a range of frames of the videos of each eye to new videos, named like the

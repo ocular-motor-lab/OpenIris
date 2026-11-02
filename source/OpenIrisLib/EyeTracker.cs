@@ -327,6 +327,11 @@ namespace OpenIris
             }
             finally
             {
+                // The images of the last frame stay, to be shown (the web client asks for them), but
+                // they may point into buffers of the cameras that the system frees when it is disposed
+                // (Spinnaker): reading them then crashed OpenIris without a trace (#32). Keep copies.
+                KeepCopiesOfTheLastImages();
+
                 EyeTrackingSystem?.Dispose();
 
                 Tracking = false;
@@ -336,6 +341,32 @@ namespace OpenIris
                 ImageProcessor = null;
                 EyeTrackingSystem = null;
                 RecordingSession = null;
+            }
+        }
+
+        /// <summary>
+        /// Replaces the images of the last frame with copies that OpenIris owns, with their data.
+        /// Once per stop, so the cameras can keep giving images without copying them.
+        /// </summary>
+        private void KeepCopiesOfTheLastImages()
+        {
+            if (!(LastImagesAndData is EyeTrackerImagesAndData last)) return;
+
+            foreach (var whichEye in new[] { Eye.Left, Eye.Right })
+            {
+                if (!(last.Images[whichEye] is ImageEye image)) continue;
+
+                try
+                {
+                    var copy = image.Copy();
+                    copy.EyeData = image.EyeData;
+                    copy.ImageTorsion = image.ImageTorsion?.Copy();
+                    last.Images[whichEye] = copy;
+                }
+                catch (Exception ex) when (ex is ObjectDisposedException || ex is InvalidOperationException)
+                {
+                    last.Images[whichEye] = null;
+                }
             }
         }
 

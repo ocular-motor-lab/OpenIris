@@ -10,10 +10,13 @@ namespace OpenIris
 
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.ExceptionServices;
+    using System.Security;
     using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
@@ -226,6 +229,30 @@ namespace OpenIris
         /// Last image of one eye (left or right) as JPEG, by default with the tracking drawn on top
         /// as in the OpenIris window. ?overlay=false for the plain image.
         /// </summary>
+        /// <summary>
+        /// The image as JPEG, or null if it was released while reading it (the next request gets the
+        /// next frame). An access violation (memory of a camera buffer released) is caught here,
+        /// which needs this attribute in .NET Framework, and a method that isn't async.
+        /// </summary>
+        [HandleProcessCorruptedStateExceptions, SecurityCritical]
+        private static byte[]? Jpeg(ImageEye imageEye, bool overlay, EyeCalibration calibration, EyeTrackingPipelineSettings settings)
+        {
+            try
+            {
+                using var image = overlay ? EyeImageOverlay.DrawAllData(imageEye, calibration, settings) : imageEye.Image.Convert<Bgr, byte>();
+                if (image is null) return null;
+
+                using var buffer = new VectorOfByte();
+                CvInvoke.Imencode(".jpg", image, buffer, new KeyValuePair<ImwriteFlags, int>(ImwriteFlags.JpegQuality, 80));
+                return buffer.ToArray();
+            }
+            catch (Exception ex) when (ex is ObjectDisposedException || ex is NullReferenceException || ex is AccessViolationException)
+            {
+                Trace.WriteLine("ERROR reading an eye image for the web API: " + ex.Message);
+                return null;
+            }
+        }
+
         [Route(HttpVerbs.Get, "/images/{eye}")]
         public async Task GetImage(string eye, [QueryField] string? overlay)
         {
@@ -236,23 +263,8 @@ namespace OpenIris
             var imageEye = imagesAndData?.Images[whichEye];
             if (imagesAndData is null || imageEye is null) throw HttpException.NotFound("No image.");
 
-            byte[] jpeg;
-            try
-            {
-                using var image = overlay == "false"
-                    ? imageEye.Image.Convert<Bgr, byte>()
-                    : EyeImageOverlay.DrawAllData(imageEye, imagesAndData.Calibration.EyeCalibrationParameters[whichEye], imagesAndData.TrackingSettings);
-                if (image is null) throw HttpException.NotFound("No image.");
-
-                using var buffer = new VectorOfByte();
-                CvInvoke.Imencode(".jpg", image, buffer, new KeyValuePair<ImwriteFlags, int>(ImwriteFlags.JpegQuality, 80));
-                jpeg = buffer.ToArray();
-            }
-            catch (Exception ex) when (ex is ObjectDisposedException || ex is NullReferenceException || ex is AccessViolationException)
-            {
-                // The frame was released while copying it. The next request gets the next one.
-                throw new HttpException(503, "The image changed while reading it, try again.");
-            }
+            var jpeg = Jpeg(imageEye, overlay != "false", imagesAndData.Calibration.EyeCalibrationParameters[whichEye], imagesAndData.TrackingSettings)
+                ?? throw new HttpException(503, "The image changed while reading it, try again.");
 
             HttpContext.Response.ContentType = "image/jpeg";
             HttpContext.Response.Headers.Add("Cache-Control", "no-store");

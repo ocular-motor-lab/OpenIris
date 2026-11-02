@@ -225,7 +225,7 @@ The window talks to the system through the system's own properties, methods and 
 example, the window of the Synthetic Eyes system sets the system's `Rotation`, and the Webcam
 system raises an event with each image of the face, which its window shows
 (`BasicPlugins\SyntheticEyes\SyntheticEyesUI.cs`, `BasicPlugins\Webcam\WebcamFaceView.cs`). The view
-classes are in `OpenIrisWinForms.dll`: reference it, as well as OpenIrisLib (see
+classes are in OpenIrisWinForms: reference its NuGet package, as well as OpenIrisLib (see
 [Creating a plugin](creating-a-plugin.md)).
 
 ## 3. Try it

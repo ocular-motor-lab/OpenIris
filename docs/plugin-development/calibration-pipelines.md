@@ -64,7 +64,7 @@ collect data over many frames (for example while the subject looks at targets) b
 
 To show instructions or progress in a Calibration tab while calibrating, keep the state in the
 calibration class (public properties), and export a panel class that shows it. That way the
-calibration class doesn't depend on Windows Forms. The panel classes are in `OpenIrisWinForms.dll`:
+calibration class doesn't depend on Windows Forms. The panel classes are in OpenIrisWinForms (its NuGet package, see [Creating a plugin](creating-a-plugin.md)):
 
 ```csharp
 [Export(typeof(ICalibrationPanel))]

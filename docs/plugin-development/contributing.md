@@ -94,7 +94,10 @@ releases are numbered after the last tag. To move to a new minor or major versio
 To make a release:
 
 1. Merge everything into `main` and push. Check that the GitHub build passes.
-2. Create the version tag on that commit (for example `0.2.0`) and push it.
+2. Create the version tag on that commit (for example `0.2.0`) and push it. Pushing the tag also
+   publishes the NuGet packages of OpenIrisLib and OpenIrisWinForms with that version (see
+   [Building](building.md#nuget-packages)); pre-release tags such as `0.2.0-alpha.3` publish
+   pre-release packages. Check the **Publish NuGet packages** run in the **Actions** tab.
 3. Build **Release** from that commit, so the program reports exactly that version.
 4. Zip the `bin\x64\Release` folder as `OpenIris_Win_Release_<version>.zip`.
 5. On GitHub: **Releases**, **Draft a new release**, choose the tag, write what's new, attach the

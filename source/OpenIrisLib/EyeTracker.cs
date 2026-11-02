@@ -522,7 +522,7 @@ namespace OpenIris
         public void StopRecording()
         {
             Trace.WriteLine("StopRecording");
-            RecordingSession?.Stop(RecordingSession.NumberFrameLastInVideo);
+            RecordingSession?.StopAtLastFrameInVideo();
         }
 
         /// <summary>

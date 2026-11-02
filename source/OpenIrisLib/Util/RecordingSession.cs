@@ -49,7 +49,14 @@ namespace OpenIris
         private StreamWriter? dataFile;
         private EyeTrackerLog? log;
 
+        // RangeToRecord will keep track fo the range of frame numbers that need to be recorded.
+        // Initially is unknown (empty). As soon as the first image frame comes that will be the begining
+        // of the range the end of the range might be the last image frame recorded at the time
+        // the order to stop recording is recieved. Or it can be set specifically at the stop
+        // recording for some future frame number. Frames can come as soon as the session is
+        // visible to the eye tracker, before Start, so Start must not reset it (see #76).
         private Range RangeToRecord;
+        private volatile bool stopRequested;
         private Task? recordingTask;
         private bool started;
 
@@ -147,13 +154,6 @@ namespace OpenIris
             started = true;
 
             settings.LastRecordedFile = DataFileName;
-
-            // RangeToRecord will keep track fo the range of frame numbers that need to be recorded.
-            // Initially is unknown. As soon as the first image frame comes that will be the begining
-            // of the range the end of the range might be the last image frame recorded at the time
-            // the order to stop recording is recieved. Or it can be set specifically at the stop
-            // recording for some future frame number.
-            RangeToRecord = new Range();
 
             try
             {
@@ -271,6 +271,16 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Stop the recording at the last frame recorded in the video. The stop is applied with the
+        /// next grabbed frame, by the thread that adds the raw frames, so no frame can be half
+        /// added when the last frame is decided (see #76).
+        /// </summary>
+        internal void StopAtLastFrameInVideo()
+        {
+            stopRequested = true;
+        }
+
+        /// <summary>
         /// Records new raw frames. If buffer is full it will drop the frame.
         /// </summary>
         /// <param name="images">Frames to be recorded.</param>
@@ -281,6 +291,13 @@ namespace OpenIris
             if (rawFramesRecorder is null) throw new InvalidOperationException("Recorder not ready.");
 
             var frameNumber = images.GetFrameNumber();
+
+            if (stopRequested)
+            {
+                stopRequested = false;
+                Stop(rawFramesRecorder.LastItemAdded);
+                return false;
+            }
 
             // If starting recording we must wait until we get the first raw image because they come
             // before the processed images by definition. If the range is not sent from outside.

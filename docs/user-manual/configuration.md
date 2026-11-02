@@ -26,8 +26,8 @@ without torsion, or with different pipeline parameters), and switch between them
 changing each setting.
 
 Choose the profile on the main window, above **Start Tracking**, or with **Use** in the **Profiles**
-tab of the configuration window. Switch profiles while not tracking, because the eye tracking system
-may change. In the **Profiles** tab:
+tab of the configuration window. The eye tracking system may change, so switching while tracking
+asks to stop tracking (and recording) first. In the **Profiles** tab:
 
 - **New…** creates a profile for an eye tracking system, with its default settings;
 - **Duplicate…** copies the selected profile, for example to try other settings while keeping the

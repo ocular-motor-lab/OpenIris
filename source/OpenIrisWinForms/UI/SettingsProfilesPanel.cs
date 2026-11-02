@@ -64,7 +64,7 @@ namespace OpenIris.UI
                 Padding = new Padding(0, 6, 0, 0),
                 ForeColor = SystemColors.GrayText,
                 Text = "Each profile has its own eye tracking system, pipeline, calibration and settings (Advanced tab). " +
-                    "The active profile, in bold, is also chosen on the main window. Switch profiles while not tracking.",
+                    "The active profile, in bold, is also chosen on the main window. Switching while tracking asks to stop first.",
             };
 
             var profilesBox = new GroupBox { Text = "Profiles", Dock = DockStyle.Top, Height = 260, Padding = new Padding(8) };
@@ -114,7 +114,7 @@ namespace OpenIris.UI
 
         private void UpdateButtons()
         {
-            useButton.Enabled = Selected != null && !IsActive(Selected) && eyeTracker.NotStarted;
+            useButton.Enabled = Selected != null && !IsActive(Selected);
             renameButton.Enabled = Selected != null;
             deleteButton.Enabled = Selected != null && !IsActive(Selected);
         }
@@ -132,11 +132,12 @@ namespace OpenIris.UI
             e.DrawFocusRectangle();
         }
 
-        private void UseSelected()
+        private async void UseSelected()
         {
             if (Selected is string profile && !IsActive(profile))
             {
-                Try(() => eyeTracker.SwitchSettingsProfile(profile));
+                await ProfileSwitcher.SwitchAsync(this, eyeTracker, profile);
+                UpdateProfiles();
             }
         }
 

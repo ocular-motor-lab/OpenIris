@@ -224,19 +224,13 @@ namespace OpenIris.UI
                 // tracking system, pipeline and settings (managed in the configuration window).
                 //
                 UpdateProfileComboBox();
-                profileComboBox.SelectionChangeCommitted += (o, e) =>
+                profileComboBox.SelectionChangeCommitted += async (o, e) =>
                 {
                     if (!(profileComboBox.SelectedItem is string profile) || profile == eyeTracker.Settings.Profile) return;
 
-                    try
-                    {
-                        eyeTracker.SwitchSettingsProfile(profile);
-                    }
-                    catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException || ex is System.IO.IOException)
-                    {
-                        MessageBox.Show(this, ex.Message, "Settings profile", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        UpdateProfileComboBox();
-                    }
+                    // While tracking, it asks to stop first.
+                    await ProfileSwitcher.SwitchAsync(this, eyeTracker, profile);
+                    UpdateProfileComboBox();
                 };
 
 
@@ -273,7 +267,6 @@ namespace OpenIris.UI
                         tabPages.TabPages.Add(tabPageLog);
 
                         tabPages.SelectedTab = tabPageStart;
-                        profileComboBox.Enabled = eyeTracker.NotStarted;
                         pipelineUI = null;
                     }
                 }
@@ -408,7 +401,6 @@ namespace OpenIris.UI
         {
             if (eyeTracker.Tracking is false)
             {
-                profileComboBox.Enabled = eyeTracker.NotStarted;
                 pipelineUI = null;
             }
         }

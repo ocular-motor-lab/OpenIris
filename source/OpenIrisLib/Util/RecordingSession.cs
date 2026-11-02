@@ -40,11 +40,11 @@ namespace OpenIris
 
         private EyeCollection<VideoWriter?>? rawVideoWriters;
         private VideoWriter? processedVideoWriter;
-        private readonly System.Collections.Generic.Dictionary<Eye, Mat> rawFrameBuffers = new();
+        private readonly System.Collections.Generic.Dictionary<Eye, VideoFrameBuffer> rawFrameBuffers = new();
         private Size rawVideoSize;
         private readonly int[] rawVideoFrameCounts = new int[2];
         private StreamWriter? rawVideoFramesFile;
-        private Mat? processedFrameBuffer;
+        private VideoFrameBuffer? processedFrameBuffer;
         private StreamWriter? eventFile;
         private StreamWriter? dataFile;
         private EyeTrackerLog? log;
@@ -395,7 +395,7 @@ namespace OpenIris
                 // VideoWriter silently drops frames of a different size than the video's.
                 if (image.Size != rawVideoSize) continue;
 
-                if (!rawFrameBuffers.TryGetValue(image.WhichEye, out var buffer)) rawFrameBuffers[image.WhichEye] = buffer = new Mat();
+                if (!rawFrameBuffers.TryGetValue(image.WhichEye, out var buffer)) rawFrameBuffers[image.WhichEye] = buffer = new VideoFrameBuffer();
                 VideoTools.WriteFrame(writer, image.Image, buffer);
 
                 positions[(int)image.WhichEye] = rawVideoFrameCounts[(int)image.WhichEye]++.ToString(CultureInfo.InvariantCulture);
@@ -462,7 +462,7 @@ namespace OpenIris
                             size: imageForVideo.Size,
                             isColor: true);
 
-                VideoTools.WriteFrame(processedVideoWriter, imageForVideo, processedFrameBuffer ??= new Mat());
+                VideoTools.WriteFrame(processedVideoWriter, imageForVideo, processedFrameBuffer ??= new VideoFrameBuffer());
             }
             return true;
         }

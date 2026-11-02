@@ -31,31 +31,21 @@ namespace OpenIris
 
         /// <summary>
         /// Writes an EmguCV image to a video. Use it instead of writer.Write(image) or
-        /// writer.Write(image.Mat): FFmpeg, which writes the videos, reads frames with instructions that
-        /// need memory aligned to 16-64 bytes, and EmguCV images keep their pixels in .NET arrays,
-        /// aligned only to 8 bytes. Writing them directly crashes (access violation) now and then. The
-        /// frame is copied into a Mat that OpenCV allocated.
+        /// writer.Write(image.Mat): FFmpeg, which writes the videos, reads past the end of gray
+        /// frames, and writing them directly crashes (access violation) now and then. The frame is
+        /// copied into memory with room for that (see <see cref="VideoFrameBuffer"/>).
         /// </summary>
         /// <param name="writer">The video.</param>
         /// <param name="image">The frame.</param>
-        /// <param name="buffer">Mat for the copy. Keep it from frame to frame, and dispose it with the video.</param>
-        public static void WriteFrame<TColor>(VideoWriter writer, Image<TColor, byte> image, Mat buffer)
+        /// <param name="buffer">Memory for the copy. Keep it from frame to frame, and dispose it with the video.</param>
+        public static void WriteFrame<TColor>(VideoWriter writer, Image<TColor, byte> image, VideoFrameBuffer buffer)
             where TColor : struct, IColor
         {
-            image.Mat.CopyTo(buffer);
+            var frame = buffer.Frame(image.Size, image.NumberOfChannels);
+            image.Mat.CopyTo(frame);
             GC.KeepAlive(image);
-            lock (FfmpegLock)
-            {
-                writer.Write(buffer);
-            }
+            writer.Write(frame);
         }
-
-        /// <summary>
-        /// Lock around the calls into FFmpeg that read and write videos at the same time, from different
-        /// threads (playing a video while recording another): writing a frame while a video was being
-        /// read crashed now and then inside FFmpeg (access violation, #32).
-        /// </summary>
-        internal static readonly object FfmpegLock = new object();
 
         /// <summary>
         /// Copies a range of frames of the videos of each eye to new videos, named like the

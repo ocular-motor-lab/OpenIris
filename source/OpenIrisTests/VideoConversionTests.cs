@@ -36,7 +36,7 @@ namespace OpenIris.Tests
             {
                 var input = Path.Combine(folder, "input.avi");
                 using (var writer = new VideoWriter(input, 0, Fps, FrameSize, isColor: false))
-                using (var buffer = new Mat())
+                using (var buffer = new VideoFrameBuffer())
                 {
                     for (int i = 0; i < Frames; i++)
                     {

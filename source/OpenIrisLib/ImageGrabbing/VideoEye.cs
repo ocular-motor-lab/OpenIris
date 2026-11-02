@@ -165,23 +165,15 @@ namespace OpenIris.ImageGrabbing
         /// <returns>Image of the eye grabbed.</returns>
         public virtual ImageEye GrabImageEyeFromVideo()
         {
-            // FFmpeg reads the video: not at the same time as it writes another one (VideoTools.FfmpegLock).
-            ImageEyeTimestamp timestamp;
-            Mat? queried;
-            lock (VideoTools.FfmpegLock)
-            {
-                // Set up the timestamp for the image
-                timestamp = new ImageEyeTimestamp(
-                    seconds: Video.Get(CapProp.PosMsec) / 1000,
-                    frameNumber: (ulong)Video.Get(CapProp.PosFrames),
-                    frameNumberRaw: (ulong)Video.Get(CapProp.PosFrames));
-
-                queried = Video.QueryFrame();
-            }
+            // Set up the timestamp for the image
+            var timestamp = new ImageEyeTimestamp(
+                seconds: Video.Get(CapProp.PosMsec) / 1000,
+                frameNumber: (ulong)Video.Get(CapProp.PosFrames),
+                frameNumberRaw: (ulong)Video.Get(CapProp.PosFrames));
 
             // Retrieve the new frame. Pass the image itself to ImageEye, not grayImage.Bitmap: that
             // Bitmap shares grayImage's memory, which the GC can free while it is still being copied.
-            using var frame = queried
+            using var frame = Video.QueryFrame()
                 ?? throw new InvalidOperationException($"Could not read frame {timestamp.FrameNumber} of the video.");
             var grayImage = frame.ToImage<Gray, byte>();
 

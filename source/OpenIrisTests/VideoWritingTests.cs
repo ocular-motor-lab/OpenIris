@@ -15,9 +15,9 @@ namespace OpenIris.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     /// <summary>
-    /// Writing EmguCV images to videos. Their pixels are in .NET arrays, aligned to 8 bytes only, and
-    /// FFmpeg needs more: writing them directly crashed now and then (access violation). These write
-    /// thousands of new images while the garbage collector runs constantly.
+    /// Writing EmguCV images to videos. FFmpeg reads 1024 bytes past the end of gray frames, and
+    /// writing them crashed now and then (access violation, #32). These write thousands of new images
+    /// while the garbage collector runs constantly.
     /// </summary>
     [TestClass]
     public class VideoWritingTests
@@ -49,7 +49,7 @@ namespace OpenIris.Tests
                 for (int video = 0; video < 4; video++)
                 {
                     using var writer = new VideoWriter(file, 0, 100, new Size(320, 240), color);
-                    using var buffer = new Mat();
+                    using var buffer = new VideoFrameBuffer();
                     for (int i = 0; i < 500; i++)
                     {
                         if (color) VideoTools.WriteFrame(writer, new Image<Bgr, byte>(320, 240, new Bgr(i % 255, 0, 0)), buffer);
@@ -68,6 +68,35 @@ namespace OpenIris.Tests
             }
 
             TestContext.WriteLine($"2000 frames written while the garbage collector ran {collections} times.");
+        }
+        [DataTestMethod]
+        [DataRow(320, 240, 1)]
+        [DataRow(720, 540, 1)]
+        [DataRow(400, 300, 1)]
+        [DataRow(1440, 1080, 1)]
+        [DataRow(642, 482, 3)]
+        public void FramesHaveWhatFfmpegNeeds(int width, int height, int channels)
+        {
+            // Many frames, so some of them land next to a page boundary.
+            for (int i = 0; i < 200; i++)
+            {
+                using var buffer = new VideoFrameBuffer();
+                var frame = buffer.Frame(new Size(width, height), channels);
+
+                // OpenCV gives FFmpeg the frame itself (not a copy without room after it) when the rows
+                // are multiples of 32 bytes and the frame doesn't end within 32 bytes of a page boundary.
+                var step = frame.Step;
+                var start = frame.DataPointer.ToInt64();
+                var end = start + (long)step * height;
+                Assert.AreEqual(0, step % 32, "Bytes per row.");
+                Assert.AreEqual((end - 32) >> 12, (end + 32) >> 12, "Frame next to a page boundary.");
+
+                // FFmpeg reads 1024 bytes from the end of the image as if its rows had no padding.
+                var memory = (Mat)typeof(VideoFrameBuffer).GetField("memory", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.GetValue(buffer)!;
+                var memoryEnd = memory.DataPointer.ToInt64() + memory.Cols;
+                Assert.IsTrue(start + (long)width * channels * height + 1024 <= memoryEnd, "Room after the frame.");
+                Assert.IsTrue(end <= memoryEnd, "Frame inside the memory.");
+            }
         }
     }
 }

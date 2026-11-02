@@ -1,6 +1,7 @@
-classdef OpenIrisTCP  < handle
-    %OpenIrisTCP Controls OpenIris with its text commands over TCP (MATLAB R2020b or later).
-    %   See docs/user-manual/remote-control.md for the commands and the data format.
+classdef OpenIrisTCP < OpenIris.OpenIrisClient
+    %OpenIrisTCP Controls OpenIris with its text commands over TCP (MATLAB R2020b or later). Kept for
+    %   existing scripts: new code can use OpenIris.OpenIrisClient(ip, [], 'tcp'), which has the same
+    %   methods. See docs/user-manual/remote-control.md for the commands and the data format.
     %
     %   oi = OpenIrisTCP;
     %   oi.Connect('localhost');
@@ -10,83 +11,41 @@ classdef OpenIrisTCP  < handle
     %   data = oi.GetCurrentData();
     %   oi.StopRecording();
 
-    properties
-        t
-        timeout = 2   % Seconds to wait for a reply
-    end
-
     methods
+        function this = OpenIrisTCP()
+            this.timeout = 2;
+        end
+
         function result = Connect(this, ip, port)
-           result = 0;
-
-            if ( ~exist('port','var') || isempty(port) )
-                port = 9002;
-            end
-
-            this.t = tcpclient(ip,port);
-
-            result = 1;
+            if ( ~exist('port','var') ), port = []; end
+            result = Connect@OpenIris.OpenIrisClient(this, ip, port, 'tcp');
         end
 
-        function SetSessionName(this, sessionName)
-            this.Send(['SetSessionName|' sessionName]);
-        end
-
-        function StartRecording(this)
-            this.Send('StartRecording');
-        end
-
-        function StopRecording(this)
-            this.Send('StopRecording');
-        end
-
-        function frameNumber = RecordEvent(this, message)
-            % Saves the message in the events file of the recording and returns the frame number.
-            frameNumber = str2double(this.Ask(['RecordEvent|' message], false));
-        end
-
-        function data = GetCurrentData(this)
+        function data = GetCurrentData(this, ~)
             % Data of the last processed frame.
-            data = OpenIrisTCP.ParseData(this.Ask('GetData', true));
+            data = OpenIrisTCP.AddOldFields(GetCurrentData@OpenIris.OpenIrisClient(this));
         end
 
         function data = WaitForData(this)
             % Data of the next processed frame (OpenIris waits up to 1 second for it).
-            data = OpenIrisTCP.ParseData(this.Ask('WaitForData', true));
+            data = OpenIrisTCP.AddOldFields(this.WaitForNewData());
         end
 
         function Send(this, command)
-            % Sends a command that has no reply. Commands end with a newline, so OpenIris can tell
-            % them apart when several arrive together. That needs OpenIris 0.2 or later: older
-            % versions don't recognize a command that ends with a newline.
-            write(this.t, uint8([command newline]));
+            % Sends a command that has no reply.
+            this.CommandSend(command);
         end
 
         function reply = Ask(this, command, isJson)
-            % Sends a command and returns its reply. TCP doesn't separate messages, so keep reading
-            % until the reply is complete.
-            flush(this.t);
-            write(this.t, uint8([command newline]));
-            reply = '';
-            started = tic;
-            while toc(started) < this.timeout
-                if ( this.t.NumBytesAvailable > 0 )
-                    reply = [reply char(read(this.t, this.t.NumBytesAvailable))]; %#ok<AGROW>
-                    if ( ~isJson || OpenIrisTCP.IsCompleteJson(reply) )
-                        return;
-                    end
-                end
-                pause(0.001);
-            end
-            error('OpenIrisTCP:timeout', 'No reply from OpenIris to %s.', command);
+            % Sends a command and returns its reply.
+            reply = this.CommandAsk(command, isJson);
         end
     end
 
-    methods(Static = true)
-        function data = ParseData(reply)
+    methods (Static, Access = private)
+        function data = AddOldFields(data)
             % The full reply is in data.Left, data.Right and data.Extra. The fields LeftX, LeftY,
             % etc. are kept for scripts written for older versions.
-            data = jsondecode(reply);
             data.LeftFrameNumber = data.Left.FrameNumber;
             data.LeftTime = data.Left.Seconds;
             data.LeftX = data.Left.Pupil.Center.X;
@@ -96,18 +55,5 @@ classdef OpenIrisTCP  < handle
             data.RightX = data.Right.Pupil.Center.X;
             data.RightY = data.Right.Pupil.Center.Y;
         end
-
-        function complete = IsCompleteJson(text)
-            complete = false;
-            if ( isempty(text) || text(end) ~= '}' )
-                return;
-            end
-            try
-                jsondecode(text);
-                complete = true;
-            catch
-            end
-        end
     end
-
 end

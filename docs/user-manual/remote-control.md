@@ -9,10 +9,12 @@ There are three ways to do it:
 - **A web browser.** Open `http://<OpenIris computer>:9001/` on any computer, tablet or phone of the
   network to see the eyes and a live trace, record, change settings, and run a full-screen
   calibration. See [Web client](#web-client).
-- **The web API** (HTTP and JSON), used by the web client and by the MATLAB class
-  `OpenIrisMatlabClient.m`. Any language can use it. See [Web API](#web-api).
+- **The web API** (HTTP and JSON), used by the web client. Any language can use it. See
+  [Web API](#web-api).
 - **Text commands over UDP or TCP.** Simple text messages, the fastest for events during an
   experiment. Replies with eye data are JSON. See [Text commands](#text-commands-udp-and-tcp).
+
+From MATLAB, the class `OpenIris.OpenIrisClient` uses either. See [MATLAB](#matlab).
 
 OpenIris listens as soon as it starts; tracking does not need to be running. The log at startup
 shows which services started, for example `UDP server Waiting for requests in port 9003.`
@@ -166,26 +168,8 @@ function reply = ask(u, command, openiris, port)
 end
 ```
 
-### MATLAB class for TCP
-
-`OpenIrisTCP.m` (in the [`matlab`](https://github.com/ocular-motor-lab/OpenIris/tree/main/matlab) folder of the repository) wraps the commands over TCP, including waiting
-for complete replies. It ends each command with a newline, so commands sent one right after another
-(as `SetSessionName` and `StartRecording` below) stay separate. Use the one from the same release as
-OpenIris:
-
-```matlab
-oi = OpenIrisTCP;
-oi.Connect('127.0.0.1');            % Port 9002 by default
-oi.SetSessionName('Subject01');
-oi.StartRecording();
-frame = oi.RecordEvent('StimulusOn');
-data = oi.GetCurrentData();         % Or oi.WaitForData() for the next frame
-fprintf('Left pupil at %.1f, %.1f\n', data.LeftX, data.LeftY);
-oi.StopRecording();
-```
-
-The data has the whole reply in `data.Left`, `data.Right` and `data.Extra`, and for convenience
-`LeftX`, `LeftY`, `LeftTime`, `LeftFrameNumber` and the same for the right eye.
+The MATLAB class `OpenIris.OpenIrisClient` sends these commands for you, over UDP or TCP. See
+[MATLAB](#matlab).
 
 ## Calibration
 
@@ -305,31 +289,63 @@ columns, which are those of the [data file](data-file.md):
 `{"type": "columns", "columns": ["LeftFrameNumber", ...]}`. Then, about 30 times a second, the
 frames since the last message: `{"type": "data", "rows": [[...], [...]]}`.
 
-### MATLAB
-
-`OpenIrisMatlabClient.m` (in the [`matlab`](https://github.com/ocular-motor-lab/OpenIris/tree/main/matlab) folder) uses the web API. It needs no DLL
-and works on any system (MATLAB R2016b or later):
-
-```matlab
-oi = OpenIrisMatlabClient;
-oi.Connect('127.0.0.1');               % Or Connect() to use the address in openiris_folder\IP.txt
-oi.SetSessionName('Subject01');
-oi.StartRecording();
-frame = oi.RecordEvent('StimulusOn');
-data = oi.GetCurrentData();             % data.LeftCalibrated.HorizontalPosition, data.Left.Pupil.Center.X...
-oi.StopRecording();
-files = oi.DownloadFile();              % Into openiris_folder\DownloadedData
-```
-
-With Psychtoolbox installed, `RecordEvent` starts each message with the `GetSecs` time, to help
-synchronize the stimulus and eye tracker clocks. Also: `IsRecording`, `GetStatus`,
-`ChangeSetting(name, value)`, `WaitForNewData`, `ResetReference`, `StartCalibration`,
-`CalibrationMessage`, `CancelCalibration`.
-
-Scripts written for the old version of this class, which used `OpenIrisRemoteClient.dll` and the
-.NET remote service (removed in 0.2), keep working. The difference: `GetCurrentData` returns a
-struct (`data.Left.Pupil.Center.X`) instead of a .NET object (`data.Item(0)...`).
-
 The URLs of the old browser commands (`http://localhost:9001/EyeTrackerEndpoint/Web/StartRecording`,
 `StopRecording`, `ResetReference`, `RecordEvent?message=...`, `GetFileWeb`, `StatusSummary`) also
 still work, and no longer need the `netsh http add urlacl` command.
+
+## MATLAB
+
+`OpenIris.OpenIrisClient`, in the [`matlab`](https://github.com/ocular-motor-lab/OpenIris/tree/main/matlab)
+folder of the repository (put that folder on the MATLAB path), controls OpenIris over the web API,
+TCP or UDP. It needs no DLL and works on any system (MATLAB R2016b or later; R2020b or later for TCP
+and UDP). Use the one from the same release as OpenIris.
+
+```matlab
+oi = OpenIris.OpenIrisClient('127.0.0.1');             % Web API (HTTP), port 9001
+% oi = OpenIris.OpenIrisClient('127.0.0.1', [], 'udp'); % Text commands over UDP, port 9003
+% oi = OpenIris.OpenIrisClient('127.0.0.1', [], 'tcp'); % Text commands over TCP, port 9002
+oi.ChangeSetting('SessionName', 'Subject01');
+oi.StartRecording();
+frame = oi.RecordEvent('StimulusOn');
+data = oi.GetCurrentData();             % Or oi.WaitForNewData() for the next frame
+fprintf('Left pupil at %.1f, %.1f\n', data.Left.Pupil.Center.X, data.Left.Pupil.Center.Y);
+oi.StopRecording();
+if ( ~oi.Status.Recording )
+    files = oi.DownloadFile();          % Into openiris_folder\DownloadedData
+end
+```
+
+`OpenIrisClient(ip, port, protocol)`: without `ip`, the address in `openiris_folder\IP.txt`, or
+localhost; without `port` (or with 9000, the port of the old client), the protocol's default.
+
+The methods are the same with every protocol. With `'udp'` or `'tcp'`, the ones that have a text
+command use it, and the others go to the web API of the same computer:
+
+| | HTTP | UDP or TCP |
+| --- | --- | --- |
+| `StartRecording`, `StopRecording`, `RecordEvent` | web API | text command |
+| `GetCurrentData`, `WaitForNewData` | web API | text command |
+| `ChangeSetting('SessionName', …)`, `SetSessionName` | web API | text command |
+| `CalibrationMessage` | web API | text command |
+| `Status`, `IsRecording`, other settings, `DownloadFile`, `ResetReference`, `StartCalibration`, `CancelCalibration` | web API | web API |
+
+If the web API can't be reached (for example, a firewall that only lets UDP through), those methods
+fail with an error that says so, and the others keep working.
+
+The data (`GetCurrentData`, `WaitForNewData`) always has `data.FrameNumber`, `data.Seconds`, and
+`data.Left` and `data.Right` with `Pupil` (`Center.X`, `Center.Y`, `Size`...). Over HTTP it also has
+the rest of each eye's data, `data.LeftCalibrated` and `data.RightCalibrated` (`HorizontalPosition`,
+`VerticalPosition`, `TorsionalPosition`, in degrees), `Head` and `Extra`. With the text commands
+the reflections are `data.Left.CRs`. Values are NaN when the eye wasn't found.
+
+**The old clients.** `OpenIris.OpenIrisClient` has the name and methods of the class in
+`OpenIrisRemoteClient.dll`, which used the .NET remote service removed in 0.2. Code that created
+it with `OpenIris.OpenIrisClient(ip, port)` keeps working: remove the `NET.addAssembly` of the DLL
+and put the `matlab` folder on the path instead. Two differences: `GetCurrentData` returns a
+struct (`data.Left.Pupil.Center.X`) instead of a .NET object, and `DownloadFile` returns a cell
+array of file paths instead of a .NET list.
+
+`OpenIrisMatlabClient` (web API) and `OpenIrisTCP` (TCP) are kept for existing scripts. They have
+the same methods, with `Connect(ip, port)`. `OpenIrisMatlabClient.RecordEvent` starts each message
+with the Psychtoolbox `GetSecs` time, and `OpenIrisTCP` adds `LeftX`, `LeftY`, `LeftTime`,
+`LeftFrameNumber` and the same for the right eye to the data.

@@ -45,7 +45,13 @@ namespace OpenIris.ImageProcessing
             /// <summary>
             /// Center of the ellipse that best fits the contour.
             /// </summary>
-            EllipseFitting
+            EllipseFitting,
+
+            /// <summary>
+            /// As EllipseFitting, with a robust fit that expects a round pupil (#77): points far from
+            /// the ellipse count less, and a gap in the contour doesn't stretch it.
+            /// </summary>
+            RobustEllipseFitting,
         }
 
         /// <summary>
@@ -72,6 +78,8 @@ namespace OpenIris.ImageProcessing
                     return CalculatePositionConvexHull(imageEye, pupilAprox, desiredMaxSize, threshold);
                 case PositionTrackingMethod.EllipseFitting:
                     return CalculatePositionEllipseFitting(imageEye, mask, pupilAprox, pupilReference, desiredMaxSize, threshold);
+                case PositionTrackingMethod.RobustEllipseFitting:
+                    return CalculatePositionEllipseFitting(imageEye, mask, pupilAprox, pupilReference, desiredMaxSize, threshold, robust: true);
                 default:
                     break;
             }
@@ -89,8 +97,9 @@ namespace OpenIris.ImageProcessing
         /// <param name="pupilReference">Pupil ellipse reference from calibration.</param>
         /// <param name="desiredMaxSize"></param>
         /// <param name="threshold"></param>
+        /// <param name="robust">Fit with <see cref="RobustEllipseFit"/>, without the heuristic interpolation.</param>
         /// <returns>The pupil ellipse.</returns>
-        public static PupilData CalculatePositionEllipseFitting(ImageEye imageEye, Image<Gray, byte>? mask, PupilData pupilAprox, PupilData pupilReference, int desiredMaxSize, int threshold)
+        public static PupilData CalculatePositionEllipseFitting(ImageEye imageEye, Image<Gray, byte>? mask, PupilData pupilAprox, PupilData pupilReference, int desiredMaxSize, int threshold, bool robust = false)
         {
             // Do it at the begining so it does not change during the processing
             var DEBUG = EyeTracker.DEBUG;
@@ -111,7 +120,8 @@ namespace OpenIris.ImageProcessing
             var ELLIPSE_FITTING_DO_CURVATURE_FILTER = true;
             var ELLIPSE_FITTING_DO_MASK = true;
             var ELLIPSE_FITTING_DO_APROX_POLY = true;
-            var ELLIPSE_FITTING_DO_HEURISTIC_INTERPOLATION = true;
+            // The robust fit's prior does this job.
+            var ELLIPSE_FITTING_DO_HEURISTIC_INTERPOLATION = !robust;
 
             (var pupilCountour, var imgPupilBinaryDebug1) = GetPupilContour(imageEye, imgPupilBinary);
 
@@ -524,7 +534,7 @@ namespace OpenIris.ImageProcessing
             // If there are too few points do not try to fit the ellipse, just exit
             if (pupilCountour.Size < 8) return pupilAprox;
 
-            var pupilEllipse = CvInvoke.FitEllipse(pupilCountour);
+            var pupilEllipse = robust ? RobustEllipseFit.Fit(pupilCountour) : CvInvoke.FitEllipse(pupilCountour);
             
             // Change the ellipse information to the coordinates of the original image
 

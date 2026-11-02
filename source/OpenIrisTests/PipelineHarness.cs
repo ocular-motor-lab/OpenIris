@@ -26,6 +26,8 @@ namespace OpenIris.Tests
         /// </summary>
         public static string SourceFolder { get; } = GetSourceFolder();
 
+        public static Action<EyeTrackingPipelineSettings>? ExperimentConfigure; // TEMPORARY (#77)
+
         /// <summary>
         /// Gets the full path of one of the sample videos included with OpenIris (sample-videos, at the root of the repository),
         /// the same ones the Simulation eye tracking system plays.
@@ -149,6 +151,7 @@ namespace OpenIris.Tests
             // So torsion is exactly the same every run.
             if (settings is EyeTrackingPipelineJOMSettings jom) jom.TorsionNoiseSeed = 1;
             configure?.Invoke(settings);
+            ExperimentConfigure?.Invoke(settings); // TEMPORARY (#77)
             return EyeTrackingPipelineBase.Create(pipelineName, whichEye, settings);
         }
 

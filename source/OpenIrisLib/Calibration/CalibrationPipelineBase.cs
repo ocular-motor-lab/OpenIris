@@ -85,6 +85,15 @@ namespace OpenIris
         /// </summary>
         public virtual ICalibrationUIControl? GetCalibrationUI() => null;
 
+        /// <summary>
+        /// What this calibration found for an eye beyond the eye model and the reference (for example
+        /// the map of Remote Linear), which then changes the calibrated data (see EyeCalibrationData).
+        /// Asked once the eye model is calibrated. Null (the default) for calibrations that only use the
+        /// eye model and the reference.
+        /// </summary>
+        /// <param name="whichEye">Which eye.</param>
+        public virtual EyeCalibrationData? GetCalibrationData(Eye whichEye) => null;
+
         public virtual void Dispose()
         {
         }

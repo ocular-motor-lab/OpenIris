@@ -62,6 +62,13 @@ namespace OpenIris
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingsyStemFactory.ClassesAvaiable.Select(t => t.SettingsType));
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
                 ExtraSettingsTypesForXML.AddRange(CalibrationPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
+
+                // The kinds of calibration data (EyeCalibrationData), for the calibration files: those
+                // defined in the assemblies of the calibration plugins.
+                ExtraSettingsTypesForXML.AddRange(CalibrationPipelineFactory.ClassesAvaiable
+                    .Select(t => t.SettingsType.Assembly).Distinct()
+                    .SelectMany(TypesIn)
+                    .Where(t => typeof(EyeCalibrationData).IsAssignableFrom(t) && !t.IsAbstract));
             }
             catch (Exception ex)
             {
@@ -87,6 +94,21 @@ namespace OpenIris
             {
                 Trace.WriteLine($"ERROR loading the plugin parts of type {typeof(T).Name}: {ex.Message}");
                 return Enumerable.Empty<T>();
+            }
+        }
+
+        /// <summary>
+        /// The types of an assembly that can be loaded (a plugin may reference a library that isn't installed).
+        /// </summary>
+        private static IEnumerable<Type> TypesIn(Assembly assembly)
+        {
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t != null);
             }
         }
 

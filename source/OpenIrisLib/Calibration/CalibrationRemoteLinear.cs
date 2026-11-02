@@ -83,7 +83,8 @@ namespace OpenIris.Calibration
         CR1,
         CR2,
         CR3,
-        CR4
+        CR4,
+        CR5
     }
 
     /// <summary>
@@ -139,114 +140,12 @@ namespace OpenIris.Calibration
         /// <returns>A PointF representing the signal in pixels. Null if eye is incorrect or out of bounds.</returns>
         public PointF? GetEyeSignalAtIdx(int idx, Eye eye, EyeSignalSource sig_src, EyeSignalSource sig_ref)
         {
-            if (fixation_data.Count < idx) return null;
+            if (fixation_data.Count <= idx) return null;
             var eye_data = fixation_data[idx];
             if (eye_data.WhichEye != eye) return null;
 
-            var crs = eye_data.CornealReflections;
-            PointF data_src = new PointF(), data_ref = new PointF();
-
-            switch (sig_src)
-            {
-                case EyeSignalSource.None:
-                    data_src = new PointF(0.0f, 0.0f);
-                    break;
-                case EyeSignalSource.Pupil:
-                    data_src = eye_data.Pupil.Center;
-                    break;
-                case EyeSignalSource.CR1:
-                    if (crs != null && crs.Length > 0)
-                    {
-                        data_src = crs[0].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case EyeSignalSource.CR2:
-                    if (crs != null && crs.Length > 1)
-                    {
-                        data_src = crs[1].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case EyeSignalSource.CR3:
-                    if (crs != null && crs.Length > 2)
-                    {
-                        data_src = crs[2].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case EyeSignalSource.CR4:
-                    if (crs != null && crs.Length > 3)
-                    {
-                        data_src = crs[3].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-            }
-
-            switch (sig_ref)
-            {
-                case EyeSignalSource.None:
-                    data_ref = new PointF(0.0f, 0.0f);
-                    break;
-                case EyeSignalSource.Pupil:
-                    data_ref = eye_data.Pupil.Center;
-                    break;
-                case EyeSignalSource.CR1:
-                    if (crs != null && crs.Length > 0)
-                    {
-                        data_ref = crs[0].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case EyeSignalSource.CR2:
-                    if (crs != null && crs.Length > 1)
-                    {
-                        data_ref = crs[1].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case EyeSignalSource.CR3:
-                    if (crs != null && crs.Length > 2)
-                    {
-                        data_ref = crs[2].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case EyeSignalSource.CR4:
-                    if (crs != null && crs.Length > 3)
-                    {
-                        data_ref = crs[3].Center;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-            }
-
-            return new PointF(data_src.X - data_ref.X, data_src.Y - data_ref.Y);
+            // The same signal as when the map is applied to the data.
+            return LinearGazeMap.Signal(eye_data, sig_src, sig_ref);
         }
 
         /// <summary>
@@ -360,8 +259,20 @@ namespace OpenIris.Calibration
         /// Completes the calibration routine and updates the plugins settings to store the results.
         /// </summary>
         /// <param name="settings">A reference to the calibration settings</param>
+        /// <summary>
+        /// The map fitted for each eye, which goes into the calibration and is applied to the data.
+        /// Null for an eye whose fit failed.
+        /// </summary>
+        public EyeCollection<LinearGazeMap?> Maps { get; } = new EyeCollection<LinearGazeMap?>(null, null);
+
+        private static LinearGazeMap MapFrom(double gxx, double gxy, double gyx, double gyy, double xOffset, double yOffset, CalibrationSettingsRemoteLinear settings) =>
+            new LinearGazeMap { Gxx = gxx, Gxy = gxy, Gyx = gyx, Gyy = gyy, XOffset = xOffset, YOffset = yOffset, Source = settings.SignalSource, Reference = settings.SignalReference };
+
         public void CompleteCalibration(ref CalibrationSettingsRemoteLinear settings)
         {
+            Maps[Eye.Left] = null;
+            Maps[Eye.Right] = null;
+
             // Loop over fixation datasets and fill lists containing target points (Y) and eye data (X) 
             var left_data = new List<PointF>(calibration_data.Count);
             var left_target = new List<PointF>(calibration_data.Count);
@@ -409,6 +320,7 @@ namespace OpenIris.Calibration
 
                 settings.LeftXOffset = left_cal.GetValue(2, 0);
                 settings.LeftYOffset = left_cal.GetValue(2, 1);
+                Maps[Eye.Left] = MapFrom(settings.LeftGxx, settings.LeftGxy, settings.LeftGyx, settings.LeftGyy, settings.LeftXOffset, settings.LeftYOffset, settings);
             }
             else
             {
@@ -438,6 +350,7 @@ namespace OpenIris.Calibration
 
                 settings.RightXOffset = right_cal.GetValue(2, 0);
                 settings.RightYOffset = right_cal.GetValue(2, 1);
+                Maps[Eye.Right] = MapFrom(settings.RightGxx, settings.RightGxy, settings.RightGyx, settings.RightGyy, settings.RightXOffset, settings.RightYOffset, settings);
             }
             else
             {
@@ -518,6 +431,11 @@ namespace OpenIris.Calibration
         /// <summary>
         /// Reference is implicit in the fixation data (0,0), so just return once called
         /// </summary>
+        /// <summary>
+        /// The map fitted for the eye: the calibrated positions come from it.
+        /// </summary>
+        public override EyeCalibrationData? GetCalibrationData(Eye whichEye) => calibrator.Maps[whichEye];
+
         public override (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
             if (image == null) return (false, null);
@@ -531,8 +449,8 @@ namespace OpenIris.Calibration
         /// Handles incoming messages from the client
         /// 
         /// Messages: 
-        /// SetSource:n  -> Sets SignalSource     (0=None, 1=Pupil, 2=CR1, 3=CR2, 4=CR3, 5=CR4)
-        /// SetRef:n     -> Sets SignalReference  (0=None, 1=Pupil, 2=CR1, 3=CR2, 4=CR3, 5=CR4)
+        /// SetSource:n  -> Sets SignalSource     (0=None, 1=Pupil, 2=CR1, 3=CR2, 4=CR3, 5=CR4, 6=CR5)
+        /// SetRef:n     -> Sets SignalReference  (0=None, 1=Pupil, 2=CR1, 3=CR2, 4=CR3, 5=CR4, 6=CR5)
         /// FixStart:x,y -> Start collecting data for a fixation, with the ground-truth point at x,y
         /// FixStop      -> Finish collecting data for the previous fixation
         /// FixAbort     -> Finish collecting data and discard the previous fixation

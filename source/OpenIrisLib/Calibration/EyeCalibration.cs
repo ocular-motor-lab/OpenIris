@@ -79,6 +79,13 @@ namespace OpenIris
         /// </summary>
         public EyeData ReferenceData { get; set; }
 
+        /// <summary>
+        /// What the calibration found beyond the eye model and the reference, which changes the
+        /// calibrated data as that calibration needs (for example the map of Remote Linear). Null for
+        /// calibrations that only use the eye model and the reference.
+        /// </summary>
+        public EyeCalibrationData? CalibrationData { get; set; }
+
         /// <summary> 
         /// Gets the reference image for the torsion.
         /// </summary>
@@ -143,9 +150,12 @@ namespace OpenIris
         {
             return new EyeCalibration()
             {
+                WhichEye = WhichEye,
+                ImageSize = ImageSize,
                 EyePhysicalModel = EyePhysicalModel,
                 ImageTorsionReference = ImageTorsionReference,
                 ReferenceData = ReferenceData.Copy(),
+                CalibrationData = CalibrationData,
             };
         }
     }

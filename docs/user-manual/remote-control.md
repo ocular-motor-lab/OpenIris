@@ -197,9 +197,11 @@ A calibration can be driven by the stimulus program when the **Calibration metho
    `CALIBRATION|FixStart:x,y`, with the position of the target, while the subject looks at it. Then
    it sends `CALIBRATION|FixStop`. Use `CALIBRATION|FixAbort` instead to discard that target (for
    example after a blink).
-3. When all targets are done, it sends `CALIBRATION|Complete`. OpenIris fits a linear transformation
-   from eye position to target position. Each target counts as one point: the median of the data
-   collected during it.
+3. When all targets are done, it sends `CALIBRATION|Complete`. OpenIris fits, for each eye, a linear
+   transformation from the eye signal to the target position. Each target counts as one point: the
+   median of the data collected during it. Give the targets in degrees, positive to the subject's
+   right and up: the calibrated horizontal and vertical positions (`H`, `V` in the data file) come
+   from the fit, in those units, from then on. The fit is saved in the `.cal` file.
 
 Other messages:
 
@@ -208,8 +210,10 @@ Other messages:
 | `SetSource:n` | Which signal is used as eye position. |
 | `SetRef:n` | Which signal is subtracted as reference. |
 
-For both, `n` is 0 = none, 1 = pupil, 2 to 5 = corneal reflection 1 to 4. The defaults are pupil
-for the source and the first corneal reflection for the reference.
+For both, `n` is 0 = none, 1 = pupil, 2 to 6 = corneal reflection 1 to 5. The defaults are pupil
+for the source and the first corneal reflection for the reference. For the pupil alone (a webcam),
+send `SetRef:0`; for dual Purkinje, the first reflection minus the one with the fourth Purkinje image
+(see [Calibration](calibration.md#which-method-to-use)).
 
 Each message replies `ack`, or an error message if it couldn't be understood. With no calibration in
 progress, messages are ignored and reply `ack`.

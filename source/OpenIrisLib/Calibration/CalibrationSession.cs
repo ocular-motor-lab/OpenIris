@@ -110,6 +110,10 @@ namespace OpenIris
                         calibrationParameters.EyeCalibrationParameters[Eye.Left].SetEyeModel(eyeModels[Eye.Left]);
                         calibrationParameters.EyeCalibrationParameters[Eye.Right].SetEyeModel(eyeModels[Eye.Right]);
 
+                        // What the calibration found beyond the eye model (the map of Remote Linear...).
+                        calibrationParameters.EyeCalibrationParameters[Eye.Left].CalibrationData = calibrationPipeline.GetCalibrationData(Eye.Left);
+                        calibrationParameters.EyeCalibrationParameters[Eye.Right].CalibrationData = calibrationPipeline.GetCalibrationData(Eye.Right);
+
                         return calibrationParameters;
                     }
                 }

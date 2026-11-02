@@ -34,9 +34,20 @@ reference, taken while the subject looks straight ahead.
   works when each camera faces its eye roughly straight on.
 - **Manual Calibration** is for when that assumption doesn't hold, for example when a camera sees
   the eye from the side or from below, or when you want to set the eye model precisely.
-- **Remote Linear** fits a transformation from eye position to target position, from targets shown
-  by a stimulus program. The fit is saved, but not applied to the data yet (#61). For calibrated
-  data, use Auto or Manual Calibration for now.
+- **Remote Linear** fits a linear transformation from the eye signal to the gaze angle, from
+  targets at known positions, shown by a stimulus program or by the
+  [web client](remote-control.md#full-screen-calibration-and-validation). It is the most accurate when the subject
+  can look at targets. The calibrated horizontal and vertical positions then come from that fit, and
+  it is saved in the `.cal` file with the rest of the calibration. Choose the eye signal in its
+  settings (**SignalSource** minus **SignalReference**):
+
+  | Setup | SignalSource | SignalReference |
+  | --- | --- | --- |
+  | Pupil minus corneal reflection (the default; less sensitive to the camera moving on the head) | Pupil | CR1 |
+  | Pupil alone, for example the webcam, which has no corneal reflections (the iris center) | Pupil | None |
+  | Dual Purkinje (DPI): first corneal reflection minus the fourth Purkinje image | CR1 | the reflection with the 4th image, for example CR5 |
+
+  The ready-made **Webcam** profile already uses the pupil alone.
 
 ### Calibrating with Auto
 

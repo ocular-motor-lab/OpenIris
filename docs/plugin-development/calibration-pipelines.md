@@ -116,8 +116,19 @@ images show the eye as someone facing the subject sees it, with y down.
   twice the iris radius, and takes that same frame as the reference. Enough when each camera faces
   its eye roughly straight on.
 - **Manual** lets the user set the eye model on the image, for cameras that see the eye at an angle.
-- **Remote Linear** fits a linear transformation from eye position to target position, but the fit
-  isn't applied to the data yet, and it sets no eye model (#61).
+- **Remote Linear** fits a linear transformation from the eye signal to the target positions
+  (`LinearGazeMap`), which then gives the horizontal and vertical positions instead of the eye model
+  (see below).
+
+## Calibration data beyond the eye model
+
+A calibration can produce more than the eye model and the reference: return it from
+`GetCalibrationData(eye)`, as an object of a class inheriting `EyeCalibrationData`. OpenIris keeps it
+in the calibration (and its `.cal` file, with its type), and for each frame tracked well calls its
+`Adjust(eyeData, fromEyeModel)` with the calibrated data computed from the eye model and the
+reference: return it changed as your calibration needs, replacing the angles (as `LinearGazeMap`
+does), correcting them, or anything else. The class must be serializable as XML (public properties,
+a constructor without parameters), and be in the same assembly as the calibration.
 
 A new calibration usually changes how the eye model is found (from several gaze positions, for
 example) and keeps the reference as Auto does: the first frame tracked well.

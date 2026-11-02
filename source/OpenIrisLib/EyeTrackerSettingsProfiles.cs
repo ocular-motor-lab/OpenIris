@@ -103,7 +103,18 @@ namespace OpenIris
         private static readonly (string name, string system, string pipeline, Action<EyeTrackerSettings> setUp)[] ReadyMadeProfiles =
         {
             ("Simulation", "Simulation", "JOM", s => { }),
-            ("Webcam", "Webcam", "Webcam iris", s => { }),
+            ("Webcam", "Webcam", "Webcam iris", s =>
+            {
+                // No corneal reflections with a webcam: Remote Linear fits the pupil (the iris center) alone.
+                s.CalibrationMethod = "Remote Linear";
+                if (s.CalibrationSettings is OpenIris.Calibration.CalibrationSettingsRemoteLinear remoteLinear)
+                {
+                    remoteLinear.SignalSource = OpenIris.Calibration.EyeSignalSource.Pupil;
+                    remoteLinear.SignalReference = OpenIris.Calibration.EyeSignalSource.None;
+                }
+
+                s.CalibrationMethod = "Auto";
+            }),
             ("Synthetic Eyes", "Synthetic Eyes", "JOM", s =>
             {
                 // The drawn iris is 80 pixels in radius, as a real one of 6 mm; the pupil is very dark.

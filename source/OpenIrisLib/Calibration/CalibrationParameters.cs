@@ -194,6 +194,7 @@ namespace OpenIris
                 data.HorizontalPosition = -(xDeg - referenceXDeg);
                 data.VerticalPosition = -(yDeg - referenceYDeg);
 
+
                 data.TorsionalPosition = eyeData.TorsionAngle;
 
                 if (double.IsNaN(eyeData.TorsionAngle))
@@ -232,6 +233,13 @@ namespace OpenIris
                 else
                 {
                     data.DataQuality = double.NaN;
+                }
+
+                // What the calibration found beyond the eye model (for example the map of Remote
+                // Linear) changes the data as that calibration needs.
+                if (calibrationInfo.CalibrationData is EyeCalibrationData calibrationData)
+                {
+                    data = calibrationData.Adjust(eyeData, data);
                 }
             }
 

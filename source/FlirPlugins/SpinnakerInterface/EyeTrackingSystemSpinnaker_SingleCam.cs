@@ -36,7 +36,8 @@ namespace SpinnakerInterface
                 camera: cameraList[0],
                 frameRate: (double)settings.FrameRate,
                 gain: (int)settings.Gain,
-                roi: new Rectangle { Width = 720, Height = 450 });
+                roi: new Rectangle { Width = 720, Height = 450 },
+                framesInBuffers: MaxFramesInBuffers);
                 
                 settings.CameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
 

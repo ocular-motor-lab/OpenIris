@@ -94,6 +94,14 @@ public class CameraEyeExample : CameraEye, IMovableImageEyeSource
 >   job, when it creates and starts the cameras.
 > - `FrameNumberRaw` is the camera's own counter. It does not need to match between cameras.
 
+> [!WARNING]
+> **Images that point to the camera's own memory.** For speed, an image can wrap the camera API's
+> buffer instead of copying the pixels (`new ImageEye(width, height, stride, pointer, timestamp)`, as
+> the Spinnaker plugin does). The camera then must not reuse that buffer while OpenIris still uses the
+> image: images wait in OpenIris' buffers before they are processed. Give the camera at least
+> `MaxFramesInBuffers` buffers (a property of the eye tracking system, set before
+> `CreateAndStartCameras`), plus a margin, or frames that wait get the pixels of later ones.
+
 Other optional members:
 
 - `ImageEye.ImageSourceData`: any object attached to an image (for example values the camera sends

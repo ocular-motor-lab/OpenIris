@@ -38,14 +38,16 @@ namespace SpinnakerInterface
                 camera: cameraList[0],
                 frameRate: (double)settings.FrameRate,
                 gain: (int)settings.Gain,
-                roi: new Rectangle { X=settings.LeftOffset.X, Y=settings.LeftOffset.Y, Width = settings.FrameWidth, Height = settings.FrameHeight });
+                roi: new Rectangle { X=settings.LeftOffset.X, Y=settings.LeftOffset.Y, Width = settings.FrameWidth, Height = settings.FrameHeight },
+                framesInBuffers: MaxFramesInBuffers);
 
                 rightEyeCamera = new CameraEyeSpinnaker(
                 whichEye: Eye.Right,
                 camera: cameraList[1],
                 frameRate: (double)settings.FrameRate,
                 gain: (int)settings.Gain,
-                roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = settings.FrameWidth, Height = settings.FrameHeight });
+                roi: new Rectangle { X = settings.RightOffset.X, Y = settings.RightOffset.Y, Width = settings.FrameWidth, Height = settings.FrameHeight },
+                framesInBuffers: MaxFramesInBuffers);
 
                 settings.LeftEyeCameraSerialNumber = cameraList[0].DeviceSerialNumber.ToString();
                 settings.RightEyeCameraSerialNumber = cameraList[1].DeviceSerialNumber.ToString();

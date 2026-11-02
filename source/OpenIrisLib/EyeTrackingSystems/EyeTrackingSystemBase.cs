@@ -40,6 +40,13 @@ namespace OpenIris
         public EyeTrackingSystemSettings Settings { get; private set; }
 
         /// <summary>
+        /// Gets the most frames from the cameras that OpenIris holds at once in its buffers (<see
+        /// cref="EyeTracker.MaxFramesInBuffers"/>), set before the cameras are created. Cameras that
+        /// give images without copying them need at least this many buffers of their own.
+        /// </summary>
+        public int MaxFramesInBuffers { get; internal set; }
+
+        /// <summary>
         /// Image sources (cameras or videos) of this eye tracking system.
         /// </summary>
         public EyeCollection<IImageEyeSource?>? imageSources;

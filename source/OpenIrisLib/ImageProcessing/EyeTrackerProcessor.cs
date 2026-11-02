@@ -78,6 +78,11 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Gets the most frames held at once: the input buffer, plus one being processed by each thread.
+        /// </summary>
+        internal int MaxFramesHeld => inputBufferSize + numberOfThreads;
+
+        /// <summary>
         /// Notifies listeners that a frame has been processed and new data is available.
         /// </summary>
         internal event EventHandler<EyeTrackerImagesAndData>? ImagesProcessed;

@@ -128,6 +128,13 @@ namespace OpenIris
         public EyeTrackerProcessor? ImageProcessor { get; private set; }
 
         /// <summary>
+        /// Gets the most frames from the cameras held at once in OpenIris' buffers: the grabber's
+        /// (shared by the cameras) and the processor's. Cameras that give images without copying them
+        /// need at least this many buffers, or they reuse the memory of images still waiting (#69).
+        /// </summary>
+        public int MaxFramesInBuffers => Settings.BufferSize + (ImageProcessor?.MaxFramesHeld ?? 0);
+
+        /// <summary>
         /// Head tracker
         /// </summary>
         public HeadTracker? HeadTracker { get; private set; }
@@ -252,6 +259,7 @@ namespace OpenIris
                     {
                         EyeTrackingSystem = EyeTrackingSystemBase.Create(Settings.EyeTrackerSystem, Settings.EyeTrackingSystemSettings);
                         ImageProcessor = new EyeTrackerProcessor(EyeTrackerProcessor.Mode.RealTime, EyeTrackingSystem, Settings.MaxNumberOfProcessingThreads, Settings.BufferSize);
+                        EyeTrackingSystem.MaxFramesInBuffers = MaxFramesInBuffers;
                         ImageGrabber = await EyeTrackerImageGrabber.CreateNewForCameras(EyeTrackingSystem, Settings.BufferSize);
                         HeadTracker = await HeadTracker.CreateNewForRealTime(EyeTrackingSystem);
                     }

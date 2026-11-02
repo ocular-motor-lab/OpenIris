@@ -131,7 +131,8 @@ namespace SpinnakerInterface
         #endregion Static Methods
 
         #region constructor
-        public CameraEyeSpinnaker(Eye whichEye, IManagedCamera camera, double frameRate, int gain, Rectangle roi)
+        /// <param name="framesInBuffers">Most frames OpenIris holds at once (EyeTrackingSystemBase.MaxFramesInBuffers).</param>
+        public CameraEyeSpinnaker(Eye whichEye, IManagedCamera camera, double frameRate, int gain, Rectangle roi, int framesInBuffers)
         {
             cam = camera;
 
@@ -139,6 +140,7 @@ namespace SpinnakerInterface
             FrameRate = frameRate;
             this.gain = gain;
             FrameSize = roi.Size;
+            streamBufferCount = framesInBuffers + StreamBufferMargin;
 
             isMaster = TriggerMode.Default;
             cam.Init();
@@ -305,7 +307,13 @@ namespace SpinnakerInterface
         /// </summary>
         private bool roiChunks;
 
-        private const int StreamBufferCount = 250;
+        /// <summary>
+        /// Stream buffers beyond the frames OpenIris holds: frames Spinnaker filled that aren't taken
+        /// yet, waiting for the other camera's frame, and waiting to be put back in order after processing.
+        /// </summary>
+        private const int StreamBufferMargin = 20;
+
+        private readonly int streamBufferCount;
 
         private void InitParameters()
         {
@@ -341,15 +349,22 @@ namespace SpinnakerInterface
 
             maxGain = cam.Gain.Max;
 
-            // Many more stream buffers than Spinnaker's default (about 10). The images given to
+            // As many stream buffers as frames OpenIris can hold, plus a margin. The images given to
             // OpenIris point to these buffers, without a copy, and Spinnaker fills each buffer again
-            // after going through all the others. With the default, a frame waiting more than about
-            // 20 ms at 450 Hz (in the grabber or processing queues) got the pixels of a later frame.
-            // These cover both queues (100 frames each by default) with some margin (see #69).
+            // after going through all the others. With Spinnaker's default (about 10), a frame waiting
+            // more than about 20 ms at 450 Hz (in the grabber or processing queues) got the pixels of
+            // a later frame (#69).
             try
             {
                 cam.TLStream.StreamBufferCountMode.FromString("Manual");
-                cam.TLStream.StreamBufferCountManual.Value = Math.Min(StreamBufferCount, cam.TLStream.StreamBufferCountManual.Max);
+                var max = cam.TLStream.StreamBufferCountManual.Max;
+                if (streamBufferCount > max)
+                {
+                    Trace.WriteLine($"WARNING: OpenIris can hold {streamBufferCount - StreamBufferMargin} frames (BufferSize), more than the {max} buffers " +
+                        $"of the {WhichEye} camera: frames waiting too long can get the pixels of later frames. Make BufferSize smaller.");
+                }
+                cam.TLStream.StreamBufferCountManual.Value = Math.Min(streamBufferCount, max);
+                Trace.WriteLine($"Spinnaker: {cam.TLStream.StreamBufferCountManual.Value} stream buffers for the {WhichEye} camera.");
             }
             catch (SpinnakerException ex)
             {

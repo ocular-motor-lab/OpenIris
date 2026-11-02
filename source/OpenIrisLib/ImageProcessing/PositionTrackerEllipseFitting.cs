@@ -449,7 +449,7 @@ namespace OpenIris.ImageProcessing
 
             if (ELLIPSE_FITTING_DO_HEURISTIC_INTERPOLATION)
             {
-                // This can distort the pupil, especially far from the reference position (see #73).
+                // This can distort the pupil, especially far from the reference position (see #77).
 
                 var boundingBox = pupilCountour.GetCountourBoundingBox();
 

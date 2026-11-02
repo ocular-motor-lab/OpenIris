@@ -52,6 +52,30 @@ namespace OpenIris.Tests
                 $"reflection {Noise(withReflection, d => d.CornealReflections[0].Center.X):0.000} {Noise(withReflection, d => d.CornealReflections[0].Center.Y):0.000}, " +
                 $"pupil - reflection {Noise(withReflection, d => d.Pupil.Center.X - d.CornealReflections[0].Center.X):0.000} {Noise(withReflection, d => d.Pupil.Center.Y - d.CornealReflections[0].Center.Y):0.000}");
             ReportTorsion(good, truthIsZero: false);
+            ReportTorsionSteady(data, data[PipelineHarness.SampleVideoReference].Pupil.Center);
+        }
+
+        /// <summary>
+        /// Torsion noise where it can be trusted without knowing the truth: frame-to-frame
+        /// differences, leaving out frames near a blink (3 frames around one not tracked), with the
+        /// pupil more than 2 mm from the reference, and differences over 1° (saccades).
+        /// </summary>
+        private void ReportTorsionSteady(List<EyeData> data, PointF reference)
+        {
+            var maxDistance = 2 / PipelineHarness.SampleVideoMmPerPix;
+            bool Steady(int i) =>
+                Enumerable.Range(i - 3, 7).All(j => j < 0 || j >= data.Count || data[j].ProcessFrameResult == ProcessFrameResult.Good) &&
+                Math.Sqrt(Math.Pow(data[i].Pupil.Center.X - reference.X, 2) + Math.Pow(data[i].Pupil.Center.Y - reference.Y, 2)) < maxDistance &&
+                !double.IsNaN(data[i].TorsionAngle);
+
+            var differences = Enumerable.Range(1, data.Count - 1)
+                .Where(i => Steady(i) && Steady(i - 1))
+                .Select(i => data[i].TorsionAngle - data[i - 1].TorsionAngle)
+                .Where(d => Math.Abs(d) < 1)
+                .ToArray();
+            if (differences.Length == 0) return;
+            var noise = Math.Sqrt(differences.Average(d => d * d) / 2);
+            TestContext.WriteLine($"  Torsion steady (°): frame-to-frame noise {noise:0.000} ({differences.Length} pairs: no blinks, pupil within 2 mm of the reference, jumps under 1°)");
         }
 
         /// <summary>
@@ -75,6 +99,62 @@ namespace OpenIris.Tests
             TestContext.WriteLine($"  Pupil (px): accuracy {Mean(pupil, p => p.X):0.000} {Mean(pupil, p => p.Y):0.000}, precision {Sd(pupil, p => p.X):0.000} {Sd(pupil, p => p.Y):0.000}");
             TestContext.WriteLine($"  Reflection (px): accuracy {Mean(reflection, p => p.X):0.000} {Mean(reflection, p => p.Y):0.000}, precision {Sd(reflection, p => p.X):0.000} {Sd(reflection, p => p.Y):0.000}");
             ReportTorsion(good, truthIsZero: true);
+        }
+
+        /// <summary>
+        /// Torsion against known rotations, with the real iris of the sample video: each frame is
+        /// also rotated around its pupil by a known angle (up to ±5°), and the difference between
+        /// the two measurements should be that angle. The eye's own torsion is in both, so it
+        /// cancels. Gain is the slope of measured against applied (1 is perfect).
+        /// </summary>
+        [DataTestMethod]
+        [TestCategory("Measurement")]
+        [DataRow(Eye.Left)]
+        [DataRow(Eye.Right)]
+        public void SampleVideoRotated(Eye eye)
+        {
+            const int frames = 300;
+            var plain = PipelineHarness.RunSampleVideo("JOM", eye, frames);
+            var random = new Random(1);
+            var angles = Enumerable.Range(0, plain.Count).Select(_ => random.NextDouble() * 10 - 5).ToArray();
+
+            var rotatedFrames = PipelineHarness.ReadVideo(PipelineHarness.SampleVideo(eye), eye, plain.Count)
+                .Select((frame, i) => Rotate(frame, plain[i].Pupil.Center, angles[i]));
+            var rotated = PipelineHarness.Run("JOM", eye, rotatedFrames, PipelineHarness.SampleVideoMmPerPix, eyeModelFromReference: true,
+                reference: PipelineHarness.ReadFrame(PipelineHarness.SampleVideo(eye), eye, PipelineHarness.SampleVideoReference),
+                configure: PipelineHarness.Thresholds(PipelineHarness.SampleVideoDarkThreshold));
+
+            var pairs = Enumerable.Range(0, plain.Count)
+                .Where(i => plain[i].ProcessFrameResult == ProcessFrameResult.Good && rotated[i].ProcessFrameResult == ProcessFrameResult.Good)
+                .Select(i => (applied: angles[i], measured: rotated[i].TorsionAngle - plain[i].TorsionAngle))
+                .Where(p => !double.IsNaN(p.measured))
+                .ToArray();
+            Assert.IsTrue(pairs.Length > 1, "No torsion measured.");
+
+            // Torsion is positive clockwise from the subject, and rotating the image counterclockwise
+            // (OpenCV's positive angles) is... whichever sign the gain says.
+            var gain = pairs.Sum(p => p.applied * p.measured) / pairs.Sum(p => p.applied * p.applied);
+            var errors = pairs.Select(p => p.measured - Math.Sign(gain) * p.applied).ToArray();
+            var mean = errors.Average();
+            var sd = Math.Sqrt(errors.Average(e => (e - mean) * (e - mean)));
+            TestContext.WriteLine($"Sample video {eye} rotated: {pairs.Length}/{plain.Count} frames measured");
+            TestContext.WriteLine($"  Torsion (°): gain {gain:0.000}, accuracy {mean:0.000}, precision {sd:0.000}, " +
+                $"max |error| {errors.Max(Math.Abs):0.000}, errors over 0.5° {errors.Count(e => Math.Abs(e) > 0.5)}");
+        }
+
+        /// <summary>
+        /// Rotates a frame around a point (OpenCV's positive angles: counterclockwise in the image).
+        /// </summary>
+        private static ImageEye Rotate(ImageEye frame, PointF center, double angle)
+        {
+            using (frame)
+            {
+                using var matrix = new Emgu.CV.Mat();
+                Emgu.CV.CvInvoke.GetRotationMatrix2D(center, angle, 1, matrix);
+                var image = new Emgu.CV.Image<Emgu.CV.Structure.Gray, byte>(frame.Image.Size);
+                Emgu.CV.CvInvoke.WarpAffine(frame.Image, image, matrix, frame.Image.Size, Emgu.CV.CvEnum.Inter.Cubic, Emgu.CV.CvEnum.Warp.Default, Emgu.CV.CvEnum.BorderType.Replicate);
+                return new ImageEye(image, frame.WhichEye, frame.TimeStamp, null) { Roi = frame.Roi };
+            }
         }
 
         private void ReportTorsion(EyeData?[] good, bool truthIsZero)

@@ -262,7 +262,7 @@ namespace OpenIris
                 points[i].X = (int)Math.Round(Math.Cos(theta) * data.Iris.Radius);
                 points[i].Y = (int)Math.Round(Math.Sin(theta) * data.Iris.Radius);
 
-                // Needs checking (see #73).
+                // With an eye model, the circle is tilted with the eye, as the iris on the globe.
                 if (!eyeModel.IsEmpty)
                 {
                     points[i] = RotatePoint(points[i], eyeModel, data.Pupil.Center);

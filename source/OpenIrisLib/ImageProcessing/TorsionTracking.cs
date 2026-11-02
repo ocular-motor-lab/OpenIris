@@ -170,8 +170,11 @@ namespace OpenIris.ImageProcessing
                 CvInvoke.Sobel(imageEyePolar, imageEyePolar, Emgu.CV.CvEnum.DepthType.Cv32F, 0, 1, (int)Math.Min(31, (torsionSobelFilterSize * torsionAngularResolution) + 1));
                 EyeTrackerDebug.AddImage("torsion2", imageEye.WhichEye, imageEyePolar);
 
-                // Apply the zero mask and add saturations to keep the range symmetric around zero
-                // Doesn't suit every size of Sobel filter (see #73).
+                // To bytes: the conversion sets the negative gradients to 0, so this keeps the positive
+                // ones up to 100, a near-binary edge map. It looks like a bug, but strong edges
+                // (eyelashes, eyelids) can't dominate the correlation: keeping both signs, scaled to
+                // the iris's standard deviation, was no better on the sample videos, and noisier with
+                // a wider range (#73). Measure with TrackingMeasurementTests before changing it.
                 var imageTorsion = imageEyePolar.Max(-100).Min(100).Convert<Gray, byte>();
                 EyeTrackerDebug.AddImage("torsion3", imageEye.WhichEye, imageTorsion);
 

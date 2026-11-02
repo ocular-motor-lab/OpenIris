@@ -85,9 +85,10 @@ namespace OpenIris.UI
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.linkLabelDataFolder2 = new System.Windows.Forms.LinkLabel();
             this.panel5 = new System.Windows.Forms.Panel();
-            this.systemComboBox = new System.Windows.Forms.ComboBox();
+            this.profileComboBox = new System.Windows.Forms.ComboBox();
             this.buttonStartTracking = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
+            this.labelProfileSystem = new System.Windows.Forms.Label();
             this.buttonPlayVideo = new System.Windows.Forms.Button();
             this.buttonProcessVideo = new System.Windows.Forms.Button();
             this.tabSetup = new System.Windows.Forms.TabPage();
@@ -537,9 +538,10 @@ namespace OpenIris.UI
             // panel5
             // 
             this.panel5.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.panel5.Controls.Add(this.systemComboBox);
+            this.panel5.Controls.Add(this.profileComboBox);
             this.panel5.Controls.Add(this.buttonStartTracking);
             this.panel5.Controls.Add(this.label5);
+            this.panel5.Controls.Add(this.labelProfileSystem);
             this.panel5.Controls.Add(this.buttonPlayVideo);
             this.panel5.Controls.Add(this.buttonProcessVideo);
             this.panel5.Location = new System.Drawing.Point(616, 184);
@@ -548,14 +550,15 @@ namespace OpenIris.UI
             this.panel5.Size = new System.Drawing.Size(373, 289);
             this.panel5.TabIndex = 3;
             // 
-            // systemComboBox
+            // profileComboBox
             // 
-            this.systemComboBox.FormattingEnabled = true;
-            this.systemComboBox.Location = new System.Drawing.Point(4, 89);
-            this.systemComboBox.Margin = new System.Windows.Forms.Padding(4);
-            this.systemComboBox.Name = "systemComboBox";
-            this.systemComboBox.Size = new System.Drawing.Size(362, 26);
-            this.systemComboBox.TabIndex = 42;
+            this.profileComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.profileComboBox.FormattingEnabled = true;
+            this.profileComboBox.Location = new System.Drawing.Point(4, 89);
+            this.profileComboBox.Margin = new System.Windows.Forms.Padding(4);
+            this.profileComboBox.Name = "profileComboBox";
+            this.profileComboBox.Size = new System.Drawing.Size(362, 26);
+            this.profileComboBox.TabIndex = 42;
             // 
             // buttonStartTracking
             // 
@@ -575,7 +578,18 @@ namespace OpenIris.UI
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(151, 18);
             this.label5.TabIndex = 2;
-            this.label5.Text = "Eyetracking System : ";
+            this.label5.Text = "Profile:";
+            // 
+            // labelProfileSystem
+            // 
+            this.labelProfileSystem.AutoEllipsis = true;
+            this.labelProfileSystem.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.labelProfileSystem.Location = new System.Drawing.Point(70, 67);
+            this.labelProfileSystem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelProfileSystem.Name = "labelProfileSystem";
+            this.labelProfileSystem.Size = new System.Drawing.Size(296, 18);
+            this.labelProfileSystem.TabIndex = 43;
+            this.labelProfileSystem.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // buttonPlayVideo
             // 
@@ -1485,6 +1499,7 @@ namespace OpenIris.UI
         private System.Windows.Forms.Button buttonProcessVideo;
         private System.Windows.Forms.Button buttonPlayVideo;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label labelProfileSystem;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Panel panelHeadViewer;
         private System.Windows.Forms.Label labelHeadData;
@@ -1519,7 +1534,7 @@ namespace OpenIris.UI
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private OpenIris.UI.DebugImagesPanel panel6;
         private System.Windows.Forms.ToolStripMenuItem systemToolStripMenuItem;
-        private System.Windows.Forms.ComboBox systemComboBox;
+        private System.Windows.Forms.ComboBox profileComboBox;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.LinkLabel linkLabelDataFolder2;
         private System.Windows.Forms.SplitContainer splitContainer2;

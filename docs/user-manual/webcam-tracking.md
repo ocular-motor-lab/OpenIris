@@ -26,9 +26,8 @@ and the iris diameter for the pupil size, in the data file.
 1. Connect the webcam and place it below or above the screen, facing the subject, about 50–70 cm
    away. The face should fill a good part of the image: the more pixels on the eyes, the better.
 2. Light the face evenly from the front. Avoid a bright window behind the subject.
-3. In the [configuration](configuration.md), choose:
-   - **Eye tracking system**: `Webcam`
-   - **Tracking pipeline**: `Webcam iris`
+3. Select the **Webcam** [profile](configuration.md#settings-profiles) on the main window. It uses
+   the `Webcam` eye tracking system and the `Webcam iris` pipeline.
 4. Start tracking. The two eye images appear once the face is found, with the iris circle and the
    eyelids drawn on them.
 

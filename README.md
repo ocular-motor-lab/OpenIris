@@ -23,7 +23,7 @@ To quickly install and check OpenIris features, download [the latest version of 
 - Download the release zip file in the desired directory
 - Unzip the folder
 - Inside the release folder, open the openiris.exe file
-- The openiris main window will open. Select "Simulation" from the "Eye Tracking System" menu (default option) and hit Start Tracking.
+- The openiris main window will open. Select the "Simulation" profile (the default) and hit Start Tracking.
 - The default pupil, corneal reflection, and torsion tracking pipeline will start.
 
 This is just an example video. To explore all the great features of OpenIris, please read the [documentation](https://omlab.berkeley.edu/OpenIris/).

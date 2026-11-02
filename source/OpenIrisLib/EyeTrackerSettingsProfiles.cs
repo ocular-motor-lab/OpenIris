@@ -86,9 +86,96 @@ namespace OpenIris
         private string ProfileFile(string name) => Path.Combine(ProfilesFolder, name + ".xml");
 
         /// <summary>
-        /// Loads the settings from the folder OpenIris starts in: the active profile and the shared settings.
+        /// Loads the settings from the folder OpenIris starts in: the active profile and the shared
+        /// settings. It also adds the ready-made profiles not added before.
         /// </summary>
-        public static EyeTrackerSettings Load() => LoadFromFolder(Directory.GetCurrentDirectory());
+        public static EyeTrackerSettings Load()
+        {
+            var settings = LoadFromFolder(Directory.GetCurrentDirectory());
+            settings.AddReadyMadeProfiles();
+            return settings;
+        }
+
+        /// <summary>
+        /// Profiles that come with OpenIris, as starting points: name, eye tracking system, tracking
+        /// pipeline, and how they differ from its default settings.
+        /// </summary>
+        private static readonly (string name, string system, string pipeline, Action<EyeTrackerSettings> setUp)[] ReadyMadeProfiles =
+        {
+            ("Simulation", "Simulation", "JOM", s => { }),
+            ("Webcam", "Webcam", "Webcam iris", s => { }),
+            ("Synthetic Eyes", "Synthetic Eyes", "JOM", s =>
+            {
+                // The drawn iris is 80 pixels in radius, as a real one of 6 mm; the pupil is very dark.
+                s.EyeTrackingSystemSettings.PixPerMm = 80 / 6.0;
+                if (s.TrackingPipelineSettings is EyeTrackingPipelineJOMSettings jom) jom.DarkThresholdLeftEye = jom.DarkThresholdRightEye = 40;
+            }),
+            ("Spinnaker Dual Camera", "Spinnaker Dual Camera", "JOM", s =>
+            {
+                s.EyeTrackingSystemSettings.FrameRate = 500;
+                if (s.TrackingPipelineSettings is EyeTrackingPipelineJOMSettings jom) jom.CalculateTorsion = false;
+            }),
+            ("Spinnaker Dual Camera torsion", "Spinnaker Dual Camera", "JOM", s =>
+            {
+                s.EyeTrackingSystemSettings.FrameRate = 250;
+                if (s.TrackingPipelineSettings is EyeTrackingPipelineJOMSettings jom) jom.CalculateTorsion = true;
+            }),
+        };
+
+        /// <summary>
+        /// Whether these are the default settings of a new installation, not read from any file.
+        /// </summary>
+        private bool newInstallation;
+
+        /// <summary>
+        /// Ready-made profiles already added (saved in OpenIrisSettings.xml), so they are added once:
+        /// one that was deleted doesn't come back.
+        /// </summary>
+        private List<string> readyMadeProfilesAdded = new List<string>();
+
+        /// <summary>
+        /// Adds the ready-made profiles not added before whose eye tracking system and pipeline are
+        /// installed. A profile with the same name stays as it is. In a new installation, the active
+        /// profile becomes Simulation (the default settings) instead of Default.
+        /// </summary>
+        public void AddReadyMadeProfiles()
+        {
+            var systems = EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.Select(c => c.Name).ToList() ?? new List<string>();
+            var pipelines = EyeTrackerPluginManager.EyeTrackingPipelineFactory?.ClassesAvaiable.Select(c => c.Name).ToList() ?? new List<string>();
+            var changed = false;
+
+            if (newInstallation && EyeTrackerSystem == ReadyMadeProfiles[0].system)
+            {
+                Profile = ReadyMadeProfiles[0].name;
+                newInstallation = false;
+                changed = true;
+            }
+
+            foreach (var (name, system, pipeline, setUp) in ReadyMadeProfiles)
+            {
+                if (readyMadeProfilesAdded.Contains(name, StringComparer.OrdinalIgnoreCase)) continue;
+
+                // Not installed (yet): added if it is installed later.
+                if (!systems.Contains(system) || !pipelines.Contains(pipeline)) continue;
+
+                if (!Profiles.Contains(name, StringComparer.OrdinalIgnoreCase))
+                {
+                    var settings = new EyeTrackerSettings { EyeTrackerSystem = system, EyeTrackingPipeline = pipeline };
+                    setUp(settings);
+                    WriteProfile(name, settings);
+                    Trace.WriteLine($"Added the ready-made settings profile '{name}'.");
+                }
+
+                readyMadeProfilesAdded.Add(name);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                Save();
+                OnPropertyChanged(this, nameof(Profiles));
+            }
+        }
 
         /// <summary>
         /// Loads the settings from a folder: a profile and the shared settings. The first time, the
@@ -123,6 +210,8 @@ namespace OpenIris
                 settings.SetSharedValues(shared);
             }
 
+            settings.readyMadeProfilesAdded = shared?.ReadyMadeProfilesAdded ?? new List<string>();
+
             settings.folder = folder;
             Trace.WriteLine($"Settings profile '{settings.Profile}'.");
             return settings;
@@ -137,11 +226,7 @@ namespace OpenIris
 
             try
             {
-                Directory.CreateDirectory(ProfilesFolder);
-                using (var file = new StreamWriter(ProfileFile(Profile)))
-                {
-                    ProfileSerializer().Serialize(file, this);
-                }
+                WriteProfile(Profile, this);
 
                 var serializer = new XmlSerializer(typeof(SharedSettingsFile));
                 using (var file = new StreamWriter(Path.Combine(folder, FileName)))
@@ -193,6 +278,35 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Creates a profile with the default settings of an eye tracking system. It doesn't become
+        /// the active one.
+        /// </summary>
+        /// <param name="name">Name of the new profile.</param>
+        /// <param name="eyeTrackerSystem">Eye tracking system of the new profile.</param>
+        public void CreateProfile(string name, string eyeTrackerSystem)
+        {
+            CheckNewProfileName(name);
+
+            WriteProfile(name.Trim(), new EyeTrackerSettings { EyeTrackerSystem = eyeTrackerSystem });
+            OnPropertyChanged(this, nameof(Profiles));
+        }
+
+        /// <summary>
+        /// Makes a copy of a profile with another name. It doesn't become the active one.
+        /// </summary>
+        public void DuplicateProfile(string name, string newName)
+        {
+            if (!Profiles.Contains(name, StringComparer.OrdinalIgnoreCase)) throw new ArgumentException($"There is no settings profile '{name}'.");
+            CheckNewProfileName(newName);
+
+            // The active profile may have changes that aren't in its file yet.
+            if (string.Equals(name, Profile, StringComparison.OrdinalIgnoreCase)) Save();
+
+            File.Copy(ProfileFile(name), ProfileFile(newName.Trim()));
+            OnPropertyChanged(this, nameof(Profiles));
+        }
+
+        /// <summary>
         /// Renames a profile.
         /// </summary>
         public void RenameProfile(string name, string newName)
@@ -225,6 +339,13 @@ namespace OpenIris
             OnPropertyChanged(this, nameof(Profiles));
         }
 
+        private void WriteProfile(string name, EyeTrackerSettings settings)
+        {
+            Directory.CreateDirectory(ProfilesFolder);
+            using var file = new StreamWriter(ProfileFile(name));
+            ProfileSerializer().Serialize(file, settings);
+        }
+
         private void CheckNewProfileName(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("The name of the profile is empty.");
@@ -251,7 +372,7 @@ namespace OpenIris
             }
 
             Trace.WriteLine("No settings yet, using the default settings.");
-            return new EyeTrackerSettings();
+            return new EyeTrackerSettings { newInstallation = true };
         }
 
         private static string? RootElement(string file)
@@ -332,6 +453,7 @@ namespace OpenIris
         private SharedSettingsFile GetSharedValues() => new SharedSettingsFile
         {
             ActiveProfile = Profile,
+            ReadyMadeProfilesAdded = readyMadeProfilesAdded,
             Settings = SharedProperties
                 .Select(p => new SharedSettingsFile.Setting { Name = p.Name, Value = TypeDescriptor.GetConverter(p.PropertyType).ConvertToInvariantString(p.GetValue(this)) ?? string.Empty })
                 .ToList(),
@@ -412,6 +534,13 @@ namespace OpenIris
         [XmlArray("SharedSettings")]
         [XmlArrayItem("Setting")]
         public List<Setting> Settings { get; set; } = new List<Setting>();
+
+        /// <summary>
+        /// Names of the ready-made profiles already added, so each is added once.
+        /// </summary>
+        [XmlArray("ReadyMadeProfilesAdded")]
+        [XmlArrayItem("Profile")]
+        public List<string> ReadyMadeProfilesAdded { get; set; } = new List<string>();
 
         /// <summary>
         /// One shared setting.

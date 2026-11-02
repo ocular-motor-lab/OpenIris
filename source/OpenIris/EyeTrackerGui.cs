@@ -162,7 +162,6 @@ namespace OpenIris.UI
                 eyeTrackerUICommands.StartTrackingCommand.Bind(buttonStartTracking);
 
                 eyeTrackerUICommands.EditSettingsCommand.Bind(configurationToolStripMenuItem);
-                AddSettingsProfilesMenu();
 
                 //eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
                 //eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
@@ -221,17 +220,24 @@ namespace OpenIris.UI
                 KeyPress += (o, e) => eyeTracker.RecordEvent("KEYPRESS", e.KeyChar);
 
                 //
-                // Update system combo box
+                // Profile combo box: switches between the settings profiles, each with its eye
+                // tracking system, pipeline and settings (managed in the configuration window).
                 //
-                var availableSystems = EyeTrackerPluginManager.EyeTrackingsyStemFactory.ClassesAvaiable.Select(x => x.Name).ToArray();
-                Array.Sort(availableSystems);
+                UpdateProfileComboBox();
+                profileComboBox.SelectionChangeCommitted += (o, e) =>
+                {
+                    if (!(profileComboBox.SelectedItem is string profile) || profile == eyeTracker.Settings.Profile) return;
 
-                systemComboBox.DataSource = availableSystems;
-                systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
-                settings.PropertyChanged += (o, e) => { 
-                    if (e.PropertyName == nameof(settings.EyeTrackerSystem))
-                        systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem); };
-                systemComboBox.SelectedIndexChanged += (o, e) => { settings.EyeTrackerSystem = availableSystems[systemComboBox.SelectedIndex]; };
+                    try
+                    {
+                        eyeTracker.SwitchSettingsProfile(profile);
+                    }
+                    catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException || ex is System.IO.IOException)
+                    {
+                        MessageBox.Show(this, ex.Message, "Settings profile", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        UpdateProfileComboBox();
+                    }
+                };
 
 
                 // Enable UI timer for updates
@@ -267,8 +273,7 @@ namespace OpenIris.UI
                         tabPages.TabPages.Add(tabPageLog);
 
                         tabPages.SelectedTab = tabPageStart;
-                        systemComboBox.SelectedIndex = systemComboBox.FindStringExact(settings.EyeTrackerSystem);
-                        systemComboBox.Enabled = eyeTracker.NotStarted;
+                        profileComboBox.Enabled = eyeTracker.NotStarted;
                         pipelineUI = null;
                     }
                 }
@@ -352,68 +357,20 @@ namespace OpenIris.UI
         private void UpdateTitle() => Text = $"OpenIris - {eyeTracker.Settings.Profile}";
 
         /// <summary>
-        /// The Settings profile menu, after Configuration: the profiles, to switch between them, and
-        /// to save, rename or delete them.
+        /// Shows the profiles, with the active one selected, and the eye tracking system of the active one.
         /// </summary>
-        private void AddSettingsProfilesMenu()
+        private void UpdateProfileComboBox()
         {
-            var menu = new ToolStripMenuItem("Settings profile");
-            fileToolStripMenuItem.DropDownItems.Insert(fileToolStripMenuItem.DropDownItems.IndexOf(configurationToolStripMenuItem) + 1, menu);
-            menu.DropDownItems.Add(new ToolStripMenuItem("(empty)"));
-
-            void Try(Action action)
+            var settings = eyeTracker.Settings;
+            var profiles = settings.Profiles;
+            if (!profileComboBox.Items.Cast<string>().SequenceEqual(profiles))
             {
-                try
-                {
-                    action();
-                }
-                catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException || ex is System.IO.IOException)
-                {
-                    MessageBox.Show(this, ex.Message, "Settings profile", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                profileComboBox.Items.Clear();
+                profileComboBox.Items.AddRange(profiles);
             }
 
-            menu.DropDownOpening += (o, e) =>
-            {
-                var settings = eyeTracker.Settings;
-                menu.DropDownItems.Clear();
-                foreach (var profile in settings.Profiles)
-                {
-                    var item = new ToolStripMenuItem(profile)
-                    {
-                        Checked = profile == settings.Profile,
-                        Enabled = eyeTracker.NotStarted || profile == settings.Profile,
-                        ToolTipText = eyeTracker.NotStarted ? null : "Stop tracking to switch profiles.",
-                    };
-                    item.Click += (_, __) => Try(() => eyeTracker.SwitchSettingsProfile(profile));
-                    menu.DropDownItems.Add(item);
-                }
-
-                menu.DropDownItems.Add(new ToolStripSeparator());
-                menu.DropDownItems.Add("Save as new profile ...", null, (_, __) =>
-                {
-                    var name = TextInputDialog.Show(this, "Save as new profile", "Name of the new profile, with the current settings:");
-                    if (name != null) Try(() => settings.SaveProfileAs(name));
-                });
-                menu.DropDownItems.Add("Rename this profile ...", null, (_, __) =>
-                {
-                    var name = TextInputDialog.Show(this, "Rename profile", $"New name of the profile '{settings.Profile}':", settings.Profile);
-                    if (name != null) Try(() => settings.RenameProfile(settings.Profile, name));
-                });
-                var delete = new ToolStripMenuItem("Delete profile");
-                foreach (var profile in settings.Profiles.Where(p => p != settings.Profile))
-                {
-                    delete.DropDownItems.Add(profile, null, (_, __) =>
-                    {
-                        if (MessageBox.Show(this, $"Delete the settings profile '{profile}'?", "Delete profile", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
-                        {
-                            Try(() => settings.DeleteProfile(profile));
-                        }
-                    });
-                }
-                delete.Enabled = delete.DropDownItems.Count > 0;
-                menu.DropDownItems.Add(delete);
-            };
+            profileComboBox.SelectedItem = settings.Profile;
+            labelProfileSystem.Text = $"System: {settings.EyeTrackerSystem}";
         }
 
         private void EyeTracker_Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -421,6 +378,12 @@ namespace OpenIris.UI
             if (e.PropertyName == nameof(EyeTrackerSettings.Profile))
             {
                 BeginInvoke(new Action(UpdateTitle));
+            }
+
+            if (e.PropertyName == nameof(EyeTrackerSettings.Profile) || e.PropertyName == nameof(EyeTrackerSettings.Profiles)
+                || e.PropertyName == nameof(EyeTrackerSettings.EyeTrackerSystem))
+            {
+                BeginInvoke(new Action(UpdateProfileComboBox));
             }
 
             // Check if the property that changed was SessionName
@@ -445,8 +408,7 @@ namespace OpenIris.UI
         {
             if (eyeTracker.Tracking is false)
             {
-                systemComboBox.SelectedIndex = systemComboBox.FindStringExact(eyeTracker.Settings.EyeTrackerSystem);
-                systemComboBox.Enabled = eyeTracker.NotStarted;
+                profileComboBox.Enabled = eyeTracker.NotStarted;
                 pipelineUI = null;
             }
         }

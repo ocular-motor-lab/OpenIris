@@ -181,7 +181,7 @@ namespace OpenIris
                 canExecute: () => !eyeTracker.Calibrating);
 
             EditSettingsCommand = new EyeTrackerUICommand(
-                execute: async _ => EyeTrackerSettingsForm.Show(eyeTracker.Settings),
+                execute: async _ => EyeTrackerSettingsForm.Show(eyeTracker),
                 canExecute: () => true);
 
             StartCancelCalibrationCommand = new EyeTrackerUICommand(

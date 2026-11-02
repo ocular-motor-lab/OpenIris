@@ -124,5 +124,82 @@ namespace OpenIris.Tests
 
             Assert.AreEqual("Webcam pilot", EyeTrackerSettings.LoadFromFolder(folder).Profile);
         }
+
+        /// <summary>
+        /// A new installation gets the ready-made profiles of the systems that are installed (here only
+        /// Simulation: the tests don't load the plugins), and starts with Simulation. They are added
+        /// only that first time, so a deleted one doesn't come back.
+        /// </summary>
+        [TestMethod]
+        public void NewInstallationGetsTheReadyMadeProfiles()
+        {
+            var previousFolder = Directory.GetCurrentDirectory();
+            try
+            {
+                Directory.SetCurrentDirectory(folder);
+
+                var settings = EyeTrackerSettings.Load();
+                Assert.AreEqual("Simulation", settings.Profile);
+                CollectionAssert.AreEqual(new[] { "Simulation" }, settings.Profiles, "Only the profiles of the installed systems.");
+
+                settings.SaveProfileAs("Mine");
+                settings.DeleteProfile("Simulation");
+
+                var again = EyeTrackerSettings.Load();
+                Assert.AreEqual("Mine", again.Profile);
+                CollectionAssert.AreEqual(new[] { "Mine" }, again.Profiles, "Not added again.");
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(previousFolder);
+            }
+        }
+
+        /// <summary>
+        /// An installation that already has profiles (such as Default, from an older version) also
+        /// gets the ready-made ones, once, keeping its active profile.
+        /// </summary>
+        [TestMethod]
+        public void ExistingInstallationGetsTheReadyMadeProfilesOnce()
+        {
+            var existing = EyeTrackerSettings.LoadFromFolder(folder);
+            existing.SessionName = "Mine";
+            existing.Save();
+
+            var previousFolder = Directory.GetCurrentDirectory();
+            try
+            {
+                Directory.SetCurrentDirectory(folder);
+
+                var settings = EyeTrackerSettings.Load();
+                Assert.AreEqual(EyeTrackerSettings.DefaultProfileName, settings.Profile, "The active profile stays.");
+                Assert.AreEqual("Mine", settings.SessionName);
+                CollectionAssert.AreEqual(new[] { "Default", "Simulation" }, settings.Profiles);
+
+                settings.DeleteProfile("Simulation");
+                CollectionAssert.AreEqual(new[] { "Default" }, EyeTrackerSettings.Load().Profiles, "A deleted ready-made profile doesn't come back.");
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(previousFolder);
+            }
+        }
+
+        [TestMethod]
+        public void ProfilesCanBeCreatedAndDuplicated()
+        {
+            var settings = EyeTrackerSettings.LoadFromFolder(folder);
+            settings.SessionName = "Unsaved change";
+
+            settings.DuplicateProfile(EyeTrackerSettings.DefaultProfileName, "Copy");
+            settings.CreateProfile("Fresh", "Simulation");
+            Assert.ThrowsException<ArgumentException>(() => settings.DuplicateProfile("Copy", "fresh"));
+            Assert.ThrowsException<ArgumentException>(() => settings.CreateProfile("COPY", "Simulation"));
+
+            Assert.AreEqual(EyeTrackerSettings.DefaultProfileName, settings.Profile, "New profiles don't become the active one.");
+            CollectionAssert.AreEqual(new[] { "Copy", "Default", "Fresh" }, settings.Profiles);
+            Assert.AreEqual("Unsaved change", EyeTrackerSettings.LoadFromFolder(folder, "Copy").SessionName, "A copy has the changes not saved yet.");
+            Assert.AreNotEqual("Unsaved change", EyeTrackerSettings.LoadFromFolder(folder, "Fresh").SessionName, "A new profile has the default settings.");
+        }
     }
 }

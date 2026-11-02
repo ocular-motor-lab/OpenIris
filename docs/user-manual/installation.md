@@ -70,14 +70,15 @@ From here, see [Configuration](configuration.md) to adjust OpenIris to your setu
 
 ## With cameras
 
-Select the eye tracking system for your cameras and click **Start Tracking**:
+Select the [profile](configuration.md#settings-profiles) for your cameras on the main window, above
+**Start Tracking**, and click **Start Tracking**. Each profile has an eye tracking system, shown next
+to it:
 
-- **Spinnaker Dual Camera**: two FLIR cameras, one per eye, synchronized. The two cameras must be
-  connected with the synchronization cable (see [Hardware](hardware.md#synchronized-cameras)), or
-  OpenIris won't start.
-- **Spinnaker Single Camera**: one FLIR camera, for one eye or both eyes in the same image.
-
-![Choosing the eye tracking system](../images/user-manual/select-eye-tracking-system.png)
+- **Spinnaker Dual Camera** (or **Spinnaker Dual Camera torsion**, to measure torsion): two FLIR
+  cameras, one per eye, synchronized. The two cameras must be connected with the synchronization
+  cable (see [Hardware](hardware.md#synchronized-cameras)), or OpenIris won't start.
+- For another system, such as **Spinnaker Single Camera** (one FLIR camera, for one eye or both eyes
+  in the same image), create a profile with **New…** in the **Profiles** tab of the configuration.
 
 The first time, OpenIris may ask for the cameras' serial numbers: accept and continue. If the left
 and right cameras turn out to be swapped, swap their serial numbers in the configuration.

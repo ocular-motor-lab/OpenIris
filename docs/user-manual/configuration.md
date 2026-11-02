@@ -1,16 +1,19 @@
 # Configuration
 
-Open the configuration window with **File > Configuration…**. It has four columns:
+Open the configuration window with **File > Configuration…**. It has two tabs:
 
-1. **General settings**: which system, pipeline and calibration to use, and how to record.
-2. **System settings**: the settings of the selected eye tracking system (the cameras).
-3. **Eye tracking pipeline settings**: how the images are processed.
-4. **Calibration settings**: the settings of the selected calibration method.
+- **Profiles**: the [settings profiles](#settings-profiles), and the settings of this computer, which
+  are the same in every profile.
+- **Advanced**: all the settings of the active profile, in four columns:
+  1. **General settings**: which system, pipeline and calibration to use, and how to record.
+  2. **System settings**: the settings of the selected eye tracking system (the cameras).
+  3. **Eye tracking pipeline settings**: how the images are processed.
+  4. **Calibration settings**: the settings of the selected calibration method.
 
 ![The configuration window](../images/user-manual/configuration-window.png)
 
 Click a setting to see its description at the bottom of the column. Settings are saved automatically
-in the active [settings profile](#settings-profiles) and kept for the next session.
+in the active profile and kept for the next session.
 
 Some settings can only change while not tracking, for example the camera frame rate. Changing one of
 them while tracking stops the tracking; start it again to apply the change.
@@ -18,15 +21,36 @@ them while tracking stops the tracking; start it again to apply the change.
 ## Settings profiles
 
 A profile is a complete configuration: the eye tracking system, the pipeline, the calibration method
-and all their settings. Keep one profile for each setup used on a computer (for example "Lab rig",
-"Webcam pilot", "Patient room") and switch between them instead of changing each setting.
+and all their settings. Keep one profile for each setup or way of tracking (for example with and
+without torsion, or with different pipeline parameters), and switch between them instead of
+changing each setting.
 
-Under **File > Settings profile**:
+Choose the profile on the main window, above **Start Tracking**, or with **Use** in the **Profiles**
+tab of the configuration window. Switch profiles while not tracking, because the eye tracking system
+may change. In the **Profiles** tab:
 
-- click a profile to switch to it (only while not tracking, because the eye tracking system may
-  change);
-- **Save as new profile…** saves the current settings with a new name and switches to it;
-- **Rename this profile…** and **Delete profile** (any but the active one).
+- **New…** creates a profile for an eye tracking system, with its default settings;
+- **Duplicate…** copies the selected profile, for example to try other settings while keeping the
+  ones that work;
+- **Rename…** and **Delete** (any but the active one).
+
+OpenIris comes with these profiles, to start from:
+
+| Profile | System and settings |
+| --- | --- |
+| **Simulation** | The Simulation system, which plays sample videos: no cameras needed. The default. |
+| **Webcam** | The Webcam system and the Webcam iris pipeline (see [Webcam tracking](webcam-tracking.md)). |
+| **Synthetic Eyes** | Drawn eyes that you rotate from a window, to test tracking and calibration with a known answer: no cameras needed. |
+| **Spinnaker Dual Camera** | Two FLIR cameras at 500 Hz, the JOM pipeline without torsion. |
+| **Spinnaker Dual Camera torsion** | Two FLIR cameras at 250 Hz, the JOM pipeline with torsion. |
+
+OpenIris adds each of them once, also to installations that already have profiles, and only if its
+eye tracking system is installed. A profile you already have with the same name stays as it is, and
+one you delete doesn't come back. Change them as you need, or duplicate them first.
+
+Changing a setting changes the active profile: OpenIris saves it in the profile's file when the
+configuration window closes, when switching profiles and when OpenIris closes. To try other settings
+while keeping a profile as it is, duplicate it and use the copy.
 
 The title of the main window shows the active profile. OpenIris starts with the profile used last. To
 start with another one, for example from a shortcut, add `--profile "Lab rig"` to the command line
@@ -34,7 +58,8 @@ of `OpenIris.exe`. The [web client](remote-control.md#web-client) can also switc
 
 A few settings belong to the computer rather than to a setup, so they stay the same when switching
 profiles: **DataFolder**, **ServiceListeningPort**, **MaxNumberOfProcessingThreads**,
-**BufferSize** and **LslStreamName**. Their descriptions say "Shared by all profiles".
+**BufferSize** and **LslStreamName**. They are in the **Profiles** tab, under "Settings of this
+computer".
 
 The files, in the OpenIris folder:
 

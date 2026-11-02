@@ -4,7 +4,7 @@
 
 ## Starting
 
-Select the eye tracking system and click **Start Tracking** (or **File > Start tracking**). The
+Select the [profile](configuration.md#settings-profiles) (with its eye tracking system) and click **Start Tracking** (or **File > Start tracking**). The
 **Set up** tab shows the image of each eye with what OpenIris tracks drawn on it: the pupil, the
 corneal reflections, the iris and, if torsion is on, the iris pattern used to measure it.
 

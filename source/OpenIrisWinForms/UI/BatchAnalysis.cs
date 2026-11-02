@@ -131,8 +131,9 @@ namespace OpenIris.UI
                 for (int i = 0; i < listView1.Items.Count; i++)
                 {
                     var optionsItem = ((ProcessItem)listView1.Items[i]).Options;
+                    var itemFile = optionsItem.VideoFileNames?[Eye.Left] ?? optionsItem.VideoFileNames?[Eye.Right] ?? string.Empty;
 
-                    lines[3 + i] = Path.GetFileName(file).Replace("-Left.avi", "");
+                    lines[3 + i] = Path.GetFileName(itemFile).Replace("-Left.avi", "").Replace("-Right.avi", "");
                 }
 
                 File.WriteAllLines(saveFileDialog1.FileName, lines);
@@ -156,8 +157,16 @@ namespace OpenIris.UI
 
                 for (int currentItem = 0; currentItem < listView1.Items.Count; currentItem++)
                 {
+                    // After a recording that failed, tracking may still be stopping.
+                    var waiting = System.Diagnostics.Stopwatch.StartNew();
+                    while (!eyeTracker.NotStarted && waiting.Elapsed < TimeSpan.FromSeconds(30)) await Task.Delay(100);
+
                     listView1.Items[currentItem].SubItems[2].Text = "Processing";
                     var options = (ProcessVideoOptions)optionsList.ElementAt(currentItem);
+
+                    // Without a calibration of its own, a recording would keep the one of the
+                    // recording before.
+                    if (string.IsNullOrEmpty(options.CalibrationFileName)) eyeTracker.ResetCalibration();
 
                     try
                     {
@@ -165,19 +174,25 @@ namespace OpenIris.UI
                         {
                             await batchTask;
                         }
+
+                        listView1.Items[currentItem].SubItems[2].Text = "Completed";
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        closing = true;
+                        // Go on with the next recording: one that fails doesn't stop the batch.
+                        System.Diagnostics.Trace.WriteLine($"ERROR processing {options.VideoFileNames?[0]}: {ex}");
+                        listView1.Items[currentItem].SubItems[2].Text = "Failed: " + ex.Message;
                         eyeTracker.StopTracking();
+                    }
+                    finally
+                    {
+                        batchTask = null;
                     }
 
                     if (closing)
                     {
                         return;
                     }
-
-                    listView1.Items[currentItem].SubItems[2].Text = "Completed";
                 }
 
                 panel1.Enabled = true;

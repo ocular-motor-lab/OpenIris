@@ -130,6 +130,54 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
+        /// Processes several recordings in a row with the same eye tracker, as Tools > Batch analysis
+        /// does. It used to crash after one or two.
+        /// </summary>
+        [TestMethod]
+        public async Task SeveralRecordingsAreProcessedInARow()
+        {
+            var folder = Path.Combine(Path.GetTempPath(), "OpenIrisTests-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(folder);
+            var previousFolder = Directory.GetCurrentDirectory();
+            Directory.SetCurrentDirectory(folder);
+
+            var eyeTracker = EyeTracker.Create();
+            try
+            {
+                eyeTracker.Settings.DataFolder = folder;
+                for (int i = 0; i < 4; i++)
+                {
+                    await WithinLimit(
+                        eyeTracker.ProcessVideo(new ProcessVideoOptions
+                        {
+                            VideoFileNames = new EyeCollection<string?>(PipelineHarness.SampleVideo(Eye.Left), PipelineHarness.SampleVideo(Eye.Right)),
+                            EyeTrackingSystem = "Simulation",
+                            CustomRange = new Range(0, 199),
+                            SaveProcessedVideo = i % 2 == 1,
+                        }),
+                        $"processing number {i + 1} to finish");
+
+                    var dataFile = eyeTracker.Settings.LastRecordedFile;
+                    Assert.AreEqual(201, File.ReadAllLines(dataFile).Length, $"Lines of the data file of processing number {i + 1} (with the header): {dataFile}");
+                }
+            }
+            finally
+            {
+                eyeTracker.Dispose();
+                Directory.SetCurrentDirectory(previousFolder);
+            }
+
+            try
+            {
+                Directory.Delete(folder, recursive: true);
+            }
+            catch (IOException)
+            {
+                // A file may still be open. It is in the temp folder anyway.
+            }
+        }
+
+        /// <summary>
         /// Reads a video and returns its number of frames and its width in pixels.
         /// </summary>
         private static (int frames, int width) ReadVideo(string fileName)

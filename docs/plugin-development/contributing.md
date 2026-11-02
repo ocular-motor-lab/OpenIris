@@ -98,10 +98,14 @@ To make a release:
    publishes the NuGet packages of OpenIrisLib and OpenIrisWinForms with that version (see
    [Building](building.md#nuget-packages)); pre-release tags such as `0.2.0-alpha.3` publish
    pre-release packages. Check the **Publish NuGet packages** run in the **Actions** tab.
-3. Build **Release** from that commit, so the program reports exactly that version.
-4. Zip the `bin\x64\Release` folder as `OpenIris_Win_Release_<version>.zip`.
-5. On GitHub: **Releases**, **Draft a new release**, choose the tag, write what's new, attach the
-   zip, **Publish release**.
+3. On a computer with the Spinnaker and FlyCapture SDKs installed, check out that commit and run
+   `tools\Make-Release.ps1` in PowerShell. It builds Release from an empty folder (GitHub's build
+   machines can't make the release, because they don't have the SDKs: their builds don't have the
+   camera plugins), checks that the program reports the version and has every plugin, zips it as
+   `bin\OpenIris_Win_Release_<version>.zip`, and creates a draft release on GitHub with the zip.
+   With `-NoRelease` it only makes the zip.
+4. On GitHub, **Releases**: edit the draft's notes (what's new), check the zip, and **Publish
+   release**.
 
 ## When OpenIris crashes
 

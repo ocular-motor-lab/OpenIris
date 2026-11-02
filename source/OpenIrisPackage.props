@@ -16,6 +16,8 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <!-- The documentation of the API, for IntelliSense in the plugins. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- GitVersion only sets the package version: the assembly versions stay in AssemblyInfo.cs. -->
+    <UpdateAssemblyInfo>false</UpdateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\docs\images\logo-512.png" Pack="true" PackagePath="logo.png" Visible="false" />

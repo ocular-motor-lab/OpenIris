@@ -13,6 +13,7 @@ namespace OpenIris
     using System.Runtime.Serialization;
     using System.Security.Permissions;
     using Emgu.CV;
+    using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
     using OpenIris.ImageGrabbing;
 
@@ -135,63 +136,46 @@ namespace OpenIris
             Roi.IsEmpty ? Rectangle.Empty : new Rectangle(Roi.X + part.X, Roi.Y + part.Y, part.Width, part.Height);
 
         /// <summary>
-        /// Or when there are mirrors.
+        /// Turns the image to correct the orientation of the camera, when it is rotated or there
+        /// are mirrors: first rotated (clockwise by the angle of the orientation), then mirrored
+        /// horizontally. Flips are done in place, and only a rotation by 90 or 270 degrees, which
+        /// changes the size of the image, makes a new one. This runs for every frame.
         /// </summary>
         /// <param name="cameraOrientation">Orientation of the camera reltive to the eye.</param>
-        /// <returns>The new images with the correct orientation.</returns>
         public void CorrectOrientation(CameraOrientation cameraOrientation)
         {
-            if (!cameraOrientation.IsRotated())
+            switch (cameraOrientation)
             {
-                // Fix the image
-                if (!cameraOrientation.IsMirrored() && !cameraOrientation.IsUpsideDown())
-                {
-                    // Do nothing
-                }
-
-                if (!cameraOrientation.IsMirrored() && cameraOrientation.IsUpsideDown())
-                {
-                    FlipHorizontal();
-                    FlipVertical();
-                }
-
-                if (cameraOrientation.IsMirrored() && !cameraOrientation.IsUpsideDown())
-                {
-                    FlipHorizontal();
-                }
-
-                if (cameraOrientation.IsMirrored() && cameraOrientation.IsUpsideDown())
-                {
-                    FlipVertical();
-                }
-            }
-            else
-            {
-                Transpose();
-
-                // Fix the image
-                if (!cameraOrientation.IsMirrored() && !cameraOrientation.IsUpsideDown())
-                {
-                    // Do nothing
-                }
-
-                if (!cameraOrientation.IsMirrored() && cameraOrientation.IsUpsideDown())
-                {
-                    FlipHorizontal();
-                    FlipVertical();
-                }
-
-                if (cameraOrientation.IsMirrored() && !cameraOrientation.IsUpsideDown())
-                {
-                    FlipHorizontal();
-                }
-
-                if (cameraOrientation.IsMirrored() && cameraOrientation.IsUpsideDown())
-                {
-                    FlipVertical();
-                }
+                case CameraOrientation.Upright:
+                    break;
+                case CameraOrientation.UprightMirrored:
+                    FlipInPlace(FlipType.Horizontal);
+                    break;
+                case CameraOrientation.Rotated180:
+                    FlipInPlace(FlipType.Both);
+                    break;
+                case CameraOrientation.Rotated180Mirrored:
+                    FlipInPlace(FlipType.Vertical);
+                    break;
+                case CameraOrientation.Rotated90:
+                    Transpose();
+                    FlipInPlace(FlipType.Horizontal);
+                    break;
+                case CameraOrientation.Rotated90Mirrored:
+                    Transpose();
+                    break;
+                case CameraOrientation.Rotated270:
+                    Transpose();
+                    FlipInPlace(FlipType.Vertical);
+                    break;
+                case CameraOrientation.Rotated270Mirrored:
+                    Transpose();
+                    FlipInPlace(FlipType.Both);
+                    break;
             }
         }
+
+        private void FlipInPlace(FlipType flipType) => CvInvoke.Flip(Image, Image, flipType);
 
         /// <summary>
         /// Rotates the image 180 degrees.

@@ -115,6 +115,10 @@ namespace OpenIris.ImageGrabbing
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+    /// <summary>
+    /// How the image of a camera has to be turned to show the eye upright: rotated clockwise by
+    /// the angle, then mirrored horizontally (see ImageEye.CorrectOrientation).
+    /// </summary>
     public enum CameraOrientation
     {
         Upright,

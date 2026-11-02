@@ -298,6 +298,8 @@ namespace SpinnakerInterface
         /// </summary>
         private bool roiChunks;
 
+        private const int StreamBufferCount = 250;
+
         private void InitParameters()
         {
             camModelName = cam.DeviceModelName.Value;
@@ -321,6 +323,21 @@ namespace SpinnakerInterface
             maxROI_Offset = maxFrameSize - roiSize;
 
             maxGain = cam.Gain.Max;
+
+            // Many more stream buffers than Spinnaker's default (about 10). The images given to
+            // OpenIris point to these buffers, without a copy, and Spinnaker fills each buffer again
+            // after going through all the others. With the default, a frame waiting more than about
+            // 20 ms at 450 Hz (in the grabber or processing queues) got the pixels of a later frame.
+            // These cover both queues (100 frames each by default) with some margin (see #69).
+            try
+            {
+                cam.TLStream.StreamBufferCountMode.FromString("Manual");
+                cam.TLStream.StreamBufferCountManual.Value = Math.Min(StreamBufferCount, cam.TLStream.StreamBufferCountManual.Max);
+            }
+            catch (SpinnakerException ex)
+            {
+                Trace.WriteLine($"Spinnaker: couldn't set the number of stream buffers: {ex.Message}");
+            }
 
             Debug.WriteLine($"Centering ROI. FrameMax {maxFrameSize}, ROI_SIZE {roiSize}");
             //Center the ROI in the middle of the physical camera frame.

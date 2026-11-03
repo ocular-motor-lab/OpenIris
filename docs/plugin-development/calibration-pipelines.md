@@ -149,6 +149,9 @@ See `OpenIrisWinForms\Calibration\CalibrationRemoteLinearUI.cs`.
     in (`Intrinsics`), copied by OpenIris from the frames: the model and the reference follow the
     images when the window of the camera moves. See
     [Geometry and conventions](geometry.md#the-camera).
+  - **The extrinsics of the camera and the lights** (`Extrinsics`, `Lights`), copied by OpenIris from
+    the system settings: where the camera is and how it's turned from the eye, and where the lights
+    are from the eye. The calibrated angles take the head's up from the extrinsics.
   - **The calibration's own data for this eye** (`CalibrationData`, below).
 - **The head** (`HeadCalibrationParameters`): its reference (`ReferenceHeadData`: the head angles are
   relative to it) and the head model (`HeadModel`: where the eyes are in the head).

@@ -81,23 +81,29 @@ pixels.
   the reference directly. Calibrate again after changing the intrinsics in the settings.
 - **(planned)** Distortion coefficients, in OpenCV's order (k1, k2, p1, p2, k3), and binning.
 
-**(planned) The rig: where the cameras and the lights are.** The hardware is described in one
-common frame, **the rig**: whatever the hardware is fixed to (the goggles or headset for head-mounted
-systems, effectively the head; the camera mount for remote systems). In it:
+**Where the cameras and the lights are.** Settings of the eye tracking system, copied into each
+calibration when it's made (`EyeCalibration.Extrinsics`, `EyeCalibration.Lights`, saved in the `.cal`
+file), like the intrinsics. Both use the head frame (x forward, y to the subject's left, z up, mm):
 
-- **Each camera's extrinsics:** its pose in the rig, `T_rig_camera`. The relative rotation of two
-  cameras (they aren't parallel), needed for vergence, follows from their poses.
-- **Each light** (the infrared LEDs that make the corneal reflections): its position in the rig, and
-  which reflection it makes (CR0, CR1...). Their positions in any camera's frame follow from the
-  camera's pose, so lights seen by both cameras are entered once. A physical model of the
-  reflections needs them (with two or more lights, the cornea's center can be found in 3D, as in
-  Guestrin and Eizenman's theory of remote gaze estimation, IEEE Transactions on Biomedical
-  Engineering, 2006).
-
-Like the intrinsics, the rig will be a setting of the eye tracking system, copied into the calibration
-parameters (a calibration may refine it), and every part is optional: without camera poses, each eye
-is on its own (weak perspective, as today); without lights, the reflections are used empirically (pupil
-minus reflection, Remote Linear's map), as today.
+- **Each camera's extrinsics** (`EyeTrackingSystemSettings.CameraExtrinsics`, `CameraExtrinsics`):
+  OpenCV's rvec (radians) and tvec (mm), from the head frame to the camera's,
+  p_camera = R · p_head + t, with the origin at the center of the eye the camera looks at (between
+  the eyes for a camera that sees both). The camera frame is that of the image after the camera
+  orientation. One for each camera, sized by the system's attribute like the intrinsics. Unknown
+  (tvec 0): the camera faces the eye at 50 mm, with the image's up as the head's up
+  (`CameraExtrinsics.Facing`). Today the calibrated angles use the rotation: the head's up comes from
+  it (`CameraExtrinsics.HeadUp`) instead of the image's up, so a camera rolled or tilted on the head
+  gives the right angles. The translation isn't used yet (weak perspective).
+- **The lights** (`EyeTrackingSystemSettings.Lights`, `LightPosition`): the infrared LEDs that make
+  the corneal reflections, none, one or more as the system has (Spinnaker Dual Camera: one, position
+  still to be measured). Positions in mm from the point between the eyes; with
+  `DistanceBetweenEyesMm`, each calibration keeps them from the center of its eye
+  (`LightsFrom`). (0, 0, 0) is unknown. Not used yet: a physical model of the reflections needs
+  them (with two or more lights, the cornea's center can be found in 3D, as in Guestrin and
+  Eizenman's theory of remote gaze estimation, IEEE Transactions on Biomedical Engineering, 2006).
+  Without it, the reflections are used empirically (pupil minus reflection, Remote Linear's map).
+- **(planned)** Which reflection each light makes (CR1, CR2...), and the relative rotation of two
+  cameras (for vergence), which follows from their extrinsics once they share an origin.
 
 ## Coordinate frames
 
@@ -108,11 +114,10 @@ minus reflection, Remote Linear's map), as today.
 | **Face** (Webcam) | x to the subject's left, y up, z out of the face; origin at the nose tip | mm | `FacePose`'s generic face model |
 | **Output** (eye and head) | positive to the subject's right, up, and clockwise as the subject sees it | degrees, mm | the calibrated data ([data file](../user-manual/data-file.md#coordinate-system)) |
 | **Head** | x forward, y to the subject's left, z up; origin at the midpoint between the centers of the eyes | mm | `HeadModel.NeckToEyes` |
-| **Rig** (planned) | the frame the hardware is fixed to (the headset, or the camera mount) | mm | none yet |
 
-**(planned) Transforms** are named by the frames they connect: `T_camera_head` is the 4×4 [R | t]
-that takes points in head coordinates to camera coordinates (p_camera = T_camera_head · p_head).
-Chains read right to left: `T_camera_head · T_head_eye` = `T_camera_eye`.
+**Transforms** are named by the frames they connect: `T_camera_head` is the [R | t] that takes
+points in head coordinates to camera coordinates (p_camera = T_camera_head · p_head), as a camera's
+extrinsics do. Chains read right to left: `T_camera_head · T_head_eye` = `T_camera_eye`.
 
 ## Rotations
 
@@ -218,5 +223,5 @@ validation reports accuracy.
 | Calibrated eye and head data | `CalibratedEyeData`, `CalibratedHeadData` |
 | Head pose (Webcam) | `HeadData.FaceRotation`, `HeadData.FacePosition` |
 | Intrinsics | the eye tracking system's settings; each image's in its pixels (`ImageEye.Intrinsics`); the calibration's in `EyeCalibration.Intrinsics` |
-| (planned) Camera poses, lights | the eye tracking system's settings, copied into the calibration parameters |
+| Camera extrinsics, lights | the eye tracking system's settings (`CameraExtrinsics`, `Lights`, `DistanceBetweenEyesMm`); the calibration's in `EyeCalibration.Extrinsics` and `EyeCalibration.Lights` |
 | Head model, head reference | `HeadCalibration`, saved in the `.cal` file |

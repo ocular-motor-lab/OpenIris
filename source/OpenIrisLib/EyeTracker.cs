@@ -509,7 +509,7 @@ namespace OpenIris
                     IncreaseContrast = false,
                     AddEyelids = false,
                 });
-                using var recordingTask = RecordingSession.Start(Calibration, Settings, RecordingSession.Describe(this));
+                using var recordingTask = RecordingSession.Start(Calibration, Settings, RecordingSession.Describe(this, options));
 
                 // Play video and wait until it finishes. This will also start the tracking
                 using var playingVideoTask = PlayVideo(options);
@@ -579,7 +579,7 @@ namespace OpenIris
 
             try
             {
-                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings, Settings.EyeTrackingSystemSettings))
                 {
 
                     var tempCalibration = await CalibrationSession.StartCalibratingModel(Settings.TrackingPipelineSettings);
@@ -638,7 +638,7 @@ namespace OpenIris
 
             try
             {
-                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
+                using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings, Settings.EyeTrackingSystemSettings))
                 {
                     Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.TrackingPipelineSettings);
                 }

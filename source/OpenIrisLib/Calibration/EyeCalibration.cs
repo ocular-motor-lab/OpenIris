@@ -87,6 +87,20 @@ namespace OpenIris
         public CameraIntrinsics Intrinsics { get; set; }
 
         /// <summary>
+        /// Gets or sets the extrinsics of the camera that sees this eye (where it is and how it's
+        /// turned from the eye), copied by the calibration session from the system settings. Empty if
+        /// unknown, as in calibration files from before 0.2: then the camera faces the eye
+        /// (CameraExtrinsics.Facing).
+        /// </summary>
+        public CameraExtrinsics Extrinsics { get; set; }
+
+        /// <summary>
+        /// Gets or sets the lights of the system, from the center of this eye, copied by the
+        /// calibration session from the system settings (EyeTrackingSystemSettings.LightsFrom).
+        /// </summary>
+        public LightPosition[] Lights { get; set; } = new LightPosition[0];
+
+        /// <summary>
         /// How much the eye model and the reference move to be in the pixels of an image with the given
         /// intrinsics: by how much its principal point moved, for example when the window of the camera
         /// moved. Nothing if either intrinsics are unknown.
@@ -253,6 +267,8 @@ namespace OpenIris
                 WhichEye = WhichEye,
                 ImageSize = ImageSize,
                 Intrinsics = Intrinsics,
+                Extrinsics = Extrinsics,
+                Lights = (LightPosition[])Lights.Clone(),
                 EyePhysicalModel = EyePhysicalModel,
                 ImageTorsionReference = ImageTorsionReference,
                 ReferenceImage = ReferenceImage,

@@ -19,7 +19,8 @@ namespace OpenIris
     /// <remarks>
     /// <para>The frame is the head-fixed one of 3D oculomotor research (Haslwanter 1995): right-handed,
     /// x forward along the line of sight at the reference, y to the subject's left, z up. Up is the
-    /// image's up, made perpendicular to the line of sight at the reference.</para>
+    /// head's up from the camera's extrinsics (the image's up for a camera facing the eye), made
+    /// perpendicular to the line of sight at the reference.</para>
     /// <para>The direction of the line of sight comes from the pupil on the eye globe, with weak
     /// perspective, turned by the eye model's angle kappa (from the pupillary axis to the visual axis). The rotation that takes the reference line of sight to the current one follows
     /// Listing's law, with Listing's plane perpendicular to the line of sight at the reference: its
@@ -70,12 +71,15 @@ namespace OpenIris
         /// <param name="current">Current line of sight, in camera coordinates.</param>
         /// <param name="torsionDeg">Torsion in degrees, positive clockwise as the subject sees it, or NaN
         /// if unknown (then Listing's law alone).</param>
-        public static Quaternion FromLinesOfSight(Vector3 reference, Vector3 current, double torsionDeg)
+        /// <param name="headUp">The head's up in camera coordinates (CameraExtrinsics.HeadUp). The
+        /// image's up (-y) if null, as for a camera facing the eye.</param>
+        public static Quaternion FromLinesOfSight(Vector3 reference, Vector3 current, double torsionDeg, Vector3? headUp = null)
         {
             // The head-fixed axes in camera coordinates: forward is the reference line of sight, up
-            // is the image's up (-y) made perpendicular to it, left completes the right-handed frame.
+            // is the head's up made perpendicular to it, left completes the right-handed frame.
             var forward = Vector3.Normalize(reference);
-            var up = Vector3.Normalize(-Vector3.UnitY - Vector3.Dot(-Vector3.UnitY, forward) * forward);
+            var headUpInCamera = headUp ?? -Vector3.UnitY;
+            var up = Vector3.Normalize(headUpInCamera - Vector3.Dot(headUpInCamera, forward) * forward);
             var left = Vector3.Cross(up, forward);
 
             var gaze = Vector3.Normalize(new Vector3(Vector3.Dot(current, forward), Vector3.Dot(current, left), Vector3.Dot(current, up)));

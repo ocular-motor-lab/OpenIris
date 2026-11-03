@@ -58,6 +58,27 @@ namespace OpenIris.Tests
             Assert.IsTrue(session.HasReferences(calibration));
         }
 
+        /// <summary>
+        /// The calibration keeps the extrinsics of the cameras and the lights of the system (from each
+        /// eye), as they were when it was made.
+        /// </summary>
+        [TestMethod]
+        public void KeepsTheExtrinsicsAndTheLights()
+        {
+            var extrinsics = new CameraExtrinsics(1.1f, 1.2f, -1.3f, 2, -3, 55);
+            var system = new EyeTrackingSystemSettings
+            {
+                CameraExtrinsics = new EyeCollection<CameraExtrinsics>(extrinsics, default),
+                Lights = new[] { new LightPosition(50, 0, -20) },
+            };
+            using var session = new CalibrationSession(Eye.Both, "Auto", new CalibrationSettings(), system);
+
+            var model = Run(session, session.StartCalibratingModel(TrackingSettings), () => Frame(Eye.Both, new CalibrationParameters(), new PointF(30, 20)));
+            Assert.AreEqual(extrinsics, model!.EyeCalibrationParameters[Eye.Left].Extrinsics);
+            Assert.AreEqual(CameraExtrinsics.Facing(CameraIntrinsics.AssumedDistanceToEyeMm), model.EyeCalibrationParameters[Eye.Right].Extrinsics, "Unknown: facing.");
+            CollectionAssert.AreEqual(system.LightsFrom(Eye.Right), model.EyeCalibrationParameters[Eye.Right].Lights);
+        }
+
         [TestMethod]
         public void ReferencesOnlyFromFramesProcessedWithTheNewModels()
         {

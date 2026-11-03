@@ -94,7 +94,7 @@ namespace OpenIris
         /// <summary>
         /// What to write at the beginning of the log of this recording (see RecordingInfo).
         /// </summary>
-        internal string Describe(EyeTracker eyeTracker) => RecordingInfo.Describe(eyeTracker, DataFileName, options);
+        internal string Describe(EyeTracker eyeTracker, ProcessVideoOptions? videos = null) => RecordingInfo.Describe(eyeTracker, DataFileName, options, videos);
 
         /// <summary>
         /// Gets the total time spent recording.

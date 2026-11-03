@@ -200,7 +200,8 @@ namespace OpenIris
                 var rotation = EyeRotationMath.FromLinesOfSight(
                     EyeRotationMath.LineOfSight(new System.Drawing.PointF(referenceX, referenceY), eyeModel, eyeData.WhichEye),
                     EyeRotationMath.LineOfSight(eyeData.Pupil.Center, eyeModel, eyeData.WhichEye),
-                    eyeData.TorsionAngle);
+                    eyeData.TorsionAngle,
+                    calibrationInfo.Extrinsics.IsEmpty ? null : calibrationInfo.Extrinsics.HeadUp);
                 var (horizontal, vertical, torsion) = EyeRotationMath.FickAngles(rotation);
                 data.HorizontalPosition = horizontal;
                 data.VerticalPosition = vertical;

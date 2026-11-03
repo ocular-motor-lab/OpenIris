@@ -57,10 +57,11 @@ namespace OpenIris
                 // The intrinsics of each camera of the system, unknown until they are filled in: one
                 // or two, as the system says in its attribute.
                 var systemSettings = AllEyeTrackerSystemSettings[value];
-                if (systemSettings.CameraIntrinsics is null &&
+                if ((systemSettings.CameraIntrinsics is null || systemSettings.CameraExtrinsics is null) &&
                     EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.FirstOrDefault(system => system.Name == value) is IEyeTrackingSystemMetadata metadata)
                 {
-                    systemSettings.CameraIntrinsics = EyeTrackingSystemSettings.UnknownIntrinsics(metadata.VideoConfiguration);
+                    systemSettings.CameraIntrinsics ??= EyeTrackingSystemSettings.UnknownIntrinsics(metadata.VideoConfiguration);
+                    systemSettings.CameraExtrinsics ??= EyeTrackingSystemSettings.Unknown<CameraExtrinsics>(metadata.VideoConfiguration);
                 }
 
                 if (value != eyeTrackerSystem)

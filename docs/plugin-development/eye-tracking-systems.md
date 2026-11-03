@@ -161,9 +161,12 @@ public class EyeTrackingSystemExample : EyeTrackingSystemBase
 
 `EyeTrackingSystemExampleSettings` is the settings class (see
 [Settings](creating-a-plugin.md#settings)). It inherits from `EyeTrackingSystemSettings`, which
-already has the settings common to all systems: `Eye`, `FrameRate`, `PixPerMm`, and
-`CameraIntrinsics`, one for each camera (as many as the attribute says: `VideoEyeConfiguration.OneVideo`
-for one camera, two by default).
+already has the settings common to all systems: `Eye`, `FrameRate`, `PixPerMm`,
+`CameraIntrinsics` and `CameraExtrinsics`, one for each camera (as many as the attribute says:
+`VideoEyeConfiguration.OneVideo` for one camera, two by default), and the system's `Lights` with
+`DistanceBetweenEyesMm` (see [Geometry and conventions](geometry.md#the-camera)). A system with lights
+lists them in its settings' constructor, for example `Lights = new[] { new LightPosition() }` for one
+light whose position is still unknown.
 
 `CreateAndStartCameras` returns one camera for both eyes (`new EyeCollection<CameraEye?>(camera)`),
 or one per eye (`new EyeCollection<CameraEye?>(left, right)`, with `null` for an eye without camera).

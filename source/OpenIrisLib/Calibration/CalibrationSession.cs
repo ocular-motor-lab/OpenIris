@@ -67,14 +67,19 @@ namespace OpenIris
         /// <param name="whichEyeToCalibrate">The eyes of the eye tracking system: both, left, or right.</param>
         /// <param name="calibrationPipelineName">Name of the pipeline to use for calibration.</param>
         /// <param name="settings"></param>
+        /// <param name="systemSettings">Settings of the eye tracking system, for the extrinsics of
+        /// the cameras and the lights kept in the calibration. Unknown ones if null.</param>
         /// <exception cref="InvalidOperationException">If the pipeline name does not exist.</exception>
-        internal CalibrationSession(Eye whichEyeToCalibrate, string calibrationPipelineName, CalibrationSettings settings)
+        internal CalibrationSession(Eye whichEyeToCalibrate, string calibrationPipelineName, CalibrationSettings settings, EyeTrackingSystemSettings? systemSettings = null)
         {
             calibrationPipeline = CalibrationPipelineBase.Create(calibrationPipelineName, settings);
             calibrationPipeline.EyesToCalibrate = whichEyeToCalibrate;
 
             this.whichEyeToCalibrate = whichEyeToCalibrate;
+            this.systemSettings = systemSettings;
         }
+
+        private readonly EyeTrackingSystemSettings? systemSettings;
 
         /// <summary>
         /// Stage 1: calibrates the models (eye models, the calibration's own parameters, the head
@@ -178,13 +183,19 @@ namespace OpenIris
         /// The models and references a calibration gives are in the pixels of the images it got: the
         /// calibration keeps the intrinsics of the images of the frame where the stage completed, with
         /// the eye models moved to them if they were in other pixels (the window of the camera moved
-        /// since the model, before Reset reference). The references are from that frame (#61).
+        /// since the model, before Reset reference). The references are from that frame (#61). It also
+        /// keeps the extrinsics of the cameras and the lights of the system, as they are now.
         /// </summary>
         private void KeepIntrinsics(CalibrationParameters calibration, EyeTrackerImagesAndData frame)
         {
             foreach (var eye in CalibrationPipelineBase.Eyes(whichEyeToCalibrate))
             {
-                if (frame.Images[eye] is ImageEye image) calibration.EyeCalibrationParameters[eye].MoveEyeModelTo(image.Intrinsics);
+                var eyeCalibration = calibration.EyeCalibrationParameters[eye];
+                if (frame.Images[eye] is ImageEye image) eyeCalibration.MoveEyeModelTo(image.Intrinsics);
+
+                if (systemSettings is null) continue;
+                eyeCalibration.Extrinsics = systemSettings.ExtrinsicsOf(eye);
+                eyeCalibration.Lights = systemSettings.LightsFrom(eye);
             }
         }
 

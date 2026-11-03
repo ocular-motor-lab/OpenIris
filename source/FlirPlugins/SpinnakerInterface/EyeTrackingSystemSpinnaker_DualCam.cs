@@ -125,6 +125,9 @@ namespace SpinnakerInterface
         {
             PixPerMm = 7;
             Eye = Eye.Both;
+
+            // One light, where it is still to be measured.
+            Lights = new[] { new LightPosition() };
         }
 
         // Not [NeedsRestarting]: the system itself sets these while starting the cameras, and that

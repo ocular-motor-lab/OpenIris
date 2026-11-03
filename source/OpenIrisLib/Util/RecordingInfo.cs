@@ -42,7 +42,9 @@ namespace OpenIris
         /// <param name="eyeTracker">The eye tracker that records.</param>
         /// <param name="dataFileName">The data file of the recording.</param>
         /// <param name="options">The options of the recording.</param>
-        public static string Describe(EyeTracker eyeTracker, string dataFileName, RecordingOptions options)
+        /// <param name="videos">The videos processed, when processing videos (the eye tracking
+        /// system isn't there yet when the recording starts).</param>
+        public static string Describe(EyeTracker eyeTracker, string dataFileName, RecordingOptions options, ProcessVideoOptions? videos = null)
         {
             var now = DateTimeOffset.Now;
             var settings = eyeTracker.Settings;
@@ -59,20 +61,38 @@ namespace OpenIris
             Line("Started", $"{now:yyyy-MM-dd HH:mm:ss.fff zzz}");
             Line("Started (UTC)", $"{now.UtcDateTime:yyyy-MM-dd HH:mm:ss.fff}");
             Line("OpenIris version", Version);
-            Line("Session", settings.SessionName);
+            if (videos is null) Line("Session", settings.SessionName);
             Line("Data file", $"{dataFileName} ({Columns(EyeTrackerData.GetStringHeader())} columns)");
             Line("Calibrated data file", $"{dataFileName.Replace(".txt", "-calibrated.txt")} ({Columns(EyeTrackerData.GetCalibratedStringHeader())} columns)");
             Line("Raw videos", !options.SaveRawVideo ? "no" : options.DecimateRatioRawVideo > 1 ? $"1 of every {options.DecimateRatioRawVideo} frames" : "every frame");
             Line("LSL stream", settings.StreamToLsl ? settings.LslStreamName : "off");
 
-            Section("Eye tracking system");
-            Line("Name", system?.Name ?? "none", 2);
+            if (videos is not null)
+            {
+                Section("Processing videos");
+                Line("Left video", videos.VideoFileNames[Eye.Left] ?? "none", 2);
+                Line("Right video", videos.VideoFileNames[Eye.Right] ?? "none", 2);
+                Line("Recorded with", videos.EyeTrackingSystem, 2);
+                Line("Calibration file", string.IsNullOrEmpty(videos.CalibrationFileName) ? "none" : videos.CalibrationFileName, 2);
+                Line("Frames", videos.CustomRange.IsEmpty ? "all" : $"{videos.CustomRange.Begin} to {videos.CustomRange.End}", 2);
+                Line("Processed video", videos.SaveProcessedVideo ? "yes" : "no", 2);
+            }
+
+            // When processing videos, the system is created after the recording starts.
+            if (system is not null || videos is null)
+            {
+                Section("Eye tracking system");
+                Line("Name", system?.Name ?? "none", 2);
+            }
+
             if (system is not null)
             {
                 Line("Pixel scale", $"{system.Settings.PixPerMm} pixels per mm", 2);
                 Line("Frame rate set", $"{system.Settings.FrameRate} Hz", 2);
                 if (grabber is not null && grabber.FrameRateMeasured > 0) Line("Frame rate measured", $"{grabber.FrameRateMeasured:0.0} Hz", 2);
                 if (grabber is not null && !grabber.FrameSize.IsEmpty) Line("Frame size", Size(grabber.FrameSize), 2);
+                Line("Lights", system.Settings.Lights.Length == 0 ? "none" : string.Join(", ", system.Settings.Lights), 2);
+                Line("Between the eyes", $"{system.Settings.DistanceBetweenEyesMm} mm", 2);
 
                 foreach (var source in system.imageSources?.ToArray() ?? Array.Empty<IImageEyeSource?>())
                 {
@@ -88,6 +108,13 @@ namespace OpenIris
                     Line("Frame rate", $"{camera.FrameRate} Hz", 2);
                     Line("Orientation", camera.CameraOrientation, 2);
                     Line("Intrinsics", camera.Intrinsics, 2);
+                    var extrinsics = system.Settings.CameraExtrinsics?.Count switch
+                    {
+                        1 => system.Settings.CameraExtrinsics[Eye.Both],
+                        2 when camera.WhichEye != Eye.Both => system.Settings.CameraExtrinsics[camera.WhichEye],
+                        _ => default,
+                    };
+                    Line("Extrinsics", extrinsics.IsEmpty ? "Unknown (facing the eye)" : extrinsics.ToString(), 2);
                     var cameraTime = camera.GetCameraTime();
                     if (!double.IsNaN(cameraTime)) Line("Camera time", $"{cameraTime:0.000000} s (the camera's clock now, as Seconds in the data file)", 2);
                 }
@@ -104,6 +131,7 @@ namespace OpenIris
                 Line($"{eye.WhichEye} eye model", eye.HasEyeModel ? $"center ({model.Center.X:0.0}, {model.Center.Y:0.0}) px, radius {model.Radius:0.0} px" : "none", 2);
                 Line($"{eye.WhichEye} reference", eye.HasReference ? $"pupil at ({reference.X:0.0}, {reference.Y:0.0}) px" : "none", 2);
                 Line($"{eye.WhichEye} intrinsics", eye.Intrinsics, 2);
+                Line($"{eye.WhichEye} extrinsics", eye.Extrinsics, 2);
             }
 
             Section("Computer");

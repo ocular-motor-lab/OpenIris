@@ -101,7 +101,7 @@ file), like the intrinsics. Both use the head frame (x forward, y to the subject
   (`LightsFrom`). (0, 0, 0) is unknown. Not used yet: a physical model of the reflections needs
   them (with two or more lights, the cornea's center can be found in 3D, as in Guestrin and
   Eizenman's theory of remote gaze estimation, IEEE Transactions on Biomedical Engineering, 2006).
-  Without it, the reflections are used empirically (pupil minus reflection, Remote Linear's map).
+  Without it, the reflections are used empirically (pupil minus reflection, N-point's map).
 - **(planned)** Which reflection each light makes (CR1, CR2...), and the relative rotation of two
   cameras (for vergence), which follows from their extrinsics once they share an origin.
 
@@ -172,7 +172,7 @@ refractive indices (near-constant, from the same schematic eye).
 **What a calibration measures beyond this model goes in its own parameters**: for each eye,
 `EyeCalibration.CalibrationData` (an `EyeCalibrationData`), applied when it calculates the calibrated
 data; for the whole calibration (a screen, a fit on both eyes together),
-`CalibrationParameters.CalibrationModelParameters`. For example, per eye: Remote Linear's map from the
+`CalibrationParameters.CalibrationModelParameters`. For example, per eye: N-point's map from the
 eye signal to the targets (`LinearGazeMap`), or, for example, a correction for the **pupil-size
 artifact**: the pupil's center shifts (a few tenths of a millimeter) when the pupil changes size,
 which looks like an eye movement of up to a degree or two, and like vergence with two eyes (see the

@@ -139,7 +139,7 @@ it is up to each calibration method, which says which one it uses. All three ang
 agree near the reference; they differ for large eye or head rotations. The gaze and up vectors
 (see [Columns](#columns)) give the same orientation without that choice.
 
-How the calibration methods included with OpenIris (Auto, Manual, Remote Linear) calculate the eye
+How the calibration methods included with OpenIris (Auto, Manual, N-point) calculate the eye
 angles:
 
 - **H, V and T are Fick angles** (horizontal about the head's vertical axis, then vertical, then

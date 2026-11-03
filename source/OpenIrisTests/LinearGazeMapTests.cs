@@ -14,7 +14,7 @@ namespace OpenIris.Tests
     using OpenIris.Calibration;
 
     /// <summary>
-    /// The map of the Remote Linear calibration: applied to the data, saved in the calibration file,
+    /// The map of the N-point calibration: applied to the data, saved in the calibration file,
     /// and with the signals for the pupil alone (webcam), the pupil minus a reflection, and dual Purkinje.
     /// </summary>
     [TestClass]

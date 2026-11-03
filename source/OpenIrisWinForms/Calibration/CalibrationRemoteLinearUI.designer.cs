@@ -90,7 +90,7 @@
             this.groupBox1.Size = new System.Drawing.Size(268, 563);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Remote Linear Calibration";
+            this.groupBox1.Text = "N-point calibration";
             this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // dataGridView1

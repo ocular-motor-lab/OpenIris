@@ -211,7 +211,7 @@ classdef OpenIrisClient < handle
         end
 
         function reply = CalibrationMessage(this, message)
-            % Sends a message to the running calibration (Remote Linear: FixStart:x,y, FixStop,
+            % Sends a message to the running calibration (N-point in its Remote mode: FixStart:x,y, FixStop,
             % FixAbort, Complete) and returns the reply ('ack' or an error).
             if ( this.UsesCommands() )
                 reply = this.CommandAsk(['Calibration|' char(message)], false);

@@ -151,7 +151,7 @@ namespace OpenIris
 
         /// <summary>
         /// What the calibration found beyond the eye model and the reference, which changes the
-        /// calibrated data as that calibration needs (for example the map of Remote Linear). Null for
+        /// calibrated data as that calibration needs (for example the map of N-point). Null for
         /// calibrations that only use the eye model and the reference.
         /// </summary>
         public EyeCalibrationData? CalibrationData { get; set; }

@@ -13,7 +13,7 @@ namespace OpenIris
 
     /// <summary>
     /// What a calibration found for one eye beyond the eye model and the reference, and how it changes
-    /// the calibrated data: for example a map fitted from targets (LinearGazeMap, by the Remote Linear
+    /// the calibrated data: for example a map fitted from targets (LinearGazeMap, by the N-point
     /// calibration). Each calibration can have its own kind, used as it needs: replacing the angles of
     /// the eye model, correcting them, or adding to them.
     /// </summary>

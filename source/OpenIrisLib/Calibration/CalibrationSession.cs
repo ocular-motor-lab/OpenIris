@@ -74,6 +74,7 @@ namespace OpenIris
         {
             calibrationPipeline = CalibrationPipelineBase.Create(calibrationPipelineName, settings);
             calibrationPipeline.EyesToCalibrate = whichEyeToCalibrate;
+            calibrationPipeline.SystemSettings = systemSettings;
 
             this.whichEyeToCalibrate = whichEyeToCalibrate;
             this.systemSettings = systemSettings;

@@ -174,7 +174,8 @@ The MATLAB class `OpenIris.OpenIrisClient` sends these commands for you, over UD
 ## Calibration
 
 A calibration can be driven by the stimulus program when the **Calibration method** is
-**Remote Linear** (Configuration, General settings, section C):
+**N-point** (Configuration, General settings, section C) with the **Mode** **Remote** (see
+[Calibration](calibration.md#n-point)):
 
 1. Start the calibration in OpenIris (the **Calibrate** button).
 2. For each calibration target, the stimulus program shows the target and sends
@@ -200,7 +201,8 @@ send `SetRef:0`; for dual Purkinje, the first reflection minus the one with the 
 (see [Calibration](calibration.md#which-method-to-use)).
 
 Each message replies `ack`, or an error message if it couldn't be understood. With no calibration in
-progress, messages are ignored and reply `ack`.
+progress, messages are ignored and reply `ack`. In the Local and RemoteDisplay modes OpenIris shows
+the targets itself, and replies to the target messages with an error.
 
 To synchronize eye data with a stimulus display, see also
 [OpenIrisSync](https://github.com/ocular-motor-lab/OpenIrisSync/wiki).
@@ -231,8 +233,8 @@ Choosing the display works in Chrome and Edge, which ask once for permission (**
 and only when the page is opened as `http://localhost:9001`, on the OpenIris computer. Browsers don't
 allow it for pages at another computer's address: there, move the window to the display instead.
 
-It uses the **Remote Linear** calibration (by Ryan Ressmeyer, see [Calibration](#calibration)) and
-switches OpenIris to it. Set the width of the screen and the viewing distance, so the targets are at
+It uses the **N-point** calibration (by Ryan Ressmeyer, see [Calibration](#calibration)) in its
+Remote mode, and switches OpenIris to it. Set the width of the screen and the viewing distance, so the targets are at
 the right angles, and the number of targets (5, 9 or 13), how far out they go, and how long each
 lasts. The positions are in degrees, up and right positive. At the end the subject looks at the
 center target, which becomes the zero reference.
@@ -241,6 +243,32 @@ The result shows each target with the position the calibration gives for each ey
 shows the targets again (in a new random order) and compares them with the gaze: the mean and
 maximum error of each eye, in degrees, is the accuracy to report. The calibration error is lower than
 the real one, because the fit was made to those same points.
+
+
+### Targets shown by OpenIris
+
+With the N-point calibration in its **RemoteDisplay** mode, OpenIris decides the targets and their
+timing, and the web client shows them: open the client in a browser on the computer of the screen
+the subject looks at. When a calibration starts (from OpenIris or from the client), the targets
+cover the page, whichever page of the client is open, and when it ends the page comes back. **Esc**
+stops the calibration.
+
+A browser only goes full screen after a click on the page, not when a calibration starts, so the
+targets fill the browser window. To have them full screen, press **Full screen** in the client's
+Calibration group first, choosing the display the subject looks at (as for the full-screen
+calibration): the client stays full screen while you use it. F11 does it too. The width of the
+screen and the viewing distance are settings of OpenIris's eye tracking system
+(**ScreenWidthMm**, **ViewingDistanceMm**), not of the client.
+
+Other programs can draw the targets too: they come on the WebSocket
+`ws://<address>:9001/ws/calibration`, about 60 times a second while there is one,
+
+```
+{"type":"target","x":5,"y":-3,"scale":1.4,"recording":false,"size":0.8,"screenWidthMm":530,"distanceMm":570,"number":2,"count":9}
+```
+
+with `x`, `y` in degrees (positive right and up), `size` the diameter in degrees drawn `scale` times
+bigger, and `{"type":"idle"}` when there is no target.
 
 ## Web API
 

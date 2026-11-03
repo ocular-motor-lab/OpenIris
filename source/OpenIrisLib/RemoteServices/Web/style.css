@@ -149,3 +149,10 @@ footer {
   padding: 8px 16px; color: var(--muted); font-size: 12px;
   border-top: 1px solid var(--border); background: var(--panel);
 }
+
+/* The calibration targets when OpenIris controls them (targets.js): over the whole page, mid gray,
+   as is usual for stimuli. */
+.targets-stage { position: fixed; inset: 0; z-index: 100; background: #808080; display: none; cursor: none; }
+.targets-stage.show { display: block; }
+.targets-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.targets-stage .hint { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; color: #555; font-size: 13px; }

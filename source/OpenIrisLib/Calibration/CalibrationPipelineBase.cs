@@ -46,9 +46,16 @@ namespace OpenIris
         public CalibrationSettings Settings { get; set; }
 
         /// <summary>
-        /// Indicates weather the calibration was cancelled.
+        /// Indicates whether the calibration was cancelled. The calibration can set it itself, for
+        /// example when the subject presses Esc on its targets; the session then stops.
         /// </summary>
-        public bool Cancelled { get; }
+        public bool Cancelled { get; protected set; }
+
+        /// <summary>
+        /// Settings of the eye tracking system (the screen of the targets, the cameras...), set by the
+        /// calibration session. Null if unknown.
+        /// </summary>
+        public EyeTrackingSystemSettings? SystemSettings { get; internal set; }
 
         protected CalibrationPipelineBase()
         {

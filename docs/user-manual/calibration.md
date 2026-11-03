@@ -21,7 +21,7 @@ Choose the method in the configuration (**CalibrationMethod**, General settings,
 | --- | --- |
 | **Auto** | Takes the eye model and the reference from the first good frame. The subject must look straight ahead when you click Calibrate. |
 | **Manual Calibration** | You set the eye model yourself, in a panel with controls for each eye. |
-| **Remote Linear** | Your stimulus program shows targets and tells OpenIris where they are; OpenIris fits a linear transformation from eye position to target position. See [Remote control](remote-control.md#calibration). |
+| **N-point** | The subject looks at targets at known positions; OpenIris fits a linear transformation from eye position to target position. OpenIris, a display it controls, or your stimulus program shows the targets: see [N-point](#n-point). Called **Remote Linear** before 0.2. |
 
 Each calibration has two steps, one after the other: first the eye model of each eye, then the
 reference, taken while the subject looks straight ahead.
@@ -34,9 +34,8 @@ reference, taken while the subject looks straight ahead.
   works when each camera faces its eye roughly straight on.
 - **Manual Calibration** is for when that assumption doesn't hold, for example when a camera sees
   the eye from the side or from below, or when you want to set the eye model precisely.
-- **Remote Linear** fits a linear transformation from the eye signal to the gaze angle, from
-  targets at known positions, shown by a stimulus program or by the
-  [web client](remote-control.md#full-screen-calibration-and-validation). It is the most accurate when the subject
+- **N-point** fits a linear transformation from the eye signal to the gaze angle, from
+  targets at known positions (see [N-point](#n-point)). It is the most accurate when the subject
   can look at targets. The calibrated horizontal and vertical positions then come from that fit, and
   it is saved in the `.cal` file with the rest of the calibration. Choose the eye signal in its
   settings (**SignalSource** minus **SignalReference**):
@@ -48,6 +47,29 @@ reference, taken while the subject looks straight ahead.
   | Dual Purkinje (DPI): first corneal reflection minus the fourth Purkinje image | CR1 | the reflection with the 4th image, for example CR5 |
 
   The ready-made **Webcam** profile already uses the pupil alone.
+
+### N-point
+
+Who shows the targets, and who decides where and when, is the calibration's **Mode**:
+
+| Mode | The targets are shown by | Their positions and timing are decided by | Display |
+| --- | --- | --- | --- |
+| **Local** | OpenIris, full screen on a display of its computer | OpenIris | **StimulusDisplay** in the eye tracking system's settings: its number in Windows' display settings, 0 for the main display |
+| **RemoteDisplay** | the web client, on the computer of the screen the subject looks at: any of its pages shows the targets while there are any | OpenIris | chosen in the web client (see [Remote control](remote-control.md#targets-shown-by-openiris)) |
+| **Remote** (the default) | your stimulus program, or the web client's [full-screen calibration](remote-control.md#full-screen-calibration-and-validation) | that program, which tells OpenIris with messages | chosen in that program |
+
+With **Local** and **RemoteDisplay**, press **Calibrate** in OpenIris (or the web client) and the
+targets start: the center first, then the others in random order. Each target shrinks while the
+eye settles on it (**SettleSeconds**), and then its data is collected (**CollectSeconds**). After
+the last one, the subject looks at the center, which becomes the reference. Esc on OpenIris's
+targets (Local) stops the calibration. The calibration's settings choose how many targets
+(**Targets**: 5, 9 or 13), how far out they go (**TargetsHorizontal**, **TargetsVertical**, in
+degrees from the center) and their size (**TargetSize**). The screen is part of the eye tracking
+system's settings (section **Stimulus display**): its width (**ScreenWidthMm**) and the distance from
+the eyes (**ViewingDistanceMm**), so the targets are at the right angles.
+
+With **Remote**, the program sends the targets as they are shown: see
+[Remote control](remote-control.md#calibration).
 
 ### Calibrating with Auto
 

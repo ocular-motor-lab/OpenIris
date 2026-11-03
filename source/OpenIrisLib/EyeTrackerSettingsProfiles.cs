@@ -105,8 +105,8 @@ namespace OpenIris
             ("Simulation", "Simulation", "JOM", s => { }),
             ("Webcam", "Webcam", "Webcam iris", s =>
             {
-                // No corneal reflections with a webcam: Remote Linear fits the pupil (the iris center) alone.
-                s.CalibrationMethod = "Remote Linear";
+                // No corneal reflections with a webcam: N-point fits the pupil (the iris center) alone.
+                s.CalibrationMethod = OpenIris.Calibration.CalibrationPipelineRemoteLinear.MethodName;
                 if (s.CalibrationSettings is OpenIris.Calibration.CalibrationSettingsRemoteLinear remoteLinear)
                 {
                     remoteLinear.SignalSource = OpenIris.Calibration.EyeSignalSource.Pupil;

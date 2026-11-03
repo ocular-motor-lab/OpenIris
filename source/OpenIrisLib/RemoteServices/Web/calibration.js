@@ -1,6 +1,6 @@
 // OpenIris web client: full-screen N-point calibration and validation.
 //
-// Calibration drives the Remote Linear method (CalibrationRemoteLinear.cs, by Ryan Ressmeyer) with its
+// Calibration drives the N-point method (Remote mode; CalibrationRemoteLinear.cs, by Ryan Ressmeyer) with its
 // messages: for each target FixStart:x,y (target in degrees, y up) and FixStop, then Complete. OpenIris
 // fits, for each eye, a linear map from the eye signal (source minus reference, pupil minus CR1 by
 // default) to the targets and saves it in the calibration settings (LeftGxx...).
@@ -49,7 +49,8 @@ async function api(method, path, body) {
   return data;
 }
 
-const METHOD = "Remote Linear";
+// This page shows and controls the targets itself: the N-point calibration in its Remote mode.
+const METHOD = "N-point";
 const SIGNALS = ["None", "Pupil", "CR1", "CR2", "CR3", "CR4"];
 
 async function getSettings() {
@@ -81,7 +82,7 @@ function connectStream() {
   socket.onclose = () => setTimeout(connectStream, 1000);
 }
 
-// Eye signal of one row, as the Remote Linear calibration computes it: source minus reference, in
+// Eye signal of one row, as the N-point calibration computes it: source minus reference, in
 // pixels. Null if the eye or a reflection wasn't found (OpenIris writes 0 then).
 function signal(row, eye, source, reference) {
   const point = (name) => {
@@ -114,7 +115,7 @@ function medianSignals(rows, source, reference) {
   return result;
 }
 
-// Gaze in degrees from a signal, with the map of the Remote Linear calibration: the fit is
+// Gaze in degrees from a signal, with the map of the N-point calibration: the fit is
 // [x y] = [sx sy 1] * [[Gxx Gxy] [Gyx Gyy] [XOffset YOffset]].
 function gaze(map, s) {
   return [
@@ -354,6 +355,7 @@ async function calibrate() {
     if (!status.Tracking) throw new Error("OpenIris is not tracking.");
     if (status.Calibrating) throw new Error("OpenIris is already calibrating.");
     if (status.CalibrationMethod !== METHOD) await setSetting("CalibrationMethod", METHOD);
+    await setSetting("Calibration.Mode", "Remote");
     await setSetting("Calibration.SignalSource", source);
     await setSetting("Calibration.SignalReference", reference);
 
@@ -396,7 +398,7 @@ async function validate() {
     if (!status.Tracking) throw new Error("OpenIris is not tracking.");
     const settings = await getSettings();
     if (status.CalibrationMethod !== METHOD || settings["Calibration.LeftGxx"] === undefined) {
-      throw new Error("Calibrate first: validation uses the Remote Linear calibration.");
+      throw new Error("Calibrate first: validation uses the N-point calibration.");
     }
     const source = settings["Calibration.SignalSource"], reference = settings["Calibration.SignalReference"];
     const points = targetGrid(options.points, options.extentX, options.extentY);

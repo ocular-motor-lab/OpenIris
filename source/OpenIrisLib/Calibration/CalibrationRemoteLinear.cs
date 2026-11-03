@@ -400,10 +400,60 @@ namespace OpenIris.Calibration
         }
     }
 
-    [Export(typeof(CalibrationPipelineBase)), PluginDescription("Remote Linear", typeof(CalibrationSettingsRemoteLinear))]
+    /// <summary>
+    /// Who shows the targets of the N-point calibration and decides where and when.
+    /// </summary>
+    public enum NPointMode
+    {
+        /// <summary>OpenIris shows the targets itself, full screen on a display of its computer (StimulusDisplay).</summary>
+        Local,
+
+        /// <summary>OpenIris decides the targets, and a display client draws them (the web client's display page, on another computer).</summary>
+        RemoteDisplay,
+
+        /// <summary>A remote program shows the targets and tells OpenIris with messages (FixStart:x,y, FixStop, FixAbort, Complete).</summary>
+        Remote,
+    }
+
+    /// <summary>
+    /// N-point calibration (called Remote Linear before 0.2): for each eye, a linear map from the eye
+    /// signal (pupil minus a reflection, by default) to the targets, in degrees. The targets are shown
+    /// by OpenIris (Local), by a display client that OpenIris controls (RemoteDisplay), or by a remote
+    /// program that controls them (Remote). See docs/user-manual/calibration.md.
+    /// </summary>
+    [Export(typeof(CalibrationPipelineBase)), PluginDescription(MethodName, typeof(CalibrationSettingsRemoteLinear))]
     public class CalibrationPipelineRemoteLinear : CalibrationPipelineBase
     {
+        /// <summary>Name of the calibration method.</summary>
+        public const string MethodName = "N-point";
+
         private LinearCalibrator calibrator = new LinearCalibrator();
+
+        // The targets when OpenIris controls them (Local and RemoteDisplay).
+        private NPointSequence? sequence;
+        private readonly System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+        private int recordingNumber;
+
+        /// <summary>
+        /// Seconds since the targets started, for the tests. The time of the computer if null.
+        /// </summary>
+        internal Func<double>? Clock { get; set; }
+
+        /// <summary>
+        /// Gets who shows the targets.
+        /// </summary>
+        public NPointMode Mode => (Settings as CalibrationSettingsRemoteLinear)?.Mode ?? NPointMode.Remote;
+
+        /// <summary>
+        /// Gets the target to draw now when OpenIris controls the targets (Local and RemoteDisplay
+        /// modes), or null. The center target while the reference is taken, after the targets.
+        /// </summary>
+        public NPointTarget? Target { get; private set; }
+
+        /// <summary>
+        /// Stops the calibration, for example when the subject presses Esc on the targets.
+        /// </summary>
+        public void Cancel() => Cancelled = true;
 
         /// <summary>
         /// Whether the calibration is collecting a fixation ("Fixating") or not ("Waiting"), for the
@@ -423,6 +473,8 @@ namespace OpenIris.Calibration
         /// </summary>
         public override (bool completed, CalibrationParameters? calibration) ProcessForCalibrationModel(EyeTrackerImagesAndData frame, EyeTrackingPipelineSettings processingSettings)
         {
+            if (Mode != NPointMode.Remote) RunTargets();
+
             foreach (var eye in Eyes(EyesToCalibrate))
             {
                 if (frame.Images[eye]?.EyeData is EyeData eyeData) calibrator.PushData(eyeData);
@@ -444,9 +496,54 @@ namespace OpenIris.Calibration
         /// </summary>
         public override (bool completed, CalibrationParameters? calibration) ProcessForZeroReference(EyeTrackerImagesAndData frame, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
+            // The subject looks at the center while the reference is taken.
+            if (Mode != NPointMode.Remote) Target = new NPointTarget(new PointF(0, 0), 1, true, 0, 0);
+
             if (!AllEyesTracked(frame)) return (false, null);
 
             return (true, WithReferences(currentCalibration, frame));
+        }
+
+        /// <summary>
+        /// Shows the targets when OpenIris controls them: starts and stops collecting each one as the
+        /// sequence goes, and completes the calibration after the last.
+        /// </summary>
+        private void RunTargets()
+        {
+            var settings = (CalibrationSettingsRemoteLinear)Settings;
+            if (sequence is null)
+            {
+                var points = NPointSequence.Layout((int)settings.Targets, (float)settings.TargetsHorizontal, (float)settings.TargetsVertical, new Random());
+                sequence = new NPointSequence(points, settings.SettleSeconds, settings.CollectSeconds);
+                stopwatch.Restart();
+            }
+
+            if (calibrator.completed) return;
+
+            var target = sequence.TargetAt(Clock?.Invoke() ?? stopwatch.Elapsed.TotalSeconds);
+
+            // A target's data ends when the next target starts moving, or after the last.
+            if (recordingNumber != 0 && target?.Number != recordingNumber)
+            {
+                calibrator.StopFixation();
+                Fixations = calibrator.GetUIData(settings.SignalSource, settings.SignalReference);
+                recordingNumber = 0;
+            }
+
+            if (target is not null && target.Recording && recordingNumber == 0)
+            {
+                calibrator.StartFixation(target.Position);
+                recordingNumber = target.Number;
+            }
+
+            Target = target;
+            Status = target is null ? "Done" : $"Target {target.Number} of {target.Count}" + (target.Recording ? ", collecting" : string.Empty);
+
+            if (target is null)
+            {
+                calibrator.CompleteCalibration(ref settings);
+                calibrator.completed = true;
+            }
         }
 
         /// <summary>
@@ -467,6 +564,12 @@ namespace OpenIris.Calibration
         /// <exception cref="ArgumentNullException"></exception>
         public override string HandleMessage(string message)
         {
+            // When OpenIris shows the targets, the targets don't come in messages.
+            if (Mode != NPointMode.Remote && !message.StartsWith("Set", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return $"ERROR: OpenIris shows the targets (N-point calibration in the {Mode} mode). Set Mode to Remote to send them.";
+            }
+
             if (message.StartsWith("SetSource:", StringComparison.InvariantCultureIgnoreCase))
             {
                 try
@@ -543,9 +646,53 @@ namespace OpenIris.Calibration
     }
 
 
+    /// <summary>
+    /// How many targets the N-point calibration shows when OpenIris controls them.
+    /// </summary>
+    public enum NPointTargets
+    {
+        /// <summary>The center and the four corners.</summary>
+        Five = 5,
+
+        /// <summary>A 3 × 3 grid.</summary>
+        Nine = 9,
+
+        /// <summary>The 3 × 3 grid and the corners of a grid half as big.</summary>
+        Thirteen = 13,
+    }
+
     [Serializable]
     public class CalibrationSettingsRemoteLinear : CalibrationSettings
     {
+        [Category("Targets"), Description("Who shows the targets: Local, OpenIris itself on the display StimulusDisplay of the eye tracking system; " +
+            "RemoteDisplay, a display client that OpenIris controls (the web client's display page); Remote, a remote program that shows them and sends " +
+            "FixStart:x,y, FixStop and Complete. The screen's size and distance are settings of the eye tracking system.")]
+        public NPointMode Mode { get => mode; set => SetProperty(ref mode, value, nameof(Mode)); }
+        private NPointMode mode = NPointMode.Remote;
+
+        [Category("Targets"), Description("How many targets OpenIris shows (Local and RemoteDisplay modes).")]
+        public NPointTargets Targets { get => targets; set => SetProperty(ref targets, value, nameof(Targets)); }
+        private NPointTargets targets = NPointTargets.Nine;
+
+        [Category("Targets"), Description("Horizontal distance from the center to the outer targets, in degrees.")]
+        public double TargetsHorizontal { get => targetsHorizontal; set => SetProperty(ref targetsHorizontal, value, nameof(TargetsHorizontal)); }
+        private double targetsHorizontal = 10;
+
+        [Category("Targets"), Description("Vertical distance from the center to the outer targets, in degrees.")]
+        public double TargetsVertical { get => targetsVertical; set => SetProperty(ref targetsVertical, value, nameof(TargetsVertical)); }
+        private double targetsVertical = 8;
+
+        [Category("Targets"), Description("Diameter of the targets, in degrees.")]
+        public double TargetSize { get => targetSize; set => SetProperty(ref targetSize, value, nameof(TargetSize)); }
+        private double targetSize = 0.8;
+
+        [Category("Targets"), Description("Time for the eye to settle on each target before its data is collected, in seconds.")]
+        public double SettleSeconds { get => settleSeconds; set => SetProperty(ref settleSeconds, value, nameof(SettleSeconds)); }
+        private double settleSeconds = 0.8;
+
+        [Category("Targets"), Description("Time collecting the data of each target, in seconds.")]
+        public double CollectSeconds { get => collectSeconds; set => SetProperty(ref collectSeconds, value, nameof(CollectSeconds)); }
+        private double collectSeconds = 1.0;
 
         [Category("Sources"), Description("Source of eye position.")]
         public EyeSignalSource SignalSource { get => signalSource; set => SetProperty(ref signalSource, value, nameof(SignalSource)); }

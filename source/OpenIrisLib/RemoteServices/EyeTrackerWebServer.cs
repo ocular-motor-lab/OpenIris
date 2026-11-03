@@ -33,6 +33,7 @@ namespace OpenIris
         private readonly SynchronizationContext? uiContext;
         private readonly WebServer server;
         private readonly EyeTrackerDataStream dataStream;
+        private readonly CalibrationTargetStream targetStream;
 
         /// <summary>
         /// JSON options of every reply. NaN (eye not found) goes as null, which JSON has and
@@ -54,6 +55,7 @@ namespace OpenIris
             this.eyeTracker = eyeTracker;
             uiContext = SynchronizationContext.Current;
             dataStream = new EyeTrackerDataStream("/ws/data", eyeTracker);
+            targetStream = new CalibrationTargetStream("/ws/calibration", eyeTracker);
 
             Swan.Logging.Logger.NoLogging();
 
@@ -61,6 +63,7 @@ namespace OpenIris
                     .WithUrlPrefix($"http://*:{port}/")
                     .WithMode(HttpListenerMode.EmbedIO))
                 .WithModule(dataStream)
+                .WithModule(targetStream)
                 .WithModule(new WebApiModule("/api", SendJsonAsync)
                     .WithController(() => new EyeTrackerWebApi(eyeTracker, this)))
                 .WithModule(new ActionModule("/EyeTrackerEndpoint/Web", HttpVerbs.Any, OldWebEndpointAsync))
@@ -176,6 +179,7 @@ namespace OpenIris
         public void Dispose()
         {
             dataStream.Dispose();
+            targetStream.Dispose();
             server.Dispose();
         }
 

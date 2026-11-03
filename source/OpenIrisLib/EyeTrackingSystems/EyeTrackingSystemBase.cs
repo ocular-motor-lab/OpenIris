@@ -392,6 +392,19 @@ namespace OpenIris
         public LightPosition[] Lights { get => lights; set => SetProperty(ref lights, value, nameof(Lights)); }
         private LightPosition[] lights = new LightPosition[0];
 
+        [Category("Stimulus display"), Description("Width of the visible part of the screen where the calibration targets are shown, in mm.")]
+        public double ScreenWidthMm { get => screenWidthMm; set => SetProperty(ref screenWidthMm, value, nameof(ScreenWidthMm)); }
+        private double screenWidthMm = 530;
+
+        [Category("Stimulus display"), Description("Distance from the eyes to the screen, in mm.")]
+        public double ViewingDistanceMm { get => viewingDistanceMm; set => SetProperty(ref viewingDistanceMm, value, nameof(ViewingDistanceMm)); }
+        private double viewingDistanceMm = 570;
+
+        [Category("Stimulus display"), Description("The display where OpenIris shows the calibration targets itself (N-point calibration, Local mode): " +
+            "its number in Windows' display settings (1, 2...). 0 for the main display.")]
+        public int StimulusDisplay { get => stimulusDisplay; set => SetProperty(ref stimulusDisplay, value, nameof(StimulusDisplay)); }
+        private int stimulusDisplay = 0;
+
         [Category("Camera properties"), Description("Distance between the centers of the eyes, in mm, to know where the lights are from each eye.")]
         public double DistanceBetweenEyesMm { get => distanceBetweenEyesMm; set => SetProperty(ref distanceBetweenEyesMm, value, nameof(DistanceBetweenEyesMm)); }
         private double distanceBetweenEyesMm = 63;

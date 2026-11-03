@@ -51,6 +51,12 @@
         <div class="row">
           <a class="button" id="openCalibration" href="calibration.html" target="_blank" title="Opens in a new window: move it to the screen the subject looks at">Full-screen calibration</a>
         </div>
+        <div class="row" style="margin-top:8px" title="When OpenIris shows the targets on this client (N-point calibration, RemoteDisplay mode), they fill this window: go full screen first, on the display the subject looks at.">
+          <select id="display" style="flex:1 1 100%;min-width:0"><option value="">This window's display</option></select>
+          <button id="fullScreen">Full screen</button>
+          <button id="findDisplays" type="button">Find displays</button>
+        </div>
+        <div class="muted" id="displayNote" style="font-size:12px"></div>
         <div class="row" style="margin-top:8px">
           <button id="startCalibration" title="Start the calibration method chosen in the settings">Calibrate</button>
           <button id="cancelCalibration">Cancel</button>
@@ -139,5 +145,6 @@
   </footer>
 
   <script src="app.js"></script>
+  <script src="targets.js"></script>
 </body>
 </html>

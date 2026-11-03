@@ -592,6 +592,8 @@ namespace OpenIris.UI
 
             if (!eyeTracker.Calibrating && tabPages.Contains(tabCalibration))
             {
+                // Disposed, so what the panel opened (the targets of N-point's Local mode) closes too.
+                foreach (var control in tabCalibration.Controls.Cast<Control>().ToArray()) control.Dispose();
                 tabCalibration.Controls.Clear();
                 tabPages.TabPages.Remove(tabCalibration);
                 tabPages.SelectTab(0);

@@ -39,6 +39,14 @@ namespace OpenIris.Calibration
         {
             this.pipeline = pipeline;
             InitializeComponent();
+
+            // In the Local mode OpenIris shows the targets itself, while the calibration lasts.
+            if (pipeline.Mode == NPointMode.Local)
+            {
+                var targets = new NPointTargetsForm(pipeline);
+                targets.Show();
+                Disposed += (_, __) => targets.Close();
+            }
         }
 
         private void RemoteCalibrationUI_Load(object sender, EventArgs e)

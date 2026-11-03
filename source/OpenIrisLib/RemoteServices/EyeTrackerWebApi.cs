@@ -161,7 +161,7 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Sends a message to the running calibration (for example FixStart:x,y for the Remote Linear
+        /// Sends a message to the running calibration (for example FixStart:x,y for the N-point
         /// method). The body is the message, as text. Replies with the answer of the calibration.
         /// </summary>
         [Route(HttpVerbs.Post, "/calibration/message")]

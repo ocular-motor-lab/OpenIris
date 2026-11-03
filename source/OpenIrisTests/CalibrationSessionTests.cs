@@ -139,7 +139,7 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
-        /// Remote Linear driven by messages, as the web client or a MATLAB script does it: the pupil
+        /// N-point driven by messages, as the web client or a MATLAB script does it: the pupil
         /// moves 2 px per degree, and the map fitted for each eye gives back the targets.
         /// </summary>
         [DataTestMethod]
@@ -148,7 +148,7 @@ namespace OpenIris.Tests
         public void RemoteLinearFitsTheTargetsSentInMessages(Eye eyes)
         {
             var settings = new CalibrationSettingsRemoteLinear { SignalSource = EyeSignalSource.Pupil, SignalReference = EyeSignalSource.None };
-            using var session = new CalibrationSession(eyes, "Remote Linear", settings);
+            using var session = new CalibrationSession(eyes, "N-point", settings);
 
             var target = new PointF(0, 0);
             PointF Pupil() => new PointF(100 + 2 * target.X, 80 - 2 * target.Y);
@@ -189,6 +189,79 @@ namespace OpenIris.Tests
                 Assert.AreEqual(5, horizontal, 0.05, $"{eye} eye horizontal");
                 Assert.AreEqual(-3, vertical, 0.05, $"{eye} eye vertical");
             }
+        }
+
+        /// <summary>
+        /// N-point with OpenIris showing the targets (Local and RemoteDisplay): the subject (the pupil)
+        /// follows the target OpenIris draws, and the map fitted gives back the targets. The targets
+        /// don't come in messages then.
+        /// </summary>
+        [DataTestMethod]
+        [DataRow(NPointMode.Local)]
+        [DataRow(NPointMode.RemoteDisplay)]
+        public void NPointShowsTheTargetsItself(NPointMode mode)
+        {
+            var settings = new CalibrationSettingsRemoteLinear
+            {
+                Mode = mode, Targets = NPointTargets.Five, SettleSeconds = 0.2, CollectSeconds = 0.3,
+                SignalSource = EyeSignalSource.Pupil, SignalReference = EyeSignalSource.None,
+            };
+            using var session = new CalibrationSession(Eye.Both, "N-point", settings);
+            var pipeline = (CalibrationPipelineRemoteLinear)session.Pipeline;
+
+            // The time advances 50 ms per frame.
+            var frames = 0;
+            pipeline.Clock = () => Volatile.Read(ref frames) * 0.05;
+            var seen = new System.Collections.Generic.HashSet<PointF>();
+
+            var model = Run(session, session.StartCalibratingModel(TrackingSettings), () =>
+            {
+                Interlocked.Increment(ref frames);
+                var target = pipeline.Target?.Position ?? new PointF(0, 0);
+                if (pipeline.Target?.Recording == true) seen.Add(target);
+                return Frame(Eye.Both, new CalibrationParameters(), new PointF(100 + 2 * target.X, 80 - 2 * target.Y));
+            });
+
+            Assert.AreEqual(5, seen.Count, "Five targets shown.");
+            StringAssert.StartsWith(session.HandleMessage("FixStart:1,2"), "ERROR", "No targets in messages.");
+
+            var map = (LinearGazeMap)model!.EyeCalibrationParameters[Eye.Left].CalibrationData!;
+            var (horizontal, vertical) = map.Apply(Frame(Eye.Both, model, new PointF(100 + 2 * 5, 80 - 2 * -3)).Images[Eye.Left]!.EyeData!)!.Value;
+            Assert.AreEqual(5, horizontal, 0.05);
+            Assert.AreEqual(-3, vertical, 0.05);
+        }
+
+        /// <summary>
+        /// The sequence of targets: each one moves, settles shrinking, and then records; the center
+        /// first.
+        /// </summary>
+        [TestMethod]
+        public void NPointSequenceOfTargets()
+        {
+            var points = NPointSequence.Layout(9, 10, 8, new Random(1));
+            Assert.AreEqual(9, points.Length);
+            Assert.AreEqual(new PointF(0, 0), points[0], "The center first.");
+            Assert.AreEqual(5, NPointSequence.Layout(5, 10, 8, new Random(1)).Length);
+            Assert.AreEqual(13, NPointSequence.Layout(13, 10, 8, new Random(1)).Length);
+
+            var sequence = new NPointSequence(points, 1, 2);
+            var perTarget = NPointSequence.MoveSeconds + 1 + 2;
+            Assert.AreEqual(9 * perTarget, sequence.Duration, 1e-9);
+
+            var moving = sequence.TargetAt(perTarget + NPointSequence.MoveSeconds / 2)!;
+            Assert.AreEqual(2, moving.Number);
+            Assert.AreEqual(points[1].X / 2, moving.Position.X, 1e-4, "Halfway from the first target.");
+            Assert.IsFalse(moving.Recording);
+
+            var settling = sequence.TargetAt(perTarget + NPointSequence.MoveSeconds + 0.5)!;
+            Assert.AreEqual(1.5, settling.Scale, 1e-9);
+            Assert.IsFalse(settling.Recording);
+
+            var recording = sequence.TargetAt(perTarget + NPointSequence.MoveSeconds + 1.5)!;
+            Assert.IsTrue(recording.Recording);
+            Assert.AreEqual(points[1], recording.Position);
+
+            Assert.IsNull(sequence.TargetAt(sequence.Duration + 0.01), "Over.");
         }
 
         [TestMethod]

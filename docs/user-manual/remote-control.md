@@ -21,8 +21,8 @@ shows which services started, for example `UDP server Waiting for requests in po
 
 ## Ports
 
-All ports are numbered from the setting **ServiceListeningPort** (Configuration, General settings,
-section G, default 9000). Changing it requires restarting OpenIris.
+All ports are numbered from the setting **ServiceListeningPort** (Configuration, Profiles tab, settings of
+this computer, Network, default 9000). Changing it requires restarting OpenIris.
 
 | Port | Default | Used for |
 | --- | --- | --- |
@@ -174,7 +174,7 @@ The MATLAB class `OpenIris.OpenIrisClient` sends these commands for you, over UD
 ## Calibration
 
 A calibration can be driven by the stimulus program when the **Calibration method** is
-**N-point** (Configuration, General settings, section C) with the **Mode** **Remote** (see
+**N-point** (Configuration, Profiles tab, Eye tracking) with the **Mode** **Remote** (see
 [Calibration](calibration.md#n-point)):
 
 1. Start the calibration in OpenIris (the **Calibrate** button).

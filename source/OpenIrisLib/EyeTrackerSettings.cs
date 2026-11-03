@@ -26,7 +26,7 @@ namespace OpenIris
     {
         #region A) Choose an eye tracking system plugin"
 
-        [Category("A) Choose an eye tracking system"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
+        [Category("Eye tracking"), Description("EyeTracker system. What type of device or device configuration you want to use.")]
         [NeedsRestarting]
         [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingSystemBase>))]
         public string EyeTrackerSystem
@@ -89,7 +89,7 @@ namespace OpenIris
 
         #region B) Choose a tracking pipeline plugin
 
-        [Category("B) Choose a tracking pipeline"), Description("Tracking pipeline. What pipeline for tracking position, torsion etc you want to use?")]
+        [Category("Eye tracking"), Description("Tracking pipeline. What pipeline for tracking position, torsion etc you want to use?")]
         [TypeConverter(typeof(PluginListTypeConverter<EyeTrackingPipelineBase>))]
         public string EyeTrackingPipeline
         {
@@ -153,7 +153,7 @@ namespace OpenIris
         #region C) Choose a calibration method plugin
 
 
-        [Category("C) Choose a calibration method"), Description("Calibration method")]
+        [Category("Eye tracking"), Description("Calibration method")]
         [TypeConverter(typeof(PluginListTypeConverter<CalibrationPipelineBase>))]
         public string CalibrationMethod
         {
@@ -202,18 +202,18 @@ namespace OpenIris
 
         #region D) General settings
 
-        [Category("D) General settings"), Description("Maximum number of processing threads. Shared by all profiles.")]
+        [Category("General"), Description("Maximum number of processing threads. Shared by all profiles.")]
         [NeedsRestarting(true)]
         [SharedSetting]
         public int MaxNumberOfProcessingThreads { get => maxNumberOfProcessingThreads; set => SetProperty(ref maxNumberOfProcessingThreads, value, nameof(MaxNumberOfProcessingThreads)); }
         private int maxNumberOfProcessingThreads = 1; // Default value
 
-        [Category("D) General settings"), Description("Value indicating where debuging images should be shown")]
+        [Category("General"), Description("Value indicating where debuging images should be shown")]
         public bool Debug { get => debug; set => SetProperty(ref debug, value, nameof(Debug)); }
         private bool debug = false; // Default value
 
 
-        [Category("D) General settings"), Description("Gets the size of the buffer. Shared by all profiles.")]
+        [Category("General"), Description("Gets the size of the buffer. Shared by all profiles.")]
         [NeedsRestarting]
         [SharedSetting]
         public int BufferSize { get => bufferSize; set => SetProperty(ref bufferSize, value, nameof(BufferSize)); }
@@ -223,26 +223,26 @@ namespace OpenIris
 
         #region E) Recording settings
 
-        [Category("E) Recording settings"), Description("Name of the data files")]
+        [Category("Recording"), Description("Name of the data files")]
         public string SessionName { get => sessionName; set => SetProperty(ref sessionName, value, nameof(SessionName)); }
         private string sessionName = "OpenIris"; // Default value
 
-        [Category("E) Recording settings"), Description("Folder where data is saved. Shared by all profiles.")]
+        [Category("Recording"), Description("Folder where data is saved. Shared by all profiles.")]
         [SharedSetting]
         public string DataFolder { get => dataFolder; set => SetProperty(ref dataFolder, value, nameof(DataFolder)); }
         private string dataFolder = @"C:\OpenIrisData"; // Default value
 
         [Browsable(false)]
-        [Category("E) Recording settings"), Description("Last file saved.")]
+        [Category("Recording"), Description("Last file saved.")]
         [SharedSetting]
         public string LastRecordedFile { get => lastRecordedFile; set => SetProperty(ref lastRecordedFile, value, nameof(LastRecordedFile)); }
         private string lastRecordedFile = string.Empty; // Default value
 
-        [Category("E) Recording settings"), Description("Indicates if video should be recorded.")]
+        [Category("Recording"), Description("Indicates if video should be recorded.")]
         public bool RecordVideo { get => recordVideo; set => SetProperty(ref recordVideo, value, nameof(RecordVideo)); }
         private bool recordVideo = false; // Default value
 
-        [Category("E) Recording settings"), Description("Proportion of frames that should be recorded (1 every x).")]
+        [Category("Recording"), Description("Proportion of frames that should be recorded (1 every x).")]
         public int DecimateVideoRatio { get => decimateVideoRatio; set => SetProperty(ref decimateVideoRatio, value, nameof(DecimateVideoRatio)); }
         private int decimateVideoRatio = 1; // Default value
 
@@ -250,7 +250,7 @@ namespace OpenIris
 
         #region F) Display settings
 
-        [Category("F) Display settings"), Description("Number of seconds in trace plots.")]
+        [Category("Plots"), Description("Number of seconds in trace plots.")]
         public double TraceSpan { get => traceSpan; set => SetProperty(ref traceSpan, value, nameof(TraceSpan)); }
         private double traceSpan = 5; // Default value
 
@@ -258,7 +258,7 @@ namespace OpenIris
 
         #region G) Network settings
 
-        [Category("G) Network "), Description("TCP port where the host is listening. Shared by all profiles.")]
+        [Category("Network"), Description("TCP port where the host is listening. Shared by all profiles.")]
         [NeedsRestarting]
         [SharedSetting]
         public int ServiceListeningPort { get => serviceListeningPort; set => SetProperty(ref serviceListeningPort, value, nameof(ServiceListeningPort)); }
@@ -268,11 +268,11 @@ namespace OpenIris
 
         #region H) LSL streaming
 
-        [Category("H) LSL streaming"), Description("Indicates if the eye tracking data should be streamed through a Lab Streaming Layer (LSL) outlet. This runs in parallel with any eye tracking system.")]
+        [Category("LSL streaming"), Description("Indicates if the eye tracking data should be streamed through a Lab Streaming Layer (LSL) outlet. This runs in parallel with any eye tracking system.")]
         public bool StreamToLsl { get => streamToLsl; set => SetProperty(ref streamToLsl, value, nameof(StreamToLsl)); }
         private bool streamToLsl = false; // Default value
 
-        [Category("H) LSL streaming"), Description("Name of the LSL stream (outlet) advertised on the network. Shared by all profiles.")]
+        [Category("LSL streaming"), Description("Name of the LSL stream (outlet) advertised on the network. Shared by all profiles.")]
         [SharedSetting]
         public string LslStreamName { get => lslStreamName; set => SetProperty(ref lslStreamName, value, nameof(LslStreamName)); }
         private string lslStreamName = "OpenIris"; // Default value

@@ -15,7 +15,7 @@ positions into eye rotation angles, and to measure torsion against the reference
 
 ## Calibration methods
 
-Choose the method in the configuration (**CalibrationMethod**, General settings, section C):
+Choose the method in the configuration (**CalibrationMethod**, Profiles tab, Eye tracking):
 
 | Method | How it works |
 | --- | --- |

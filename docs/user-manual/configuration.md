@@ -76,20 +76,20 @@ the profile **Default**, and leaves the old file as it was.
 
 ## General settings
 
-| Section | Setting | Notes |
+| Category | Setting | Notes |
 | --- | --- | --- |
-| A | **EyeTrackerSystem** | The cameras, or Simulation. Same as the list on the main window. |
-| B | **EyeTrackingPipeline** | How images are processed. **JOM** is the full pipeline (pupil, corneal reflections, eyelids, torsion). |
-| C | **CalibrationMethod** | See [Calibration](calibration.md). |
-| D | **MaxNumberOfProcessingThreads** | How many frames are processed at the same time. 2 works best in most cases. |
-| D | **Debug** | Shows intermediate images in the Debug tab. Keep it **False** while recording: it slows processing, and at high frame rates OpenIris drops frames. |
-| D | **BufferSize** | How many frames can wait to be processed before frames are dropped. |
-| E | **SessionName** | Name of the recording files. Can also be changed on the main window. |
-| E | **DataFolder** | Where recordings are saved (default `C:\OpenIrisData`). |
-| E | **RecordVideo** | Whether recordings include the raw video of the eyes (default off). Videos let you [process the recording again](processing-videos.md) later, but take a lot of disk space. |
-| E | **DecimateVideoRatio** | Record one of every N frames in the video: 1 records every frame, 2 every other frame, 5 one of every 5. The data file still has every frame. |
-| F | **TraceSpan** | How many seconds the traces in the Viewer tab show. |
-| G | **ServiceListeningPort** | First network port for [remote control](remote-control.md) (default 9000). |
+| Eye tracking | **EyeTrackerSystem** | The cameras, or Simulation. Same as the list on the main window. |
+| Eye tracking | **EyeTrackingPipeline** | How images are processed. **JOM** is the full pipeline (pupil, corneal reflections, eyelids, torsion). |
+| Eye tracking | **CalibrationMethod** | See [Calibration](calibration.md). |
+| General | **MaxNumberOfProcessingThreads** | How many frames are processed at the same time. 2 works best in most cases. |
+| General | **Debug** | Shows intermediate images in the Debug tab. Keep it **False** while recording: it slows processing, and at high frame rates OpenIris drops frames. |
+| General | **BufferSize** | How many frames can wait to be processed before frames are dropped. |
+| Recording | **SessionName** | Name of the recording files. Can also be changed on the main window. |
+| Recording | **DataFolder** | Where recordings are saved (default `C:\OpenIrisData`). |
+| Recording | **RecordVideo** | Whether recordings include the raw video of the eyes (default off). Videos let you [process the recording again](processing-videos.md) later, but take a lot of disk space. |
+| Recording | **DecimateVideoRatio** | Record one of every N frames in the video: 1 records every frame, 2 every other frame, 5 one of every 5. The data file still has every frame. |
+| Plots | **TraceSpan** | How many seconds the traces in the Viewer tab show. |
+| Network | **ServiceListeningPort** | First network port for [remote control](remote-control.md) (default 9000). |
 
 ## System settings
 

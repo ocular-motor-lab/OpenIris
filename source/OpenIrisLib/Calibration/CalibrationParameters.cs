@@ -154,11 +154,14 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Gets the calibrated data from the raw data.
+        /// Gets the calibrated data from the raw data. The angles are the Fick angles of the rotation of
+        /// the eye from the reference (EyeRotationMath): Listing's law with Listing's plane perpendicular
+        /// to the line of sight at the reference, plus the torsion when it is known.
         /// </summary>
         /// <param name="eyeData">Raw data.</param>
+        /// <param name="mmPerPix">Size of a pixel at the eye, in mm, for the pupil area. NaN if unknown.</param>
         /// <returns>Calibrated data.</returns>
-        public CalibratedEyeData GetCalibratedEyeData(EyeData? eyeData)
+        public CalibratedEyeData GetCalibratedEyeData(EyeData? eyeData, double mmPerPix = double.NaN)
         {
             var data = new CalibratedEyeData
             {
@@ -192,28 +195,19 @@ namespace OpenIris
                     referenceY = EyeCalibrationParameters[eyeData.WhichEye].ImageSize.Height / 2;
                 }
 
-                // Get the angle position relative to the reference
-                var referenceXDeg = Math.Asin((referenceX - eyeModel.Center.X) / eyeModel.Radius) * 180 / Math.PI;
-                var referenceYDeg = Math.Asin((referenceY - eyeModel.Center.Y) / eyeModel.Radius) * 180 / Math.PI;
+                // The rotation of the eye from the reference, and its Fick angles. Torsion is NaN
+                // when it isn't measured (the rotation then follows Listing's law).
+                var rotation = EyeRotationMath.FromLinesOfSight(
+                    EyeRotationMath.LineOfSight(new System.Drawing.PointF(referenceX, referenceY), eyeModel, eyeData.WhichEye),
+                    EyeRotationMath.LineOfSight(eyeData.Pupil.Center, eyeModel, eyeData.WhichEye),
+                    eyeData.TorsionAngle);
+                var (horizontal, vertical, torsion) = EyeRotationMath.FickAngles(rotation);
+                data.HorizontalPosition = horizontal;
+                data.VerticalPosition = vertical;
+                data.TorsionalPosition = double.IsNaN(eyeData.TorsionAngle) ? double.NaN : torsion;
 
-                var xDeg = Math.Asin((eyeData.Pupil.Center.X - eyeModel.Center.X) / eyeModel.Radius) * 180 / Math.PI;
-                var yDeg = Math.Asin((eyeData.Pupil.Center.Y - eyeModel.Center.Y) / eyeModel.Radius) * 180 / Math.PI;
-
-                data.HorizontalPosition = -(xDeg - referenceXDeg);
-                data.VerticalPosition = -(yDeg - referenceYDeg);
-
-
-                data.TorsionalPosition = eyeData.TorsionAngle;
-
-                if (double.IsNaN(eyeData.TorsionAngle))
-                {
-                    data.TorsionalPosition = double.NaN;
-                }
-
-                // Pupil area in mm² assuming a 24 mm eye globe. Width and height are the full axes of
-                // the ellipse, so its area is π·w·h/4.
-                var globeRadiusPixels = calibrationInfo.EyePhysicalModel.IsEmpty ? eyeData.Iris.Radius : calibrationInfo.EyePhysicalModel.Radius;
-                data.PupilArea = Math.PI / 4 * (eyeData.Pupil.Size.Width / globeRadiusPixels * 12) * (eyeData.Pupil.Size.Height / globeRadiusPixels * 12);
+                // Width and height are the full axes of the ellipse, so its area is π·w·h/4.
+                data.PupilArea = Math.PI / 4 * eyeData.Pupil.Size.Width * eyeData.Pupil.Size.Height * mmPerPix * mmPerPix;
 
                 if (calibrationInfo.HasReference)
                 {
@@ -258,14 +252,15 @@ namespace OpenIris
         /// Gets the calibrated eye data for both eyes.
         /// </summary>
         /// <param name="eyeDataRaw">Eye data raw.</param>
+        /// <param name="mmPerPix">Size of a pixel at the eye, in mm, for the pupil area. NaN if unknown.</param>
         /// <returns></returns>
-        public EyeCollection<CalibratedEyeData> GetCalibratedEyeData(EyeCollection<EyeData?> eyeDataRaw)
+        public EyeCollection<CalibratedEyeData> GetCalibratedEyeData(EyeCollection<EyeData?> eyeDataRaw, double mmPerPix = double.NaN)
         {
             if (eyeDataRaw is null) throw new ArgumentNullException(nameof(eyeDataRaw));
 
             return new EyeCollection<CalibratedEyeData>(
-                GetCalibratedEyeData(eyeDataRaw[Eye.Left]),
-                GetCalibratedEyeData(eyeDataRaw[Eye.Right]));
+                GetCalibratedEyeData(eyeDataRaw[Eye.Left], mmPerPix),
+                GetCalibratedEyeData(eyeDataRaw[Eye.Right], mmPerPix));
         }
 
         /// <summary>

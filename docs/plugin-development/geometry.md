@@ -1,4 +1,4 @@
-﻿# Geometry and conventions
+# Geometry and conventions
 
 How OpenIris describes images, cameras, eyes and heads, in the terms computer vision uses. Where
 a convention exists, OpenIris follows OpenCV's: OpenIris is built on it (through EmguCV), and
@@ -116,7 +116,7 @@ Chains read right to left: `T_camera_head · T_head_eye` = `T_camera_eye`.
 
 ## Rotations
 
-- **(planned) The head-fixed frame for eye rotations** is the one used in 3D oculomotor research
+- **The head-fixed frame for eye rotations** is the one used in 3D oculomotor research
   (Haslwanter, "Mathematics of three-dimensional eye rotations", Vision Research, 1995):
   right-handed, x forward (the line of sight at the reference), y to the subject's left, z up, with
   rotations relative to the reference (primary) position. With the right-hand rule, positive
@@ -124,10 +124,16 @@ Chains read right to left: `T_camera_head · T_head_eye` = `T_camera_eye`.
   positive **rightward, upward**, and clockwise, so the angle getters flip the signs of horizontal and
   vertical; torsion agrees.
 - **In the math:** rotation matrices, quaternions, or rotation vectors (OpenCV's `Rodrigues`).
-- **Euler-type angles** (Fick, Helmholtz) only as outputs, with the convention named. Today the
-  three calibrated eye angles are each calculated separately (see the
-  [data file](../user-manual/data-file.md#coordinate-system)); the Webcam head angles are in Fick
-  order (yaw, then pitch, then roll).
+- **Euler-type angles** (Fick, Helmholtz) only as outputs, with the convention named. The
+  calibrated eye angles are the Fick angles of the eye's rotation (`EyeRotationMath`): the line of
+  sight from the eye model (the pupillary axis turned by kappa), Listing's law with Listing's plane
+  perpendicular to the line of sight at the reference, and the measured torsion about the line of
+  sight after it (see the [data file](../user-manual/data-file.md#coordinate-system)). Up is the
+  image's up made perpendicular to the line of sight at the reference. The Webcam head angles are
+  in Fick order (yaw, then pitch, then roll).
+- **Kappa** (`EyePhysicalModel.KappaAngleH`, `KappaAngleV`, in degrees): from the pupillary axis to
+  the visual axis, positive towards the nose and up. Applied about the image's axes, exact for the
+  eye near the camera's axis.
 - **(planned)** The calibrated eye data stores a rotation, with the angles as getters in one
   documented convention (the data file columns keep their names), and a "torsion known" flag,
   because horizontal and vertical are often known when torsion isn't. The calibrated head data

@@ -293,7 +293,7 @@ namespace OpenIris
                     {
                         EyeDataRaw = eyeDataRaw,
                         HeadDataRaw = headDataRaw,
-                        EyeDataCalibrated = Calibration?.GetCalibratedEyeData(eyeDataRaw),
+                        EyeDataCalibrated = Calibration?.GetCalibratedEyeData(eyeDataRaw, processedImages.TrackingSettings?.MmPerPix ?? double.NaN),
                         HeadDataCalibrated = Calibration?.GetCalibratedHeadData(headDataRaw),
                         FrameRate = ImageGrabber!.FrameRate
                     };

@@ -74,10 +74,9 @@ namespace OpenIris
     /// <para>The signs and the zero are the contract. How the three angles combine into an
     /// orientation (Fick, Helmholtz, rotation vectors...) is up to whatever calculates them, which
     /// must say which one it uses. Today that is CalibrationParameters.GetCalibratedEyeData for all
-    /// the calibration methods: horizontal and vertical are each the arcsine of the pupil's
-    /// displacement on the eye globe of the calibration's eye model (pupil center minus globe center,
-    /// divided by the globe radius, in the image), minus the same for the reference. Calculated
-    /// separately, they are not Fick or Helmholtz angles, though all agree near the reference.</para>
+    /// the calibration methods: the Fick angles of the rotation of the eye from the reference
+    /// (EyeRotationMath), with Listing's law (Listing's plane perpendicular to the line of sight at
+    /// the reference) plus the measured torsion.</para>
     /// <para>The signs assume the eye images show the eyes as seen by someone facing the subject (the
     /// subject's right is the left of the image, up is up). Each eye tracking system makes its images
     /// look like that with its camera orientation (CameraEye.CameraOrientation); a camera that sees
@@ -107,7 +106,8 @@ namespace OpenIris
         public double TorsionalPosition { get; set; }
 
         /// <summary>
-        /// Gets or sets the area of the pupil ellipse, in mm², taking the eye globe as 24 mm across.
+        /// Gets or sets the area of the pupil ellipse, in mm², with the pixel scale (MmPerPix). NaN if
+        /// the pixel scale is unknown.
         /// </summary>
         public double PupilArea { get; set; }
 

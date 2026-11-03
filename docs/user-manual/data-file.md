@@ -107,11 +107,19 @@ agree near the reference; they differ for large eye or head rotations.
 How the calibration methods included with OpenIris (Auto, Manual, Remote Linear) calculate the eye
 angles:
 
-- **H and V** are each the arcsine of the pupil's displacement on the eye globe: the distance from
-  the center of the globe (the calibration's eye model) to the center of the pupil, in the image,
-  divided by the radius of the globe. The value at the reference is subtracted. Horizontal and
-  vertical are calculated separately, so they are not Fick or Helmholtz angles.
-- **T** is the rotation of the iris pattern around the pupil, compared with the reference iris.
+- **H, V and T are Fick angles** (horizontal about the head's vertical axis, then vertical, then
+  torsion about the line of sight) of the rotation of the eye from the reference.
+- **The line of sight** goes from the center of the eye globe (the calibration's eye model) through
+  the center of the pupil, turned by the eye model's angle kappa if it has one.
+- **The rotation** takes the line of sight at the reference to the current one following
+  Listing's law, with Listing's plane perpendicular to the line of sight at the reference, and then
+  turns the eye about the line of sight by the torsion measured from the iris pattern, compared
+  with the reference iris. In Fick angles, a rotation that follows Listing's law has a small
+  torsion at oblique positions (tan(T/2) = tan(H/2)·tan(V/2): about 0.9° at 10° in both H
+  and V, 2° at 15°, 3.5° at 20°), so T is the measured torsion plus that.
+- **Before 0.2,** H and V were each the arcsine of the pupil's displacement on the globe, calculated
+  separately, and T was the measured torsion alone. They are the same on the horizontal and
+  vertical axes, and differ at oblique positions.
 - **The signs assume the eye images show the eyes as seen by someone facing the subject:** the
   subject's right is the left of the image, and up is up. Each eye tracking system turns its images
   that way with its camera orientation (for example **VideoOrientation** in Simulation). A camera
@@ -142,7 +150,7 @@ For each eye, `Left` first, then `Right` (`LeftH`, `LeftV`, ... `RightEyeOpening
 | --- | --- |
 | `H`, `V` | Eye position in degrees, as above. `NaN` if the pupil wasn't found. |
 | `T` | Torsion in degrees, as above. The same value as `Torsion`. |
-| `PupilArea` | Area of the pupil ellipse in mm² (π × `PupilWidth` × `PupilHeight` / 4, converted to mm taking the eye globe as 24 mm across). |
+| `PupilArea` | Area of the pupil ellipse in mm² (π × `PupilWidth` × `PupilHeight` / 4, converted to mm with the eye tracking system's pixel scale, **PixPerMm**). Before 0.2 it took the eye globe as 24 mm across. |
 | `EyeOpening` | How open the eyelids are, in percent of the opening at calibration. 0 without a calibration reference. |
 
 For the head:

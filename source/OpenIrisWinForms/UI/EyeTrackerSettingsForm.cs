@@ -87,6 +87,10 @@ namespace OpenIris.UI
             propertyGridCalibrationSettings.ToolbarVisible = false;
             propertyGridCalibrationSettings.PropertySort = PropertySort.Categorized;
 
+            WindowsStyle.FitHelpToDescription(propertyGridSystemSettings);
+            WindowsStyle.FitHelpToDescription(propertyGridTrackingSettings);
+            WindowsStyle.FitHelpToDescription(propertyGridCalibrationSettings);
+
             propertyGridTrackingSettings.SelectedObject = settings.TrackingPipelineSettings;
             propertyGridSystemSettings.SelectedObject = settings.EyeTrackingSystemSettings;
             propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;

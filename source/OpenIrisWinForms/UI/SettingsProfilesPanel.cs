@@ -95,6 +95,8 @@ namespace OpenIris.UI
 
             profileSettingsGrid = NewGrid(p => !SettingsSubset.IsShared(p));
             computerSettingsGrid = NewGrid(SettingsSubset.IsShared);
+            WindowsStyle.FitHelpToDescription(profileSettingsGrid);
+            WindowsStyle.FitHelpToDescription(computerSettingsGrid);
             var settingsTable = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
             settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));

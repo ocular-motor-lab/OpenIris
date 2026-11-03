@@ -62,6 +62,58 @@ namespace OpenIris.UI
         }
 
         /// <summary>
+        /// Makes the help at the bottom of a PropertyGrid as tall as the description of the selected
+        /// setting needs, so it can be read whole (it is two lines otherwise, cut with "..."). Up to
+        /// half of the grid; it can still be resized by dragging its top edge.
+        /// </summary>
+        public static void FitHelpToDescription(PropertyGrid grid)
+        {
+            // The help is a private control of the PropertyGrid (.NET Framework 4.8): its Lines
+            // property sets its height, and userSized keeps the grid from setting it back.
+            const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
+            var help = typeof(PropertyGrid).GetField("doccomment", Private)?.GetValue(grid) as Control;
+            var lines = help?.GetType().GetProperty("Lines", Private | BindingFlags.Public);
+            var lineHeightField = help?.GetType().GetField("lineHeight", Private);
+            var description = help?.GetType().GetField("m_labelDesc", Private)?.GetValue(help) as Label;
+            var fullDescription = help?.GetType().GetField("fullDesc", Private); // the label may have it cut with "..."
+            var userSized = help?.GetType().BaseType?.GetField("userSized", Private);
+            var layout = typeof(PropertyGrid).GetMethod("OnLayoutInternal", Private);
+            if (help is null || lines is null || lineHeightField is null || description is null || fullDescription is null || userSized is null || layout is null) return;
+            var measure = new Label { Padding = description.Padding };
+
+            void Fit()
+            {
+                if (!help.Visible || description.Width <= 0) return;
+
+                _ = lines.GetValue(help); // updates lineHeight to the font
+                var lineHeight = System.Math.Max(1, (int)lineHeightField.GetValue(help));
+                measure.Font = description.Font;
+                measure.Text = fullDescription.GetValue(help) as string ?? description.Text;
+                var textHeight = measure.GetPreferredSize(new Size(description.Width, 0)).Height;
+                var count = 2 + System.Math.Max(1, (textHeight + lineHeight - 1) / lineHeight); // the name, the description, and the line the help keeps free
+                count = System.Math.Min(count, System.Math.Max(3, grid.Height / 2 / lineHeight));
+
+                userSized.SetValue(help, true);
+                if ((int)lines.GetValue(help) == count) return;
+                lines.SetValue(help, count);
+                layout.Invoke(grid, new object[] { false }); // PerformLayout doesn't move the help
+
+            }
+
+            // After the grid has shown the new description in the help.
+            void FitLater()
+            {
+                if (grid.IsHandleCreated) grid.BeginInvoke((System.Action)Fit);
+            }
+
+            grid.HandleCreated += (o, e) => FitLater(); // the first setting is selected before
+            grid.VisibleChanged += (o, e) => FitLater();
+            grid.SelectedGridItemChanged += (o, e) => FitLater();
+            grid.SelectedObjectsChanged += (o, e) => FitLater();
+            grid.SizeChanged += (o, e) => FitLater();
+        }
+
+        /// <summary>
         /// Menus and toolbars with flat colors instead of the gradients of Office 2003.
         /// </summary>
         private class FlatColorTable : ProfessionalColorTable

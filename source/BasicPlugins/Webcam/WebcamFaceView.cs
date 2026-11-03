@@ -46,6 +46,7 @@ namespace OpenIris
             ClientSize = new Size(640, 382);
             Controls.Add(pictureBox);
             Controls.Add(status);
+            WindowsStyle.ScaleToScreen(this);
             timer.Tick += (_, __) => DrawLastFrame();
             timer.Start();
         }

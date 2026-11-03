@@ -27,6 +27,7 @@ namespace OpenIris.UI
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            WindowsStyle.Apply();
             Application.Run(new EyeTrackerGui(GetProfile(args)));
         }
 

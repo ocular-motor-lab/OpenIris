@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- A small tool: next to the libraries it uses. -->
     <OutputPath>$(OpenIrisLibDir)</OutputPath>
   </PropertyGroup>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+  <assemblyIdentity version="1.0.0.0" name="OpenIris.app" />
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <!-- Draw the windows at the real resolution of the screen instead of letting Windows stretch
+           them, blurry, when the display scaling isn't 100%. It has to be here, not in app.config
+           (DpiAwareness): set there it comes too late for System.Drawing, which keeps converting
+           font sizes at 96 DPI, and the text comes out too small or too big. System aware, not per
+           monitor: on a second monitor with a different scaling Windows stretches the windows. -->
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+    </windowsSettings>
+  </application>
+</assembly>

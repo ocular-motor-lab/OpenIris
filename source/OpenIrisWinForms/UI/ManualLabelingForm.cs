@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="ManualLabelingForm.cs">
 //     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -185,6 +185,7 @@ namespace OpenIris.UI
                 foreach (var view in views) view.Video.Dispose();
             };
 
+            WindowsStyle.ScaleToScreen(this);
             ShowFrame(0);
         }
 

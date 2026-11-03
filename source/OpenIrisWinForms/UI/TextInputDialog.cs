@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="TextInputDialog.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -39,6 +39,7 @@ namespace OpenIris.UI
             form.Controls.AddRange(new Control[] { label, textBox, ok, cancel });
             form.AcceptButton = ok;
             form.CancelButton = cancel;
+            WindowsStyle.ScaleToScreen(form);
 
             return form.ShowDialog(owner) == DialogResult.OK ? textBox.Text.Trim() : null;
         }

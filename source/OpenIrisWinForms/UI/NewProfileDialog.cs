@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="NewProfileDialog.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -47,6 +47,7 @@ namespace OpenIris.UI
             form.Controls.AddRange(new Control[] { nameLabel, nameBox, systemLabel, systemBox, ok, cancel });
             form.AcceptButton = ok;
             form.CancelButton = cancel;
+            WindowsStyle.ScaleToScreen(form);
 
             if (form.ShowDialog(owner) != DialogResult.OK || !(systemBox.SelectedItem is string selected)) return null;
             return (nameBox.Text.Trim(), selected);

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="SettingsProfilesPanel.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -37,7 +37,7 @@ namespace OpenIris.UI
             Padding = new Padding(8);
 
             // The profiles: a list, with the buttons to manage them on its right.
-            profilesList = new ListBox { Dock = DockStyle.Fill, DrawMode = DrawMode.OwnerDrawFixed, ItemHeight = 22, IntegralHeight = false };
+            profilesList = new ListBox { Dock = DockStyle.Fill, DrawMode = DrawMode.OwnerDrawFixed, ItemHeight = WindowsStyle.Scale(22), IntegralHeight = false };
             profilesList.DrawItem += DrawProfile;
             profilesList.SelectedIndexChanged += (o, e) => UpdateButtons();
             profilesList.DoubleClick += (o, e) => UseSelected();
@@ -86,6 +86,7 @@ namespace OpenIris.UI
             Controls.Add(computerBox);
             Controls.Add(new Panel { Dock = DockStyle.Top, Height = 8 });
             Controls.Add(profilesBox);
+            WindowsStyle.ScaleToScreen(this);
 
             UpdateProfiles();
         }

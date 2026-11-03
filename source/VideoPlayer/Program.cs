@@ -16,6 +16,7 @@ namespace VideoPlayer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            OpenIris.UI.WindowsStyle.Apply();
             Application.Run(new VideoPlayer());
         }
     }

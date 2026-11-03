@@ -4,6 +4,7 @@
     <RootNamespace>OpenIris.UI</RootNamespace>
     <AssemblyName>OpenIris</AssemblyName>
     <ApplicationIcon>OpenIris.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

@@ -488,7 +488,7 @@ namespace OpenIris.UI
             this.tabPages.Controls.Add(this.tabTiming);
             this.tabPages.Controls.Add(this.tabPageLog);
             this.tabPages.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabPages.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tabPages.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabPages.ImageList = this.imageList1;
             this.tabPages.Location = new System.Drawing.Point(0, 0);
             this.tabPages.Margin = new System.Windows.Forms.Padding(4);
@@ -526,7 +526,7 @@ namespace OpenIris.UI
             // linkLabelDataFolder2
             // 
             this.linkLabelDataFolder2.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.linkLabelDataFolder2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.linkLabelDataFolder2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.linkLabelDataFolder2.Location = new System.Drawing.Point(8, 25);
             this.linkLabelDataFolder2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabelDataFolder2.Name = "linkLabelDataFolder2";
@@ -672,7 +672,7 @@ namespace OpenIris.UI
             // 
             // textBoxSession
             // 
-            this.textBoxSession.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBoxSession.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxSession.Location = new System.Drawing.Point(8, 25);
             this.textBoxSession.Margin = new System.Windows.Forms.Padding(4);
             this.textBoxSession.Name = "textBoxSession";
@@ -695,7 +695,7 @@ namespace OpenIris.UI
             // linkLabelDataFolder
             // 
             this.linkLabelDataFolder.BackColor = System.Drawing.SystemColors.Control;
-            this.linkLabelDataFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.linkLabelDataFolder.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.linkLabelDataFolder.Location = new System.Drawing.Point(8, 25);
             this.linkLabelDataFolder.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.linkLabelDataFolder.Name = "linkLabelDataFolder";
@@ -706,7 +706,7 @@ namespace OpenIris.UI
             // 
             // buttonSelectFolder
             // 
-            this.buttonSelectFolder.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonSelectFolder.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonSelectFolder.Location = new System.Drawing.Point(276, 25);
             this.buttonSelectFolder.Margin = new System.Windows.Forms.Padding(4);
             this.buttonSelectFolder.Name = "buttonSelectFolder";
@@ -719,7 +719,7 @@ namespace OpenIris.UI
             // 
             this.buttonResetReference.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonResetReference.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonResetReference.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonResetReference.Location = new System.Drawing.Point(4, 343);
             this.buttonResetReference.Margin = new System.Windows.Forms.Padding(4);
             this.buttonResetReference.Name = "buttonResetReference";
@@ -781,7 +781,7 @@ namespace OpenIris.UI
             // 
             // buttonCenterEyes
             // 
-            this.buttonCenterEyes.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonCenterEyes.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonCenterEyes.Location = new System.Drawing.Point(92, 27);
             this.buttonCenterEyes.Margin = new System.Windows.Forms.Padding(4);
             this.buttonCenterEyes.Name = "buttonCenterEyes";
@@ -923,7 +923,7 @@ namespace OpenIris.UI
             // 
             this.buttonCalibrate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonCalibrate.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonCalibrate.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonCalibrate.Location = new System.Drawing.Point(4, 286);
             this.buttonCalibrate.Margin = new System.Windows.Forms.Padding(4);
             this.buttonCalibrate.Name = "buttonCalibrate";
@@ -936,7 +936,7 @@ namespace OpenIris.UI
             // 
             this.buttonRecord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.buttonRecord.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.buttonRecord.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonRecord.Location = new System.Drawing.Point(4, 402);
             this.buttonRecord.Margin = new System.Windows.Forms.Padding(4);
             this.buttonRecord.Name = "buttonRecord";
@@ -1288,7 +1288,7 @@ namespace OpenIris.UI
             // labelDiagnosticsGrabbing
             // 
             this.labelDiagnosticsGrabbing.AutoSize = true;
-            this.labelDiagnosticsGrabbing.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelDiagnosticsGrabbing.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelDiagnosticsGrabbing.Location = new System.Drawing.Point(816, 46);
             this.labelDiagnosticsGrabbing.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelDiagnosticsGrabbing.Name = "labelDiagnosticsGrabbing";
@@ -1299,7 +1299,7 @@ namespace OpenIris.UI
             // labelTiming
             // 
             this.labelTiming.AutoSize = true;
-            this.labelTiming.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTiming.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.labelTiming.Location = new System.Drawing.Point(32, 28);
             this.labelTiming.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelTiming.Name = "labelTiming";

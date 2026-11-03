@@ -9,6 +9,7 @@ namespace OpenIris.Tests
     using System;
     using System.Drawing;
     using System.IO;
+    using System.Linq;
     using Emgu.CV;
     using Emgu.CV.Structure;
     using OpenIris.ImageGrabbing;
@@ -61,7 +62,7 @@ namespace OpenIris.Tests
         [TestMethod]
         public void WithoutCalibrationFromThePixelScale()
         {
-            var intrinsics = CameraIntrinsics.FromPixelScale(new Size(721, 541), 8, 50);
+            var intrinsics = CameraIntrinsics.FromPixelScale(new Size(721, 541), 8);
             Assert.AreEqual(new CameraIntrinsics(400, 400, 360, 270), intrinsics);
         }
 
@@ -126,7 +127,6 @@ namespace OpenIris.Tests
             var settings = new EyeTrackerSettings();
             var system = settings.EyeTrackingSystemSettings;
             system.PixPerMm = 8;
-            system.DistanceCameraToEyeMm = 50;
             var single = new TestCamera(Eye.Both);
             var left = new TestCamera(Eye.Left);
             var right = new TestCamera(Eye.Right);
@@ -157,6 +157,28 @@ namespace OpenIris.Tests
             {
                 File.Delete(path);
             }
+        }
+
+        /// <summary>
+        /// The settings of a system start with one unknown intrinsics for each of its cameras, as its
+        /// attribute says, and the property grid shows each one by its eye.
+        /// </summary>
+        [TestMethod]
+        public void SettingsStartWithOneIntrinsicsPerCamera()
+        {
+            PipelineHarness.EnsurePluginsLoaded();
+            var settings = new EyeTrackerSettings { EyeTrackerSystem = "Simulation" };
+            Assert.AreEqual(2, settings.EyeTrackingSystemSettings.CameraIntrinsics!.Count);
+            Assert.IsTrue(settings.EyeTrackingSystemSettings.CameraIntrinsics.All(i => i.IsEmpty));
+
+            Assert.AreEqual(1, EyeTrackingSystemSettings.UnknownIntrinsics(VideoEyeConfiguration.OneVideo).Count);
+
+            var converter = new EyeCollectionConverter<CameraIntrinsics>();
+            var two = new EyeCollection<CameraIntrinsics>(default, default);
+            var properties = converter.GetProperties(null, two, null);
+            CollectionAssert.AreEqual(new[] { "Left", "Right" }, properties.Cast<System.ComponentModel.PropertyDescriptor>().Select(p => p.Name).ToArray());
+            properties["Right"].SetValue(two, new CameraIntrinsics(1, 2, 3, 4));
+            Assert.AreEqual(new CameraIntrinsics(1, 2, 3, 4), two[Eye.Right]);
         }
 
         private sealed class TestCamera : CameraEye

@@ -16,7 +16,7 @@ using System.ComponentModel;
 namespace SpinnakerInterface
 {
 #nullable enable
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera", typeof(EyeTrackingSystemSettingsSpinnaker_SingleCam))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Spinnaker Single Camera", typeof(EyeTrackingSystemSettingsSpinnaker_SingleCam), VideoEyeConfiguration.OneVideo)]
 
 
     class EyeTrackingSystemSpinnaker_SingleCam : EyeTrackingSystemBase
@@ -120,7 +120,6 @@ namespace SpinnakerInterface
         public EyeTrackingSystemSettingsSpinnaker_SingleCam()
         {
             PixPerMm = 7;
-            DistanceCameraToEyeMm = 70;
             Eye = Eye.Both;
         }
 

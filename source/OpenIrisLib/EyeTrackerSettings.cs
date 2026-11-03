@@ -11,6 +11,7 @@ namespace OpenIris
 
     using System;
     using System.IO;
+    using System.Linq;
     using System.ComponentModel;
     using System.Xml;
     using System.Xml.Serialization;
@@ -51,6 +52,15 @@ namespace OpenIris
 
                     AllEyeTrackerSystemSettings[value].PropertyChanged += (o, e) => OnPropertyChanged(o, e.PropertyName);
                     AllEyeTrackerSystemSettings[value].PropertyChangingNeedsRestart += (o, e) => OnPropertyChangingNeedsRestart(o, e.PropertyName);
+                }
+
+                // The intrinsics of each camera of the system, unknown until they are filled in: one
+                // or two, as the system says in its attribute.
+                var systemSettings = AllEyeTrackerSystemSettings[value];
+                if (systemSettings.CameraIntrinsics is null &&
+                    EyeTrackerPluginManager.EyeTrackingsyStemFactory?.ClassesAvaiable.FirstOrDefault(system => system.Name == value) is IEyeTrackingSystemMetadata metadata)
+                {
+                    systemSettings.CameraIntrinsics = EyeTrackingSystemSettings.UnknownIntrinsics(metadata.VideoConfiguration);
                 }
 
                 if (value != eyeTrackerSystem)

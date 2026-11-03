@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="CameraIntrinsics.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -60,16 +60,22 @@ namespace OpenIris
         public bool IsEmpty => Fx == 0;
 
         /// <summary>
+        /// Distance from the camera to the eye assumed for cameras that have not been calibrated, in mm.
+        /// Only the focal length depends on it, which nothing uses yet.
+        /// </summary>
+        public const double AssumedDistanceToEyeMm = 50;
+
+        /// <summary>
         /// The intrinsics of a camera that has not been calibrated, from the size of its sensor and the
         /// pixels per mm at the distance of the eye (weak perspective): the focal length is the pixels
-        /// per mm times the distance, and the principal point is the center of the sensor.
+        /// per mm times the distance (AssumedDistanceToEyeMm), and the principal point is the center
+        /// of the sensor.
         /// </summary>
         /// <param name="sensorSize">Size of the sensor (the whole image the camera can take), in pixels.</param>
         /// <param name="pixPerMm">Pixels per mm at the distance of the eye.</param>
-        /// <param name="distanceMm">Distance from the camera to the eye, in mm.</param>
-        public static CameraIntrinsics FromPixelScale(Size sensorSize, double pixPerMm, double distanceMm)
+        public static CameraIntrinsics FromPixelScale(Size sensorSize, double pixPerMm)
         {
-            var f = (float)(pixPerMm * distanceMm);
+            var f = (float)(pixPerMm * AssumedDistanceToEyeMm);
             return new CameraIntrinsics(f, f, (sensorSize.Width - 1) / 2.0f, (sensorSize.Height - 1) / 2.0f);
         }
 

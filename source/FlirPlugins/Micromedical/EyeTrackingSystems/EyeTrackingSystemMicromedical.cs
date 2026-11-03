@@ -174,7 +174,6 @@ namespace OpenIris
         public EyeTrackingSystemSettingsMicromedical()
         {
             PixPerMm = 7;
-            DistanceCameraToEyeMm = 70;
             UseHeadSensor = true;
         }
 

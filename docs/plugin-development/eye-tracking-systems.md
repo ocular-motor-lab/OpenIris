@@ -1,4 +1,4 @@
-# Eye tracking systems (camera plugins)
+﻿# Eye tracking systems (camera plugins)
 
 An eye tracking system tells OpenIris how to get images: which cameras to open, how to start them,
 and how to read the videos they record. It has two parts:
@@ -161,8 +161,9 @@ public class EyeTrackingSystemExample : EyeTrackingSystemBase
 
 `EyeTrackingSystemExampleSettings` is the settings class (see
 [Settings](creating-a-plugin.md#settings)). It inherits from `EyeTrackingSystemSettings`, which
-already has the settings common to all systems: `Eye`, `FrameRate`, `PixPerMm`,
-`DistanceCameraToEyeMm`.
+already has the settings common to all systems: `Eye`, `FrameRate`, `PixPerMm`, and
+`CameraIntrinsics`, one for each camera (as many as the attribute says: `VideoEyeConfiguration.OneVideo`
+for one camera, two by default).
 
 `CreateAndStartCameras` returns one camera for both eyes (`new EyeCollection<CameraEye?>(camera)`),
 or one per eye (`new EyeCollection<CameraEye?>(left, right)`, with `null` for an eye without camera).

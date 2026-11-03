@@ -325,16 +325,22 @@ namespace OpenIris
         }
         private double pixPerMm = 6;
 
-        [Category("Camera properties"), Description("Distance from the camera to the eye ( mm)")]
-        public virtual double DistanceCameraToEyeMm { get => distanceCameraToEyeMm; set => SetProperty(ref distanceCameraToEyeMm, value, nameof(DistanceCameraToEyeMm)); }
-        private double distanceCameraToEyeMm = 50; // default value
-
         [Category("Camera properties"), Description("Intrinsics of the cameras from a camera calibration, as OpenCV gives them: one for a camera that sees both eyes, " +
             "or left and right, as the cameras of the system. For the whole sensor and the images as the camera sends them (before the camera orientation). " +
-            "Missing or unknown (Fx 0): from the sensor size, PixPerMm and DistanceCameraToEyeMm. Calibrate again after changing them.")]
+            "Unknown (Fx 0): from the sensor size and PixPerMm. Calibrate again after changing them.")]
         [NeedsRestarting]
+        [TypeConverter(typeof(EyeCollectionConverter<CameraIntrinsics>))]
         public EyeCollection<CameraIntrinsics>? CameraIntrinsics { get => cameraIntrinsics; set => SetProperty(ref cameraIntrinsics, value, nameof(CameraIntrinsics)); }
         private EyeCollection<CameraIntrinsics>? cameraIntrinsics;
+
+        /// <summary>
+        /// Unknown intrinsics for each camera of a system: one, or left and right.
+        /// </summary>
+        /// <param name="cameras">The cameras of the system, as its attribute says.</param>
+        public static EyeCollection<CameraIntrinsics> UnknownIntrinsics(VideoEyeConfiguration cameras) =>
+            cameras == VideoEyeConfiguration.OneVideo
+                ? new EyeCollection<CameraIntrinsics>(default(CameraIntrinsics))
+                : new EyeCollection<CameraIntrinsics>(default, default);
 
         /// <summary>
         /// The intrinsics of a camera: measured, from the settings, or else from the pixel scale.
@@ -347,7 +353,7 @@ namespace OpenIris
                 _ => default,
             };
 
-            return measured.IsEmpty ? OpenIris.CameraIntrinsics.FromPixelScale(camera.SensorSize, PixPerMm, DistanceCameraToEyeMm) : measured;
+            return measured.IsEmpty ? OpenIris.CameraIntrinsics.FromPixelScale(camera.SensorSize, PixPerMm) : measured;
         }
 
         [Category("Camera properties"), Description("Camera frame rate")]

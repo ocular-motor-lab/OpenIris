@@ -1,4 +1,4 @@
-# Geometry and conventions
+﻿# Geometry and conventions
 
 How OpenIris describes images, cameras, eyes and heads, in the terms computer vision uses. Where
 a convention exists, OpenIris follows OpenCV's: OpenIris is built on it (through EmguCV), and
@@ -58,11 +58,12 @@ pixels.
 
 - **Settings of the eye tracking system** (`EyeTrackingSystemSettings.CameraIntrinsics`), an
   `EyeCollection` like the system's cameras: one for a camera that sees both eyes, or one for each
-  eye's camera; **for the whole sensor, as the camera sends the images** (before the camera
+  eye's camera, as many as the system's attribute says (`VideoEyeConfiguration`); **for the whole sensor, as the camera sends the images** (before the camera
   orientation), as OpenCV's checkerboard calibration (`calibrateCamera`) gives them. A tool to do it
   from OpenIris is [#78](https://github.com/ocular-motor-lab/OpenIris/issues/78).
-- **Unknown (fx 0): from the pixel scale**, with weak perspective: f = `PixPerMm` ·
-  `DistanceCameraToEyeMm` (the pixels per mm at the eye's distance times that distance), and the
+- **Unknown (fx 0): from the pixel scale**, with weak perspective: f = `PixPerMm` · Z (the pixels
+  per mm at the eye's distance times that distance), with an assumed Z of 50 mm (only f depends on
+  it, and nothing uses f yet; a calibrated camera gives the real one, and then Z = f / `PixPerMm`), and the
   principal point at the center of the sensor (`CameraEye.SensorSize`: the whole sensor for cameras
   that read a window of it, as Spinnaker reports it).
 - **Each image carries them in its own pixels** (`ImageEye.Intrinsics`, and `EyeData.Intrinsics`

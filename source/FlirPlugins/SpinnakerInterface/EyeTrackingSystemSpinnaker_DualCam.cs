@@ -124,7 +124,6 @@ namespace SpinnakerInterface
         public EyeTrackingSystemSettingsSpinnaker_DualCam()
         {
             PixPerMm = 7;
-            DistanceCameraToEyeMm = 70;
             Eye = Eye.Both;
         }
 

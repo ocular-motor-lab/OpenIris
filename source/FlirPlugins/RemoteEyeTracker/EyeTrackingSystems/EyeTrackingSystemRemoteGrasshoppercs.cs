@@ -152,7 +152,6 @@ namespace OpenIris
             public EyeTrackerSystemSettingsRemoteGrasshopper()
             {
                 PixPerMm = 8;
-                DistanceCameraToEyeMm = 200;
                 FrameRate = 100;
             }
 

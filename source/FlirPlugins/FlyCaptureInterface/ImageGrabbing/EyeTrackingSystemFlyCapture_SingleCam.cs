@@ -14,7 +14,7 @@ using FlyCapture2Managed;
 namespace SpinnakerInterface
 {
 #nullable enable
-    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Flycapture Single Camera", typeof(EyeTrackingSystemSettings))]
+    [Export(typeof(EyeTrackingSystemBase)), PluginDescriptionEyeTrackingSystem("Flycapture Single Camera", typeof(EyeTrackingSystemSettings), VideoEyeConfiguration.OneVideo)]
 
 
     class EyeTrackingSystemFlyCapture_SingleCam : EyeTrackingSystemBase

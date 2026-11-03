@@ -243,6 +243,6 @@ classes are in OpenIrisWinForms: reference its NuGet package, as well as OpenIri
 ## 3. Try it
 
 Start OpenIris. The new system appears in the configuration window (**EyeTrackerSystem**, in the
-Advanced tab) and when creating a profile (**New…** in the Profiles tab).
+Profiles tab) and when creating a profile (**New…** in the Profiles tab).
 
 ![The new system in the list](../images/plugin-development/example-system-in-menu.png)

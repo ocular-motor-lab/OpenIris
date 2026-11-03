@@ -9,6 +9,7 @@ namespace OpenIris.UI
 #nullable enable
 
     using System;
+    using System.ComponentModel;
     using System.Drawing;
     using System.IO;
     using System.Linq;
@@ -16,7 +17,8 @@ namespace OpenIris.UI
 
     /// <summary>
     /// The Profiles tab of the configuration window: the settings profiles, to switch between them
-    /// and manage them, and the settings of this computer, which are the same in every profile.
+    /// and manage them, the general settings of the active profile, and the settings of this
+    /// computer, which are the same in every profile.
     /// </summary>
     internal sealed class SettingsProfilesPanel : UserControl
     {
@@ -25,6 +27,7 @@ namespace OpenIris.UI
         private readonly Button useButton;
         private readonly Button renameButton;
         private readonly Button deleteButton;
+        private readonly PropertyGrid profileSettingsGrid;
         private readonly PropertyGrid computerSettingsGrid;
 
         /// <summary>
@@ -63,7 +66,7 @@ namespace OpenIris.UI
                 AutoSize = true,
                 Padding = new Padding(0, 6, 0, 0),
                 ForeColor = SystemColors.GrayText,
-                Text = "Each profile has its own eye tracking system, pipeline, calibration and settings (Advanced tab). " +
+                Text = "Each profile has its own general settings (below) and eye tracking system, pipeline and calibration (Advanced tab). " +
                     "The active profile, in bold, is also chosen on the main window. Switching while tracking asks to stop first.",
             };
 
@@ -72,18 +75,32 @@ namespace OpenIris.UI
             profilesBox.Controls.Add(buttons);
             profilesBox.Controls.Add(hint);
 
-            // The shared settings.
-            computerSettingsGrid = new PropertyGrid
+            // Below, side by side: the general settings of the active profile and the shared settings.
+            GroupBox SettingsBox(string text, PropertyGrid grid)
+            {
+                var box = new GroupBox { Text = text, Dock = DockStyle.Fill, Padding = new Padding(8) };
+                box.Controls.Add(grid);
+                return box;
+            }
+
+            PropertyGrid NewGrid(Func<PropertyDescriptor, bool> include) => new PropertyGrid
             {
                 Dock = DockStyle.Fill,
                 ToolbarVisible = false,
                 PropertySort = PropertySort.Categorized,
-                SelectedObject = new SettingsSubset(eyeTracker.Settings, SettingsSubset.IsShared),
+                SelectedObject = new SettingsSubset(eyeTracker.Settings, include),
             };
-            var computerBox = new GroupBox { Text = "Settings of this computer (the same in every profile)", Dock = DockStyle.Fill, Padding = new Padding(8) };
-            computerBox.Controls.Add(computerSettingsGrid);
 
-            Controls.Add(computerBox);
+            profileSettingsGrid = NewGrid(p => !SettingsSubset.IsShared(p));
+            computerSettingsGrid = NewGrid(SettingsSubset.IsShared);
+            var settingsTable = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            settingsTable.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            settingsTable.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+            settingsTable.Controls.Add(SettingsBox("General settings of the active profile", profileSettingsGrid), 0, 0);
+            settingsTable.Controls.Add(SettingsBox("Settings of this computer (the same in every profile)", computerSettingsGrid), 1, 0);
+
+            Controls.Add(settingsTable);
             Controls.Add(new Panel { Dock = DockStyle.Top, Height = 8 });
             Controls.Add(profilesBox);
             WindowsStyle.ScaleToScreen(this);
@@ -105,8 +122,17 @@ namespace OpenIris.UI
             profilesList.SelectedItem = profiles.Contains(selected, StringComparer.OrdinalIgnoreCase) ? profiles.First(p => string.Equals(p, selected, StringComparison.OrdinalIgnoreCase)) : eyeTracker.Settings.Profile;
             profilesList.EndUpdate();
 
-            computerSettingsGrid.Refresh();
+            RefreshSettings();
             UpdateButtons();
+        }
+
+        /// <summary>
+        /// Shows the settings again, after they changed.
+        /// </summary>
+        public void RefreshSettings()
+        {
+            profileSettingsGrid.Refresh();
+            computerSettingsGrid.Refresh();
         }
 
         private string? Selected => profilesList.SelectedItem as string;

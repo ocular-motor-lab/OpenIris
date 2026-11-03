@@ -14,13 +14,15 @@ namespace OpenIris.UI
     using OpenIris;
 
     /// <summary>
-    /// Configuration window, with two tabs: Profiles (the settings profiles and the settings of this
-    /// computer) and Advanced (all the settings of the active profile).
+    /// Configuration window, with two tabs: Profiles (the settings profiles, the general settings of
+    /// the active profile and the settings of this computer) and Advanced (the settings of the
+    /// active profile's eye tracking system, pipeline and calibration).
     /// </summary>
     public partial class EyeTrackerSettingsForm : Form
     {
         private static EyeTrackerSettingsForm? instance;
 
+        private readonly EyeTrackerSettings settings;
         private readonly SettingsProfilesPanel profilesPanel;
 
         /// <summary>
@@ -61,7 +63,9 @@ namespace OpenIris.UI
             InitializeComponent();
             var settings = eyeTracker.Settings;
 
-            // The tabs: the four columns of settings go in Advanced.
+            // The tabs: Profiles, with the general settings, and Advanced, with the settings of the
+            // system, the pipeline and the calibration.
+            this.settings = settings;
             profilesPanel = new SettingsProfilesPanel(eyeTracker);
             var profilesTab = new TabPage("Profiles");
             profilesTab.Controls.Add(profilesPanel);
@@ -73,9 +77,6 @@ namespace OpenIris.UI
             tabs.TabPages.Add(advancedTab);
             Controls.Add(tabs);
 
-            propertyGridGeneralSettings.ToolbarVisible = false;
-            propertyGridGeneralSettings.PropertySort = PropertySort.Categorized;
-
             propertyGridTrackingSettings.ToolbarVisible = false;
             propertyGridTrackingSettings.PropertySort = PropertySort.Categorized;
 
@@ -85,8 +86,6 @@ namespace OpenIris.UI
             propertyGridCalibrationSettings.ToolbarVisible = false;
             propertyGridCalibrationSettings.PropertySort = PropertySort.Categorized;
 
-            // The shared settings are in the Profiles tab: here only the profile's own.
-            propertyGridGeneralSettings.SelectedObject = new SettingsSubset(settings, p => !SettingsSubset.IsShared(p));
             propertyGridTrackingSettings.SelectedObject = settings.TrackingPipelineSettings;
             propertyGridSystemSettings.SelectedObject = settings.EyeTrackingSystemSettings;
             propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
@@ -98,13 +97,11 @@ namespace OpenIris.UI
 
         void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var settings = (propertyGridGeneralSettings.SelectedObject as SettingsSubset)?.Settings as EyeTrackerSettings ?? throw new InvalidOperationException("never should happen");
-
             propertyGridSystemSettings.SelectedObject = settings.EyeTrackingSystemSettings;
             propertyGridTrackingSettings.SelectedObject = settings.TrackingPipelineSettings;
             propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
 
-            propertyGridGeneralSettings.Refresh();
+            profilesPanel.RefreshSettings();
             propertyGridSystemSettings.Refresh();
             propertyGridTrackingSettings.Refresh();
             propertyGridCalibrationSettings.Refresh();

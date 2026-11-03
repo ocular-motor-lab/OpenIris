@@ -2,13 +2,14 @@
 
 Open the configuration window with **File > Configuration…**. It has two tabs:
 
-- **Profiles**: the [settings profiles](#settings-profiles), and the settings of this computer, which
-  are the same in every profile.
-- **Advanced**: all the settings of the active profile, in four columns:
-  1. **General settings**: which system, pipeline and calibration to use, and how to record.
-  2. **System settings**: the settings of the selected eye tracking system (the cameras).
-  3. **Eye tracking pipeline settings**: how the images are processed.
-  4. **Calibration settings**: the settings of the selected calibration method.
+- **Profiles**: the [settings profiles](#settings-profiles), and below them, side by side:
+  - the [general settings](#general-settings) of the active profile: which system, pipeline and
+    calibration to use, and how to record;
+  - the settings of this computer, which are the same in every profile.
+- **Advanced**: the other settings of the active profile, in three columns:
+  1. **System settings**: the settings of the selected eye tracking system (the cameras).
+  2. **Eye tracking pipeline settings**: how the images are processed.
+  3. **Calibration settings**: the settings of the selected calibration method.
 
 ![The configuration window](../images/user-manual/configuration-window.png)
 

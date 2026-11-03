@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EyeTrackerWebServer.cs">
 //     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -79,7 +79,11 @@ namespace OpenIris
                 await SendErrorAsync(context, conflict ? 409 : 500, ex.Message);
             };
 
-            server.Start();
+            // RunAsync, not Start: Start doesn't watch the task, and a failure (port 9001 taken by
+            // another OpenIris) ended up in the log as an unobserved task exception.
+            server.RunAsync().ContinueWith(
+                t => Trace.WriteLine($"ERROR: web server: {t.Exception?.InnerException?.Message}"),
+                TaskContinuationOptions.OnlyOnFaulted);
             Trace.WriteLine($"Remote control web client and API at http://localhost:{port}/");
         }
 

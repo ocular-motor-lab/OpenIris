@@ -22,6 +22,8 @@ namespace OpenIris
     /// What is written at the beginning of the log of each recording: the version of OpenIris, the
     /// computer, the time, the system and its cameras, the settings that matter most and the
     /// calibration. Everything needed later to know how a recording was made, next to the data.
+    /// The main log gets the same, without the recording: the version and the computer when
+    /// OpenIris starts, the rest each time tracking starts.
     /// </summary>
     internal static class RecordingInfo
     {
@@ -44,7 +46,26 @@ namespace OpenIris
         /// <param name="options">The options of the recording.</param>
         /// <param name="videos">The videos processed, when processing videos (the eye tracking
         /// system isn't there yet when the recording starts).</param>
-        public static string Describe(EyeTracker eyeTracker, string dataFileName, RecordingOptions options, ProcessVideoOptions? videos = null)
+        public static string Describe(EyeTracker eyeTracker, string dataFileName, RecordingOptions options, ProcessVideoOptions? videos = null) =>
+            Describe(eyeTracker, "OpenIris recording", dataFileName, options, videos);
+
+        /// <summary>
+        /// The information written in the main log when OpenIris starts: what doesn't change, the
+        /// version and the computer.
+        /// </summary>
+        /// <param name="eyeTracker">The eye tracker, with its settings loaded.</param>
+        public static string DescribeStartup(EyeTracker eyeTracker) =>
+            Describe(eyeTracker, "OpenIris started", null, null, null, setup: false);
+
+        /// <summary>
+        /// The information written in the main log when tracking starts: the same as for a
+        /// recording, without the recording and without what was written when OpenIris started.
+        /// </summary>
+        /// <param name="eyeTracker">The eye tracker, with its eye tracking system created.</param>
+        public static string DescribeTracking(EyeTracker eyeTracker) =>
+            Describe(eyeTracker, "OpenIris tracking", null, null, null, computer: false);
+
+        private static string Describe(EyeTracker eyeTracker, string title, string? dataFileName, RecordingOptions? options, ProcessVideoOptions? videos, bool setup = true, bool computer = true)
         {
             var now = DateTimeOffset.Now;
             var settings = eyeTracker.Settings;
@@ -57,94 +78,110 @@ namespace OpenIris
             void Section(string title) => text.AppendLine().AppendLine(title);
             string Size(System.Drawing.Size size) => $"{size.Width} x {size.Height} px";
 
-            text.AppendLine("==================== OpenIris recording ====================");
+            text.AppendLine($" {title} ".PadLeft(30 + (title.Length + 2) / 2, '=').PadRight(60, '='));
             Line("Started", $"{now:yyyy-MM-dd HH:mm:ss.fff zzz}");
             Line("Started (UTC)", $"{now.UtcDateTime:yyyy-MM-dd HH:mm:ss.fff}");
             Line("OpenIris version", Version);
-            if (videos is null) Line("Session", settings.SessionName);
-            Line("Data file", $"{dataFileName} ({Columns(EyeTrackerData.GetStringHeader())} columns)");
-            Line("Calibrated data file", $"{dataFileName.Replace(".txt", "-calibrated.txt")} ({Columns(EyeTrackerData.GetCalibratedStringHeader())} columns)");
-            Line("Raw videos", !options.SaveRawVideo ? "no" : options.DecimateRatioRawVideo > 1 ? $"1 of every {options.DecimateRatioRawVideo} frames" : "every frame");
-            Line("LSL stream", settings.StreamToLsl ? settings.LslStreamName : "off");
-
-            if (videos is not null)
+            if (setup)
             {
-                Section("Processing videos");
-                Line("Left video", videos.VideoFileNames[Eye.Left] ?? "none", 2);
-                Line("Right video", videos.VideoFileNames[Eye.Right] ?? "none", 2);
-                Line("Recorded with", videos.EyeTrackingSystem, 2);
-                Line("Calibration file", string.IsNullOrEmpty(videos.CalibrationFileName) ? "none" : videos.CalibrationFileName, 2);
-                Line("Frames", videos.CustomRange.IsEmpty ? "all" : $"{videos.CustomRange.Begin} to {videos.CustomRange.End}", 2);
-                Line("Processed video", videos.SaveProcessedVideo ? "yes" : "no", 2);
-            }
-
-            // When processing videos, the system is created after the recording starts.
-            if (system is not null || videos is null)
-            {
-                Section("Eye tracking system");
-                Line("Name", system?.Name ?? "none", 2);
-            }
-
-            if (system is not null)
-            {
-                Line("Pixel scale", $"{system.Settings.PixPerMm} pixels per mm", 2);
-                Line("Frame rate set", $"{system.Settings.FrameRate} Hz", 2);
-                if (grabber is not null && grabber.FrameRateMeasured > 0) Line("Frame rate measured", $"{grabber.FrameRateMeasured:0.0} Hz", 2);
-                if (grabber is not null && !grabber.FrameSize.IsEmpty) Line("Frame size", Size(grabber.FrameSize), 2);
-                Line("Lights", system.Settings.Lights.Length == 0 ? "none" : string.Join(", ", system.Settings.Lights), 2);
-                Line("Between the eyes", $"{system.Settings.DistanceBetweenEyesMm} mm", 2);
-
-                foreach (var source in system.imageSources?.ToArray() ?? Array.Empty<IImageEyeSource?>())
+                Line("Settings profile", settings.Profile);
+                if (videos is null) Line("Session", settings.SessionName);
+                if (dataFileName is not null && options is not null)
                 {
-                    if (source is not CameraEye camera)
-                    {
-                        if (source is not null) Line("Image source", source.GetType().Name, 2);
-                        continue;
-                    }
+                    Line("Data file", $"{dataFileName} ({Columns(EyeTrackerData.GetStringHeader())} columns)");
+                    Line("Calibrated data file", $"{dataFileName.Replace(".txt", "-calibrated.txt")} ({Columns(EyeTrackerData.GetCalibratedStringHeader())} columns)");
+                    Line("Raw videos", !options.SaveRawVideo ? "no" : options.DecimateRatioRawVideo > 1 ? $"1 of every {options.DecimateRatioRawVideo} frames" : "every frame");
+                }
+                else
+                {
+                    Line("Data folder", settings.DataFolder);
+                    if (!computer) Line("Free disk space", FreeSpace(settings.DataFolder));
+                }
 
-                    Section($"Camera {camera.WhichEye}");
-                    Line("Device", string.IsNullOrEmpty(camera.Description) ? camera.GetType().Name : camera.Description, 2);
-                    Line("Frame", camera.SensorSize == camera.FrameSize ? Size(camera.FrameSize) : $"{Size(camera.FrameSize)} of a {Size(camera.SensorSize)} sensor", 2);
-                    Line("Frame rate", $"{camera.FrameRate} Hz", 2);
-                    Line("Orientation", camera.CameraOrientation, 2);
-                    Line("Intrinsics", camera.Intrinsics, 2);
-                    var extrinsics = system.Settings.CameraExtrinsics?.Count switch
+                Line("LSL stream", settings.StreamToLsl ? settings.LslStreamName : "off");
+
+                if (videos is not null)
+                {
+                    Section("Processing videos");
+                    Line("Left video", videos.VideoFileNames[Eye.Left] ?? "none", 2);
+                    Line("Right video", videos.VideoFileNames[Eye.Right] ?? "none", 2);
+                    Line("Recorded with", videos.EyeTrackingSystem, 2);
+                    Line("Calibration file", string.IsNullOrEmpty(videos.CalibrationFileName) ? "none" : videos.CalibrationFileName, 2);
+                    Line("Frames", videos.CustomRange.IsEmpty ? "all" : $"{videos.CustomRange.Begin} to {videos.CustomRange.End}", 2);
+                    Line("Processed video", videos.SaveProcessedVideo ? "yes" : "no", 2);
+                }
+
+                // When processing videos, the system is created after the recording starts.
+                if (system is not null || videos is null)
+                {
+                    Section("Eye tracking system");
+                    Line("Name", system?.Name ?? "none", 2);
+                }
+
+                if (system is not null)
+                {
+                    Line("Pixel scale", $"{system.Settings.PixPerMm} pixels per mm", 2);
+                    Line("Frame rate set", $"{system.Settings.FrameRate} Hz", 2);
+                    if (grabber is not null && grabber.FrameRateMeasured > 0) Line("Frame rate measured", $"{grabber.FrameRateMeasured:0.0} Hz", 2);
+                    if (grabber is not null && !grabber.FrameSize.IsEmpty) Line("Frame size", Size(grabber.FrameSize), 2);
+                    Line("Lights", system.Settings.Lights.Length == 0 ? "none" : string.Join(", ", system.Settings.Lights), 2);
+                    Line("Between the eyes", $"{system.Settings.DistanceBetweenEyesMm} mm", 2);
+
+                    foreach (var source in system.imageSources?.ToArray() ?? Array.Empty<IImageEyeSource?>())
                     {
-                        1 => system.Settings.CameraExtrinsics[Eye.Both],
-                        2 when camera.WhichEye != Eye.Both => system.Settings.CameraExtrinsics[camera.WhichEye],
-                        _ => default,
-                    };
-                    Line("Extrinsics", extrinsics.IsEmpty ? "Unknown (facing the eye)" : extrinsics.ToString(), 2);
-                    var cameraTime = camera.GetCameraTime();
-                    if (!double.IsNaN(cameraTime)) Line("Camera time", $"{cameraTime:0.000000} s (the camera's clock now, as Seconds in the data file)", 2);
+                        if (source is not CameraEye camera)
+                        {
+                            if (source is not null) Line("Image source", source.GetType().Name, 2);
+                            continue;
+                        }
+
+                        Section($"Camera {camera.WhichEye}");
+                        Line("Device", string.IsNullOrEmpty(camera.Description) ? camera.GetType().Name : camera.Description, 2);
+                        Line("Frame", camera.SensorSize == camera.FrameSize ? Size(camera.FrameSize) : $"{Size(camera.FrameSize)} of a {Size(camera.SensorSize)} sensor", 2);
+                        Line("Frame rate", $"{camera.FrameRate} Hz", 2);
+                        Line("Orientation", camera.CameraOrientation, 2);
+                        Line("Intrinsics", camera.Intrinsics, 2);
+                        var extrinsics = system.Settings.CameraExtrinsics?.Count switch
+                        {
+                            1 => system.Settings.CameraExtrinsics[Eye.Both],
+                            2 when camera.WhichEye != Eye.Both => system.Settings.CameraExtrinsics[camera.WhichEye],
+                            _ => default,
+                        };
+                        Line("Extrinsics", extrinsics.IsEmpty ? "Unknown (facing the eye)" : extrinsics.ToString(), 2);
+                        var cameraTime = camera.GetCameraTime();
+                        if (!double.IsNaN(cameraTime)) Line("Camera time", $"{cameraTime:0.000000} s (the camera's clock now, as Seconds in the data file)", 2);
+                    }
+                }
+
+                Section("Tracking and calibration");
+                Line("Tracking pipeline", settings.EyeTrackingPipeline, 2);
+                Line("Calibration method", settings.CalibrationMethod, 2);
+                foreach (var eye in eyeTracker.Calibration.EyeCalibrationParameters)
+                {
+                    if (eye is null) continue;
+                    var model = eye.EyePhysicalModel;
+                    var reference = eye.ReferenceData.Pupil.Center;
+                    Line($"{eye.WhichEye} eye model", eye.HasEyeModel ? $"center ({model.Center.X:0.0}, {model.Center.Y:0.0}) px, radius {model.Radius:0.0} px" : "none", 2);
+                    Line($"{eye.WhichEye} reference", eye.HasReference ? $"pupil at ({reference.X:0.0}, {reference.Y:0.0}) px" : "none", 2);
+                    Line($"{eye.WhichEye} intrinsics", eye.Intrinsics, 2);
+                    Line($"{eye.WhichEye} extrinsics", eye.Extrinsics, 2);
                 }
             }
 
-            Section("Tracking and calibration");
-            Line("Tracking pipeline", settings.EyeTrackingPipeline, 2);
-            Line("Calibration method", settings.CalibrationMethod, 2);
-            foreach (var eye in eyeTracker.Calibration.EyeCalibrationParameters)
+            if (computer)
             {
-                if (eye is null) continue;
-                var model = eye.EyePhysicalModel;
-                var reference = eye.ReferenceData.Pupil.Center;
-                Line($"{eye.WhichEye} eye model", eye.HasEyeModel ? $"center ({model.Center.X:0.0}, {model.Center.Y:0.0}) px, radius {model.Radius:0.0} px" : "none", 2);
-                Line($"{eye.WhichEye} reference", eye.HasReference ? $"pupil at ({reference.X:0.0}, {reference.Y:0.0}) px" : "none", 2);
-                Line($"{eye.WhichEye} intrinsics", eye.Intrinsics, 2);
-                Line($"{eye.WhichEye} extrinsics", eye.Extrinsics, 2);
+                Section("Computer");
+                Line("Name", Environment.MachineName, 2);
+                Line("Windows", $"{RuntimeInformation.OSDescription} ({RuntimeInformation.OSArchitecture})", 2);
+                Line("Processor", $"{Registry(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString")?.Trim()}, {Environment.ProcessorCount} logical processors", 2);
+                Line("Memory", $"{TotalMemoryGB():0.0} GB", 2);
+                if (setup) Line("Free disk space", FreeSpace(dataFileName ?? settings.DataFolder), 2);
+                Line(".NET", $"{RuntimeInformation.FrameworkDescription}, {RuntimeInformation.ProcessArchitecture} process", 2);
+                Line("Timer", Stopwatch.IsHighResolution ? $"high resolution, {Stopwatch.Frequency} Hz" : "low resolution", 2);
             }
 
-            Section("Computer");
-            Line("Name", Environment.MachineName, 2);
-            Line("Windows", $"{RuntimeInformation.OSDescription} ({RuntimeInformation.OSArchitecture})", 2);
-            Line("Processor", $"{Registry(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString")?.Trim()}, {Environment.ProcessorCount} logical processors", 2);
-            Line("Memory", $"{TotalMemoryGB():0.0} GB", 2);
-            Line("Free disk space", FreeSpace(dataFileName), 2);
-            Line(".NET", $"{RuntimeInformation.FrameworkDescription}, {RuntimeInformation.ProcessArchitecture} process", 2);
-            Line("Timer", Stopwatch.IsHighResolution ? $"high resolution, {Stopwatch.Frequency} Hz" : "low resolution", 2);
-
             text.AppendLine();
-            text.AppendLine("All the settings and the calibration: the -settings.xml and .cal files of the recording.");
+            if (dataFileName is not null) text.AppendLine("All the settings and the calibration: the -settings.xml and .cal files of the recording.");
             text.AppendLine("=============================================================");
             return text.ToString();
         }

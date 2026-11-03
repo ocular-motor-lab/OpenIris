@@ -58,6 +58,9 @@ namespace OpenIris
                 // load the settings of each plugin
                 Settings = profile is null ? EyeTrackerSettings.Load() : EyeTrackerSettings.LoadFromFolder(Directory.GetCurrentDirectory(), profile);
 
+                // What doesn't change, at the beginning of the main log. The rest when tracking starts.
+                Trace.WriteLine(RecordingInfo.DescribeStartup(this));
+
                 // Start the server to accept remote requests For some reason I don't understand this
                 // cannot be done in a separate thread.
                 if (startRemoteServices) EyeTrackerRemoteServices.Start(this);
@@ -270,6 +273,9 @@ namespace OpenIris
                             "with a camera SDK (for example SpinnakerNET with the Spinnaker SDK for FLIR cameras), install the SDK and restart OpenIris.", ex);
                     }
                 }
+
+                // How the tracking is set up, in the main log, as in each recording's log.
+                Trace.WriteLine(RecordingInfo.DescribeTracking(this));
 
                 // Action for every time new images are grabbed
                 ImageGrabber.ImagesGrabbed += (_, grabbedImages) =>

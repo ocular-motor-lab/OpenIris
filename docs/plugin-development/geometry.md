@@ -56,9 +56,9 @@ known. Its error grows at large eccentricities with cameras close to the eye.
 **Intrinsics, as OpenCV's camera matrix** (`CameraIntrinsics`): K = [fx 0 cx; 0 fy cy; 0 0 1], in
 pixels.
 
-- **Settings of the eye tracking system**, one for each eye's camera
-  (`EyeTrackingSystemSettings.IntrinsicsLeftCamera`, `IntrinsicsRightCamera`; a single camera uses
-  the left one), **for the whole sensor, as the camera sends the images** (before the camera
+- **Settings of the eye tracking system** (`EyeTrackingSystemSettings.CameraIntrinsics`), an
+  `EyeCollection` like the system's cameras: one for a camera that sees both eyes, or one for each
+  eye's camera; **for the whole sensor, as the camera sends the images** (before the camera
   orientation), as OpenCV's checkerboard calibration (`calibrateCamera`) gives them. A tool to do it
   from OpenIris is [#78](https://github.com/ocular-motor-lab/OpenIris/issues/78).
 - **Unknown (fx 0): from the pixel scale**, with weak perspective: f = `PixPerMm` ·

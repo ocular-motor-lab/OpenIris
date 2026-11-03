@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="CameraIntrinsicsTests.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -112,6 +112,66 @@ namespace OpenIris.Tests
             {
                 File.Delete(path);
             }
+        }
+
+        /// <summary>
+        /// The intrinsics in the settings are an EyeCollection like the cameras: one for a camera that
+        /// sees both eyes, or left and right. Missing ones come from the pixel scale. They are saved
+        /// with the settings.
+        /// </summary>
+        [TestMethod]
+        public void SettingsHaveTheIntrinsicsOfEachCamera()
+        {
+            PipelineHarness.EnsurePluginsLoaded();
+            var settings = new EyeTrackerSettings();
+            var system = settings.EyeTrackingSystemSettings;
+            system.PixPerMm = 8;
+            system.DistanceCameraToEyeMm = 50;
+            var single = new TestCamera(Eye.Both);
+            var left = new TestCamera(Eye.Left);
+            var right = new TestCamera(Eye.Right);
+            var fromScale = new CameraIntrinsics(400, 400, 99.5f, 49.5f);
+
+            Assert.AreEqual(fromScale, system.IntrinsicsOf(single), "Nothing in the settings.");
+
+            var measuredSingle = new CameraIntrinsics(500, 501, 100, 50);
+            system.CameraIntrinsics = new EyeCollection<CameraIntrinsics>(measuredSingle);
+            Assert.AreEqual(measuredSingle, system.IntrinsicsOf(single));
+            Assert.AreEqual(fromScale, system.IntrinsicsOf(left), "One in the settings, two cameras.");
+
+            var measuredRight = new CameraIntrinsics(600, 601, 90, 40);
+            system.CameraIntrinsics = new EyeCollection<CameraIntrinsics>(default, measuredRight);
+            Assert.AreEqual(fromScale, system.IntrinsicsOf(left), "Unknown for the left camera.");
+            Assert.AreEqual(measuredRight, system.IntrinsicsOf(right));
+
+            var path = Path.Combine(Path.GetTempPath(), "OpenIrisSettingsTest-" + Guid.NewGuid().ToString("N") + ".xml");
+            try
+            {
+                settings.Save(path);
+                var loaded = EyeTrackerSettings.Load(path).EyeTrackingSystemSettings;
+                Assert.AreEqual(2, loaded.CameraIntrinsics!.Count);
+                Assert.AreEqual(measuredRight, loaded.CameraIntrinsics[Eye.Right]);
+                Assert.IsTrue(loaded.CameraIntrinsics[Eye.Left].IsEmpty);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        private sealed class TestCamera : CameraEye
+        {
+            public TestCamera(Eye eye)
+            {
+                WhichEye = eye;
+                FrameSize = new Size(200, 100);
+            }
+
+            public override void Start() { }
+
+            public override void Stop() { }
+
+            protected override ImageEye GrabImageFromCamera() => throw new NotImplementedException();
         }
 
         private static EyeData Data(PointF pupil, CameraIntrinsics intrinsics) => new EyeData

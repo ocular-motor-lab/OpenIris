@@ -19,8 +19,8 @@ namespace OpenIris
     using EmbedIO.WebSockets;
 
     /// <summary>
-    /// WebSocket that streams every frame of data, with the columns of the data file (see
-    /// docs/user-manual/data-file.md). When a client connects it gets the column names:
+    /// WebSocket that streams every frame of data, with the columns of the data file and then those
+    /// of the calibrated data file (see docs/user-manual/data-file.md). When a client connects it gets the column names:
     ///     {"type":"columns","columns":["LeftFrameNumber",...]}
     /// and then, about 30 times a second, the frames since the last message:
     ///     {"type":"data","rows":[[...],[...]]}
@@ -44,7 +44,7 @@ namespace OpenIris
         {
             this.eyeTracker = eyeTracker;
 
-            var columns = EyeTrackerData.GetStringHeader().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var columns = EyeTrackerData.GetStreamedHeader().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             columnsMessage = JsonSerializer.Serialize(new { type = "columns", columns });
 
             eyeTracker.NewDataAndImagesAvailable += OnNewData;

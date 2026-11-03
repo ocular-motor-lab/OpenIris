@@ -140,6 +140,63 @@ namespace OpenIris.Tests
             Assert.AreEqual(0, h, 1e-4, "Still 0 at the reference.");
         }
 
+        [DataTestMethod]
+        [DataRow(20.0, 15.0, 5.0)]
+        [DataRow(-30.0, 25.0, -8.0)]
+        [DataRow(10.0, -20.0, double.NaN)]
+        public void GazeAndUpAgreeWithTheAngles(double horizontal, double vertical, double torsion)
+        {
+            var data = new CalibratedEyeData { HorizontalPosition = horizontal, VerticalPosition = vertical, TorsionalPosition = torsion };
+            var h = horizontal * ToRadians;
+            var v = vertical * ToRadians;
+
+            // Right, up, forward: Fick's horizontal turns about up, then the vertical.
+            Assert.AreEqual(Math.Sin(h) * Math.Cos(v), data.Gaze.X, 1e-5);
+            Assert.AreEqual(Math.Sin(v), data.Gaze.Y, 1e-5);
+            Assert.AreEqual(Math.Cos(h) * Math.Cos(v), data.Gaze.Z, 1e-5);
+            Assert.AreEqual(0, Vector3.Dot(data.Gaze, data.Up), 1e-5);
+            Assert.AreEqual(1, data.Up.Length(), 1e-5);
+
+            // The angles come back from the rotation of the vectors.
+            var (h2, v2, t2) = EyeRotationMath.FickAngles(EyeRotationMath.FromFickAngles(horizontal, vertical, torsion));
+            Assert.AreEqual(horizontal, h2, 1e-3);
+            Assert.AreEqual(vertical, v2, 1e-3);
+            if (!double.IsNaN(torsion)) Assert.AreEqual(torsion, t2, 1e-3);
+        }
+
+        [TestMethod]
+        public void GazeAndUpAtTheReference()
+        {
+            var data = new CalibratedEyeData { TorsionalPosition = double.NaN };
+            Assert.AreEqual(new Vector3(0, 0, 1), data.Gaze);
+            Assert.AreEqual(new Vector3(0, 1, 0), data.Up);
+
+            // Clockwise as the subject sees it: the top of the eye to the subject's right.
+            data.TorsionalPosition = 10;
+            Assert.IsTrue(data.Up.X > 0);
+
+            Assert.IsTrue(float.IsNaN(new CalibratedEyeData { HorizontalPosition = double.NaN }.Gaze.X), "Not found.");
+        }
+
+        /// <summary>
+        /// Without measured torsion, the up vector is the one of Listing's law: the same as the
+        /// rotation from the lines of sight.
+        /// </summary>
+        [TestMethod]
+        public void UpFollowsListingsLawWithoutTorsion()
+        {
+            var rotation = EyeRotationMath.FromLinesOfSight(
+                EyeRotationMath.LineOfSight(Model.Center, Model, Eye.Left),
+                EyeRotationMath.LineOfSight(Pupil(20, 15, Model), Model, Eye.Left),
+                double.NaN);
+            var (_, expectedUp) = EyeRotationMath.GazeAndUp(rotation);
+
+            var up = new CalibratedEyeData { HorizontalPosition = 20, VerticalPosition = 15, TorsionalPosition = double.NaN }.Up;
+            Assert.AreEqual(expectedUp.X, up.X, 1e-4);
+            Assert.AreEqual(expectedUp.Y, up.Y, 1e-4);
+            Assert.AreEqual(expectedUp.Z, up.Z, 1e-4);
+        }
+
         [TestMethod]
         public void PupilAreaWithThePixelScale()
         {

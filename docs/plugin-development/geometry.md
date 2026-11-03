@@ -134,10 +134,13 @@ Chains read right to left: `T_camera_head · T_head_eye` = `T_camera_eye`.
 - **Kappa** (`EyePhysicalModel.KappaAngleH`, `KappaAngleV`, in degrees): from the pupillary axis to
   the visual axis, positive towards the nose and up. Applied about the image's axes, exact for the
   eye near the camera's axis.
-- **(planned)** The calibrated eye data stores a rotation, with the angles as getters in one
-  documented convention (the data file columns keep their names), and a "torsion known" flag,
-  because horizontal and vertical are often known when torsion isn't. The calibrated head data
-  stores a 4×4 pose.
+- **The whole orientation** is also given as two unit vectors, `CalibratedEyeData.Gaze` and `Up`
+  (x right, y up, z forward), calculated from the three angles as Fick angles
+  (`EyeRotationMath.FromFickAngles`), so they always agree with them, also when a calibration method
+  changes the angles. A torsion of `NaN` means unknown: the rotation then follows Listing's law. The
+  angles and the vectors are in the calibrated data file; no rotation is stored, it can always be
+  rebuilt from them.
+- **(planned)** The calibrated head data stores a 4×4 pose.
 
 ## The eye model
 

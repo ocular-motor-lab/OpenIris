@@ -1,8 +1,12 @@
 # The data file
 
-Every recording, and every processed video, saves its data in a text file named like the recording
-folder, for example `Subject01-2026Oct30-143502.txt` (see
-[The files of a recording](tracking-and-recording.md#the-files-of-a-recording)).
+Every recording, and every processed video, saves its data in two text files named like the
+recording folder (see [The files of a recording](tracking-and-recording.md#the-files-of-a-recording)):
+
+- **The data file**, for example `Subject01-2026Oct30-143502.txt`: what the eye tracker measured
+  in the images, in pixels.
+- **The calibrated data file**, `Subject01-2026Oct30-143502-calibrated.txt`: the eye and head
+  positions in degrees, calculated with the calibration (see [Calibrated data](#calibrated-data)).
 
 For an example, download the
 [output of processing the sample videos](https://github.com/ocular-motor-lab/OpenIris/tree/main/sample-data)
@@ -10,14 +14,17 @@ with the JOM pipeline: 40 seconds of both eyes at 100 Hz.
 
 ## Reading the file
 
-The file has one line per frame, with values separated by spaces. The first line has the name of
-each column.
+Both files have one line per frame, with values separated by spaces. The first line has the name of
+each column. They have the same frames, in the same order.
 
 === "MATLAB"
 
     ```matlab
     data = readtable('Subject01-2026Oct30-143502.txt', 'Delimiter', ' ');
     plot(data.LeftSeconds, data.LeftPupilX)
+
+    calibrated = readtable('Subject01-2026Oct30-143502-calibrated.txt', 'Delimiter', ' ');
+    plot(calibrated.Seconds, calibrated.LeftH)
     ```
 
 === "Python"
@@ -27,6 +34,9 @@ each column.
 
     data = pd.read_csv("Subject01-2026Oct30-143502.txt", sep=" ")
     data.plot(x="LeftSeconds", y="LeftPupilX")
+
+    calibrated = pd.read_csv("Subject01-2026Oct30-143502-calibrated.txt", sep=" ")
+    calibrated.plot(x="Seconds", y="LeftH")
     ```
 
 ## What the values mean
@@ -35,14 +45,14 @@ each column.
   camera orientation: x to the right, y down, with the origin at the top left corner of the image.
   With cameras that move their region of interest (the arrows in the Set up tab), positions are
   relative to that region, so **don't move it during a recording**.
-- **Raw and calibrated data.** The first columns are raw, in pixels. Since version 0.2 the file also
-  has the eye positions in degrees, calibrated with the calibration in use at the time (see
+- **Raw and calibrated data.** The data file is raw, in pixels. The calibrated data file has the
+  eye positions in degrees, calibrated with the calibration in use at the time (see
   [Calibrated data](#calibrated-data)). The calibration is also saved next to the data, in the
   `.cal` file (see [Calibration](calibration.md)), so the raw data can be calibrated again later.
-- **Zeros mean "not found"** in the raw columns: a frame where the pupil wasn't found still has its
+- **Zeros mean "not found"** in the data file: a frame where the pupil wasn't found still has its
   line, with the frame number and time, but zeros for the pupil, the reflections, the eyelids and
-  torsion. An eye that isn't tracked has zeros everywhere. In the calibrated columns, where 0 is a
-  valid angle, "not found" is `NaN`.
+  torsion. An eye that isn't tracked has zeros everywhere. In the calibrated data file, where 0 is
+  a valid angle, "not found" is `NaN`.
 - **A missing line means a dropped frame.** The frame number jumps by more than one.
 
 ## Columns for each eye
@@ -76,9 +86,34 @@ These come twice, first for the left eye (columns starting with `Left`), then fo
 | `DebugTimeGrabbedLeft`, `DebugTimeGrabbedRight` | When OpenIris received the frame of each eye, in seconds since OpenIris started. |
 | `DebugTimeProcessed` | When OpenIris finished processing the frame, in seconds since OpenIris started. The difference with the time grabbed is the processing delay. These three are computer times, for checking delays only: use `Seconds` for timing. |
 
-## Calibrated data
+## Region of interest
 
 Added in version 0.2, after all the columns above, so code that reads older files keeps working.
+For each eye (`Left` first, then `Right`):
+
+| Column | Contents |
+| --- | --- |
+| `RoiX`, `RoiY`, `RoiWidth`, `RoiHeight` | Where the eye image is in the full image of the camera, in the camera's pixels: X and Y of its top left corner, and its size. 0 if unknown. |
+
+What that is depends on the system:
+
+- **Cameras that read only a window of their sensor** (Spinnaker, FlyCapture): the window, as the
+  camera reports it with each frame. It changes when the window moves to follow the eye (the
+  arrows in the Set up tab), so add `RoiX` and `RoiY` to `PupilX` and `PupilY` to get positions on
+  the sensor.
+- **Systems that cut each eye out of a bigger image:** the part cut out. For the Webcam system,
+  which cuts a rotated square around each eye and scales it, it's the smallest rectangle around
+  that square, so it's approximate. 0 when the face isn't found.
+- **Other cameras, Simulation and videos:** the whole frame. When processing a recorded video,
+  that's the frame of the video, not the window of the camera that recorded it.
+
+These positions are in the camera's own image, before OpenIris rotates or mirrors it (see the
+camera orientation of the system); they match the eye image only for cameras that are upright.
+
+## Calibrated data
+
+The `…-calibrated.txt` file, since version 0.2. (The 0.2 alpha versions had these columns in the
+data file instead, between `DebugTimeProcessed` and `LeftRoiX`, without the gaze and up vectors.)
 
 ### Coordinate system
 
@@ -102,7 +137,8 @@ degrees per second, and the accelerations are in g along X, Y and Z.
 The signs and the zeros are the same for every eye tracking system and calibration method. How
 the three angles combine into an orientation (Fick, Helmholtz, rotation vectors...) is not fixed:
 it is up to each calibration method, which says which one it uses. All three angle definitions
-agree near the reference; they differ for large eye or head rotations.
+agree near the reference; they differ for large eye or head rotations. The gaze and up vectors
+(see [Columns](#columns)) give the same orientation without that choice.
 
 How the calibration methods included with OpenIris (Auto, Manual, Remote Linear) calculate the eye
 angles:
@@ -144,12 +180,21 @@ With other systems, all head columns are 0.
 
 ### Columns
 
+First the frame:
+
+| Column | Contents |
+| --- | --- |
+| `FrameNumber` | Frame number: `LeftFrameNumber` of the data file (`RightFrameNumber` if only the right eye is tracked). |
+| `Seconds` | Time the frame was taken, in seconds: `LeftSeconds` of the data file (`RightSeconds` if only the right eye is tracked). |
+
 For each eye, `Left` first, then `Right` (`LeftH`, `LeftV`, ... `RightEyeOpening`):
 
 | Column | Contents |
 | --- | --- |
 | `H`, `V` | Eye position in degrees, as above. `NaN` if the pupil wasn't found. |
-| `T` | Torsion in degrees, as above. The same value as `Torsion`. |
+| `T` | Torsion in degrees, as above: the Fick torsion, so the measured `Torsion` plus that of Listing's law at oblique positions. With torsion off in the settings, `Torsion` is 0 and `T` is only Listing's part. `NaN` when `Torsion` is (on, but no reference yet). |
+| `GazeX`, `GazeY`, `GazeZ` | The line of sight, as a unit vector: X to the subject's right, Y up, Z forward, the head's axes at the reference. (0, 0, 1) at the reference. The same direction as `H` and `V`, without the choice of angles. `NaN` if the pupil wasn't found. |
+| `UpX`, `UpY`, `UpZ` | Where the top of the eye points, as a unit vector with the same axes, perpendicular to the gaze: (0, 1, 0) at the reference. With the gaze it gives the whole orientation of the eye, torsion included. When `T` is `NaN`, the one of Listing's law. |
 | `PupilArea` | Area of the pupil ellipse in mm² (π × `PupilWidth` × `PupilHeight` / 4, converted to mm with the eye tracking system's pixel scale, **PixPerMm**). Before 0.2 it took the eye globe as 24 mm across. |
 | `EyeOpening` | How open the eyelids are, in percent of the opening at calibration. 0 without a calibration reference. |
 
@@ -161,29 +206,6 @@ For the head:
 | `HeadRollVelocity`, `HeadPitchVelocity`, `HeadYawVelocity` | Head angular velocity in degrees per second, same signs. |
 | `HeadAccelerationX`, `HeadAccelerationY`, `HeadAccelerationZ` | Head acceleration in g, along X (right), Y (up) and Z (forward). |
 | `HeadX`, `HeadY`, `HeadZ` | Head position in mm: from the camera with the Webcam system (above); 0 with other systems. |
-
-## Region of interest
-
-Also added in version 0.2, after the calibrated data, for each eye (`Left` first, then `Right`):
-
-| Column | Contents |
-| --- | --- |
-| `RoiX`, `RoiY`, `RoiWidth`, `RoiHeight` | Where the eye image is in the full image of the camera, in the camera's pixels: X and Y of its top left corner, and its size. 0 if unknown. |
-
-What that is depends on the system:
-
-- **Cameras that read only a window of their sensor** (Spinnaker, FlyCapture): the window, as the
-  camera reports it with each frame. It changes when the window moves to follow the eye (the
-  arrows in the Set up tab), so add `RoiX` and `RoiY` to `PupilX` and `PupilY` to get positions on
-  the sensor.
-- **Systems that cut each eye out of a bigger image:** the part cut out. For the Webcam system,
-  which cuts a rotated square around each eye and scales it, it's the smallest rectangle around
-  that square, so it's approximate. 0 when the face isn't found.
-- **Other cameras, Simulation and videos:** the whole frame. When processing a recorded video,
-  that's the frame of the video, not the window of the camera that recorded it.
-
-These positions are in the camera's own image, before OpenIris rotates or mirrors it (see the
-camera orientation of the system); they match the eye image only for cameras that are upright.
 
 ## The events file
 

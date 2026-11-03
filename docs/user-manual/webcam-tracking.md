@@ -65,7 +65,7 @@ choosing the Webcam system.
 
 From the face it finds, OpenIris also estimates the pose of the head, fitting a generic face to six
 points: the nose tip, the chin, the outer corners of the eyes and the corners of the mouth. It fills
-the head columns of the [data file](data-file.md#calibrated-data):
+the head columns of the [calibrated data file](data-file.md#calibrated-data):
 
 - `HeadYaw`, `HeadPitch` and `HeadRoll`, in degrees, relative to the head at the reference:
   **Calibrate** or **Reset reference** zero them, with the eyes. Before there is a reference, they are

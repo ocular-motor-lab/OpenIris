@@ -45,7 +45,7 @@ each test in detail. In short:
 - **Speed**: the JOM pipeline must not become more than 25% slower than on the same computer before.
 - **Record and process**: OpenIris tracks the Simulation system, records a short video and processes
   it, like a user would.
-- **Data file**: the lines of the data file and the values streamed through LSL must not change.
+- **Data file**: the lines of the data file and of the calibrated data file, and the values streamed through LSL, must not change.
 - **Cameras** (category Hardware): with the two FLIR cameras of Spinnaker Dual Camera connected,
   OpenIris records 20 s at 100 Hz with raw videos and at 450 Hz, and no frame may be lost. They start
   the built `OpenIris.exe` (close OpenIris first) and skip themselves when the cameras or the

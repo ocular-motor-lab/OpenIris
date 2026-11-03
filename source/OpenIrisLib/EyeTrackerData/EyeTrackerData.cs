@@ -106,11 +106,6 @@ namespace OpenIris
 
             var extraData = ExtraData;
 
-            var notTracked = new CalibratedEyeData { HorizontalPosition = double.NaN, VerticalPosition = double.NaN, TorsionalPosition = double.NaN };
-            var calibratedLeft = EyeDataCalibrated?[Eye.Left] ?? notTracked;
-            var calibratedRight = EyeDataCalibrated?[Eye.Right] ?? notTracked;
-            var calibratedHead = HeadDataCalibrated ?? new CalibratedHeadData();
-
             // One StringBuilder for the whole line. Each value is formatted from its own type (float,
             // double, integer), as always: the text of the columns must not change.
             var line = new StringBuilder(1024);
@@ -186,33 +181,8 @@ namespace OpenIris
             Add(line, TimeProcessed);
 
             // Columns added in 0.2, after the original ones so files and readers of older versions
-            // keep their column order.
-            Add(line, calibratedLeft.HorizontalPosition);
-            Add(line, calibratedLeft.VerticalPosition);
-            Add(line, calibratedLeft.TorsionalPosition);
-            Add(line, calibratedLeft.PupilArea);
-            Add(line, calibratedLeft.PercentOpening);
-            Add(line, calibratedRight.HorizontalPosition);
-            Add(line, calibratedRight.VerticalPosition);
-            Add(line, calibratedRight.TorsionalPosition);
-            Add(line, calibratedRight.PupilArea);
-            Add(line, calibratedRight.PercentOpening);
-
-            Add(line, calibratedHead.Roll);
-            Add(line, calibratedHead.Pitch);
-            Add(line, calibratedHead.Yaw);
-            Add(line, calibratedHead.RollVelocity);
-            Add(line, calibratedHead.PitchVelocity);
-            Add(line, calibratedHead.YawVelocity);
-            Add(line, calibratedHead.XAcceleration);
-            Add(line, calibratedHead.YAcceleration);
-            Add(line, calibratedHead.ZAcceleration);
-            Add(line, calibratedHead.X);
-            Add(line, calibratedHead.Y);
-            Add(line, calibratedHead.Z);
-
-            // ROI of each eye image in the camera image, in pixels (X, Y, width, height). 0 if unknown.
-            // Formatted as decimals, as when these columns were placeholders.
+            // keep their column order. ROI of each eye image in the camera image, in pixels (X, Y,
+            // width, height), 0 if unknown. Formatted as decimals, as when these were placeholders.
             Add(line, (double)dataLeft.Roi.X);
             Add(line, (double)dataLeft.Roi.Y);
             Add(line, (double)dataLeft.Roi.Width);
@@ -234,6 +204,8 @@ namespace OpenIris
 
         private static void Add(StringBuilder line, int value) => Separate(line).Append(value.ToString());
 
+        private static void Add(StringBuilder line, long value) => Separate(line).Append(value.ToString());
+
         private static StringBuilder Separate(StringBuilder line) => line.Length == 0 ? line : line.Append(' ');
 
         /// <summary>
@@ -243,11 +215,13 @@ namespace OpenIris
             => reflections != null && index < reflections.Length ? reflections[index].Center : PointF.Empty;
 
         /// <summary>
-        /// Gets the data of this frame as an array of doubles, in the same column order as
-        /// <see cref="GetStringLine"/> and <see cref="GetStringHeader"/>. Used to stream the
-        /// data through channels (e.g. LSL) keeping the same layout as the recorded data files.
+        /// Gets the data of this frame as an array of doubles: the columns of the data file
+        /// (<see cref="GetStringLine"/>), then those of the calibrated data file
+        /// (<see cref="GetCalibratedStringLine"/>) without its frame number and time. Their names
+        /// are <see cref="GetStreamedHeader"/>. Used to stream the data (LSL, the web client) with
+        /// the same columns as the recorded files.
         /// </summary>
-        /// <returns>The array of values, one per column of the data file.</returns>
+        /// <returns>The array of values.</returns>
         public double[] GetDataArray()
         {
             var eyelidsLeft = EyeDataRaw?[Eye.Left]?.Eyelids;
@@ -267,11 +241,6 @@ namespace OpenIris
             var headData = HeadDataRaw ?? new HeadData();
 
             var extraData = ExtraData;
-
-            var notTracked = new CalibratedEyeData { HorizontalPosition = double.NaN, VerticalPosition = double.NaN, TorsionalPosition = double.NaN };
-            var calibratedLeft = EyeDataCalibrated?[Eye.Left] ?? notTracked;
-            var calibratedRight = EyeDataCalibrated?[Eye.Right] ?? notTracked;
-            var calibratedHead = HeadDataCalibrated ?? new CalibratedHeadData();
 
             var values = new double[ColumnCount];
             int n = 0;
@@ -346,30 +315,6 @@ namespace OpenIris
             values[n++] = dataRight.Timestamp.TimeGrabbed;
             values[n++] = TimeProcessed;
 
-            values[n++] = calibratedLeft.HorizontalPosition;
-            values[n++] = calibratedLeft.VerticalPosition;
-            values[n++] = calibratedLeft.TorsionalPosition;
-            values[n++] = calibratedLeft.PupilArea;
-            values[n++] = calibratedLeft.PercentOpening;
-            values[n++] = calibratedRight.HorizontalPosition;
-            values[n++] = calibratedRight.VerticalPosition;
-            values[n++] = calibratedRight.TorsionalPosition;
-            values[n++] = calibratedRight.PupilArea;
-            values[n++] = calibratedRight.PercentOpening;
-
-            values[n++] = calibratedHead.Roll;
-            values[n++] = calibratedHead.Pitch;
-            values[n++] = calibratedHead.Yaw;
-            values[n++] = calibratedHead.RollVelocity;
-            values[n++] = calibratedHead.PitchVelocity;
-            values[n++] = calibratedHead.YawVelocity;
-            values[n++] = calibratedHead.XAcceleration;
-            values[n++] = calibratedHead.YAcceleration;
-            values[n++] = calibratedHead.ZAcceleration;
-            values[n++] = calibratedHead.X;
-            values[n++] = calibratedHead.Y;
-            values[n++] = calibratedHead.Z;
-
             values[n++] = dataLeft.Roi.X;
             values[n++] = dataLeft.Roi.Y;
             values[n++] = dataLeft.Roi.Width;
@@ -379,13 +324,108 @@ namespace OpenIris
             values[n++] = dataRight.Roi.Width;
             values[n++] = dataRight.Roi.Height;
 
+            CalibratedValues(values, n);
+
             return values;
+        }
+
+        /// <summary>
+        /// Gets a line of the calibrated data file: the frame number, the time, and the calibrated
+        /// columns (see <see cref="GetCalibratedStringHeader"/>).
+        /// </summary>
+        public string GetCalibratedStringLine()
+        {
+            // One buffer per thread, not one per frame.
+            var values = calibratedValues ??= new double[CalibratedColumns.Length];
+            CalibratedValues(values, 0);
+
+            var line = new StringBuilder(512);
+            Add(line, FrameNumber);
+            Add(line, Seconds);
+            foreach (var value in values) Add(line, value);
+            return line.ToString();
+        }
+
+        /// <summary>
+        /// Gets the header of the calibrated data file.
+        /// </summary>
+        public static string GetCalibratedStringHeader() => "FrameNumber Seconds " + string.Join(" ", CalibratedColumns);
+
+        /// <summary>
+        /// Gets the names of the values of <see cref="GetDataArray"/>: the columns of the data file
+        /// and then those of the calibrated data file, without the frame number and time, which the
+        /// data file already has.
+        /// </summary>
+        public static string GetStreamedHeader() => GetStringHeader() + " " + string.Join(" ", CalibratedColumns);
+
+        // Time of the first eye with data, as FrameNumber.
+        private double Seconds => (EyeDataRaw?[Eye.Left] ?? EyeDataRaw?[Eye.Right])?.Timestamp.Seconds ?? double.NaN;
+
+        [ThreadStatic]
+        private static double[]? calibratedValues;
+
+        private static readonly string[] CalibratedColumns =
+        {
+            "LeftH", "LeftV", "LeftT",
+            "LeftGazeX", "LeftGazeY", "LeftGazeZ", "LeftUpX", "LeftUpY", "LeftUpZ",
+            "LeftPupilArea", "LeftEyeOpening",
+            "RightH", "RightV", "RightT",
+            "RightGazeX", "RightGazeY", "RightGazeZ", "RightUpX", "RightUpY", "RightUpZ",
+            "RightPupilArea", "RightEyeOpening",
+            "HeadRoll", "HeadPitch", "HeadYaw",
+            "HeadRollVelocity", "HeadPitchVelocity", "HeadYawVelocity",
+            "HeadAccelerationX", "HeadAccelerationY", "HeadAccelerationZ",
+            "HeadX", "HeadY", "HeadZ",
+        };
+
+        // The calibrated values, in the order of CalibratedColumns, from values[n].
+        private void CalibratedValues(double[] values, int n)
+        {
+            n = CalibratedValues(values, n, EyeDataCalibrated?[Eye.Left] ?? CalibratedEyeData.NotTracked);
+            n = CalibratedValues(values, n, EyeDataCalibrated?[Eye.Right] ?? CalibratedEyeData.NotTracked);
+
+            var head = HeadDataCalibrated ?? CalibratedHeadData.Empty;
+            values[n++] = head.Roll;
+            values[n++] = head.Pitch;
+            values[n++] = head.Yaw;
+            values[n++] = head.RollVelocity;
+            values[n++] = head.PitchVelocity;
+            values[n++] = head.YawVelocity;
+            values[n++] = head.XAcceleration;
+            values[n++] = head.YAcceleration;
+            values[n++] = head.ZAcceleration;
+            values[n++] = head.X;
+            values[n++] = head.Y;
+            values[n++] = head.Z;
+        }
+
+        private static int CalibratedValues(double[] values, int n, CalibratedEyeData calibrated)
+        {
+            var (gaze, up) = calibrated.GetGazeAndUp();
+
+            values[n++] = calibrated.HorizontalPosition;
+            values[n++] = calibrated.VerticalPosition;
+            values[n++] = calibrated.TorsionalPosition;
+            values[n++] = gaze.X;
+            values[n++] = gaze.Y;
+            values[n++] = gaze.Z;
+            values[n++] = up.X;
+            values[n++] = up.Y;
+            values[n++] = up.Z;
+            values[n++] = calibrated.PupilArea;
+            values[n++] = calibrated.PercentOpening;
+            return n;
         }
 
         /// <summary>
         /// Number of columns of the data file.
         /// </summary>
-        private const int ColumnCount = 104;
+        private const int RawColumnCount = 82;
+
+        /// <summary>
+        /// Number of values of <see cref="GetDataArray"/>.
+        /// </summary>
+        private static int ColumnCount => RawColumnCount + CalibratedColumns.Length;
 
         /// <summary>
         /// Gets the header for the data file.
@@ -473,30 +513,6 @@ namespace OpenIris
                   "DebugTimeGrabbedLeft " +
                   "DebugTimeGrabbedRight " +
                   "DebugTimeProcessed " +
-
-                  "LeftH " +
-                  "LeftV " +
-                  "LeftT " +
-                  "LeftPupilArea " +
-                  "LeftEyeOpening " +
-                  "RightH " +
-                  "RightV " +
-                  "RightT " +
-                  "RightPupilArea " +
-                  "RightEyeOpening " +
-
-                  "HeadRoll " +
-                  "HeadPitch " +
-                  "HeadYaw " +
-                  "HeadRollVelocity " +
-                  "HeadPitchVelocity " +
-                  "HeadYawVelocity " +
-                  "HeadAccelerationX " +
-                  "HeadAccelerationY " +
-                  "HeadAccelerationZ " +
-                  "HeadX " +
-                  "HeadY " +
-                  "HeadZ " +
 
                   "LeftRoiX " +
                   "LeftRoiY " +

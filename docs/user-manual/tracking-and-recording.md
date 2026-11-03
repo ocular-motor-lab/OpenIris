@@ -43,6 +43,7 @@ time, for example `Subject01-2026Oct30-143502`. Inside, with the same name:
 | File | Contents |
 | --- | --- |
 | `….txt` | The data, one line per frame (see [The data file](data-file.md)). |
+| `…-calibrated.txt` | The calibrated data: eye and head positions in degrees, one line per frame (see [Calibrated data](data-file.md#calibrated-data)). |
 | `…-Left.avi`, `…-Right.avi` | The raw video of each eye, if **RecordVideo** is on. |
 | `…-videoframes.txt` | Where each frame is in the raw videos, if **RecordVideo** is on (see [The data file](data-file.md#the-video-frames-file)). |
 | `…-events.txt` | The events sent during the recording (see [Remote control](remote-control.md)). |

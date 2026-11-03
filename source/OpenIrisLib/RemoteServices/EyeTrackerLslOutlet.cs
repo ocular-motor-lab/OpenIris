@@ -144,7 +144,7 @@ namespace OpenIris
 
         private static void AppendChannelLabels(IntPtr info, int numberOfChannels)
         {
-            var labels = EyeTrackerData.GetStringHeader().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var labels = EyeTrackerData.GetStreamedHeader().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
             var desc = Lsl.lsl_get_desc(info);
             var channels = Lsl.lsl_append_child(desc, "channels");

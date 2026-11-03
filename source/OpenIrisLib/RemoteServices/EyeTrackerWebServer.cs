@@ -11,6 +11,7 @@ namespace OpenIris
     using System;
     using System.Diagnostics;
     using System.IO;
+    using System.Numerics;
     using System.Text;
     using System.Text.Json;
     using System.Text.Json.Serialization;
@@ -39,7 +40,7 @@ namespace OpenIris
         /// </summary>
         public static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
-            Converters = { new JsonStringEnumConverter(), new NanAsNullConverter(), new NanAsNullFloatConverter() },
+            Converters = { new JsonStringEnumConverter(), new NanAsNullConverter(), new NanAsNullFloatConverter(), new Vector3AsArrayConverter() },
         };
 
         /// <summary>
@@ -206,6 +207,24 @@ namespace OpenIris
             {
                 if (float.IsNaN(value) || float.IsInfinity(value)) writer.WriteNullValue();
                 else writer.WriteNumberValue(value);
+            }
+        }
+
+        /// <summary>
+        /// Writes vectors (the gaze and up of the calibrated data) as [x, y, z]. Vector3 has only
+        /// fields, which would otherwise go as {}.
+        /// </summary>
+        private sealed class Vector3AsArrayConverter : JsonConverter<Vector3>
+        {
+            public override Vector3 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                var values = JsonSerializer.Deserialize<float[]>(ref reader, options) ?? Array.Empty<float>();
+                return values.Length == 3 ? new Vector3(values[0], values[1], values[2]) : new Vector3(float.NaN);
+            }
+
+            public override void Write(Utf8JsonWriter writer, Vector3 value, JsonSerializerOptions options)
+            {
+                JsonSerializer.Serialize(writer, new[] { value.X, value.Y, value.Z }, options);
             }
         }
     }

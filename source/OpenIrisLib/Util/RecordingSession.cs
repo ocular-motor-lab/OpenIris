@@ -47,6 +47,7 @@ namespace OpenIris
         private VideoFrameBuffer? processedFrameBuffer;
         private StreamWriter? eventFile;
         private StreamWriter? dataFile;
+        private StreamWriter? calibratedDataFile;
         private EyeTrackerLog? log;
 
         // RangeToRecord will keep track fo the range of frame numbers that need to be recorded.
@@ -206,6 +207,8 @@ namespace OpenIris
 
                     dataFile?.Dispose();
                     dataFile = null;
+                    calibratedDataFile?.Dispose();
+                    calibratedDataFile = null;
 
                     processedVideoWriter?.Dispose();
                     processedVideoWriter = null;
@@ -408,16 +411,19 @@ namespace OpenIris
         private bool RecordDataAndProcessedImages((EyeTrackerImagesAndData dataAndImages, double frameRate) images)
         {
             //
-            // Save the data to text file
+            // Save the data to text files: raw, and calibrated (see docs/user-manual/data-file.md)
             // 
             if (dataFile is null)
             {
-                // Open the file and write the header the first time
+                // Open the files and write the headers the first time
                 dataFile = new StreamWriter(DataFileName);
                 dataFile.WriteLine(EyeTrackerData.GetStringHeader());
+                calibratedDataFile = new StreamWriter(DataFileName.Replace(".txt", "-calibrated.txt"));
+                calibratedDataFile.WriteLine(EyeTrackerData.GetCalibratedStringHeader());
             }
 
             dataFile.WriteLine(images.dataAndImages.Data?.GetStringLine() ?? string.Empty);
+            calibratedDataFile?.WriteLine(images.dataAndImages.Data?.GetCalibratedStringLine() ?? string.Empty);
 
             //
             // Save the images to a video file with data overlay
@@ -497,6 +503,7 @@ namespace OpenIris
             processedVideoWriter?.Dispose();
             eventFile?.Dispose();
             dataFile?.Dispose();
+            calibratedDataFile?.Dispose();
             log?.Dispose();
 
             rawVideoWriters = null;
@@ -504,6 +511,7 @@ namespace OpenIris
             processedVideoWriter = null;
             eventFile = null;
             dataFile = null;
+            calibratedDataFile = null;
             log = null;
         }
     }

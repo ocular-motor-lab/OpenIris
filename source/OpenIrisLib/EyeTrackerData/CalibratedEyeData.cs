@@ -7,6 +7,7 @@
 namespace OpenIris
 {
     using System;
+    using System.Numerics;
 
     /// <summary>
     /// Form: http://www.opt.indiana.edu/v665/CD/CD_Version/CH3/CH3.HTM Much of the effort in
@@ -104,6 +105,29 @@ namespace OpenIris
         /// of the eye towards the subject's right).
         /// </summary>
         public double TorsionalPosition { get; set; }
+
+        /// <summary>
+        /// The data of an eye that isn't tracked: angles NaN, the rest 0.
+        /// </summary>
+        public static readonly CalibratedEyeData NotTracked = new CalibratedEyeData { HorizontalPosition = double.NaN, VerticalPosition = double.NaN, TorsionalPosition = double.NaN };
+
+        /// <summary>
+        /// Gets the line of sight, as a unit vector: x to the subject's right, y up, z forward, with
+        /// (0, 0, 1) at the reference. From the three angles as Fick angles. NaN if they are.
+        /// </summary>
+        public Vector3 Gaze => GetGazeAndUp().gaze;
+
+        /// <summary>
+        /// Gets the up direction of the eye (where the top of the eye points), as a unit vector with
+        /// the axes of Gaze, (0, 1, 0) at the reference. If the torsion is unknown (NaN), the one of
+        /// Listing's law.
+        /// </summary>
+        public Vector3 Up => GetGazeAndUp().up;
+
+        /// <summary>
+        /// Gets Gaze and Up, calculated together. A method, so it isn't serialized with the data.
+        /// </summary>
+        public (Vector3 gaze, Vector3 up) GetGazeAndUp() => EyeRotationMath.GazeAndUp(EyeRotationMath.FromFickAngles(HorizontalPosition, VerticalPosition, TorsionalPosition));
 
         /// <summary>
         /// Gets or sets the area of the pupil ellipse, in mm², with the pixel scale (MmPerPix). NaN if
@@ -215,6 +239,9 @@ namespace OpenIris
     /// </remarks>
     public struct CalibratedHeadData : IEquatable<CalibratedHeadData>
     {
+        /// <summary>No head data: all 0.</summary>
+        public static readonly CalibratedHeadData Empty = default;
+
         /// <summary>Acceleration towards the subject's right (+X), in g.</summary>
         public double XAcceleration { get; set; }
 

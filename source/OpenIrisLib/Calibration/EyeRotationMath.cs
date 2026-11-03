@@ -80,17 +80,60 @@ namespace OpenIris
 
             var gaze = Vector3.Normalize(new Vector3(Vector3.Dot(current, forward), Vector3.Dot(current, left), Vector3.Dot(current, up)));
 
-            // Listing's law: the shortest rotation from the reference (x) to the current line of sight.
-            var axis = Vector3.Cross(Vector3.UnitX, gaze);
-            var sin = axis.Length();
-            var listing = sin < 1e-9f
-                ? Quaternion.Identity
-                : Quaternion.CreateFromAxisAngle(axis / sin, (float)Math.Atan2(sin, gaze.X));
-
+            var listing = Listing(gaze);
             if (double.IsNaN(torsionDeg)) return listing;
 
             // The torsion about the current line of sight, after Listing's rotation.
             return Quaternion.CreateFromAxisAngle(gaze, (float)(torsionDeg / RadToDeg)) * listing;
+        }
+
+        /// <summary>
+        /// The rotation with the given Fick angles, in degrees with OpenIris's signs (FickAngles). If
+        /// the torsion is NaN (unknown), the rotation that follows Listing's law to the same line of
+        /// sight.
+        /// </summary>
+        public static Quaternion FromFickAngles(double horizontal, double vertical, double torsion)
+        {
+            var h = -horizontal / RadToDeg;
+            var v = -vertical / RadToDeg;
+
+            if (double.IsNaN(torsion))
+            {
+                return Listing(new Vector3((float)(Math.Cos(h) * Math.Cos(v)), (float)(Math.Sin(h) * Math.Cos(v)), (float)-Math.Sin(v)));
+            }
+
+            // R = Rz(h) Ry(v) Rx(t), as in FickAngles.
+            return
+                Quaternion.CreateFromAxisAngle(Vector3.UnitZ, (float)h) *
+                Quaternion.CreateFromAxisAngle(Vector3.UnitY, (float)v) *
+                Quaternion.CreateFromAxisAngle(Vector3.UnitX, (float)(torsion / RadToDeg));
+        }
+
+        /// <summary>
+        /// Listing's law: the shortest rotation from the reference (x) to the line of sight.
+        /// </summary>
+        /// <param name="gaze">Line of sight in the head-fixed frame, unit length.</param>
+        private static Quaternion Listing(Vector3 gaze)
+        {
+            var axis = Vector3.Cross(Vector3.UnitX, gaze);
+            var sin = axis.Length();
+            return sin < 1e-9f
+                ? Quaternion.Identity
+                : Quaternion.CreateFromAxisAngle(axis / sin, (float)Math.Atan2(sin, gaze.X));
+        }
+
+        /// <summary>
+        /// The line of sight and the up direction of the eye after a rotation in the head-fixed frame,
+        /// as unit vectors with OpenIris's axes: x to the subject's right, y up, z forward. At the
+        /// reference they are (0, 0, 1) and (0, 1, 0).
+        /// </summary>
+        /// <param name="rotation">The rotation in the head-fixed frame.</param>
+        public static (Vector3 gaze, Vector3 up) GazeAndUp(Quaternion rotation)
+        {
+            // From the head-fixed frame (x forward, y left, z up) to right, up, forward.
+            static Vector3 ToRightUpForward(Vector3 v) => new Vector3(-v.Y, v.Z, v.X);
+
+            return (ToRightUpForward(Vector3.Transform(Vector3.UnitX, rotation)), ToRightUpForward(Vector3.Transform(Vector3.UnitZ, rotation)));
         }
 
         /// <summary>

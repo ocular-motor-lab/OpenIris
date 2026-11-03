@@ -184,7 +184,7 @@ A calibration can be driven by the stimulus program when the **Calibration metho
 3. When all targets are done, it sends `CALIBRATION|Complete`. OpenIris fits, for each eye, a linear
    transformation from the eye signal to the target position. Each target counts as one point: the
    median of the data collected during it. Give the targets in degrees, positive to the subject's
-   right and up: the calibrated horizontal and vertical positions (`H`, `V` in the data file) come
+   right and up: the calibrated horizontal and vertical positions (`H`, `V` in the calibrated data file) come
    from the fit, in those units, from then on. The fit is saved in the `.cal` file.
 
 Other messages:
@@ -285,8 +285,9 @@ requests.post(oi + "/recording/stop")
 ### Live data
 
 The WebSocket `ws://<address>:9001/ws/data` sends every frame. First it sends the names of the
-columns, which are those of the [data file](data-file.md):
-`{"type": "columns", "columns": ["LeftFrameNumber", ...]}`. Then, about 30 times a second, the
+columns, which are those of the [data file](data-file.md) followed by those of the calibrated data
+file (without its `FrameNumber` and `Seconds`, which the data file already has):
+`{"type": "columns", "columns": ["LeftFrameNumber", ...]}`. LSL streams the same columns. Then, about 30 times a second, the
 frames since the last message: `{"type": "data", "rows": [[...], [...]]}`.
 
 The URLs of the old browser commands (`http://localhost:9001/EyeTrackerEndpoint/Web/StartRecording`,

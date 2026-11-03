@@ -16,7 +16,7 @@ namespace OpenIris.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     /// <summary>
-    /// Checks that the lines of the data file and the values streamed through LSL don't change: the
+    /// Checks that the lines of the data files and the values streamed through LSL don't change: the
     /// same frames must give exactly the same text and numbers as in Baselines\data-file-lines.txt.
     /// Run with OPENIRIS_UPDATE_BASELINES=1 to rewrite it after an intended change.
     /// </summary>
@@ -36,6 +36,7 @@ namespace OpenIris.Tests
                 {
                     var data = RandomFrame(random, i);
                     actual.AppendLine(data.GetStringLine());
+                    actual.AppendLine(data.GetCalibratedStringLine());
                     actual.AppendLine(string.Join(" ", data.GetDataArray().Select(v => v.ToString("R"))));
                 }
 

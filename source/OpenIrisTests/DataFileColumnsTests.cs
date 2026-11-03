@@ -11,9 +11,9 @@ namespace OpenIris.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     /// <summary>
-    /// Checks the columns of the data file: the header, the lines and the LSL samples must match,
+    /// Checks the columns of the data files: the header, the lines and the LSL samples must match,
     /// and the columns of older versions must keep their names and positions, because analysis code
-    /// reads them.
+    /// reads them. The calibrated columns of 0.2 alphas moved to the calibrated data file.
     /// </summary>
     [TestClass]
     public class DataFileColumnsTests
@@ -27,8 +27,17 @@ namespace OpenIris.Tests
             var data = new EyeTrackerData();
 
             Assert.AreEqual(header.Length, Split(data.GetStringLine()).Length);
-            Assert.AreEqual(header.Length, data.GetDataArray().Length);
             Assert.AreEqual(header.Length, header.Distinct().Count(), "Column names must be unique.");
+
+            var calibrated = Split(EyeTrackerData.GetCalibratedStringHeader());
+            Assert.AreEqual(calibrated.Length, Split(data.GetCalibratedStringLine()).Length);
+            Assert.AreEqual(calibrated.Length, calibrated.Distinct().Count(), "Column names must be unique.");
+
+            // The streams: the data file, then the calibrated file without its frame number and time.
+            var streamed = Split(EyeTrackerData.GetStreamedHeader());
+            Assert.AreEqual(streamed.Length, data.GetDataArray().Length);
+            Assert.AreEqual(streamed.Length, streamed.Distinct().Count(), "Column names must be unique.");
+            CollectionAssert.AreEqual(header.Concat(calibrated.Skip(2)).ToArray(), streamed);
         }
 
         [TestMethod]
@@ -42,7 +51,17 @@ namespace OpenIris.Tests
             Assert.AreEqual("Int0", header[55]);
             Assert.AreEqual("Double0", header[63]);
             Assert.AreEqual("DebugTimeProcessed", header[ColumnsUntil0_1 - 1]);
-            Assert.AreEqual("LeftH", header[ColumnsUntil0_1]);
+            Assert.AreEqual("LeftRoiX", header[ColumnsUntil0_1]);
+        }
+
+        [TestMethod]
+        public void CalibratedFileStartsWithTheFrameNumber()
+        {
+            var header = Split(EyeTrackerData.GetCalibratedStringHeader());
+
+            Assert.AreEqual("FrameNumber", header[0]);
+            Assert.AreEqual("Seconds", header[1]);
+            Assert.AreEqual("LeftH", header[2]);
         }
 
         private static string[] Split(string line) => line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

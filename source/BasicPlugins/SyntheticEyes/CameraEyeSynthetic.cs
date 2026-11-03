@@ -164,14 +164,14 @@ namespace OpenIris.ImageGrabbing
         private Image<Gray, byte> Draw(EyeRotation rotation)
         {
             // Image axes: x right, y down, z away from the camera. The eye shows as OpenIris expects
-            // it (see the data file docs): looking left (+horizontal) moves the pupil to the left of
-            // the image and looking up moves it up, as in a camera behind a hot mirror. So from head
-            // axes (X line of sight, Y left, Z up): x = -Y, y = -Z, z = -X.
+            // it (see the data file docs), as seen by someone facing the subject: looking right
+            // (+horizontal) moves the pupil to the left of the image and looking up moves it up. So
+            // from head axes (X line of sight, Y left, Z up): x = Y, y = -Z, z = -X.
             //
             // Each pixel of the new image shows the point of the eye at the primary position that
             // the rotation brings there: source = P * R^T * P^T * pixel.
             var r = rotation.Matrix();
-            var p = new double[,] { { 0, -1, 0 }, { 0, 0, -1 }, { -1, 0, 0 } };
+            var p = new double[,] { { 0, 1, 0 }, { 0, 0, -1 }, { -1, 0, 0 } };
             var a = new double[3, 3];
             for (int i = 0; i < 3; i++)
                 for (int j = 0; j < 3; j++)

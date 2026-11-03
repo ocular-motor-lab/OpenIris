@@ -69,17 +69,17 @@ namespace OpenIris.EyeTrackingSystems
                 slider.Enabled = true;
             }
 
-            Setup(ListingAngle, "Angle (0 left, 90 up)", -180, 180);
+            Setup(ListingAngle, "Angle (0 right, 90 up)", -180, 180);
             Setup(ListingEccentricity, "Eccentricity", 0, 90);
-            Setup(ListingTorsion, "Torsion", -90, 90);
+            Setup(ListingTorsion, "Torsion (+ clockwise)", -90, 90);
             foreach (var (h, v, t) in new[] { (FickHorizontal, FickVertical, FickTorsion), (HelmholtzHorizontal, HelmholtzVertical, HelmholtzTorsion), (HessHorizontal, HessVertical, HessTorsion), (HarmsHorizontal, HarmsVertical, HarmsTorsion) })
             {
-                Setup(h, "Horizontal (+ left)", -90, 90);
+                Setup(h, "Horizontal (+ right)", -90, 90);
                 Setup(v, "Vertical (+ up)", -90, 90);
-                Setup(t, "Torsion", -90, 90);
+                Setup(t, "Torsion (+ clockwise)", -90, 90);
             }
             Setup(RotationVectorX, "X (line of sight axis)", -1, 1);
-            Setup(RotationVectorY, "Y (interaural axis)", -1, 1);
+            Setup(RotationVectorY, "Y (interaural axis, to the left)", -1, 1);
             Setup(RotationVectorZ, "Z (vertical axis)", -1, 1);
 
             groups = new[]
@@ -133,8 +133,8 @@ namespace OpenIris.EyeTrackingSystems
 
         #region Pad
 
-        // The pad is the eye seen from the front: a point at distance r from the center is a gaze
-        // with eccentricity asin(r). Left is to the subject's left.
+        // The pad is the eye seen from the front, as in the eye images: a point at distance r from
+        // the center is a gaze with eccentricity asin(r). The subject's right is to the left.
         private (double x, double y)? PadPoint(Point location)
         {
             var size = Math.Min(panel1.Width, panel1.Height) / 2.0;
@@ -179,9 +179,9 @@ namespace OpenIris.EyeTrackingSystems
 
             // Where the line of sight points, and a tick for the torsion.
             var m = rotation.Matrix();
-            var px = cx - (float)m[1, 0] * size;
+            var px = cx + (float)m[1, 0] * size;
             var py = cy - (float)m[2, 0] * size;
-            var tickX = cx - (float)m[1, 2] * size;
+            var tickX = cx + (float)m[1, 2] * size;
             var tickY = cy - (float)m[2, 2] * size;
             using var pen = new Pen(Color.Lime, 2);
             g.DrawLine(pen, px, py, px + (tickX - cx) * 0.15f, py + (tickY - cy) * 0.15f);

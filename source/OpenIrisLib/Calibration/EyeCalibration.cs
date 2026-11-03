@@ -124,6 +124,40 @@ namespace OpenIris
         }
 
         /// <summary>
+        /// Gets the image of the eye at the reference, as the tracking pipeline received it, saved with
+        /// the calibration so the reference can be seen or processed again later. Null in calibration
+        /// files from before 0.2.
+        /// </summary>
+        [XmlIgnore]
+        public Image<Gray, byte>? ReferenceImage { get; set; }
+
+        /// <summary>
+        /// The reference image for serialization: a PNG file (lossless).
+        /// </summary>
+        [XmlElement("ReferenceImage")]
+        public byte[]? ReferenceImageSerialized
+        {
+            get
+            {
+                if (ReferenceImage is null) return null;
+
+                using var buffer = new VectorOfByte();
+                CvInvoke.Imencode(".png", ReferenceImage, buffer);
+                return buffer.ToArray();
+            }
+            set
+            {
+                ReferenceImage = null;
+                if (value != null)
+                {
+                    using var mat = new Mat();
+                    CvInvoke.Imdecode(value, ImreadModes.Grayscale, mat);
+                    ReferenceImage = mat.ToImage<Gray, byte>();
+                }
+            }
+        }
+
+        /// <summary>
         /// Sets the eye model in the calibration.
         /// </summary>
         /// <param name="eyePhysicalModel"></param>
@@ -140,6 +174,16 @@ namespace OpenIris
         {
             ReferenceData = processedImageEye?.EyeData ?? new EyeData();
             ImageTorsionReference = processedImageEye?.ImageTorsion;
+
+            // A copy: the image may be the camera's buffer, reused for later frames. The whole image,
+            // whatever its ROI.
+            ReferenceImage = null;
+            if (processedImageEye?.Image is Image<Gray, byte> image)
+            {
+                var copy = image.Clone();
+                copy.ROI = System.Drawing.Rectangle.Empty;
+                ReferenceImage = copy;
+            }
         }
 
         /// <summary>
@@ -154,6 +198,7 @@ namespace OpenIris
                 ImageSize = ImageSize,
                 EyePhysicalModel = EyePhysicalModel,
                 ImageTorsionReference = ImageTorsionReference,
+                ReferenceImage = ReferenceImage,
                 ReferenceData = ReferenceData.Copy(),
                 CalibrationData = CalibrationData,
             };

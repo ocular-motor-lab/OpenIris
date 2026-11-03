@@ -85,6 +85,29 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
+        /// The reference keeps the whole image of the frame (a copy, whatever its ROI), and it is saved
+        /// and read back unchanged. Files without it read as null.
+        /// </summary>
+        [TestMethod]
+        public void ReferenceImageIsKeptAndRoundTrips()
+        {
+            using var image = TestImage();
+            using var frame = new ImageEye(image.Clone(), Eye.Left, ImageEyeTimestamp.Empty, null);
+            frame.Image.ROI = new Rectangle(2, 2, 10, 10);
+
+            var calibration = new EyeCalibration(Eye.Left);
+            calibration.SetReference(frame);
+            frame.Image.SetValue(new Gray(0));
+            AssertSameImage(image, calibration.ReferenceImage);
+
+            var read = new EyeCalibration { ReferenceImageSerialized = calibration.ReferenceImageSerialized };
+            AssertSameImage(image, read.ReferenceImage);
+
+            Assert.IsNull(new EyeCalibration().ReferenceImageSerialized);
+            Assert.IsNull(new EyeCalibration { ReferenceImageSerialized = null }.ReferenceImage);
+        }
+
+        /// <summary>
         /// Reading used to add the two eyes in the file to the two the constructor creates.
         /// </summary>
         [TestMethod]

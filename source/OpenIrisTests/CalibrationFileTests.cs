@@ -108,6 +108,51 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
+        /// The head model and the depth of the eye model are saved and read back; a file without them
+        /// (older) reads the defaults.
+        /// </summary>
+        [TestMethod]
+        public void HeadModelAndEyeDepthRoundTrip()
+        {
+            PipelineHarness.EnsurePluginsLoaded();
+            var path = Path.Combine(Path.GetTempPath(), "OpenIrisCalibrationTest-" + System.Guid.NewGuid().ToString("N") + ".cal");
+            try
+            {
+                var saved = new CalibrationParameters();
+                saved.EyeCalibrationParameters[Eye.Left].SetEyeModel(new EyePhysicalModel(new PointF(100, 110), 120) { CenterDepth = 900 });
+                saved.HeadCalibrationParameters = new HeadCalibration
+                {
+                    ReferenceHeadData = new HeadData(),
+                    HeadModel = new HeadModel { LeftEye = new System.Numerics.Vector3(-300, 2, 3), RightEye = new System.Numerics.Vector3(310, 4, 5), InterpupillaryDistance = 60, NeckToEyes = new System.Numerics.Vector3(70, 0, 80) },
+                };
+                saved.Save(path);
+
+                var loaded = CalibrationParameters.Load(path);
+                Assert.AreEqual(900, loaded.EyeCalibrationParameters[Eye.Left].EyePhysicalModel.CenterDepth);
+                var model = loaded.HeadCalibrationParameters!.HeadModel;
+                Assert.AreEqual(new System.Numerics.Vector3(-300, 2, 3), model.LeftEye);
+                Assert.AreEqual(new System.Numerics.Vector3(310, 4, 5), model.RightEye);
+                Assert.AreEqual(60, model.InterpupillaryDistance);
+                Assert.AreEqual(new System.Numerics.Vector3(70, 0, 80), model.NeckToEyes);
+
+                // An older file: no head model, no depth.
+                var text = File.ReadAllText(path);
+                var start = text.IndexOf("<HeadModel>", System.StringComparison.Ordinal);
+                var end = text.IndexOf("</HeadModel>", System.StringComparison.Ordinal) + "</HeadModel>".Length;
+                text = text.Remove(start, end - start).Replace("<CenterDepth>900</CenterDepth>", "");
+                File.WriteAllText(path, text);
+                var old = CalibrationParameters.Load(path);
+                Assert.AreEqual(0, old.EyeCalibrationParameters[Eye.Left].EyePhysicalModel.CenterDepth);
+                Assert.AreEqual(63, old.HeadCalibrationParameters!.HeadModel.InterpupillaryDistance);
+                Assert.AreEqual(System.Numerics.Vector3.Zero, old.HeadCalibrationParameters.HeadModel.LeftEye);
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
+        /// <summary>
         /// Reading used to add the two eyes in the file to the two the constructor creates.
         /// </summary>
         [TestMethod]

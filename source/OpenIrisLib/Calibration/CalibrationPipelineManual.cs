@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="CalibrationSession.cs">
+// <copyright file="CalibrationPipelineManual.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
 // </copyright>
@@ -25,23 +25,36 @@ namespace OpenIris
         /// </summary>
         public EyeCollection<EyePhysicalModel>? EyeModels { get; set; }
 
-        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(ImageEye image, EyeTrackingPipelineSettings processingSettings)
+        /// <summary>
+        /// Keeps the last images for the user interface, until the user sets the eye models.
+        /// </summary>
+        public override (bool completed, CalibrationParameters? calibration) ProcessForCalibrationModel(EyeTrackerImagesAndData frame, EyeTrackingPipelineSettings processingSettings)
         {
-            LastImages[image.WhichEye] = image;
+            foreach (var eye in Eyes(EyesToCalibrate))
+            {
+                if (frame.Images[eye] is ImageEye image) LastImages[eye] = image;
+            }
 
             var eyeModels = EyeModels;
-            if (eyeModels is null) return (false, EyePhysicalModel.EmptyModel);
+            if (eyeModels is null) return (false, null);
 
-            return (true, eyeModels[image.WhichEye]);
+            var calibration = new CalibrationParameters();
+            foreach (var eye in Eyes(EyesToCalibrate))
+            {
+                calibration.EyeCalibrationParameters[eye].SetEyeModel(eyeModels[eye]);
+            }
+
+            return (true, calibration);
         }
 
-        public override (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
+        /// <summary>
+        /// The references, from the first frame with every eye tracked.
+        /// </summary>
+        public override (bool completed, CalibrationParameters? calibration) ProcessForZeroReference(EyeTrackerImagesAndData frame, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
-            if (image == null) return (false, null);
+            if (!AllEyesTracked(frame)) return (false, null);
 
-            if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
-
-            return (true, image);
+            return (true, WithReferences(currentCalibration, frame));
         }
     }
 

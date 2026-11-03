@@ -1,63 +1,111 @@
 # Calibration pipelines
 
 A calibration pipeline runs when the user presses **Calibrate** (or **Reset reference**). It turns
-the tracked images into the calibration that OpenIris uses from then on.
+the tracked frames into the calibration that OpenIris uses from then on (`CalibrationParameters`,
+saved in the `.cal` file).
 
-A calibration has two steps, run one after the other on the frames as they are processed:
+A calibration has two stages, run one after the other on the frames as they are processed:
 
-1. **Eye model** (`ProcessForEyeModel`): the physical model of the eye (the eye's center and size in
-   the image), needed to convert pupil positions into rotation angles and to measure torsion.
-2. **Reference** (`ProcessForReference`): the frame that defines the zero position: where the eye is
-   when looking straight ahead, and the iris image torsion is measured against.
+1. **The model** (`ProcessForCalibrationModel`): the eye models (each eye's center and size in its
+   image), needed to convert pupil positions into rotation angles and to measure torsion; and, if
+   the calibration has them, its own parameters and the head model. It may also set the references,
+   and then the second stage is skipped.
+2. **The zero reference** (`ProcessForZeroReference`): where the eyes and the head are when the
+   subject looks straight ahead, and the iris images torsion is measured against.
 
-**Reset reference** runs only the second step.
+**Reset reference** runs only the second stage, with the current models.
 
-From the eye model and the reference, OpenIris calculates the calibrated data
+From the models and the references, OpenIris calculates the calibrated data
 (`CalibrationParameters.GetCalibratedEyeData`). It must follow the
 [coordinate system](../user-manual/data-file.md#coordinate-system) of the data file: positive is
-rightward, upward and clockwise from the subject's point of view, and 0 is the reference. How the
-angles combine into an orientation (Fick, Helmholtz...) is up to the calibration. Today all
-calibrations share the same calculation; one that calculates the angles its own way must keep the
-signs and the zero, and say in its documentation which angles it uses.
+rightward, upward and clockwise from the subject's point of view, and 0 is the reference. The
+geometry (images, eye model, head model, frames) is described in
+[Geometry and conventions](geometry.md).
 
 See [Creating a plugin](creating-a-plugin.md) first for the project setup.
 
 ## The calibration class
 
-Each method is called with every new processed frame until it says it's done. The simplest built-in
-calibration, `Auto` (`OpenIrisLib\Calibration\CalibrationPipelineAuto.cs`), finishes on the first
-good frame:
+Each stage is called with every new processed frame until it says it's completed. A frame
+(`EyeTrackerImagesAndData`) has both eye images with their tracking data (`frame.Images[eye].EyeData`)
+and the head data (`frame.Data.HeadDataRaw`: a head sensor, or the face pose of the Webcam system).
+The simplest built-in calibration, `Auto` (`OpenIrisLib\Calibration\CalibrationPipelineAuto.cs`),
+finishes each stage on the first frame where every eye is tracked:
 
 ```csharp
 [Export(typeof(CalibrationPipelineBase)), PluginDescription("Auto", typeof(CalibrationSettings))]
 public class CalibrationPipelineAuto : CalibrationPipelineBase
 {
-    public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(ImageEye imageEye, EyeTrackingPipelineSettings processingSettings)
+    public override (bool completed, CalibrationParameters? calibration) ProcessForCalibrationModel(EyeTrackerImagesAndData frame, EyeTrackingPipelineSettings processingSettings)
     {
-        if (imageEye?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, EyePhysicalModel.EmptyModel);
+        if (!AllEyesTracked(frame)) return (false, null);
 
-        return (true, new EyePhysicalModel(imageEye.EyeData.Pupil.Center, (float)(imageEye.EyeData.Iris.Radius * 2.0)));
+        var calibration = new CalibrationParameters();
+        foreach (var eye in Eyes(EyesToCalibrate))
+        {
+            var eyeData = frame.Images[eye]!.EyeData!;
+            calibration.EyeCalibrationParameters[eye].SetEyeModel(new EyePhysicalModel(eyeData.Pupil.Center, (float)(eyeData.Iris.Radius * 2.0)));
+        }
+
+        return (true, calibration);
     }
 
-    public override (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
+    public override (bool completed, CalibrationParameters? calibration) ProcessForZeroReference(EyeTrackerImagesAndData frame, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
     {
-        if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
+        if (!AllEyesTracked(frame)) return (false, null);
 
-        return (true, image);
+        return (true, WithReferences(currentCalibration, frame));
     }
 }
 ```
 
-`imageEye.EyeData` is the result of the tracking pipeline for that frame. A real calibration would
-collect data over many frames (for example while the subject looks at targets) before returning
-`true`.
+A real calibration would collect data over many frames (for example while the subject looks at
+targets) before returning `true`. Helpers in the base class:
+
+| Member | What it is |
+| --- | --- |
+| `EyesToCalibrate` | The eyes of the system: `Left`, `Right` or `Both`. A one-eye system has `null` images for the other eye. |
+| `Eyes(EyesToCalibrate)` | Those eyes, one by one. |
+| `AllEyesTracked(frame)` | Whether every eye of the system is tracked well in the frame. |
+| `WithReferences(calibration, frame)` | A copy of the calibration with the references of every eye and of the head taken from one frame. |
+
+## The contract
+
+Everything not listed here is up to the calibration: what it collects, how it fits, what its
+messages mean.
+
+**OpenIris guarantees:**
+
+- **One thread.** The two stages and `HandleMessage` are called from the calibration thread only,
+  never at the same time, so a calibration needs no locks. Messages from clients are queued and
+  delivered between frames, in the order they arrived.
+- **Frames** in order (some may be skipped), with the raw tracking data of each eye and the head data
+  of that frame.
+- **The order:** "Calibrate" runs the model stage until it's completed, then the zero reference stage
+  (unless the model already set the references). "Reset reference" runs only the zero reference
+  stage. Cancelling keeps the previous calibration.
+- **Fresh frames for the reference:** in the zero reference stage, only frames processed with the new
+  eye models (torsion needs them). If the model stage didn't give an eye model for an eye, OpenIris
+  makes one from the first of those frames (centered on the pupil, with twice the iris radius).
+
+**The calibration must:**
+
+- **Model stage:** when completed, return a calibration with an eye model for each eye in
+  `EyesToCalibrate`, and optionally its own parameters (below), the head model, and the references.
+- **Zero reference stage:** when completed, return the calibration with the references of each eye
+  in `EyesToCalibrate` and of the head. They may come from one frame or from many (a median over a
+  fixation, for example), but the eyes' and the head's must describe the same moment or period.
+  OpenIris checks there's one for each eye.
+- **Use the raw data** of the frames (`EyeData`, `HeadDataRaw`): their calibrated data comes from the
+  calibration being replaced.
+- **Be serializable:** everything it returns is saved in the `.cal` file.
 
 ## Optional methods
 
 | Method | Use it to |
 | --- | --- |
+| `HandleMessage(message)` | Receive messages from a stimulus program during calibration: plain text sent with the web API, the `CALIBRATION\|message` remote command, or `CalibrationMessage` in MATLAB (see [Remote control](../user-manual/remote-control.md#calibration)). The meaning is yours; return "ack" or an error text, which goes back to the client. |
 | `GetCalibrationUI()` | Show a panel in a Calibration tab of the main window while calibrating, with instructions or progress. Return a `UserControl` implementing `ICalibrationUIControl`. Better: export a panel class instead (see below). |
-| `HandleRemoteMessage(message)` | Receive messages from a stimulus program during calibration, sent with the `CALIBRATION\|message` remote command (see [Remote control](../user-manual/remote-control.md#calibration)). Return the reply. |
 | `Dispose()` | Release resources. |
 
 ## A panel in the Calibration tab
@@ -81,20 +129,28 @@ See `OpenIrisWinForms\Calibration\CalibrationRemoteLinearUI.cs`.
 ## Examples in the source code
 
 - `CalibrationPipelineAuto.cs`: the minimal calibration above.
-- `CalibrationPipelineManual.cs`: the user sets the eye model by hand, with a panel of controls
+- `CalibrationPipelineManual.cs`: the user sets the eye models by hand, with a panel of controls
   (`OpenIrisWinForms\Calibration\CalibrationPipelineManualUI.cs`).
-- `CalibrationRemoteLinear.cs`: a stimulus program shows targets and tells OpenIris where they are;
-  OpenIris fits a linear transformation from eye position to target position.
+- `CalibrationRemoteLinear.cs`: a stimulus program shows targets and tells OpenIris where they are
+  with messages; OpenIris fits a linear transformation from the eye signal to the target position.
 
-## How the eye model and the reference are used
+## What a calibration contains
 
-A calibration produces an `EyeCalibration` for each eye, saved in the `.cal` file:
+`CalibrationParameters`, saved in the `.cal` file:
 
-- **The eye model** (`EyePhysicalModel`): the center of the eyeball in the image and its radius, in
-  pixels. `ProcessForEyeModel` returns it.
-- **The reference**: the eye data of a frame where the subject looks straight ahead
-  (`ReferenceData`), and its torsion image (`ImageTorsionReference`). `ProcessForReference`
-  returns that frame.
+- **For each eye** (`EyeCalibrationParameters[eye]`, an `EyeCalibration`):
+  - **The eye model** (`EyePhysicalModel`): the center of the eyeball in the image and its radius, in
+    pixels, and the depth of the center (`CenterDepth`, 0 if unknown). See
+    [Geometry and conventions](geometry.md#the-eye-model).
+  - **The reference** (`SetReference` takes a processed frame): the eye data where the subject looks
+    straight ahead (`ReferenceData`), the torsion image (`ImageTorsionReference`), and the image of
+    the frame itself (`ReferenceImage`), to see or reprocess later.
+  - **The calibration's own data for this eye** (`CalibrationData`, below).
+- **The head** (`HeadCalibrationParameters`): its reference (`ReferenceHeadData`: the head angles are
+  relative to it) and the head model (`HeadModel`: where the eyes are in the head).
+- **The calibration's own parameters for the whole calibration** (`CalibrationModelParameters`,
+  below).
+- **The tracking settings** at the time (`TrackingSettings`), filled by OpenIris.
 
 `CalibrationParameters.GetCalibratedEyeData` turns the pupil position into angles with the eye
 model: the horizontal angle of the pupil is `asin((pupilX - centerX) / radius)`, and the same for
@@ -113,22 +169,24 @@ images show the eye as someone facing the subject sees it, with y down.
 ## Which calibration to choose
 
 - **Auto** sets the eye model as centered on the pupil when the subject looks straight ahead, with
-  twice the iris radius, and takes that same frame as the reference. Enough when each camera faces
-  its eye roughly straight on.
+  twice the iris radius, and takes the first frame processed with it as the reference. Enough when
+  each camera faces its eye roughly straight on.
 - **Manual** lets the user set the eye model on the image, for cameras that see the eye at an angle.
 - **Remote Linear** fits a linear transformation from the eye signal to the target positions
   (`LinearGazeMap`), which then gives the horizontal and vertical positions instead of the eye model
   (see below).
 
-## Calibration data beyond the eye model
+## The calibration's own data and parameters
 
-A calibration can produce more than the eye model and the reference: return it from
-`GetCalibrationData(eye)`, as an object of a class inheriting `EyeCalibrationData`. OpenIris keeps it
-in the calibration (and its `.cal` file, with its type), and for each frame tracked well calls its
-`Adjust(eyeData, fromEyeModel)` with the calibrated data computed from the eye model and the
-reference: return it changed as your calibration needs, replacing the angles (as `LinearGazeMap`
-does), correcting them, or anything else. The class must be serializable as XML (public properties,
-a constructor without parameters), and be in the same assembly as the calibration.
+A calibration can produce more than the models and the references:
 
-A new calibration usually changes how the eye model is found (from several gaze positions, for
-example) and keeps the reference as Auto does: the first frame tracked well.
+- **For each eye:** set `EyeCalibrationParameters[eye].CalibrationData` in the calibration it returns,
+  to an object of a class inheriting `EyeCalibrationData`. For each frame tracked well, OpenIris calls
+  its `Adjust(eyeData, fromEyeModel)` with the calibrated data computed from the eye model and the
+  reference: return it changed as your calibration needs, replacing the angles (as `LinearGazeMap`
+  does), correcting them (a pupil-size correction, for example), or anything else.
+- **For the whole calibration** (a screen, a fit on both eyes together): set
+  `CalibrationModelParameters` to an object of a class inheriting `CalibrationModelParameters`.
+
+Both are kept in the `.cal` file with their type, so they must be serializable as XML (public
+properties, a constructor without parameters), and be in the same assembly as the calibration.

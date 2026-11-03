@@ -147,8 +147,9 @@ namespace OpenIris
                 EyeCalibrationParameters = new EyeCollection<EyeCalibration>(
                     EyeCalibrationParameters[Eye.Left].Copy(),
                     EyeCalibrationParameters[Eye.Right].Copy()),
-                HeadCalibrationParameters = HeadCalibrationParameters,
+                HeadCalibrationParameters = HeadCalibrationParameters?.Copy(),
                 TrackingSettings = TrackingSettings,
+                CalibrationModelParameters = CalibrationModelParameters,
             };
         }
 

@@ -14,7 +14,22 @@ namespace OpenIris
     [Serializable]
     public class HeadCalibration
     {
+        /// <summary>
+        /// Gets or sets the head data at the reference: the head angles are relative to it.
+        /// </summary>
         public HeadData ReferenceHeadData { get; set; }
+
+        /// <summary>
+        /// Gets or sets where the eyes are in the head. Calibration files from before 0.2 have the
+        /// defaults.
+        /// </summary>
+        public HeadModel HeadModel { get; set; } = new HeadModel();
+
+        /// <summary>
+        /// Makes a copy.
+        /// </summary>
+        /// <returns>The copy.</returns>
+        public HeadCalibration Copy() => new HeadCalibration { ReferenceHeadData = ReferenceHeadData, HeadModel = HeadModel.Copy() };
 
         /// <summary>
         /// Update the calibration info with the head datae.

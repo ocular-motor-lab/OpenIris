@@ -309,7 +309,8 @@ namespace OpenIris.Calibration
             }
 
             var left_cal = new Mat();
-            var left_ret = CvInvoke.Solve(X_left, Y_left, left_cal, DecompMethod.Svd);
+            // Three unknowns per axis: an eye with fewer fixations (or none: a system with one eye) gets no map.
+            var left_ret = left_data.Count >= 3 && CvInvoke.Solve(X_left, Y_left, left_cal, DecompMethod.Svd);
 
             if (left_ret)
             {
@@ -339,7 +340,7 @@ namespace OpenIris.Calibration
             }
 
             var right_cal = new Mat();
-            var right_ret = CvInvoke.Solve(X_right, Y_right, right_cal, DecompMethod.Svd);
+            var right_ret = right_data.Count >= 3 && CvInvoke.Solve(X_right, Y_right, right_cal, DecompMethod.Svd);
 
             if (right_ret)
             {
@@ -416,33 +417,36 @@ namespace OpenIris.Calibration
         public List<FixationGridViewRow> Fixations { get; private set; } = new List<FixationGridViewRow>();
 
         /// <summary>
-        /// Pushes EyeData to the calibrator 
+        /// Gives the data of each eye to the calibrator while a fixation is open, until the client sends
+        /// Complete; then the maps fitted for each eye (the calibrated positions come from them). The eye
+        /// models are left to the session for now (from the reference frame).
         /// </summary>
-        public override (bool modelCalibrationCompleted, EyePhysicalModel model) ProcessForEyeModel(ImageEye image, EyeTrackingPipelineSettings processingSettings)
+        public override (bool completed, CalibrationParameters? calibration) ProcessForCalibrationModel(EyeTrackerImagesAndData frame, EyeTrackingPipelineSettings processingSettings)
         {
-            if (!(image.EyeData is null))
+            foreach (var eye in Eyes(EyesToCalibrate))
             {
-                calibrator.PushData(image.EyeData);
+                if (frame.Images[eye]?.EyeData is EyeData eyeData) calibrator.PushData(eyeData);
             }
 
-            return (calibrator.completed, calibrator.completed ? EyePhysicalModel.EmptyModel : EyePhysicalModel.EmptyModel);
+            if (!calibrator.completed) return (false, null);
+
+            var calibration = new CalibrationParameters();
+            foreach (var eye in Eyes(EyesToCalibrate))
+            {
+                calibration.EyeCalibrationParameters[eye].CalibrationData = calibrator.Maps[eye];
+            }
+
+            return (true, calibration);
         }
 
         /// <summary>
-        /// Reference is implicit in the fixation data (0,0), so just return once called
+        /// The references (the torsion needs one), from the first frame with every eye tracked.
         /// </summary>
-        /// <summary>
-        /// The map fitted for the eye: the calibrated positions come from it.
-        /// </summary>
-        public override EyeCalibrationData? GetCalibrationData(Eye whichEye) => calibrator.Maps[whichEye];
-
-        public override (bool referenceCalibrationCompleted, ImageEye? referenceData) ProcessForReference(ImageEye image, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
+        public override (bool completed, CalibrationParameters? calibration) ProcessForZeroReference(EyeTrackerImagesAndData frame, CalibrationParameters currentCalibration, EyeTrackingPipelineSettings processingSettings)
         {
-            if (image == null) return (false, null);
+            if (!AllEyesTracked(frame)) return (false, null);
 
-            if (image?.EyeData?.ProcessFrameResult != ProcessFrameResult.Good) return (false, null);
-
-            return (true, image);
+            return (true, WithReferences(currentCalibration, frame));
         }
 
         /// <summary>
@@ -461,7 +465,7 @@ namespace OpenIris.Calibration
         /// <param name="message">Message from client</param>
         /// <returns>"Ack" or error to the client</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public override string HandleRemoteMessage(string message)
+        public override string HandleMessage(string message)
         {
             if (message.StartsWith("SetSource:", StringComparison.InvariantCultureIgnoreCase))
             {

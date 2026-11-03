@@ -582,14 +582,18 @@ namespace OpenIris
                 using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
                 {
 
-                    var tempCalibration = await CalibrationSession.StartCalibratingEyeModel(Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
+                    var tempCalibration = await CalibrationSession.StartCalibratingModel(Settings.TrackingPipelineSettings);
                     if (tempCalibration is null) return;
 
                     // IMPORTANT!! Need to update calibration so the zero reference processing is done with a
                     // proper eye model.
                     Calibration = tempCalibration;
 
-                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
+                    // Unless the calibration already set the references with the models.
+                    if (!CalibrationSession.HasReferences(Calibration))
+                    {
+                        Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.TrackingPipelineSettings);
+                    }
                 }
             }
             catch
@@ -636,7 +640,7 @@ namespace OpenIris
             {
                 using (CalibrationSession = new CalibrationSession(Settings.EyeTrackingSystemSettings.Eye, Settings.CalibrationMethod, Settings.CalibrationSettings))
                 {
-                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.CalibrationSettings, Settings.TrackingPipelineSettings);
+                    Calibration = await CalibrationSession.StartCalibratingZeroReference(Calibration, Settings.TrackingPipelineSettings);
                 }
             }
             catch
@@ -696,7 +700,7 @@ namespace OpenIris
 
             if (CalibrationSession is null) return "ack";
 
-            return CalibrationSession?.HandleRemoteMessage(eventMessage) ?? "ack";
+            return CalibrationSession?.HandleMessage(eventMessage) ?? "ack";
         }
 
         /// <summary>

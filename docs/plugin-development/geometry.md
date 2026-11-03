@@ -110,7 +110,7 @@ minus reflection, Remote Linear's map), as today.
 | **Camera** | OpenCV's: x right, y down, z forward (out of the lens) | mm | the Webcam head pose (`FacePose`) |
 | **Face** (Webcam) | x to the subject's left, y up, z out of the face; origin at the nose tip | mm | `FacePose`'s generic face model |
 | **Output** (eye and head) | positive to the subject's right, up, and clockwise as the subject sees it | degrees, mm | the calibrated data ([data file](../user-manual/data-file.md#coordinate-system)) |
-| **Head** (planned) | to be defined with the head model | mm | none yet |
+| **Head** | x forward, y to the subject's left, z up; origin at the midpoint between the centers of the eyes | mm | `HeadModel.NeckToEyes` |
 | **Rig** (planned) | the frame the hardware is fixed to (the headset, or the camera mount) | mm | none yet |
 
 **(planned) Transforms** are named by the frames they connect: `T_camera_head` is the 4×4 [R | t]
@@ -139,8 +139,10 @@ Chains read right to left: `T_camera_head · T_head_eye` = `T_camera_eye`.
 ## The eye model
 
 `EyePhysicalModel` describes the eye globe **in the image**: `Center`, the center of the globe, and
-`Radius`, its radius, both in pixels of the oriented image; `HorizontalVerticalRatio`, and cornea
-and kappa parameters. The calibrated angles and the torsion's geometric correction use it. A
+`Radius`, its radius, both in pixels of the oriented image; `CenterDepth`, the distance of the center
+from the camera along its axis, in the same pixel units (millimeters / `MmPerPix`), which with
+`Center` places the center in 3D (0 if unknown, as in older calibration files: weak perspective);
+`HorizontalVerticalRatio`, and cornea and kappa parameters. The calibrated angles and the torsion's geometric correction use it. A
 calibration always ends with one: when a calibration pipeline doesn't provide it, the calibration
 session makes one from the reference frame (centered on the pupil, with the iris diameter as
 radius), or `EyePhysicalModel.GetDefault` (the image center, a 12 mm radius) if that frame has no
@@ -165,10 +167,22 @@ artifact**: the pupil's center shifts (a few tenths of a millimeter) when the pu
 which looks like an eye movement of up to a degree or two, and like vergence with two eyes (see the
 work of Hooge, Hessels, Nyström and colleagues, and Drewes, Masson and Montagnini).
 
-**(planned) The head model**, parallel to it: for each camera, in its own coordinates, the vector
-from the eye's center to the head's center of rotation (x, y in pixels, z in pixel-equivalent units,
-converted with `MmPerPix`), and the distance between the eyes (IPD) in mm. With the head's pose R in
-a camera's frame, an eye's center moves to head center + R · (eye center − head center).
+**The head model** (`HeadCalibration.HeadModel`), parallel to the eye model, with the origin of the
+head at the midpoint between the centers of the eyes:
+
+- `LeftEye`, `RightEye`: the vector from that midpoint to the center of each eye, **in that eye's
+  camera**: x, y in pixels, z (depth) in the same pixel units. Zero if unknown. No common coordinate
+  system between the cameras is needed. With the head's pose in a camera (rotation R, the midpoint's
+  position), the center of an eye in that camera is the midpoint + R · that eye's vector.
+  Head-mounted cameras move with the head, so there the eyes don't move in the images when the head
+  turns.
+- `InterpupillaryDistance`: the distance between the centers of the eyes, in mm (63 by default).
+- `NeckToEyes`: the vector from the point in the neck the head turns around to the midpoint between
+  the eyes, in mm, in the head's frame, as the neck model of virtual reality headsets (80 mm forward
+  and 75 mm up by default). It places the eyes when only the head's rotation is known.
+- Still to add, when a head sensor can be checked
+  ([#70](https://github.com/ocular-motor-lab/OpenIris/issues/70)): how the sensor is mounted on the
+  head (a rotation from the sensor's axes to the head's).
 
 ## Gaze in 3D (planned)
 
@@ -198,4 +212,4 @@ validation reports accuracy.
 | Calibrated eye and head data | `CalibratedEyeData`, `CalibratedHeadData` |
 | Head pose (Webcam) | `HeadData.FaceRotation`, `HeadData.FacePosition` |
 | (planned) Intrinsics, camera poses, lights | the eye tracking system's settings, copied into the calibration parameters |
-| (planned) Head model | the calibration parameters, saved in the `.cal` file |
+| Head model, head reference | `HeadCalibration`, saved in the `.cal` file |

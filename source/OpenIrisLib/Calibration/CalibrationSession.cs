@@ -11,6 +11,7 @@ namespace OpenIris
 
     using System;
     using System.Collections.Concurrent;
+    using System.Linq;
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
@@ -38,6 +39,16 @@ namespace OpenIris
         private BlockingCollection<EyeTrackerImagesAndData>? inputBuffer;
 
         /// <summary>
+        /// Messages from clients, waiting to be delivered to the calibration on its thread.
+        /// </summary>
+        private readonly ConcurrentQueue<(string message, TaskCompletionSource<string> reply)> messages = new();
+
+        /// <summary>
+        /// How long a client waits for the calibration to handle its message.
+        /// </summary>
+        private static readonly TimeSpan MessageTimeout = TimeSpan.FromSeconds(2);
+
+        /// <summary>
         /// The calibration method. User interfaces read its state to show it.
         /// </summary>
         public CalibrationPipelineBase Pipeline => calibrationPipeline;
@@ -53,172 +64,153 @@ namespace OpenIris
         /// <summary>
         /// Starts a calibration session.
         /// </summary>
-        /// <param name="whichEyeToCalibrate">Which eye we need to calibrate: both, left, or right.</param>
+        /// <param name="whichEyeToCalibrate">The eyes of the eye tracking system: both, left, or right.</param>
         /// <param name="calibrationPipelineName">Name of the pipeline to use for calibration.</param>
         /// <param name="settings"></param>
-        /// <returns>The calibration parameters.</returns>
         /// <exception cref="InvalidOperationException">If the pipeline name does not exist.</exception>
         internal CalibrationSession(Eye whichEyeToCalibrate, string calibrationPipelineName, CalibrationSettings settings)
         {
             calibrationPipeline = CalibrationPipelineBase.Create(calibrationPipelineName, settings);
+            calibrationPipeline.EyesToCalibrate = whichEyeToCalibrate;
 
             this.whichEyeToCalibrate = whichEyeToCalibrate;
         }
 
         /// <summary>
-        /// Calibrates the physical model of the eyeball and its relationship to the camera.
+        /// Stage 1: calibrates the models (eye models, the calibration's own parameters, the head
+        /// model), and maybe the references too.
         /// </summary>
-        /// <returns>The new calibration parametrers. Null if calibration was cancelled.</returns>
-        internal async Task<CalibrationParameters?> StartCalibratingEyeModel(CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings processingSettings)
+        /// <returns>The new calibration. Null if the calibration was cancelled or failed.</returns>
+        internal async Task<CalibrationParameters?> StartCalibratingModel(EyeTrackingPipelineSettings processingSettings)
         {
-            var eyeModels = new EyeCollection<EyePhysicalModel>(EyePhysicalModel.EmptyModel, EyePhysicalModel.EmptyModel);
-            var hasModel = new EyeCollection<bool>(whichEyeToCalibrate == Eye.Right, whichEyeToCalibrate == Eye.Left);
-
-            try
+            CalibrationParameters? result = null;
+            var completed = await Run("the model", frame =>
             {
-                using (inputBuffer = new BlockingCollection<EyeTrackerImagesAndData>(100))
-                {
-                    using var cancellation = new CancellationTokenSource();
-                    using var calibrationTask = Task.Factory.StartNew(() =>
-                     {
-                         Thread.CurrentThread.Name = "EyeTracker:CalibrationThread";
+                var (done, calibration) = calibrationPipeline.ProcessForCalibrationModel(frame, processingSettings);
+                result = calibration;
+                return done;
+            });
 
-                         // Keep processing images until the buffer is marked as complete and empty
-                         foreach (var data in inputBuffer.GetConsumingEnumerable(cancellation.Token))
-                         {
-                             foreach (var image in data.Images)
-                             {
-                                 if (image is null) continue;
-                                 if (hasModel[image.WhichEye]) continue;
+            var model = result;
+            if (!completed || model is null) return null;
 
-                                 (hasModel[image.WhichEye], eyeModels[image.WhichEye]) = calibrationPipeline.ProcessForEyeModel(image, processingSettings);
-                             }
-
-                             if (hasModel[Eye.Left] && hasModel[Eye.Right]) break;
-
-                             if (calibrationPipeline.Cancelled) break;
-                         }
-                     }, TaskCreationOptions.LongRunning);
-
-                    await calibrationTask;
-
-                    if (calibrationPipeline.Cancelled is false && inputBuffer.IsAddingCompleted is false)
-                    {
-                        var calibrationParameters = CalibrationParameters.Default;
-                        calibrationParameters.TrackingSettings = processingSettings;
-
-                        calibrationParameters.EyeCalibrationParameters[Eye.Left].SetEyeModel(eyeModels[Eye.Left]);
-                        calibrationParameters.EyeCalibrationParameters[Eye.Right].SetEyeModel(eyeModels[Eye.Right]);
-
-                        // What the calibration found beyond the eye model (the map of Remote Linear...).
-                        calibrationParameters.EyeCalibrationParameters[Eye.Left].CalibrationData = calibrationPipeline.GetCalibrationData(Eye.Left);
-                        calibrationParameters.EyeCalibrationParameters[Eye.Right].CalibrationData = calibrationPipeline.GetCalibrationData(Eye.Right);
-
-                        return calibrationParameters;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine("ERROR calibrating eye model: " + ex);
-
-                // Cancel the ongoing calibration
-                CancelCalibration();
-            }
-            finally
-            {
-                inputBuffer?.Dispose();
-                inputBuffer = null;
-            }
-
-            return null;
+            model.TrackingSettings = processingSettings;
+            return model;
         }
 
         /// <summary>
-        /// Calibrates the zero eye position and gets a reference image for torsion.
+        /// Whether a calibration has the references of every eye of the system, so the zero reference
+        /// stage isn't needed.
         /// </summary>
-        /// <returns>The new calibration parametrers. Null if calibration was cancelled.</returns>
-        internal async Task<CalibrationParameters> StartCalibratingZeroReference(CalibrationParameters currentCalibration, CalibrationSettings calibrationSettings, EyeTrackingPipelineSettings settings)
-        {
-            var eyeReferences = new EyeCollection<ImageEye?>(null, null);
-            var hasReference = new EyeCollection<bool>(whichEyeToCalibrate == Eye.Right, whichEyeToCalibrate == Eye.Left);
-            HeadData? referenceHead = null;
+        /// <param name="calibration">The calibration.</param>
+        /// <returns>True if it has them.</returns>
+        internal bool HasReferences(CalibrationParameters calibration) =>
+            CalibrationPipelineBase.Eyes(whichEyeToCalibrate).All(eye => calibration.EyeCalibrationParameters[eye].HasReference);
 
-            // Start with the current calibration and clear the References
-            // Make a copy so we don't mess with the processing pipelines
+        /// <summary>
+        /// Stage 2: calibrates the zero references of the eyes and the head, with the models of the
+        /// current calibration.
+        /// </summary>
+        /// <returns>The new calibration. The current one if the calibration was cancelled or failed.</returns>
+        internal async Task<CalibrationParameters> StartCalibratingZeroReference(CalibrationParameters currentCalibration, EyeTrackingPipelineSettings settings)
+        {
+            var eyes = CalibrationPipelineBase.Eyes(whichEyeToCalibrate);
+
+            // A copy without references, so the processing pipelines keep the current calibration.
             var tempCalibration = currentCalibration.Copy();
             tempCalibration.EyeCalibrationParameters[Eye.Left].SetReference(null);
             tempCalibration.EyeCalibrationParameters[Eye.Right].SetReference(null);
             tempCalibration.TrackingSettings = settings;
 
+            CalibrationParameters? result = null;
+            var completed = await Run("the reference", frame =>
+            {
+                foreach (var eye in eyes)
+                {
+                    // Images are processed in parallel, so frames processed with the previous eye
+                    // model may still be in the queue: not for the reference (torsion needs the new one).
+                    if (tempCalibration.EyeCalibrationParameters[eye].EyePhysicalModel != frame.Calibration.EyeCalibrationParameters[eye].EyePhysicalModel)
+                    {
+                        return false;
+                    }
+                }
+
+                // Make sure there is always a model when a reference is set, if the calibration didn't
+                // provide one.
+                foreach (var eye in eyes)
+                {
+                    if (tempCalibration.EyeCalibrationParameters[eye].HasEyeModel) continue;
+
+                    var imageEye = frame.Images[eye];
+                    var model = (imageEye?.EyeData is null) ?
+                        EyePhysicalModel.GetDefault(imageEye?.Size ?? new System.Drawing.Size(), settings.MmPerPix) :
+                        new EyePhysicalModel(imageEye.EyeData.Pupil.Center, imageEye.EyeData.Iris.Radius * 2.0f);
+                    tempCalibration.EyeCalibrationParameters[eye].SetEyeModel(model);
+                }
+
+                var (done, calibration) = calibrationPipeline.ProcessForZeroReference(frame, tempCalibration, settings);
+                result = calibration;
+                return done;
+            });
+
+            var withReference = result;
+            if (!completed || withReference is null) return currentCalibration;
+
+            var missing = eyes.Where(eye => !withReference.EyeCalibrationParameters[eye].HasReference).ToArray();
+            if (missing.Length > 0)
+            {
+                Trace.WriteLine($"ERROR: the calibration {calibrationPipeline.Name} completed the reference without one for the {string.Join(" and ", missing)} eye.");
+                return currentCalibration;
+            }
+
+            withReference.TrackingSettings = settings;
+            withReference.HeadCalibrationParameters ??= new HeadCalibration { ReferenceHeadData = new HeadData() };
+            return withReference;
+        }
+
+        /// <summary>
+        /// Runs a stage: gives the calibration each new frame, and the messages from clients between
+        /// frames, all on one thread, until the stage is completed or cancelled.
+        /// </summary>
+        /// <param name="stage">Name of the stage, for the log.</param>
+        /// <param name="processFrame">Processes a frame; returns true when the stage is completed.</param>
+        /// <returns>True if the stage was completed.</returns>
+        private async Task<bool> Run(string stage, Func<EyeTrackerImagesAndData, bool> processFrame)
+        {
+            var completed = false;
             try
             {
                 using (inputBuffer = new BlockingCollection<EyeTrackerImagesAndData>(100))
                 {
                     using var cancellation = new CancellationTokenSource();
                     using var calibrationTask = Task.Factory.StartNew(() =>
+                    {
+                        Thread.CurrentThread.Name = "EyeTracker:CalibrationThread";
+
+                        // Keep processing images until the buffer is marked as complete and empty
+                        foreach (var frame in inputBuffer.GetConsumingEnumerable(cancellation.Token))
                         {
-                            Thread.CurrentThread.Name = "EyeTracker:CalibrationThread";
+                            DeliverMessages();
+                            if (calibrationPipeline.Cancelled) break;
 
-                            // Keep processing images until the buffer is marked as complete and empty
-                            foreach (var data in inputBuffer.GetConsumingEnumerable(cancellation.Token))
+                            if (processFrame(frame))
                             {
-                                // The head at the reference: the head angles are relative to it.
-                                referenceHead = data.Data?.HeadDataRaw;
-
-                                foreach (var imageEye in data.Images)
-                                {
-                                    if (imageEye is null || hasReference[imageEye.WhichEye]) continue;
-
-                                    // Wait until we get an image that has the correct eye model.
-                                    // Because images are processed in paralel in the processing pipele,
-                                    // here in the calibration, there are images in the queue for may have been
-                                    // processed with the wrong eye model. So we don't want to use them for reference.
-                                    if (tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].EyePhysicalModel
-                                        != data.Calibration.EyeCalibrationParameters[imageEye.WhichEye].EyePhysicalModel)
-                                    {
-                                        continue;
-                                    }
-
-                                    // Make sure there is always a model when a reference is set.
-                                    // Ideally this should never happen
-                                    if (!tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].HasEyeModel)
-                                    {
-                                        var model = (imageEye.EyeData is null) ?
-                                            EyePhysicalModel.GetDefault(imageEye.Size, settings.MmPerPix) :
-                                            new EyePhysicalModel(imageEye.EyeData.Pupil.Center, imageEye.EyeData.Iris.Radius * 2.0f);
-
-                                        tempCalibration.EyeCalibrationParameters[imageEye.WhichEye].SetEyeModel(model);
-                                    }
-
-                                    (hasReference[imageEye.WhichEye], eyeReferences[imageEye.WhichEye]) = calibrationPipeline.ProcessForReference(imageEye, tempCalibration, settings);
-                                }
-
-                                if (hasReference[Eye.Left] && hasReference[Eye.Right]) break;
-
-                                if (calibrationPipeline.Cancelled) break;
+                                completed = true;
+                                break;
                             }
-                        }, TaskCreationOptions.LongRunning);
+                        }
+                    }, TaskCreationOptions.LongRunning);
 
                     await calibrationTask;
 
-                    if (!calibrationPipeline.Cancelled && inputBuffer.IsAddingCompleted is false)
-                    {
-                        tempCalibration.EyeCalibrationParameters[Eye.Left].SetReference(eyeReferences[Eye.Left]);
-                        tempCalibration.EyeCalibrationParameters[Eye.Right].SetReference(eyeReferences[Eye.Right]);
-
-                        // A new object: the copy above shares the head calibration with the current one.
-                        tempCalibration.HeadCalibrationParameters = new HeadCalibration { ReferenceHeadData = referenceHead ?? new HeadData() };
-                        return tempCalibration;
-                    }
+                    completed &= !calibrationPipeline.Cancelled && !inputBuffer.IsAddingCompleted;
                 }
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("ERROR calibrating the reference: " + ex.Message);
-
-                // Cancel the ongoing calibration
+                Trace.WriteLine($"ERROR calibrating {stage}: {ex}");
                 CancelCalibration();
+                completed = false;
             }
             finally
             {
@@ -226,16 +218,40 @@ namespace OpenIris
                 inputBuffer = null;
             }
 
-            return currentCalibration;
+            return completed;
         }
 
         /// <summary>
-        /// Handles a remote message
+        /// Delivers the queued messages to the calibration, on the calibration thread.
         /// </summary>
-        /// <param name="message"></param>
-        public string HandleRemoteMessage(string message)
+        private void DeliverMessages()
         {
-            return calibrationPipeline.HandleRemoteMessage(message);
+            while (messages.TryDequeue(out var item))
+            {
+                try
+                {
+                    item.reply.TrySetResult(calibrationPipeline.HandleMessage(item.message));
+                }
+                catch (Exception ex)
+                {
+                    item.reply.TrySetResult($"ERROR: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles a message from a client: queued, and delivered to the calibration between frames
+        /// on its thread. Waits for the reply.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <returns>The calibration's reply, or an error if it didn't handle the message in time (no frames).</returns>
+        public string HandleMessage(string message)
+        {
+            var reply = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+            messages.Enqueue((message, reply));
+            return reply.Task.Wait(MessageTimeout)
+                ? reply.Task.Result
+                : $"ERROR: the calibration didn't handle '{message}' (is the eye tracker tracking?)";
         }
 
         /// <summary>

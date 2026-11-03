@@ -66,9 +66,11 @@ namespace OpenIris
         public EyeTrackingPipelineSettings? TrackingSettings { get; set; }
 
         /// <summary>
-        /// Additional parameters that can be specific for each calibration method. Make sure this is serializable.
+        /// The calibration's own parameters for the whole calibration (not one eye), of the kind the
+        /// calibration method defines; null if it has none. The parameters of each eye are in
+        /// <see cref="EyeCalibration.CalibrationData"/>.
         /// </summary>
-        public object? AdditionalParameters { get; set; }
+        public CalibrationModelParameters? CalibrationModelParameters { get; set; }
 
         /// <summary>
         /// Loads the parameters from a file.

@@ -63,12 +63,12 @@ namespace OpenIris
                 ExtraSettingsTypesForXML.AddRange(EyeTrackingPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
                 ExtraSettingsTypesForXML.AddRange(CalibrationPipelineFactory.ClassesAvaiable.Select(t => t.SettingsType));
 
-                // The kinds of calibration data (EyeCalibrationData), for the calibration files: those
-                // defined in the assemblies of the calibration plugins.
+                // The kinds of calibration data (EyeCalibrationData, CalibrationModelParameters), for
+                // the calibration files: those defined in the assemblies of the calibration plugins.
                 ExtraSettingsTypesForXML.AddRange(CalibrationPipelineFactory.ClassesAvaiable
                     .Select(t => t.SettingsType.Assembly).Distinct()
                     .SelectMany(TypesIn)
-                    .Where(t => typeof(EyeCalibrationData).IsAssignableFrom(t) && !t.IsAbstract));
+                    .Where(t => (typeof(EyeCalibrationData).IsAssignableFrom(t) || typeof(CalibrationModelParameters).IsAssignableFrom(t)) && !t.IsAbstract));
             }
             catch (Exception ex)
             {

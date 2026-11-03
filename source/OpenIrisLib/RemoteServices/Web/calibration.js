@@ -354,8 +354,8 @@ async function calibrate() {
     const status = await api("GET", "/status");
     if (!status.Tracking) throw new Error("OpenIris is not tracking.");
     if (status.Calibrating) throw new Error("OpenIris is already calibrating.");
-    if (status.CalibrationMethod !== METHOD) await setSetting("CalibrationMethod", METHOD);
-    await setSetting("Calibration.Mode", "Remote");
+    const selected = await getSettings();
+    if (status.CalibrationMethod !== METHOD || selected["Calibration.Mode"] !== "Remote") throw new Error(notSelected(status, selected));
     await setSetting("Calibration.SignalSource", source);
     await setSetting("Calibration.SignalReference", reference);
 
@@ -462,12 +462,20 @@ function showError(error) {
   $("error").textContent = error && error.message !== "Stopped" ? error.message : "";
 }
 
+// This page drives the N-point calibration in its Remote mode; it doesn't change the calibration
+// selected in OpenIris.
+function notSelected(status, settings) {
+  const now = status.CalibrationMethod + (status.CalibrationMethod === METHOD ? ` in its ${settings["Calibration.Mode"]} mode` : "");
+  return `OpenIris uses the ${now} calibration. This page needs ${METHOD} in its Remote mode: choose it in the settings (Calibration method, and the calibration's Mode).`;
+}
+
 async function refreshInfo() {
   try {
     const settings = await getSettings();
     const status = await api("GET", "/status");
     const usingIt = status.CalibrationMethod === METHOD;
-    $("fits").textContent = (usingIt ? "" : `OpenIris uses the ${status.CalibrationMethod} calibration now. Calibrate switches it to ${METHOD}. `) +
+    const ready = usingIt && settings["Calibration.Mode"] === "Remote";
+    $("fits").textContent = (ready ? "" : notSelected(status, settings) + " ") +
       (status.Tracking ? "" : "OpenIris is not tracking.");
     for (const [id, name, fallback] of [["source", "Calibration.SignalSource", "Pupil"], ["reference", "Calibration.SignalReference", "CR1"]]) {
       const select = $(id);

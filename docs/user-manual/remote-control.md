@@ -213,18 +213,26 @@ Open `http://localhost:9001/` on the OpenIris computer, or `http://<its address>
 one (**Show IP / network info** in the OpenIris menus gives the address). The page shows:
 
 - Start and stop tracking and recording, the session name, and events.
-- The image of each eye with the tracking drawn on top, as in OpenIris, and the pupil and
-  reflection thresholds with buttons to change them.
+- The image of each eye with the tracking drawn on top, as in OpenIris, and under it the same
+  sliders as in the OpenIris window (thresholds, iris and pupil sizes..., depending on the
+  tracking pipeline).
+- With cameras that can move or change their exposure (FLIR): arrows to move each eye's camera, or
+  its region of the image (hold to keep moving), **Center eyes**, and exposure. Not while
+  recording, as in the OpenIris window.
 - The calibrated position of each eye and a **live trace** of horizontal, vertical and torsion
   (also pupil size and position, and head orientation), with every frame, however fast the camera.
-- Calibrate, cancel and reset the reference, and the files of the last recording, to download.
+- The status bar, which turns yellow, orange and red as frames are dropped or wait to be
+  processed, as in the OpenIris window, and the **Log**: its last lines, with the errors in red
+  (counted in its title while it is closed).
+- Calibrate, cancel and reset the reference, with the controls of the calibration selected in
+  OpenIris (see below), and the files of the last recording, to download.
 - All the settings, as in the settings window. Changes apply right away.
 
 Several browsers can be open at the same time.
 
 ### Full-screen calibration and validation
 
-**Full-screen calibration** opens a page that shows calibration targets on the screen the subject
+With **N-point** in its **Remote** mode selected, **Full-screen calibration** opens a page that shows calibration targets on the screen the subject
 looks at. Open it in a browser on the computer of that screen, choose the display (or move the
 window to it), and press **Calibrate**. The targets go full screen; the subject looks at the center of each one. Esc
 stops at any time.
@@ -234,7 +242,8 @@ and only when the page is opened as `http://localhost:9001`, on the OpenIris com
 allow it for pages at another computer's address: there, move the window to the display instead.
 
 It uses the **N-point** calibration (by Ryan Ressmeyer, see [Calibration](#calibration)) in its
-Remote mode, and switches OpenIris to it. Set the width of the screen and the viewing distance, so the targets are at
+Remote mode, and doesn't change the calibration selected in OpenIris: with another one selected,
+it says what to choose in the settings. Set the width of the screen and the viewing distance, so the targets are at
 the right angles, and the number of targets (5, 9 or 13), how far out they go, and how long each
 lasts. The positions are in degrees, up and right positive. At the end the subject looks at the
 center target, which becomes the zero reference.
@@ -279,7 +288,7 @@ don't exist, such as the position of an eye that wasn't found, are `null`.
 
 | Request | Does |
 | --- | --- |
-| `GET /api/status` | Tracking, recording, calibrating, frame rate, system, session name, version... |
+| `GET /api/status` | Tracking, recording, calibrating, frame rate, system, session name, version, processing time, frames waiting and dropped... |
 | `POST /api/tracking/start`, `/api/tracking/stop` | Start or stop tracking |
 | `POST /api/recording/start`, `/api/recording/stop` | Start or stop recording |
 | `POST /api/events` | Save the body (text) as an event; replies `{"FrameNumber": n}` |
@@ -287,10 +296,15 @@ don't exist, such as the position of an eye that wasn't found, are `null`.
 | `GET /api/data/next` | The same, for the next frame (waits up to 1 s) |
 | `GET /api/images/left`, `/api/images/right` | Last image of the eye (JPEG), with the tracking drawn; `?overlay=false` without |
 | `GET /api/settings` | All the settings, with their group, description, type, value and options |
+| `GET /api/quicksettings` | The settings shown as sliders under each eye, while tracking: `Left` and `Right`, each a list of `Text`, `Min`, `Max` and `Name` (of the setting) |
 | `PUT /api/settings/{name}` | Change a setting; the body is the value (JSON or text). Names as in the list: `SessionName`, `Tracking.DarkThresholdLeftEye`... |
 | `GET /api/profiles` | The [settings profiles](configuration.md#settings-profiles): `Active` and `Profiles` |
 | `PUT /api/profiles/active` | Switch to another profile; the body is its name. Only while not tracking |
 | `POST /api/profiles` | Save the current settings as a new profile, which becomes the active one; the body is its name |
+| `POST /api/cameras/center` | Center the cameras (or regions of the image) on the pupils |
+| `POST /api/cameras/move/{eye}/{direction}` | Move a camera one step: `left`, `right` or `both`; `up`, `down`, `left` or `right` |
+| `POST /api/cameras/exposure/increase`, `/reduce` | Change the exposure of the cameras |
+| `GET /api/log` | The last lines of the log, each with `Number`, `Time`, `Text` and `Error`; `?after=n` only those after line `n` |
 | `POST /api/reference/reset` | Reset the reference |
 | `POST /api/calibration/start`, `/cancel`, `/reset` | Start, cancel, or reset the calibration |
 | `POST /api/calibration/message` | Send the body (text) to the calibration, for example `FixStart:5,0`; replies `{"Reply": "ack"}` |

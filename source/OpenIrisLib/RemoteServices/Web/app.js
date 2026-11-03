@@ -72,6 +72,7 @@ function renderStatus() {
   $("startCalibration").disabled = !s.Tracking || s.Calibrating;
   $("cancelCalibration").disabled = !s.Calibrating;
   $("resetReference").disabled = !s.Tracking || s.Calibrating;
+  renderCalibration(s);
   $("profile").disabled = !s.NotStarted;
   $("saveProfileAs").disabled = false;
 
@@ -86,8 +87,22 @@ function renderStatus() {
   if (document.activeElement !== sessionName) sessionName.value = s.SessionName || "";
 
   $("grabberStatus").textContent = s.GrabberStatus + (s.HeadTrackerStatus ? " " + s.HeadTrackerStatus : "");
-  $("processorStatus").textContent = s.ProcessorStatus;
+  $("processorStatus").textContent = s.ProcessorStatus + (s.ProcessingTimeMs != null ? ` ${s.ProcessingTimeMs.toFixed(1)} ms` : "");
   $("recorderStatus").textContent = s.RecorderStatus;
+  warn("grabberStatus", s.PercentDroppedCamera, [5, 10, 20]);
+  warn("processorStatus", s.FramesInBuffer, [10, 30, 50]);
+  warn("recorderStatus", s.PercentDroppedRecording, [1, 2, 3]);
+
+  // Cameras: only what the system can do, and not while recording, as in the OpenIris window.
+  $("camerasGroup").style.display = s.CamerasMovable || s.CamerasHaveVariableExposure ? "" : "none";
+  $("centerEyes").style.display = s.CamerasMovable ? "" : "none";
+  $("centerEyes").disabled = !s.Tracking || s.Recording;
+  $("exposure").style.display = s.CamerasHaveVariableExposure ? "" : "none";
+  $("reduceExposure").disabled = $("increaseExposure").disabled = !s.Tracking || s.Recording;
+  for (const pad of document.querySelectorAll(".camera-pad")) {
+    pad.style.display = s.CamerasMovable ? "" : "none";
+    for (const b of pad.querySelectorAll("button")) b.disabled = !s.Tracking || s.Recording;
+  }
 
   for (const eye of ["Left", "Right"]) {
     $("eye" + eye).style.display = s.Eye === "Both" || s.Eye === eye ? "" : "none";
@@ -98,6 +113,22 @@ function renderStatus() {
     lastRecording = s.Recording;
     refreshFiles();
   }
+}
+
+// Only the calibration controls of the calibration selected in OpenIris. N-point's Mode says who
+// shows the targets: OpenIris on its computer (Local), this client (RemoteDisplay), or a program
+// that drives the calibration, such as the full-screen calibration page (Remote).
+function renderCalibration(s) {
+  const mode = s.CalibrationMethod === "N-point" ? (settings.find((x) => x.Name === "Calibration.Mode") || {}).Value : undefined;
+  $("calibrationLabel").textContent = "Calibration: " + s.CalibrationMethod + (mode ? ", " + mode + " mode" : "");
+  $("fullCalibrationRow").style.display = mode === "Remote" ? "" : "none";
+  $("targetsDisplay").style.display = mode === "RemoteDisplay" ? "" : "none";
+}
+
+// Warmer colors as the value passes each limit, as the status bar of the OpenIris window.
+function warn(id, value, limits) {
+  const level = limits.filter((limit) => value >= limit).length;
+  $(id).className = level ? "warn" + level : "";
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -113,6 +144,25 @@ command("stopRecording", async () => {
 command("startCalibration", () => api("POST", "/calibration/start"));
 command("cancelCalibration", () => api("POST", "/calibration/cancel"));
 command("resetReference", () => api("POST", "/reference/reset"));
+command("centerEyes", () => api("POST", "/cameras/center"));
+command("reduceExposure", () => api("POST", "/cameras/exposure/reduce"));
+command("increaseExposure", () => api("POST", "/cameras/exposure/increase"));
+
+// Camera arrows: one step when pressed, then on and on while held, as in the OpenIris window
+// (after half a second, ten steps a second).
+for (const pad of document.querySelectorAll(".camera-pad")) {
+  for (const button of pad.querySelectorAll("button")) {
+    let timer = null;
+    const move = () => api("POST", `/cameras/move/${pad.dataset.eye}/${button.dataset.direction}`).catch((error) => { stop(); showError(error); });
+    const stop = () => { clearTimeout(timer); clearInterval(timer); timer = null; };
+    button.addEventListener("pointerdown", () => {
+      showError(null);
+      move();
+      timer = setTimeout(() => { timer = setInterval(move, 100); }, 500);
+    });
+    for (const end of ["pointerup", "pointerleave", "pointercancel"]) button.addEventListener(end, stop);
+  }
+}
 
 async function recordEvent() {
   const input = $("eventMessage");
@@ -194,17 +244,18 @@ function startImageLoop(eye) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Settings: the whole list, editable, plus the pupil and reflection thresholds under each eye.
+// Settings: the whole list, editable, plus the tracking pipeline's quick settings under each eye.
 
 let settings = [];
+let quick = { Left: [], Right: [] };
 
 async function refreshSettings() {
   try {
-    settings = await api("GET", "/settings");
+    [settings, quick] = await Promise.all([api("GET", "/settings"), api("GET", "/quicksettings")]);
   } catch (error) {
     return;
   }
-  renderThresholds();
+  renderQuickSettings();
   if ($("settingsBox").open) renderSettings();
 }
 
@@ -214,23 +265,46 @@ function setSetting(name, value) {
     .catch((error) => { showError(error); refreshSettings(); });
 }
 
-function renderThresholds() {
+// The sliders the tracking pipeline shows under each eye in the OpenIris window (while tracking).
+// Rebuilt only when the list changes, so a slider being dragged isn't replaced.
+const quickShown = { Left: "", Right: "" };
+
+function renderQuickSettings() {
   for (const eye of ["Left", "Right"]) {
-    const box = document.querySelector("#eye" + eye + " .thresholds");
-    const found = settings.filter((s) => s.Group === "Tracking" && /Threshold/.test(s.Name) && s.Name.endsWith(eye + "Eye") && s.Type === "integer");
-    box.replaceChildren(...found.map((s) => {
-      const row = document.createElement("div");
-      row.className = "threshold";
-      const label = s.Name.replace("Tracking.", "").replace(eye + "Eye", "").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase();
-      row.innerHTML = `<span></span><button class="small">−</button><b></b><button class="small">+</button>`;
-      row.children[0].textContent = label.charAt(0).toUpperCase() + label.slice(1);
-      row.children[0].title = s.Description || "";
-      row.children[2].textContent = s.Value;
-      row.children[1].onclick = () => setSetting(s.Name, Math.max(0, s.Value - 1));
-      row.children[3].onclick = () => setSetting(s.Name, Math.min(255, s.Value + 1));
-      return row;
-    }));
+    const box = document.querySelector("#eye" + eye + " .quick");
+    const list = quick[eye] || [];
+    const signature = JSON.stringify(list);
+    if (signature !== quickShown[eye]) {
+      quickShown[eye] = signature;
+      box.replaceChildren(...list.map(quickSettingRow));
+    }
+    for (const row of box.children) {
+      const setting = settings.find((s) => s.Name === row.dataset.name);
+      const slider = row.querySelector("input");
+      if (!setting || document.activeElement === slider) continue;
+      slider.value = setting.Value;
+      row.querySelector("b").textContent = +Number(setting.Value).toFixed(2);
+    }
   }
+}
+
+function quickSettingRow(q) {
+  const setting = settings.find((s) => s.Name === q.Name);
+  const step = setting && setting.Type === "integer" ? 1 : 0.1;
+  const row = document.createElement("div");
+  row.className = "quick-setting";
+  row.dataset.name = q.Name;
+  row.innerHTML = `<span></span><input type="range"><button class="small">−</button><b></b><button class="small">+</button>`;
+  row.children[0].textContent = q.Text;
+  row.children[0].title = (setting && setting.Description) || "";
+  const slider = row.children[1];
+  Object.assign(slider, { min: q.Min, max: q.Max, step });
+  const set = (value) => setSetting(q.Name, Math.min(q.Max, Math.max(q.Min, +(+value).toFixed(3))));
+  slider.oninput = () => { row.children[3].textContent = +(+slider.value).toFixed(2); };
+  slider.onchange = () => { set(slider.value); slider.blur(); };
+  row.children[2].onclick = () => set(+slider.value - step);
+  row.children[4].onclick = () => set(+slider.value + step);
+  return row;
 }
 
 function renderSettings() {
@@ -578,12 +652,56 @@ setInterval(() => {
 }, 1000);
 
 // ---------------------------------------------------------------------------------------------
+// Log: the last lines of OpenIris's log, as its log tab. Errors in red, and counted in the title
+// while the log is closed.
+
+let logLast = 0;
+let logErrors = 0;
+let logLoaded = false; // The lines already there when the page opens aren't new.
+
+async function refreshLog() {
+  let lines;
+  try {
+    lines = await api("GET", "/log?after=" + logLast);
+  } catch (error) {
+    return;
+  }
+  const loaded = logLoaded;
+  logLoaded = true;
+  if (!lines.length) return;
+
+  const box = $("log");
+  const atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 4;
+  for (const line of lines) {
+    // OpenIris restarted: its lines start again from 1.
+    if (line.Number <= logLast) box.replaceChildren();
+    logLast = line.Number;
+    const div = document.createElement("div");
+    if (line.Error) { div.className = "error"; if (loaded && !$("logBox").open) logErrors++; }
+    const time = document.createElement("time");
+    time.textContent = line.Time;
+    div.append(time, line.Text);
+    box.append(div);
+  }
+  while (box.children.length > 500) box.firstChild.remove();
+  if (atBottom) box.scrollTop = box.scrollHeight;
+  $("logErrors").textContent = logErrors ? `(${logErrors} new error${logErrors > 1 ? "s" : ""})` : "";
+}
+$("logBox").addEventListener("toggle", () => {
+  logErrors = 0;
+  $("logErrors").textContent = "";
+  $("log").scrollTop = $("log").scrollHeight;
+});
+
+// ---------------------------------------------------------------------------------------------
 
 resizeTrace();
 refreshStatus();
 refreshSettings();
 setInterval(refreshStatus, 500);
 setInterval(refreshSettings, 2000);
+refreshLog();
+setInterval(refreshLog, 1000);
 startImageLoop("Left");
 startImageLoop("Right");
 connectStream();

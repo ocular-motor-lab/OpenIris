@@ -121,10 +121,22 @@ input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1
 .value { background: var(--bg); border-radius: 6px; padding: 4px 8px; }
 .value b { display: block; font-size: 18px; font-variant-numeric: tabular-nums; font-weight: 600; }
 .value small { color: var(--muted); font-size: 11px; }
-.thresholds { display: grid; gap: 4px; }
-.threshold { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-.threshold span:first-child { flex: 1; color: var(--muted); }
-.threshold b { min-width: 34px; text-align: center; font-variant-numeric: tabular-nums; }
+/* The tracking pipeline's quick settings under each eye, as the sliders of the OpenIris window. */
+.quick { display: grid; gap: 4px; }
+.quick-setting { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(60px, 1.4fr) auto 44px auto; align-items: center; gap: 6px; font-size: 13px; }
+.quick-setting span { color: var(--muted); }
+.quick-setting input[type=range] { width: 100%; min-width: 0; padding: 0; }
+.quick-setting b { text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
+.camera-pad { margin-left: auto; display: inline-flex; gap: 2px; }
+.camera-pad button { padding: 0 6px; font-size: 11px; line-height: 20px; }
+.log { max-height: 320px; overflow-y: auto; font: 12px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; margin-top: 8px; }
+.log .error { color: var(--record); min-height: 0; font-size: inherit; }
+.log time { color: var(--muted); margin-right: 8px; }
+/* Status bar warnings, as in the OpenIris window: more frames dropped or waiting, warmer. */
+footer span.warn1 { background: #fff3b0; color: #1d2229; }
+footer span.warn2 { background: #ffd08a; color: #1d2229; }
+footer span.warn3 { background: #ff9c8a; color: #1d2229; }
+footer span { padding: 0 4px; border-radius: 3px; }
 
 .trace-controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 13px; margin-bottom: 8px; }
 .trace-controls label { display: inline-flex; gap: 4px; align-items: center; color: var(--text); }

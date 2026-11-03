@@ -36,6 +36,11 @@ namespace OpenIris
         private readonly CalibrationTargetStream targetStream;
 
         /// <summary>
+        /// The last lines of the log, for GET /api/log.
+        /// </summary>
+        internal RecentLog Log { get; } = new RecentLog();
+
+        /// <summary>
         /// JSON options of every reply. NaN (eye not found) goes as null, which JSON has and
         /// MATLAB's jsondecode turns back into NaN.
         /// </summary>
@@ -185,6 +190,7 @@ namespace OpenIris
             dataStream.Dispose();
             targetStream.Dispose();
             server.Dispose();
+            Log.Dispose();
         }
 
         /// <summary>

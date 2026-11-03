@@ -51,6 +51,8 @@ namespace OpenIris
         public object GetStatus()
         {
             var settings = eyeTracker.Settings;
+            var grabber = eyeTracker.ImageGrabber;
+            var recording = eyeTracker.RecordingSession;
             return new
             {
                 eyeTracker.NotStarted,
@@ -63,6 +65,17 @@ namespace OpenIris
                 ProcessorStatus = eyeTracker.ImageProcessor?.ProcessingStatus ?? "Not tracking",
                 RecorderStatus = eyeTracker.RecordingSession?.RecordingStatus ?? "Not recording",
                 FrameRate = eyeTracker.ImageGrabber?.FrameRateMeasured ?? double.NaN,
+
+                // How well it keeps up, as the status bar of the OpenIris window shows it.
+                ProcessingTimeMs = eyeTracker.ImageProcessor is null ? double.NaN : eyeTracker.AverageFrameProcessingTime * 1000,
+                FramesInBuffer = eyeTracker.ImageProcessor?.NumberFramesInBuffer ?? 0,
+                PercentDroppedCamera = grabber is null ? 0 : grabber.NumberFramesDropped / (grabber.NumberFramesGrabbed + grabber.NumberFramesDropped + 1.0) * 100,
+                PercentDroppedRecording = recording is null ? 0 : (recording.NumberFramesDroppedInDataFile + recording.NumberFramesDroppedInVideo) / (
+                    recording.NumberFramesRecordedInDataFile + recording.NumberFramesRecordedInVideo +
+                    recording.NumberFramesDroppedInDataFile + recording.NumberFramesDroppedInVideo + 1.0) * 100,
+
+                CamerasMovable = eyeTracker.EyeTrackingSystem?.CamerasMovable ?? false,
+                CamerasHaveVariableExposure = eyeTracker.EyeTrackingSystem?.CamerasHaveVariableEspsure ?? false,
                 settings.EyeTrackerSystem,
                 Eye = settings.EyeTrackingSystemSettings.Eye,
                 settings.EyeTrackingPipeline,
@@ -171,6 +184,94 @@ namespace OpenIris
             if (!eyeTracker.Calibrating) throw new InvalidOperationException("Not calibrating.");
             return new { Reply = server.OnUiThread(() => eyeTracker.CalibrationMessage(message ?? "")) };
         }
+
+        #endregion
+
+        #region Cameras
+
+        /// <summary>
+        /// Centers the eye regions on the pupils, as Center eyes in the OpenIris window.
+        /// </summary>
+        [Route(HttpVerbs.Post, "/cameras/center")]
+        public object CenterEyes()
+        {
+            CheckCamerasMovable();
+            server.OnUiThread(() => eyeTracker.CenterEyes());
+            return Ok();
+        }
+
+        /// <summary>
+        /// Moves the region of one eye (left, right or both) one step: up, down, left or right.
+        /// </summary>
+        [Route(HttpVerbs.Post, "/cameras/move/{eye}/{direction}")]
+        public object MoveCamera(string eye, string direction)
+        {
+            if (!Enum.TryParse(eye, true, out Eye whichEye)) throw HttpException.BadRequest("The eye must be left, right or both.");
+            if (!Enum.TryParse(direction, true, out ImageGrabbing.MovementDirection movement) || movement == ImageGrabbing.MovementDirection.None)
+            {
+                throw HttpException.BadRequest("The direction must be up, down, left or right.");
+            }
+
+            CheckCamerasMovable();
+            server.OnUiThread(() => eyeTracker.MoveCamera(whichEye, movement));
+            return Ok();
+        }
+
+        [Route(HttpVerbs.Post, "/cameras/exposure/increase")]
+        public object IncreaseExposure()
+        {
+            CheckVariableExposure();
+            server.OnUiThread(() => eyeTracker.IncreaseExposure());
+            return Ok();
+        }
+
+        [Route(HttpVerbs.Post, "/cameras/exposure/reduce")]
+        public object ReduceExposure()
+        {
+            CheckVariableExposure();
+            server.OnUiThread(() => eyeTracker.ReduceExposure());
+            return Ok();
+        }
+
+        // As the OpenIris window allows them: not while recording.
+        private void CheckCamerasMovable()
+        {
+            if (!(eyeTracker.EyeTrackingSystem?.CamerasMovable ?? false)) throw new InvalidOperationException("The cameras of this system can't move.");
+            if (eyeTracker.Recording) throw new InvalidOperationException("Can't move the cameras while recording.");
+        }
+
+        private void CheckVariableExposure()
+        {
+            if (!(eyeTracker.EyeTrackingSystem?.CamerasHaveVariableEspsure ?? false)) throw new InvalidOperationException("The exposure of the cameras of this system can't change.");
+            if (eyeTracker.Recording) throw new InvalidOperationException("Can't change the exposure while recording.");
+        }
+
+        #endregion
+
+        #region Quick settings and log
+
+        /// <summary>
+        /// The settings of the tracking pipeline shown as sliders under each eye in the OpenIris
+        /// window, while tracking: label, range and the name of the setting (Tracking.Name).
+        /// </summary>
+        [Route(HttpVerbs.Get, "/quicksettings")]
+        public object GetQuickSettings() => server.OnUiThread(() =>
+        {
+            var pipelines = eyeTracker.ImageProcessor?.PipelineForUI;
+            var eyes = eyeTracker.Settings.EyeTrackingSystemSettings.Eye;
+            object Of(Eye eye) =>
+                (eyes == Eye.Both || eyes == eye ? pipelines?[eye]?.GetQuickSettingsList() : null)?
+                    .Select(s => new { Text = s.text, Min = s.range.Begin, Max = s.range.End, Name = "Tracking." + s.settingName })
+                    .ToArray()
+                ?? Array.Empty<object>();
+            return new { Left = Of(Eye.Left), Right = Of(Eye.Right) };
+        });
+
+        /// <summary>
+        /// The last lines of the log, after the line number given (?after=n; all with 0).
+        /// </summary>
+        [Route(HttpVerbs.Get, "/log")]
+        public object GetLog([QueryField] long? after) => server.Log.After(after ?? 0);
 
         #endregion
 

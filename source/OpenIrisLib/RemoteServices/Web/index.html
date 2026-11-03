@@ -27,6 +27,18 @@
         </div>
       </div>
 
+      <div class="group" id="camerasGroup">
+        <label>Cameras</label>
+        <div class="row">
+          <button id="centerEyes" title="Center the cameras (or regions of the image) on the pupils">Center eyes</button>
+          <span id="exposure" class="row">
+            <span class="muted">Exposure</span>
+            <button id="reduceExposure" class="small" aria-label="Reduce exposure">−</button>
+            <button id="increaseExposure" class="small" aria-label="Increase exposure">+</button>
+          </span>
+        </div>
+      </div>
+
       <div class="group">
         <label for="sessionName">Recording</label>
         <div class="row">
@@ -47,17 +59,19 @@
       </div>
 
       <div class="group">
-        <label>Calibration</label>
-        <div class="row">
+        <label id="calibrationLabel">Calibration</label>
+        <div class="row" id="fullCalibrationRow" style="margin-bottom:8px">
           <a class="button" id="openCalibration" href="calibration.html" target="_blank" title="Opens in a new window: move it to the screen the subject looks at">Full-screen calibration</a>
         </div>
-        <div class="row" style="margin-top:8px" title="When OpenIris shows the targets on this client (N-point calibration, RemoteDisplay mode), they fill this window: go full screen first, on the display the subject looks at.">
-          <select id="display" style="flex:1 1 100%;min-width:0"><option value="">This window's display</option></select>
-          <button id="fullScreen">Full screen</button>
-          <button id="findDisplays" type="button">Find displays</button>
+        <div id="targetsDisplay" style="margin-bottom:8px" title="OpenIris shows the targets on this client: they fill this window. Go full screen first, on the display the subject looks at.">
+          <div class="row">
+            <select id="display" style="flex:1 1 100%;min-width:0"><option value="">This window's display</option></select>
+            <button id="fullScreen">Full screen</button>
+            <button id="findDisplays" type="button">Find displays</button>
+          </div>
+          <div class="muted" id="displayNote" style="font-size:12px"></div>
         </div>
-        <div class="muted" id="displayNote" style="font-size:12px"></div>
-        <div class="row" style="margin-top:8px">
+        <div class="row">
           <button id="startCalibration" title="Start the calibration method chosen in the settings">Calibrate</button>
           <button id="cancelCalibration">Cancel</button>
           <button id="resetReference">Reset reference</button>
@@ -78,24 +92,38 @@
       </h2>
       <div class="eyes">
         <div class="eye left" id="eyeLeft">
-          <h3>Left eye</h3>
+          <h3>Left eye
+            <span class="camera-pad" data-eye="Left" title="Move the left eye's camera (or region of the image). Hold to keep moving.">
+              <button class="small" data-direction="Left" aria-label="Left">◀</button>
+              <button class="small" data-direction="Up" aria-label="Up">▲</button>
+              <button class="small" data-direction="Down" aria-label="Down">▼</button>
+              <button class="small" data-direction="Right" aria-label="Right">▶</button>
+            </span>
+          </h3>
           <div class="image"><span>No image</span></div>
           <div class="values">
             <div class="value"><small>Horizontal</small><b data-v="H">–</b></div>
             <div class="value"><small>Vertical</small><b data-v="V">–</b></div>
             <div class="value"><small>Torsion</small><b data-v="T">–</b></div>
           </div>
-          <div class="thresholds"></div>
+          <div class="quick"></div>
         </div>
         <div class="eye right" id="eyeRight">
-          <h3>Right eye</h3>
+          <h3>Right eye
+            <span class="camera-pad" data-eye="Right" title="Move the right eye's camera (or region of the image). Hold to keep moving.">
+              <button class="small" data-direction="Left" aria-label="Left">◀</button>
+              <button class="small" data-direction="Up" aria-label="Up">▲</button>
+              <button class="small" data-direction="Down" aria-label="Down">▼</button>
+              <button class="small" data-direction="Right" aria-label="Right">▶</button>
+            </span>
+          </h3>
           <div class="image"><span>No image</span></div>
           <div class="values">
             <div class="value"><small>Horizontal</small><b data-v="H">–</b></div>
             <div class="value"><small>Vertical</small><b data-v="V">–</b></div>
             <div class="value"><small>Torsion</small><b data-v="T">–</b></div>
           </div>
-          <div class="thresholds"></div>
+          <div class="quick"></div>
         </div>
       </div>
     </section>
@@ -122,6 +150,13 @@
         <span class="muted" id="rate"></span>
       </div>
       <canvas id="trace"></canvas>
+    </section>
+
+    <section class="card wide">
+      <details class="settings" id="logBox">
+        <summary>Log <span class="muted" id="logErrors"></span></summary>
+        <div class="log" id="log"></div>
+      </details>
     </section>
 
     <section class="card wide">

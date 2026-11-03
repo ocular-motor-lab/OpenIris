@@ -10,6 +10,7 @@ namespace OpenIris.UI
 
     using System;
     using System.ComponentModel;
+    using System.Linq;
     using System.Windows.Forms;
     using OpenIris;
 
@@ -92,6 +93,30 @@ namespace OpenIris.UI
 
             UpdateTitle(settings);
             UpdateHeaders();
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            CenterOnMainWindow();
+        }
+
+        // On the same screen as the main window, centered on it (Windows would choose the screen).
+        // When loading: the size is already scaled for the screen, and the window not shown yet.
+        private void CenterOnMainWindow()
+        {
+            var main = Application.OpenForms.Cast<Form>().FirstOrDefault(f => f != this && f.Visible);
+            if (main is null) return;
+
+            var area = Screen.FromControl(main).WorkingArea;
+            var bounds = main.WindowState == FormWindowState.Normal ? main.Bounds : main.RestoreBounds;
+            var width = Math.Min(Width, area.Width);
+            var height = Math.Min(Height, area.Height);
+            StartPosition = FormStartPosition.Manual;
+            Size = new System.Drawing.Size(width, height);
+            Location = new System.Drawing.Point(
+                Math.Max(area.Left, Math.Min(bounds.Left + (bounds.Width - width) / 2, area.Right - width)),
+                Math.Max(area.Top, Math.Min(bounds.Top + (bounds.Height - height) / 2, area.Bottom - height)));
         }
 
         private void UpdateTitle(EyeTrackerSettings settings) => Text = $"Configuration - profile {settings.Profile}";

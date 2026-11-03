@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="RecordAndProcessTests.cs">
 //     Copyright (c) 2014-2023 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -68,6 +68,13 @@ namespace OpenIris.Tests
                 var events = File.ReadAllText(Directory.GetFiles(folder, "Test-*-events.txt", SearchOption.AllDirectories).Single());
                 StringAssert.Contains(events, "RightAfterStart", "An event sent right after starting the recording was lost.");
                 StringAssert.Contains(events, "DuringRecording");
+
+                // The log of the recording starts with how it was made, and ends with a summary.
+                var log = File.ReadAllText(Directory.GetFiles(folder, "Test-*-log.log", SearchOption.AllDirectories).Single());
+                Console.WriteLine(log);
+                StringAssert.StartsWith(log, "==================== OpenIris recording");
+                StringAssert.Matches(log, new System.Text.RegularExpressions.Regex(@"Name:\s+Simulation"));
+                StringAssert.Contains(log, "OpenIris recording finished");
 
                 var rawLeft = Directory.GetFiles(folder, "Test-*-Left.avi", SearchOption.AllDirectories).Single();
                 var rawRight = rawLeft.Replace("-Left.avi", "-Right.avi");

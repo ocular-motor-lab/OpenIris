@@ -60,6 +60,12 @@ namespace OpenIris.ImageGrabbing
         public virtual object Info { get { return string.Empty; } }
 
         /// <summary>
+        /// Gets what the camera is (model, serial number, firmware...), for the log of each
+        /// recording. Empty if the camera doesn't say.
+        /// </summary>
+        public string Description { get; protected set; } = string.Empty;
+
+        /// <summary>
         /// Overrides the StartCapture method.
         /// </summary>
         public abstract void Start();

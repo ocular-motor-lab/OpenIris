@@ -324,6 +324,7 @@ namespace SpinnakerInterface
         private void InitParameters()
         {
             camModelName = cam.DeviceModelName.Value;
+            Description = $"{camModelName}, serial {cam.DeviceSerialNumber}, firmware {cam.DeviceFirmwareVersion}";
 
             IsFirstFrame = true;  // Remember to grab first frame number and save it.
 

@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="EyeTrackerWebApi.cs">
 //     Copyright (c) 2014-2026 Jorge Otero-Millan, Johns Hopkins University, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -78,10 +78,7 @@ namespace OpenIris
         /// <summary>
         /// Version of OpenIris, as GitVersion stamps it on OpenIris.exe (0.2.0-alpha.5...).
         /// </summary>
-        private static readonly string Version =
-            (Assembly.GetEntryAssembly()?.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false)
-                .FirstOrDefault() as AssemblyInformationalVersionAttribute)?.InformationalVersion
-            ?? typeof(EyeTracker).Assembly.GetName().Version?.ToString() ?? "";
+        private static readonly string Version = RecordingInfo.Version;
 
         #endregion
 

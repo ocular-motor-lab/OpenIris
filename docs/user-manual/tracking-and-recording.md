@@ -49,7 +49,7 @@ time, for example `Subject01-2026Oct30-143502`. Inside, with the same name:
 | `…-events.txt` | The events sent during the recording (see [Remote control](remote-control.md)). |
 | `….cal` | The calibration used. |
 | `…-settings.xml` | All the settings used. |
-| `…-log.log` | The log of the recording. |
+| `…-log.log` | The log of the recording. It starts with how the recording was made: the time, the version of OpenIris, the system and its cameras (model, serial number, frame size, intrinsics), the calibration and the computer. It ends with how many frames were written to each file and how many were lost. |
 
 ### The data file
 

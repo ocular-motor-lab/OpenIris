@@ -509,7 +509,7 @@ namespace OpenIris
                     IncreaseContrast = false,
                     AddEyelids = false,
                 });
-                using var recordingTask = RecordingSession.Start(Calibration, Settings);
+                using var recordingTask = RecordingSession.Start(Calibration, Settings, RecordingSession.Describe(this));
 
                 // Play video and wait until it finishes. This will also start the tracking
                 using var playingVideoTask = PlayVideo(options);
@@ -550,7 +550,7 @@ namespace OpenIris
                     DecimateRatioRawVideo = Settings.DecimateVideoRatio,
                     DataFolder = Settings.DataFolder
                 });
-                await RecordingSession.Start(Calibration, Settings);
+                await RecordingSession.Start(Calibration, Settings, RecordingSession.Describe(this));
             }
             finally
             {

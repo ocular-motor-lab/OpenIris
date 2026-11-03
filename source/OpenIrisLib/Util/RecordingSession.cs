@@ -85,6 +85,17 @@ namespace OpenIris
         /// </summary>
         public string DataFileName { get; }
 
+        // How many items a recorder wrote, and how many it lost because writing couldn't keep up:
+        // "1520 frames written, none lost".
+        private static string Written<T>(Consumer<T> recorder, string items) =>
+            $"{recorder.ConsumedCount} {items} written, " +
+            (recorder.DroppedCount > 0 ? $"{recorder.DroppedCount} lost (writing fell behind)" : "none lost");
+
+        /// <summary>
+        /// What to write at the beginning of the log of this recording (see RecordingInfo).
+        /// </summary>
+        internal string Describe(EyeTracker eyeTracker) => RecordingInfo.Describe(eyeTracker, DataFileName, options);
+
         /// <summary>
         /// Gets the total time spent recording.
         /// </summary>
@@ -149,7 +160,8 @@ namespace OpenIris
         /// </summary>
         /// <param name="calibration">Current calibration.</param>
         /// <param name="settings">Current settings of the eye tracker.</param>
-        internal async Task Start(CalibrationParameters calibration, EyeTrackerSettings settings)
+        /// <param name="info">What to write at the beginning of the log of the recording (RecordingInfo).</param>
+        internal async Task Start(CalibrationParameters calibration, EyeTrackerSettings settings, string? info = null)
         {
             if (started) throw new InvalidOperationException("Cannot start a new recording. Another recording is in process.");
             started = true;
@@ -159,12 +171,15 @@ namespace OpenIris
             try
             {
                 var errorHandler = new TaskErrorHandler(Stop);
-                log = EyeTrackerLog.Create(DataFileName.Replace(".txt", "-log.log"));
 
-                // Create new folder and save calibration and settings
+                // The folder first: the log opens its file when it writes.
+                Directory.CreateDirectory(Path.GetDirectoryName(DataFileName));
+                log = EyeTrackerLog.Create(DataFileName.Replace(".txt", "-log.log"));
+                if (info is not null) log.WriteBlock(info);
+
+                // Save calibration and settings
                 await Task.Run(() =>
                 {
-                    Directory.CreateDirectory(Path.GetDirectoryName(DataFileName));
                     calibration.Save(DataFileName.Replace(".txt", ".cal"));
                     settings.Save(DataFileName.Replace(".txt", "-settings.xml"));
                 });
@@ -179,10 +194,11 @@ namespace OpenIris
 
                 errorHandler.CheckForErrors();
 
-                Trace.WriteLine($"Type of Recorder -> (Frames to record >> Frames not dropped >> Fames recorded)");
-                Trace.WriteLine($"RawFramesRecorder -> ({rawFramesRecorder.TryAddedCount} >> {rawFramesRecorder.AddedCount} >> {rawFramesRecorder.ConsumedCount})");
-                Trace.WriteLine($"ProcessedFramesRecorder -> ({processedFramesRecorder.TryAddedCount} >> {processedFramesRecorder.AddedCount} >> {processedFramesRecorder.ConsumedCount})");
-                Trace.WriteLine($"EventRecorder -> ({eventRecorder.TryAddedCount} >> {eventRecorder.AddedCount} >> {eventRecorder.ConsumedCount})");
+                Trace.WriteLine("Recording finished.");
+                log?.WriteBlock(RecordingInfo.Summary(TimeRecorded,
+                    Written(processedFramesRecorder, "frames"),
+                    options.SaveRawVideo ? Written(rawFramesRecorder, "frames") : "not recorded",
+                    Written(eventRecorder, "events")));
             }
             catch
             {

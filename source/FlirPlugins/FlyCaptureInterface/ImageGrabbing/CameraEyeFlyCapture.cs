@@ -244,6 +244,7 @@ namespace OpenIris.ImageGrabbing
             Trace.WriteLine("Sensor: " + cameraInfo.sensorInfo);
             Trace.WriteLine("Sensor resolution: " + cameraInfo.sensorResolution);
             Trace.WriteLine("Serial number: " + cameraInfo.serialNumber);
+            Description = $"{cameraInfo.modelName}, serial {cameraInfo.serialNumber}, firmware {cameraInfo.firmwareVersion}";
 
             string[] s = cameraInfo.sensorResolution.Split('x');
             SensorResolution = new Size(int.Parse(s[0]), int.Parse(s[1]));

@@ -30,16 +30,13 @@ namespace OpenIris.UI
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.imageBoxEye = new Emgu.CV.UI.ImageBox();
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxEye)).BeginInit();
+            this.imageBoxEye = new OpenIris.UI.ImageView();
             this.SuspendLayout();
             // 
             // imageBoxEye
             // 
             this.imageBoxEye.BackColor = System.Drawing.Color.Black;
             this.imageBoxEye.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBoxEye.FunctionalMode = Emgu.CV.UI.ImageBox.FunctionalModeOption.Minimum;
-            this.imageBoxEye.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Default;
             this.imageBoxEye.Location = new System.Drawing.Point(0, 0);
             this.imageBoxEye.Name = "imageBoxEye";
             this.imageBoxEye.Size = new System.Drawing.Size(480, 360);
@@ -54,12 +51,11 @@ namespace OpenIris.UI
             this.Controls.Add(this.imageBoxEye);
             this.Name = "EyeTrackerImageEyeBox";
             this.Size = new System.Drawing.Size(480, 360);
-            ((System.ComponentModel.ISupportInitialize)(this.imageBoxEye)).EndInit();
             this.ResumeLayout(false);
 
         }
 
-        private Emgu.CV.UI.ImageBox imageBoxEye;
+        private OpenIris.UI.ImageView imageBoxEye;
 
         #endregion
     }

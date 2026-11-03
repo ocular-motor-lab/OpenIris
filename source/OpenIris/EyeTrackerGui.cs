@@ -36,7 +36,7 @@ namespace OpenIris.UI
         private readonly Timer timerRefreshUI;
         private readonly LogTraceListener log;
 
-        private readonly EyeCollection<ImageBox> imageBoxes;
+        private readonly EyeCollection<ImageView> imageBoxes;
 
         // Variables for keeping track of held buttons
         private readonly Timer moveCommandTimer;
@@ -64,7 +64,7 @@ namespace OpenIris.UI
             holdTimer = new Timer { Interval = 500 };
             holdTimer.Tick += HoldTimer_Tick;
 
-            imageBoxes = new EyeCollection<ImageBox>(imageBoxLeftEye, imageBoxRightEye);
+            imageBoxes = new EyeCollection<ImageView>(imageBoxLeftEye, imageBoxRightEye);
 
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
 
@@ -518,8 +518,8 @@ namespace OpenIris.UI
                 }
 
                 // Update Torsion images
-                var imageBoxIris = new EyeCollection<ImageBox>(imageBoxIrisLeft, imageBoxIrisRight);
-                var imageBoxIrisReference = new EyeCollection<ImageBox>(imageBoxIrisRefeferenceLeft, imageBoxIrisRefeferenceRight);
+                var imageBoxIris = new EyeCollection<ImageView>(imageBoxIrisLeft, imageBoxIrisRight);
+                var imageBoxIrisReference = new EyeCollection<ImageView>(imageBoxIrisRefeferenceLeft, imageBoxIrisRefeferenceRight);
 
                 foreach (var eye in eyes)
                 {
@@ -606,8 +606,8 @@ namespace OpenIris.UI
         private void UpdateTabViewer()
         {
             // Update images
-            var imageLeft = eyeTracker.LastImagesAndData?.Images[Eye.Left]?.Image.Convert<Bgr, byte>();
-            var imageRight = eyeTracker.LastImagesAndData?.Images[Eye.Right]?.Image.Convert<Bgr, byte>();
+            using var imageLeft = eyeTracker.LastImagesAndData?.Images[Eye.Left]?.Image.Convert<Bgr, byte>();
+            using var imageRight = eyeTracker.LastImagesAndData?.Images[Eye.Right]?.Image.Convert<Bgr, byte>();
             if (imageLeft != null) eyeTrackerImageEyeBoxLeftEyeSmall.Image = imageLeft;
             if (imageRight != null) eyeTrackerImageEyeBoxRightEyeSmall.Image = imageRight;
 
@@ -690,7 +690,6 @@ namespace OpenIris.UI
             else
                 toolStripStatusLabelRecording.BackColor = Color.Red;
 
-            statusStrip1.Refresh();
         }
         private void MoveButton_MouseDown(object sender, MouseEventArgs e)
         {
@@ -819,3 +818,4 @@ namespace OpenIris.UI
         }
     }
 }
+

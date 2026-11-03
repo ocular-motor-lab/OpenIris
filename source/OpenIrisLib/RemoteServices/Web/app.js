@@ -338,7 +338,7 @@ const PANELS = [
   { name: "Pupil", unit: "px", minSpan: 10, series: [["LeftPupilWidth", "left"], ["RightPupilWidth", "right"]], on: false },
   { name: "Pupil X", unit: "px", minSpan: 10, series: [["LeftPupilX", "left"], ["RightPupilX", "right"]], on: false },
   { name: "Pupil Y", unit: "px", minSpan: 10, series: [["LeftPupilY", "left"], ["RightPupilY", "right"]], on: false },
-  { name: "Head velocity", unit: "deg/s", minSpan: 10, series: [["HeadRollVelocity", "#3b82f6"], ["HeadPitchVelocity", "#ef4444"], ["HeadYawVelocity", "#22a05a"]], on: false },
+  { name: "Head", unit: "deg", minSpan: 10, series: [["HeadRoll", "#3b82f6"], ["HeadPitch", "#ef4444"], ["HeadYaw", "#22a05a"]], on: false },
 ];
 
 const trace = {

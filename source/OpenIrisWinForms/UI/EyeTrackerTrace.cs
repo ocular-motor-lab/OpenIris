@@ -74,23 +74,14 @@ namespace OpenIris.UI
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaEyelid, Eye.Left));
             tracesChart.Series.Add(new EyeTraceSeries(chartAreaEyelid, Eye.Right));
 
-            var chartAreaHeadVelocity = new TraceChartArea(tracesChart, DataStream.HVR, "HeadVelocity")
+            // Head orientation: roll, pitch and yaw, one series each.
+            var chartAreaHead = new TraceChartArea(tracesChart, DataStream.HR, "Head")
             {
-                DefaultRange = new Range(-500, 500),
-                ShouldZoom = false
+                DefaultRange = new Range(-30, 30),
             };
-            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadVelocity, Eye.Right, Color.Blue));
-            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadVelocity, Eye.Right, Color.Red));
-            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadVelocity, Eye.Right, Color.Green));
-
-            var chartAreaHeadAcceleration = new TraceChartArea(tracesChart, DataStream.HR, "HeadAcceleration")
-            {
-                DefaultRange = new Range(-2, 2),
-                ShouldZoom = false
-            };
-            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadAcceleration, Eye.Right, Color.Blue));
-            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadAcceleration, Eye.Right, Color.Red));
-            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHeadAcceleration, Eye.Right, Color.Green));
+            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHead, Eye.Right, Color.Blue, DataStream.HR));
+            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHead, Eye.Right, Color.Red, DataStream.HP));
+            tracesChart.Series.Add(new EyeTraceSeries(chartAreaHead, Eye.Right, Color.Green, DataStream.HY));
 
 
 
@@ -292,8 +283,7 @@ namespace OpenIris.UI
             tracesChart.ChartAreas["H"].Visible = horizontalToolStripMenuItem.Checked;
             tracesChart.ChartAreas["V"].Visible = verticalToolStripMenuItem.Checked;
             tracesChart.ChartAreas["T"].Visible = torsionToolStripMenuItem.Checked;
-            tracesChart.ChartAreas["HVR"].Visible = headToolStripMenuItem.Checked;
-            tracesChart.ChartAreas["HR"].Visible = headAccelerationToolStripMenuItem.Checked;
+            tracesChart.ChartAreas["HR"].Visible = headToolStripMenuItem.Checked;
             tracesChart.ChartAreas["P"].Visible = pupilToolStripMenuItem.Checked;
             tracesChart.ChartAreas["E"].Visible = eyeLidsToolStripMenuItem.Checked;
             tracesChart.ChartAreas["CRLH"].Visible = cRToolStripMenuItem.Checked;
@@ -498,11 +488,12 @@ namespace OpenIris.UI
         {
         }
 
-        public EyeTraceSeries(TraceChartArea chartArea, Eye whichEye, Color color)
+        /// <param name="signal">What to plot, if not the signal of the chart area.</param>
+        public EyeTraceSeries(TraceChartArea chartArea, Eye whichEye, Color color, DataStream? signal = null)
         {
             traceChartArea = chartArea;
             this.whichEye = whichEye;
-            dataSource = chartArea.DataSource;
+            dataSource = signal ?? chartArea.DataSource;
 
             ChartArea = chartArea.Name;
 

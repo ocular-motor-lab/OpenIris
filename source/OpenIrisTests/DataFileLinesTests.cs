@@ -108,8 +108,6 @@ namespace OpenIris.Tests
                 HeadDataCalibrated = random.Next(5) == 0 ? (CalibratedHeadData?)null : new CalibratedHeadData
                 {
                     Roll = D(90), Pitch = D(90), Yaw = D(90),
-                    RollVelocity = D(300), PitchVelocity = D(300), YawVelocity = D(300),
-                    XAcceleration = D(10), YAcceleration = D(10), ZAcceleration = D(10),
                     X = D(100), Y = D(100), Z = D(100),
                 },
                 ExtraData = new ExtraData

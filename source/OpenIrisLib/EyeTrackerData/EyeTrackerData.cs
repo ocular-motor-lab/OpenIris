@@ -373,9 +373,8 @@ namespace OpenIris
             "RightGazeX", "RightGazeY", "RightGazeZ", "RightUpX", "RightUpY", "RightUpZ",
             "RightPupilArea", "RightEyeOpening",
             "HeadRoll", "HeadPitch", "HeadYaw",
-            "HeadRollVelocity", "HeadPitchVelocity", "HeadYawVelocity",
-            "HeadAccelerationX", "HeadAccelerationY", "HeadAccelerationZ",
             "HeadX", "HeadY", "HeadZ",
+            "HeadForwardX", "HeadForwardY", "HeadForwardZ", "HeadUpX", "HeadUpY", "HeadUpZ",
         };
 
         // The calibrated values, in the order of CalibratedColumns, from values[n].
@@ -388,15 +387,17 @@ namespace OpenIris
             values[n++] = head.Roll;
             values[n++] = head.Pitch;
             values[n++] = head.Yaw;
-            values[n++] = head.RollVelocity;
-            values[n++] = head.PitchVelocity;
-            values[n++] = head.YawVelocity;
-            values[n++] = head.XAcceleration;
-            values[n++] = head.YAcceleration;
-            values[n++] = head.ZAcceleration;
             values[n++] = head.X;
             values[n++] = head.Y;
             values[n++] = head.Z;
+
+            var (forward, up) = head.GetForwardAndUp();
+            values[n++] = forward.X;
+            values[n++] = forward.Y;
+            values[n++] = forward.Z;
+            values[n++] = up.X;
+            values[n++] = up.Y;
+            values[n++] = up.Z;
         }
 
         private static int CalibratedValues(double[] values, int n, CalibratedEyeData calibrated)

@@ -197,6 +197,31 @@ namespace OpenIris.Tests
             Assert.AreEqual(expectedUp.Z, up.Z, 1e-4);
         }
 
+        /// <summary>
+        /// The head's vectors have the same axes and signs as the eyes': yaw right, pitch up, roll
+        /// clockwise (right ear down).
+        /// </summary>
+        [TestMethod]
+        public void HeadForwardAndUp()
+        {
+            var (forward, up) = CalibratedHeadData.Empty.GetForwardAndUp();
+            Assert.AreEqual(new Vector3(0, 0, 1), forward);
+            Assert.AreEqual(new Vector3(0, 1, 0), up);
+
+            (forward, _) = new CalibratedHeadData { Yaw = 30 }.GetForwardAndUp();
+            Assert.AreEqual(Math.Sin(30 * ToRadians), forward.X, 1e-5, "Yaw to the right.");
+
+            (forward, _) = new CalibratedHeadData { Pitch = 20 }.GetForwardAndUp();
+            Assert.AreEqual(Math.Sin(20 * ToRadians), forward.Y, 1e-5, "Pitch up.");
+
+            (_, up) = new CalibratedHeadData { Roll = 10 }.GetForwardAndUp();
+            Assert.AreEqual(Math.Sin(10 * ToRadians), up.X, 1e-5, "Roll clockwise: the top of the head to the right.");
+
+            var eye = new CalibratedEyeData { HorizontalPosition = 15, VerticalPosition = -10, TorsionalPosition = 5 };
+            var head = new CalibratedHeadData { Yaw = 15, Pitch = -10, Roll = 5 };
+            Assert.AreEqual(eye.GetGazeAndUp(), head.GetForwardAndUp(), "Same angles, same vectors.");
+        }
+
         [TestMethod]
         public void PupilAreaWithThePixelScale()
         {

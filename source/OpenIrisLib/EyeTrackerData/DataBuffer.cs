@@ -44,18 +44,6 @@ namespace OpenIris
         /// </summary>
         HY,
         /// <summary>
-        /// Head velocity roll.
-        /// </summary>
-        HVR,
-        /// <summary>
-        /// Head velocity pitch.
-        /// </summary>
-        HVP,
-        /// <summary>
-        /// Head velocity yaw.
-        /// </summary>
-        HVY,
-        /// <summary>
         /// CR horizontal.
         /// </summary>
         CRLH,
@@ -182,15 +170,9 @@ namespace OpenIris
 
                     DataStream.HR => bufferData[idx]?.HeadDataCalibrated?.Roll ?? double.NaN,
 
-                    DataStream.HP => bufferData[idx]?.HeadDataCalibrated?.Yaw ?? double.NaN,
+                    DataStream.HP => bufferData[idx]?.HeadDataCalibrated?.Pitch ?? double.NaN,
 
-                    DataStream.HY => bufferData[idx]?.HeadDataCalibrated?.Pitch ?? double.NaN,
-
-                    DataStream.HVR => bufferData[idx]?.HeadDataCalibrated?.RollVelocity ?? double.NaN,
-
-                    DataStream.HVP => bufferData[idx]?.HeadDataCalibrated?.YawVelocity ?? double.NaN,
-
-                    DataStream.HVY => bufferData[idx]?.HeadDataCalibrated?.PitchVelocity ?? double.NaN,
+                    DataStream.HY => bufferData[idx]?.HeadDataCalibrated?.Yaw ?? double.NaN,
 
                     DataStream.CRLH => bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections == null | bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?.Length < 1 ? double.NaN:
                     (double) bufferData[idx]?.EyeDataRaw?[whichEye]?.CornealReflections?[0].Center.X,

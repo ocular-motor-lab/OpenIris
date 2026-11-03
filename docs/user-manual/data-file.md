@@ -131,8 +131,7 @@ from the subject's point of view.**
 | `HeadX`, `HeadY`, `HeadZ` | mm | the head moves to the subject's right (X), up (Y), forward (Z) | depends on the system (see below) |
 
 The head's axes, with the head upright and facing straight ahead: X points to the subject's right,
-Y up, and Z forward, out of the face. The angular velocities have the same signs as the angles, in
-degrees per second, and the accelerations are in g along X, Y and Z.
+Y up, and Z forward, out of the face. The eyes' gaze and up vectors use the same axes.
 
 The signs and the zeros are the same for every eye tracking system and calibration method. How
 the three angles combine into an orientation (Fick, Helmholtz, rotation vectors...) is not fixed:
@@ -173,8 +172,8 @@ Two kinds of systems measure the head:
   camera's axis, and `HeadZ` the distance to the camera. All `NaN` in frames where the face isn't
   found. The angles combine in Fick order: yaw, then pitch, then roll.
 - **The Micromedical systems** have a head sensor. Their calibrated head values haven't been
-  checked against this convention yet: the signs may differ, `HeadAccelerationX`/`Y`/`Z` are the
-  sensor's own axes, and `HeadYaw` can't really be measured with an accelerometer.
+  checked against this convention yet: the signs may differ, and `HeadYaw` can't really be measured
+  with an accelerometer. The sensor's raw accelerometer and gyroscope are in the data file.
 
 With other systems, all head columns are 0.
 
@@ -203,9 +202,13 @@ For the head:
 | Column | Contents |
 | --- | --- |
 | `HeadRoll`, `HeadPitch`, `HeadYaw` | Head orientation in degrees, as above. |
-| `HeadRollVelocity`, `HeadPitchVelocity`, `HeadYawVelocity` | Head angular velocity in degrees per second, same signs. |
-| `HeadAccelerationX`, `HeadAccelerationY`, `HeadAccelerationZ` | Head acceleration in g, along X (right), Y (up) and Z (forward). |
 | `HeadX`, `HeadY`, `HeadZ` | Head position in mm: from the camera with the Webcam system (above); 0 with other systems. |
+| `HeadForwardX`, `HeadForwardY`, `HeadForwardZ` | Where the face points, as a unit vector with the axes above: (0, 0, 1) when the angles are 0. From the three angles in Fick order, like the eyes' gaze. |
+| `HeadUpX`, `HeadUpY`, `HeadUpZ` | Where the top of the head points, as a unit vector with the same axes: (0, 1, 0) when the angles are 0. |
+
+The 0.2 alpha versions also had the head's angular velocities and accelerations. They can be
+calculated from the angles, and the raw gyroscope and accelerometer of the systems that have a head
+sensor are in the data file.
 
 ## The events file
 

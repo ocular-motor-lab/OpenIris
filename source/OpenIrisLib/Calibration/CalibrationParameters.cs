@@ -284,20 +284,14 @@ namespace OpenIris
             if (headData is null || headData.IsEmpty) return new CalibratedHeadData();
 
             // Not yet checked against the convention of CalibratedHeadData (see #70). Written for
-            // the Micromedical head sensor: the accelerations are the sensor's own axes, and Yaw
-            // can't really come from the accelerometer.
+            // the Micromedical head sensor: Yaw can't really come from the accelerometer. The
+            // gyroscope and accelerometer are in the data file, raw.
 
             return new CalibratedHeadData
             {
-                XAcceleration = headData.AccelerometerX,
-                YAcceleration = headData.AccelerometerY,
-                ZAcceleration = headData.AccelerometerZ,
                 Roll = Math.Atan2(-headData.AccelerometerZ, -headData.AccelerometerX) * 180.0 / Math.PI,
                 Pitch = Math.Atan2(headData.AccelerometerY, -headData.AccelerometerX) * 180.0 / Math.PI,
                 Yaw = Math.Atan2(-headData.AccelerometerZ, headData.AccelerometerY) * 180.0 / Math.PI,
-                YawVelocity = headData.GyroX,
-                PitchVelocity = headData.GyroY,
-                RollVelocity = headData.GyroZ
             };
         }
 

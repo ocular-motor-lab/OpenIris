@@ -52,7 +52,6 @@ namespace OpenIris.UI
             this.eyeLidsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pupilToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.headToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.headAccelerationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cRToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripComboBoxSpan = new System.Windows.Forms.ToolStripComboBox();
@@ -111,7 +110,6 @@ namespace OpenIris.UI
             this.eyeLidsToolStripMenuItem,
             this.pupilToolStripMenuItem,
             this.headToolStripMenuItem,
-            this.headAccelerationToolStripMenuItem,
             this.cRToolStripMenuItem});
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -170,19 +168,8 @@ namespace OpenIris.UI
             this.headToolStripMenuItem.CheckOnClick = true;
             this.headToolStripMenuItem.Name = "headToolStripMenuItem";
             this.headToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.headToolStripMenuItem.Text = "Head velocity";
+            this.headToolStripMenuItem.Text = "Head";
             this.headToolStripMenuItem.Click += new System.EventHandler(this.visibleChartsToolStripMenuItem_Click);
-            // 
-            // headAccelerationToolStripMenuItem
-            // 
-            this.headAccelerationToolStripMenuItem.CheckOnClick = true;
-            this.headAccelerationToolStripMenuItem.Name = "headAccelerationToolStripMenuItem";
-            this.headAccelerationToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
-            this.headAccelerationToolStripMenuItem.Text = "Head acceleration";
-            this.headAccelerationToolStripMenuItem.Click += new System.EventHandler(this.visibleChartsToolStripMenuItem_Click);
-            // 
-            // cRToolStripMenuItem
-            // 
             this.cRToolStripMenuItem.CheckOnClick = true;
             this.cRToolStripMenuItem.Name = "cRToolStripMenuItem";
             this.cRToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
@@ -324,7 +311,6 @@ namespace OpenIris.UI
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton2;
         private System.Windows.Forms.ToolStripMenuItem resetPlotsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem moveVerticalAxisWithDataToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem headAccelerationToolStripMenuItem;
         private System.Windows.Forms.ToolStripLabel toolStripLabelFrameRate;
         private System.Windows.Forms.ToolStripMenuItem cRToolStripMenuItem;
     }

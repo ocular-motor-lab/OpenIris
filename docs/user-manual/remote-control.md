@@ -214,7 +214,7 @@ one (**Show IP / network info** in the OpenIris menus gives the address). The pa
 - The image of each eye with the tracking drawn on top, as in OpenIris, and the pupil and
   reflection thresholds with buttons to change them.
 - The calibrated position of each eye and a **live trace** of horizontal, vertical and torsion
-  (also pupil size and position, and head velocity), with every frame, however fast the camera.
+  (also pupil size and position, and head orientation), with every frame, however fast the camera.
 - Calibrate, cancel and reset the reference, and the files of the last recording, to download.
 - All the settings, as in the settings window. Changes apply right away.
 

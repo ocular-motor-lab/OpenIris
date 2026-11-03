@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -256,108 +257,66 @@ namespace OpenIris.Calibration
         }
 
         /// <summary>
-        /// Completes the calibration routine and updates the plugins settings to store the results.
-        /// </summary>
-        /// <param name="settings">A reference to the calibration settings</param>
-        /// <summary>
         /// The map fitted for each eye, which goes into the calibration and is applied to the data.
         /// Null for an eye whose fit failed.
         /// </summary>
         public EyeCollection<LinearGazeMap?> Maps { get; } = new EyeCollection<LinearGazeMap?>(null, null);
 
-        private static LinearGazeMap MapFrom(double gxx, double gxy, double gyx, double gyy, double xOffset, double yOffset, CalibrationSettingsRemoteLinear settings) =>
-            new LinearGazeMap { Gxx = gxx, Gxy = gxy, Gyx = gyx, Gyy = gyy, XOffset = xOffset, YOffset = yOffset, Source = settings.SignalSource, Reference = settings.SignalReference };
-
-        public void CompleteCalibration(ref CalibrationSettingsRemoteLinear settings)
+        /// <summary>
+        /// Completes the calibration: fits the map of each eye from the median of each fixation.
+        /// </summary>
+        /// <param name="source">Signal source.</param>
+        /// <param name="reference">Signal reference.</param>
+        public void CompleteCalibration(EyeSignalSource source, EyeSignalSource reference)
         {
-            Maps[Eye.Left] = null;
-            Maps[Eye.Right] = null;
-
-            // Loop over fixation datasets and fill lists containing target points (Y) and eye data (X) 
-            var left_data = new List<PointF>(calibration_data.Count);
-            var left_target = new List<PointF>(calibration_data.Count);
-
-            var right_data = new List<PointF>(calibration_data.Count);
-            var right_target = new List<PointF>(calibration_data.Count);
-            for (var i = 0; i < calibration_data.Count; i++)
+            foreach (var eye in new[] { Eye.Left, Eye.Right })
             {
-                PointF? left_pt = calibration_data[i].GetMedianData(Eye.Left, settings.SignalSource, settings.SignalReference);
-                if (left_pt != null)
-                {
-                    left_data.Add(left_pt.Value);
-                    left_target.Add(calibration_data[i].fixation_point);
-                }
+                Maps[eye] = Fit(eye, source, reference);
+                if (Maps[eye] is null) Trace.WriteLine($"N-point calibration: no map for the {eye.ToString().ToLower()} eye (fewer than 3 targets with data, or the data was singular).");
+            }
+        }
 
-                PointF? right_pt = calibration_data[i].GetMedianData(Eye.Right, settings.SignalSource, settings.SignalReference);
-                if (right_pt != null)
+        private LinearGazeMap? Fit(Eye eye, EyeSignalSource source, EyeSignalSource reference)
+        {
+            // The median signal and the target of each fixation with data (Y = X * map).
+            var data = new List<PointF>(calibration_data.Count);
+            var targets = new List<PointF>(calibration_data.Count);
+            foreach (var fixation in calibration_data)
+            {
+                if (fixation.GetMedianData(eye, source, reference) is PointF point)
                 {
-                    right_data.Add(right_pt.Value);
-                    right_target.Add(calibration_data[i].fixation_point);
+                    data.Add(point);
+                    targets.Add(fixation.fixation_point);
                 }
             }
 
-            // Create matrices for the regression and target datasets. Solve using CvInvoke.Solve
-            var X_left = Mat.Ones(left_data.Count, 3, DepthType.Cv32F, 1);
-            var Y_left = Mat.Ones(left_data.Count, 2, DepthType.Cv32F, 1);
-
-            for (var i = 0; i < left_data.Count; i++)
-            {
-                X_left.SetValue(i, 0, left_data[i].X);
-                X_left.SetValue(i, 1, left_data[i].Y);
-                Y_left.SetValue(i, 0, left_target[i].X);
-                Y_left.SetValue(i, 1, left_target[i].Y);
-            }
-
-            var left_cal = new Mat();
             // Three unknowns per axis: an eye with fewer fixations (or none: a system with one eye) gets no map.
-            var left_ret = left_data.Count >= 3 && CvInvoke.Solve(X_left, Y_left, left_cal, DecompMethod.Svd);
+            if (data.Count < 3) return null;
 
-            if (left_ret)
+            using var x = Mat.Ones(data.Count, 3, DepthType.Cv32F, 1);
+            using var y = Mat.Ones(data.Count, 2, DepthType.Cv32F, 1);
+            for (var i = 0; i < data.Count; i++)
             {
-                settings.LeftGxx = left_cal.GetValue(0, 0);
-                settings.LeftGxy = left_cal.GetValue(0, 1);
-                settings.LeftGyx = left_cal.GetValue(1, 0);
-                settings.LeftGyy = left_cal.GetValue(1, 1);
-
-                settings.LeftXOffset = left_cal.GetValue(2, 0);
-                settings.LeftYOffset = left_cal.GetValue(2, 1);
-                Maps[Eye.Left] = MapFrom(settings.LeftGxx, settings.LeftGxy, settings.LeftGyx, settings.LeftGyy, settings.LeftXOffset, settings.LeftYOffset, settings);
-            }
-            else
-            {
-                Console.WriteLine("Calibration error: Left data was singular");
+                x.SetValue(i, 0, data[i].X);
+                x.SetValue(i, 1, data[i].Y);
+                y.SetValue(i, 0, targets[i].X);
+                y.SetValue(i, 1, targets[i].Y);
             }
 
-            var X_right = Mat.Ones(right_data.Count, 3, DepthType.Cv32F, 1);
-            var Y_right = Mat.Ones(right_data.Count, 2, DepthType.Cv32F, 1);
+            using var map = new Mat();
+            if (!CvInvoke.Solve(x, y, map, DecompMethod.Svd)) return null;
 
-            for (var i = 0; i < right_data.Count; i++)
+            return new LinearGazeMap
             {
-                X_right.SetValue(i, 0, right_data[i].X);
-                X_right.SetValue(i, 1, right_data[i].Y);
-                Y_right.SetValue(i, 0, right_target[i].X);
-                Y_right.SetValue(i, 1, right_target[i].Y);
-            }
-
-            var right_cal = new Mat();
-            var right_ret = right_data.Count >= 3 && CvInvoke.Solve(X_right, Y_right, right_cal, DecompMethod.Svd);
-
-            if (right_ret)
-            {
-                settings.RightGxx = right_cal.GetValue(0, 0);
-                settings.RightGxy = right_cal.GetValue(0, 1);
-                settings.RightGyx = right_cal.GetValue(1, 0);
-                settings.RightGyy = right_cal.GetValue(1, 1);
-
-                settings.RightXOffset = right_cal.GetValue(2, 0);
-                settings.RightYOffset = right_cal.GetValue(2, 1);
-                Maps[Eye.Right] = MapFrom(settings.RightGxx, settings.RightGxy, settings.RightGyx, settings.RightGyy, settings.RightXOffset, settings.RightYOffset, settings);
-            }
-            else
-            {
-                Console.WriteLine("Calibration error: Right data was singular");
-            }
-
+                Gxx = map.GetValue(0, 0),
+                Gxy = map.GetValue(0, 1),
+                Gyx = map.GetValue(1, 0),
+                Gyy = map.GetValue(1, 1),
+                XOffset = map.GetValue(2, 0),
+                YOffset = map.GetValue(2, 1),
+                Source = source,
+                Reference = reference,
+            };
         }
 
         /// <summary>
@@ -541,7 +500,7 @@ namespace OpenIris.Calibration
 
             if (target is null)
             {
-                calibrator.CompleteCalibration(ref settings);
+                calibrator.CompleteCalibration(settings.SignalSource, settings.SignalReference);
                 calibrator.completed = true;
             }
         }
@@ -633,7 +592,7 @@ namespace OpenIris.Calibration
             else if (message.Equals("Complete", StringComparison.InvariantCultureIgnoreCase))
             {
                 var settings = Settings as CalibrationSettingsRemoteLinear ?? throw new ArgumentNullException(nameof(Settings));
-                calibrator.CompleteCalibration(ref settings);
+                calibrator.CompleteCalibration(settings.SignalSource, settings.SignalReference);
                 calibrator.completed = true;
                 return "ack";
             }
@@ -701,55 +660,6 @@ namespace OpenIris.Calibration
         [Category("Sources"), Description("Source of eye reference.")]
         public EyeSignalSource SignalReference { get => signalReference; set => SetProperty(ref signalReference, value, nameof(SignalReference)); }
         private EyeSignalSource signalReference = EyeSignalSource.CR1;
-
-        [Category("Parameters"), Description("Offset in X (Left Eye)")]
-        public double LeftXOffset { get => leftXOffset; set => SetProperty(ref leftXOffset, value, nameof(LeftXOffset)); }
-        private double leftXOffset = 0.0;
-
-        [Category("Parameters"), Description("Offset in Y (Left Eye)")]
-        public double LeftYOffset { get => leftYOffset; set => SetProperty(ref leftYOffset, value, nameof(LeftYOffset)); }
-        private double leftYOffset = 0.0;
-
-        [Category("Parameters"), Description("Gain Gxx (Left Eye)")]
-        public double LeftGxx { get => leftGxx; set => SetProperty(ref leftGxx, value, nameof(LeftGxx)); }
-        private double leftGxx = 1.0;
-
-        [Category("Parameters"), Description("Gain Gxy (Left Eye)")]
-        public double LeftGxy { get => leftGxy; set => SetProperty(ref leftGxy, value, nameof(LeftGxy)); }
-        private double leftGxy = 1.0;
-
-        [Category("Parameters"), Description("Gain Gyx (Left Eye)")]
-        public double LeftGyx { get => leftGyx; set => SetProperty(ref leftGyx, value, nameof(LeftGyx)); }
-        private double leftGyx = 1.0;
-
-        [Category("Parameters"), Description("Gain Gyy (Left Eye)")]
-        public double LeftGyy { get => leftGyy; set => SetProperty(ref leftGyy, value, nameof(LeftGyy)); }
-        private double leftGyy = 1.0;
-
-
-        [Category("Parameters"), Description("Offset in X (Right Eye)")]
-        public double RightXOffset { get => rightXOffset; set => SetProperty(ref rightXOffset, value, nameof(RightXOffset)); }
-        private double rightXOffset = 0.0;
-
-        [Category("Parameters"), Description("Offset in Y (Right Eye)")]
-        public double RightYOffset { get => rightYOffset; set => SetProperty(ref rightYOffset, value, nameof(RightYOffset)); }
-        private double rightYOffset = 0.0;
-
-        [Category("Parameters"), Description("Gain Gxx (Right Eye)")]
-        public double RightGxx { get => rightGxx; set => SetProperty(ref rightGxx, value, nameof(RightGxx)); }
-        private double rightGxx = 1.0;
-
-        [Category("Parameters"), Description("Gain Gxy (Right Eye)")]
-        public double RightGxy { get => rightGxy; set => SetProperty(ref rightGxy, value, nameof(RightGxy)); }
-        private double rightGxy = 1.0;
-
-        [Category("Parameters"), Description("Gain Gyx (Right Eye)")]
-        public double RightGyx { get => rightGyx; set => SetProperty(ref rightGyx, value, nameof(RightGyx)); }
-        private double rightGyx = 1.0;
-
-        [Category("Parameters"), Description("Gain Gyy (Right Eye)")]
-        public double RightGyy { get => rightGyy; set => SetProperty(ref rightGyy, value, nameof(RightGyy)); }
-        private double rightGyy = 1.0;
     }
 
     /// <summary>

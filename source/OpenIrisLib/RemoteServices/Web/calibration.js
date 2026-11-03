@@ -3,7 +3,7 @@
 // Calibration drives the N-point method (Remote mode; CalibrationRemoteLinear.cs, by Ryan Ressmeyer) with its
 // messages: for each target FixStart:x,y (target in degrees, y up) and FixStop, then Complete. OpenIris
 // fits, for each eye, a linear map from the eye signal (source minus reference, pupil minus CR1 by
-// default) to the targets and saves it in the calibration settings (LeftGxx...).
+// default) to the targets and keeps it in the calibration (GET /api/calibration).
 //
 // Validation shows the targets again and compares them with the gaze from that map, computed here
 // from the live data stream. It doesn't change anything in OpenIris.
@@ -124,13 +124,9 @@ function gaze(map, s) {
   ];
 }
 
-function readMaps(settings) {
-  const maps = {};
-  for (const eye of ["Left", "Right"]) {
-    const get = (n) => settings["Calibration." + eye + n];
-    maps[eye] = { Gxx: get("Gxx"), Gxy: get("Gxy"), Gyx: get("Gyx"), Gyy: get("Gyy"), XOffset: get("XOffset"), YOffset: get("YOffset") };
-  }
-  return maps;
+// The maps of the calibration in use (null for an eye without one).
+function readMaps() {
+  return api("GET", "/calibration");
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -378,7 +374,7 @@ async function calibrate() {
     await waitForStatus((s) => !s.Calibrating, 5000);
     started = false;
 
-    const maps = readMaps(await getSettings());
+    const maps = await readMaps();
     showResults("Calibration", "Fit to the calibration targets. Validate to measure the real error.", recorded, maps, source, reference);
   } catch (error) {
     if (started) await api("POST", "/calibration/cancel").catch(() => {});
@@ -396,14 +392,13 @@ async function validate() {
   try {
     const status = await api("GET", "/status");
     if (!status.Tracking) throw new Error("OpenIris is not tracking.");
-    const settings = await getSettings();
-    if (status.CalibrationMethod !== METHOD || settings["Calibration.LeftGxx"] === undefined) {
-      throw new Error("Calibrate first: validation uses the N-point calibration.");
-    }
-    const source = settings["Calibration.SignalSource"], reference = settings["Calibration.SignalReference"];
+    const maps = await readMaps();
+    const map = maps.Left || maps.Right;
+    if (!map) throw new Error("Calibrate first: validation uses the N-point calibration.");
+    const source = map.Source, reference = map.Reference;
     const points = targetGrid(options.points, options.extentX, options.extentY);
     const recorded = await showTargets(points, async () => {});
-    showResults("Validation", "Gaze from the calibration compared with the targets.", recorded, readMaps(settings), source, reference);
+    showResults("Validation", "Gaze from the calibration compared with the targets.", recorded, maps, source, reference);
   } catch (error) {
     leaveStage();
     showError(error);
@@ -427,7 +422,7 @@ function showResults(title, subtitle, recorded, maps, source, reference) {
 
     const signals = medianSignals(rows, source, reference);
     for (const eye of ["Left", "Right"]) {
-      if (!signals[eye] || maps[eye].Gxx === undefined) continue;
+      if (!signals[eye] || !maps[eye]) continue;
       const g = gaze(maps[eye], signals[eye]);
       errors[eye].push(Math.hypot(g[0] - point[0], g[1] - point[1]));
       const [gx, gy] = toPx(g[0], g[1]);

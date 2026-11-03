@@ -151,6 +151,21 @@ namespace OpenIris
             return Ok();
         }
 
+        /// <summary>
+        /// The calibration in use: for each eye, the map fitted by the N-point calibration (Gxx, Gxy,
+        /// Gyx, Gyy, XOffset, YOffset, Source, Reference), or null.
+        /// </summary>
+        [Route(HttpVerbs.Get, "/calibration")]
+        public object GetCalibration()
+        {
+            var calibration = eyeTracker.Calibration;
+            return new
+            {
+                Left = calibration.EyeCalibrationParameters[Eye.Left].CalibrationData as LinearGazeMap,
+                Right = calibration.EyeCalibrationParameters[Eye.Right].CalibrationData as LinearGazeMap,
+            };
+        }
+
         [Route(HttpVerbs.Post, "/calibration/start")]
         public object StartCalibration()
         {

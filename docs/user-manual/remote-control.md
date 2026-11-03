@@ -306,6 +306,7 @@ don't exist, such as the position of an eye that wasn't found, are `null`.
 | `POST /api/cameras/exposure/increase`, `/reduce` | Change the exposure of the cameras |
 | `GET /api/log` | The last lines of the log, each with `Number`, `Time`, `Text` and `Error`; `?after=n` only those after line `n` |
 | `POST /api/reference/reset` | Reset the reference |
+| `GET /api/calibration` | The calibration in use: for each eye (`Left`, `Right`), the map fitted by the N-point calibration (`Gxx`, `Gxy`, `Gyx`, `Gyy`, `XOffset`, `YOffset`, `Source`, `Reference`), or null |
 | `POST /api/calibration/start`, `/cancel`, `/reset` | Start, cancel, or reset the calibration |
 | `POST /api/calibration/message` | Send the body (text) to the calibration, for example `FixStart:5,0`; replies `{"Reply": "ack"}` |
 | `GET /api/files/last` | Names of the files of the last recording |

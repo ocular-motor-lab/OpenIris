@@ -34,6 +34,7 @@ namespace OpenIris.UI
         private readonly EyeTracker eyeTracker;
         private readonly EyeTrackerUICommands eyeTrackerUICommands;
         private readonly Timer timerRefreshUI;
+        private readonly Timer resizeLayoutTimer;
         private readonly LogTraceListener log;
 
         private readonly EyeCollection<ImageView> imageBoxes;
@@ -106,6 +107,19 @@ namespace OpenIris.UI
                 Interval = 100,
             };
             timerRefreshUI.Tick += TimerRefreshUI_Tick;
+
+            // While the window is being resized, lay it out now and then, not at every mouse move:
+            // each layout moves ~130 controls and can take 0.2-0.8 s, and the window did not follow
+            // the mouse. After each layout, wait three times as long as it took: the window frame
+            // always gets most of the time.
+            resizeLayoutTimer = new Timer(components) { Interval = 150 };
+            resizeLayoutTimer.Tick += (o, e) =>
+            {
+                var layoutTime = Stopwatch.StartNew();
+                ResumeLayout(true);
+                SuspendLayout();
+                resizeLayoutTimer.Interval = Math.Max(150, (int)(3 * layoutTime.ElapsedMilliseconds));
+            };
 
             Initialize();
         }
@@ -794,6 +808,23 @@ namespace OpenIris.UI
                     System.Threading.Monitor.Exit(_locker);
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        protected override void OnResizeBegin(EventArgs e)
+        {
+            base.OnResizeBegin(e);
+            SuspendLayout();
+            resizeLayoutTimer.Interval = 150;
+            resizeLayoutTimer.Start();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            resizeLayoutTimer.Stop();
+            ResumeLayout(true);
+            base.OnResizeEnd(e);
         }
 
         private void EyeTrackerGUI_FormClosing(object sender, FormClosingEventArgs e)

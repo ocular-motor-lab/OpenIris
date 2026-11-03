@@ -35,7 +35,6 @@ namespace OpenIris.UI
             // 
             // imageBoxEye
             // 
-            this.imageBoxEye.BackColor = System.Drawing.Color.Black;
             this.imageBoxEye.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxEye.Location = new System.Drawing.Point(0, 0);
             this.imageBoxEye.Name = "imageBoxEye";

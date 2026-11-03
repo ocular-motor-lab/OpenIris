@@ -35,8 +35,6 @@ namespace OpenIris.UI
         public ImageView()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.Opaque | ControlStyles.ResizeRedraw, true);
-            BackColor = Color.Black;
-            ForeColor = Color.White;
         }
 
         /// <summary>

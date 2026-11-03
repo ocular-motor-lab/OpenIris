@@ -962,7 +962,6 @@ namespace OpenIris.UI
             // 
             // tableLayoutPanel2
             // 
-            this.tableLayoutPanel2.BackColor = System.Drawing.Color.Black;
             this.tableLayoutPanel2.ColumnCount = 2;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -996,7 +995,6 @@ namespace OpenIris.UI
             // 
             // imageBoxIrisLeft
             // 
-            this.imageBoxIrisLeft.BackColor = System.Drawing.Color.Black;
             this.imageBoxIrisLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxIrisLeft.Location = new System.Drawing.Point(4, 427);
             this.imageBoxIrisLeft.Margin = new System.Windows.Forms.Padding(4);
@@ -1008,7 +1006,6 @@ namespace OpenIris.UI
             // 
             // imageBoxIrisRefeferenceLeft
             // 
-            this.imageBoxIrisRefeferenceLeft.BackColor = System.Drawing.Color.Black;
             this.imageBoxIrisRefeferenceLeft.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxIrisRefeferenceLeft.Location = new System.Drawing.Point(4, 379);
             this.imageBoxIrisRefeferenceLeft.Margin = new System.Windows.Forms.Padding(4);
@@ -1020,7 +1017,6 @@ namespace OpenIris.UI
             // 
             // imageBoxLeftEye
             // 
-            this.imageBoxLeftEye.BackColor = System.Drawing.Color.Black;
             this.imageBoxLeftEye.Caption = "Left eye";
             this.imageBoxLeftEye.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxLeftEye.Location = new System.Drawing.Point(4, 4);
@@ -1050,7 +1046,6 @@ namespace OpenIris.UI
             // 
             // imageBoxIrisRight
             // 
-            this.imageBoxIrisRight.BackColor = System.Drawing.Color.Black;
             this.imageBoxIrisRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxIrisRight.Location = new System.Drawing.Point(4, 427);
             this.imageBoxIrisRight.Margin = new System.Windows.Forms.Padding(4);
@@ -1062,7 +1057,6 @@ namespace OpenIris.UI
             // 
             // imageBoxIrisRefeferenceRight
             // 
-            this.imageBoxIrisRefeferenceRight.BackColor = System.Drawing.Color.Black;
             this.imageBoxIrisRefeferenceRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxIrisRefeferenceRight.Location = new System.Drawing.Point(4, 379);
             this.imageBoxIrisRefeferenceRight.Margin = new System.Windows.Forms.Padding(4);
@@ -1074,7 +1068,6 @@ namespace OpenIris.UI
             // 
             // imageBoxRightEye
             // 
-            this.imageBoxRightEye.BackColor = System.Drawing.Color.Black;
             this.imageBoxRightEye.Caption = "Right eye";
             this.imageBoxRightEye.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxRightEye.Location = new System.Drawing.Point(4, 4);

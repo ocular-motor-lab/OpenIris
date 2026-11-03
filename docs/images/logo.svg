@@ -8,8 +8,9 @@
   <!-- Tracking cross: upright on the surface of the eye, seen through the same oblique projection as
        the pupil (an ellipse centered at 100.62,96.04, tilted 33.3 degrees, 0.616 times as wide as it
        is tall). So the arms are foreshortened and meet at 115 degrees instead of 90. The end points
-       are the projection of arms 30 units long. -->
-  <g stroke="#e53935" stroke-width="1.2" stroke-linecap="round">
+       are the projection of arms 30 units long. Thicker in the small icons (OpenIris.ico, favicon.png),
+       up to 4.8 at 32 px and below, to stay visible. -->
+  <g stroke="#e53935" stroke-width="2.4" stroke-linecap="round">
     <line x1="105.91" y1="69.51" x2="95.33" y2="122.57"/>
     <line x1="78.67" y1="101.33" x2="122.57" y2="90.75"/>
   </g>

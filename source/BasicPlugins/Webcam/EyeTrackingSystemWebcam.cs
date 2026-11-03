@@ -145,7 +145,7 @@ namespace OpenIris
         [Category("Eye images"), Description("Width and height in pixels of the image of each eye cut out of the webcam image.")]
         [NeedsRestarting]
         public int EyeImageSize { get => eyeImageSize; set => SetProperty(ref eyeImageSize, value, nameof(EyeImageSize)); }
-        private int eyeImageSize = 128;
+        private int eyeImageSize = 256;
 
         [Category("Webcam"), Description("Open a window with the whole webcam image, the face mesh and the regions cut out as eye images when tracking starts.")]
         public bool ShowFaceView { get => showFaceView; set => SetProperty(ref showFaceView, value, nameof(ShowFaceView)); }

@@ -50,7 +50,7 @@ Settings of the Webcam system:
 | `CameraIndex` | 0 | Which webcam, if there are several (0 is the first). |
 | `ResolutionWidth`, `ResolutionHeight` | 1280 × 720 | Resolution to ask the webcam for. Webcams choose the closest one they support. |
 | `FrameRate` | 30 | Frame rate to ask for. Most webcams give 30 fps. |
-| `EyeImageSize` | 128 | Size in pixels of each eye image. |
+| `EyeImageSize` | 256 | Size in pixels of each eye image. Only changes what the eye images show: the iris model always works on 64 × 64. |
 | `ShowFaceView` | on | Open the Webcam face window when tracking starts. |
 | `HorizontalFieldOfView` | 65 | Horizontal field of view of the webcam in degrees, for the head position (see below). |
 

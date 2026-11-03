@@ -8,6 +8,7 @@ OpenIris itself. (To use OpenIris, see the [user manual](../user-manual/README.m
 3. [Eye tracking systems](eye-tracking-systems.md): support for new cameras.
 4. [Tracking pipelines](tracking-pipelines.md): new ways of processing the images.
 5. [Calibration pipelines](calibration-pipelines.md)
-6. [Building from source](building.md)
-7. [Contributing](contributing.md): making changes, tests, releases, crash reports.
-8. [Known image processing issues](image-processing-improvements.md)
+6. [Geometry and conventions](geometry.md): images, cameras, coordinate frames, rotations, the eye model.
+7. [Building from source](building.md)
+8. [Contributing](contributing.md): making changes, tests, releases, crash reports.
+9. [Known image processing issues](image-processing-improvements.md)

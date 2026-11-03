@@ -40,6 +40,7 @@ nav:
       - Eye tracking systems: plugin-development/eye-tracking-systems.md
       - Tracking pipelines: plugin-development/tracking-pipelines.md
       - Calibration pipelines: plugin-development/calibration-pipelines.md
+      - Geometry and conventions: plugin-development/geometry.md
       - Building from source: plugin-development/building.md
       - Contributing: plugin-development/contributing.md
       - Known image processing issues: plugin-development/image-processing-improvements.md

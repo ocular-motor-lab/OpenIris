@@ -63,12 +63,14 @@ namespace OpenIris.UI
             var hint = new Label
             {
                 Dock = DockStyle.Bottom,
-                AutoSize = true,
                 Padding = new Padding(0, 6, 0, 0),
                 ForeColor = SystemColors.GrayText,
                 Text = "Each profile has its own general settings (below) and eye tracking system, pipeline and calibration (Advanced tab). " +
                     "The active profile, in bold, is also chosen on the main window. Switching while tracking asks to stop first.",
             };
+
+            // As many lines as the width needs (an AutoSize label docked at the bottom stays one line).
+            hint.Resize += (o, e) => hint.Height = hint.GetPreferredSize(new Size(hint.Width, 0)).Height;
 
             var profilesBox = new GroupBox { Text = "Profiles", Dock = DockStyle.Top, Height = 260, Padding = new Padding(8) };
             profilesBox.Controls.Add(profilesList);

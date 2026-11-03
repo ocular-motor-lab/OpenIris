@@ -91,9 +91,18 @@ namespace OpenIris.UI
             propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
 
             UpdateTitle(settings);
+            UpdateHeaders();
         }
 
         private void UpdateTitle(EyeTrackerSettings settings) => Text = $"Configuration - profile {settings.Profile}";
+
+        // Each column says which plugin its settings are for.
+        private void UpdateHeaders()
+        {
+            groupBox2.Text = $"Eye tracking system: {settings.EyeTrackerSystem}";
+            groupBox3.Text = $"Eye tracking pipeline: {settings.EyeTrackingPipeline}";
+            groupBox4.Text = $"Calibration: {settings.CalibrationMethod}";
+        }
 
         void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -101,6 +110,7 @@ namespace OpenIris.UI
             propertyGridTrackingSettings.SelectedObject = settings.TrackingPipelineSettings;
             propertyGridCalibrationSettings.SelectedObject = settings.CalibrationSettings;
 
+            UpdateHeaders();
             profilesPanel.RefreshSettings();
             propertyGridSystemSettings.Refresh();
             propertyGridTrackingSettings.Refresh();

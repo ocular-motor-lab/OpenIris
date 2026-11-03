@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="WebcamInfo.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -43,7 +43,7 @@ namespace OpenIris
                 if (cameraIndex < 0 || cameraIndex >= webcams.Count) return;
 
                 var (name, moniker) = webcams[cameraIndex];
-                Trace.WriteLine($"Webcam {cameraIndex} ({name}) can send:");
+                Trace.WriteLine($"Webcam {cameraIndex} ({name}) can send, fastest first:");
                 foreach (var format in GetFormats(moniker)) Trace.WriteLine("    " + format);
                 foreach (var w in webcams) Marshal.ReleaseComObject(w.moniker);
             }
@@ -132,8 +132,9 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// Lists the formats of the capture pin, one line per format and resolution with its frame
-        /// rates.
+        /// Lists the formats of the capture pin by their fastest frame rate: one line per format and
+        /// frame rate, with the resolutions that reach it, fastest first. Webcams list every rate
+        /// down to 5 fps for each resolution; only the fastest matters.
         /// </summary>
         private static IEnumerable<string> GetFormats(IMoniker moniker)
         {
@@ -150,7 +151,7 @@ namespace OpenIris
                 var videoControl = filter as IAMVideoControl;
 
                 Marshal.ThrowExceptionForHR(streamConfig.GetNumberOfCapabilities(out var count, out var capsSize));
-                var formats = new List<(string format, Size size, string frameRates)>();
+                var formats = new List<(string format, Size size, double fps)>();
                 var caps = Marshal.AllocCoTaskMem(Math.Max(capsSize, 128));
                 try
                 {
@@ -164,23 +165,13 @@ namespace OpenIris
 
                             // Webcams list their frame rates through IAMVideoControl, or give a range.
                             var rates = GetFrameRateList(videoControl, pin, i, size);
-                            string frameRates;
-                            if (rates.Count > 0)
-                            {
-                                frameRates = string.Join(", ", rates.Select(r => r.ToString("0.##"))) + " fps";
-                            }
-                            else if (capsSize >= 120 && Marshal.ReadInt64(caps, 104) > 0)
-                            {
-                                var max = 1e7 / Marshal.ReadInt64(caps, 104);
-                                var min = 1e7 / Marshal.ReadInt64(caps, 112);
-                                frameRates = Math.Abs(max - min) < 0.01 ? $"{max:0.##} fps" : $"{min:0.##} to {max:0.##} fps";
-                            }
-                            else
-                            {
-                                frameRates = averageInterval > 0 ? $"{1e7 / averageInterval:0.##} fps" : "frame rate unknown";
-                            }
+                            var fps =
+                                rates.Count > 0 ? rates.Max() :
+                                capsSize >= 120 && Marshal.ReadInt64(caps, 104) > 0 ? 1e7 / Marshal.ReadInt64(caps, 104) :
+                                averageInterval > 0 ? 1e7 / averageInterval :
+                                double.NaN;
 
-                            formats.Add((SubtypeToString(mediaType.SubType), size, frameRates));
+                            formats.Add((SubtypeToString(mediaType.SubType), size, fps));
                         }
                         finally
                         {
@@ -193,11 +184,22 @@ namespace OpenIris
                     Marshal.FreeCoTaskMem(caps);
                 }
 
+                static string Sizes(IList<Size> sizes) => sizes.Count > 4
+                    ? $"{sizes[0].Width}x{sizes[0].Height} to {sizes[sizes.Count - 1].Width}x{sizes[sizes.Count - 1].Height} ({sizes.Count} sizes)"
+                    : string.Join(", ", sizes.Select(size => $"{size.Width}x{size.Height}"));
+
                 return formats
-                    .Distinct()
-                    .OrderBy(f => f.format)
-                    .ThenByDescending(f => f.size.Width * f.size.Height)
-                    .Select(f => $"{f.format} {f.size.Width}x{f.size.Height}: {f.frameRates}");
+                    .GroupBy(f => (f.format, f.size))
+                    .Select(g => (g.Key.format, g.Key.size, fps: g.Max(f => f.fps)))
+                    .GroupBy(f => (f.format, fps: Math.Round(f.fps, 2)))
+                    .OrderByDescending(g => double.IsNaN(g.Key.fps) ? -1 : g.Key.fps)
+                    .ThenBy(g => g.Key.format)
+                    .Select(g =>
+                    {
+                        var sizes = g.Select(f => f.size).OrderByDescending(size => size.Width * size.Height).ToList();
+                        var rate = double.IsNaN(g.Key.fps) ? "frame rate unknown" : $"{g.Key.fps:0.##} fps";
+                        return $"{g.Key.format} {rate}: {Sizes(sizes)}";
+                    });
             }
             finally
             {

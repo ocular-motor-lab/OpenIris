@@ -61,6 +61,12 @@ namespace OpenIris.UI
         public PictureBoxSizeMode SizeMode { get; set; } = PictureBoxSizeMode.Zoom;
 
         /// <summary>
+        /// Gets or sets whether the image goes at the top of the control (Zoom), not in the middle.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool AlignTop { get; set; }
+
+        /// <summary>
         /// Gets or sets a short text drawn over the top left corner, for example which eye it is.
         /// </summary>
         [DefaultValue("")]
@@ -172,7 +178,7 @@ namespace OpenIris.UI
             var scale = Math.Min((double)area.Width / size.Width, (double)area.Height / size.Height);
             var width = (int)Math.Round(size.Width * scale);
             var height = (int)Math.Round(size.Height * scale);
-            return new Rectangle((area.Width - width) / 2, (area.Height - height) / 2, width, height);
+            return new Rectangle((area.Width - width) / 2, AlignTop ? 0 : (area.Height - height) / 2, width, height);
         }
 
         [StructLayout(LayoutKind.Sequential)]

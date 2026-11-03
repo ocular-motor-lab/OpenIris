@@ -87,6 +87,8 @@ namespace OpenIris.UI
             this.panel5 = new System.Windows.Forms.Panel();
             this.profileComboBox = new System.Windows.Forms.ComboBox();
             this.buttonStartTracking = new System.Windows.Forms.Button();
+            this.buttonManageProfiles = new System.Windows.Forms.Button();
+            this.labelOpenIrisVersion = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.labelProfileSystem = new System.Windows.Forms.Label();
             this.buttonPlayVideo = new System.Windows.Forms.Button();
@@ -120,12 +122,8 @@ namespace OpenIris.UI
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
-            this.imageBoxIrisLeft = new OpenIris.UI.ImageView();
-            this.imageBoxIrisRefeferenceLeft = new OpenIris.UI.ImageView();
             this.imageBoxLeftEye = new OpenIris.UI.ImageView();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            this.imageBoxIrisRight = new OpenIris.UI.ImageView();
-            this.imageBoxIrisRefeferenceRight = new OpenIris.UI.ImageView();
             this.imageBoxRightEye = new OpenIris.UI.ImageView();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.panelPipelineQuickSettingsRightEye = new System.Windows.Forms.Panel();
@@ -493,6 +491,7 @@ namespace OpenIris.UI
             // 
             this.tabPageStart.Controls.Add(this.groupBox3);
             this.tabPageStart.Controls.Add(this.panel5);
+            this.tabPageStart.Controls.Add(this.labelOpenIrisVersion);
             this.tabPageStart.Location = new System.Drawing.Point(4, 27);
             this.tabPageStart.Margin = new System.Windows.Forms.Padding(4);
             this.tabPageStart.Name = "tabPageStart";
@@ -536,21 +535,22 @@ namespace OpenIris.UI
             this.panel5.Controls.Add(this.labelProfileSystem);
             this.panel5.Controls.Add(this.buttonPlayVideo);
             this.panel5.Controls.Add(this.buttonProcessVideo);
+            this.panel5.Controls.Add(this.buttonManageProfiles);
             this.panel5.Location = new System.Drawing.Point(616, 184);
             this.panel5.Margin = new System.Windows.Forms.Padding(4);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(373, 289);
+            this.panel5.Size = new System.Drawing.Size(373, 357);
             this.panel5.TabIndex = 3;
             // 
             // profileComboBox
             // 
             this.profileComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.profileComboBox.FormattingEnabled = true;
-            this.profileComboBox.Location = new System.Drawing.Point(4, 89);
+            this.profileComboBox.Location = new System.Drawing.Point(70, 219);
             this.profileComboBox.Margin = new System.Windows.Forms.Padding(4);
             this.profileComboBox.Name = "profileComboBox";
-            this.profileComboBox.Size = new System.Drawing.Size(362, 26);
-            this.profileComboBox.TabIndex = 42;
+            this.profileComboBox.Size = new System.Drawing.Size(296, 26);
+            this.profileComboBox.TabIndex = 3;
             // 
             // buttonStartTracking
             // 
@@ -565,10 +565,10 @@ namespace OpenIris.UI
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(4, 67);
+            this.label5.Location = new System.Drawing.Point(4, 223);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(151, 18);
+            this.label5.Size = new System.Drawing.Size(56, 18);
             this.label5.TabIndex = 2;
             this.label5.Text = "Profile:";
             // 
@@ -576,32 +576,54 @@ namespace OpenIris.UI
             // 
             this.labelProfileSystem.AutoEllipsis = true;
             this.labelProfileSystem.ForeColor = System.Drawing.SystemColors.GrayText;
-            this.labelProfileSystem.Location = new System.Drawing.Point(70, 67);
+            this.labelProfileSystem.Location = new System.Drawing.Point(4, 253);
             this.labelProfileSystem.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelProfileSystem.Name = "labelProfileSystem";
-            this.labelProfileSystem.Size = new System.Drawing.Size(296, 18);
+            this.labelProfileSystem.Size = new System.Drawing.Size(362, 62);
             this.labelProfileSystem.TabIndex = 43;
-            this.labelProfileSystem.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.labelProfileSystem.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
             // buttonPlayVideo
             // 
-            this.buttonPlayVideo.Location = new System.Drawing.Point(4, 134);
+            this.buttonPlayVideo.Location = new System.Drawing.Point(4, 71);
             this.buttonPlayVideo.Margin = new System.Windows.Forms.Padding(4);
             this.buttonPlayVideo.Name = "buttonPlayVideo";
             this.buttonPlayVideo.Size = new System.Drawing.Size(364, 64);
-            this.buttonPlayVideo.TabIndex = 0;
+            this.buttonPlayVideo.TabIndex = 1;
             this.buttonPlayVideo.Text = "Play Video";
             this.buttonPlayVideo.UseVisualStyleBackColor = true;
             // 
             // buttonProcessVideo
             // 
-            this.buttonProcessVideo.Location = new System.Drawing.Point(4, 206);
+            this.buttonProcessVideo.Location = new System.Drawing.Point(4, 143);
             this.buttonProcessVideo.Margin = new System.Windows.Forms.Padding(4);
             this.buttonProcessVideo.Name = "buttonProcessVideo";
             this.buttonProcessVideo.Size = new System.Drawing.Size(364, 64);
-            this.buttonProcessVideo.TabIndex = 0;
+            this.buttonProcessVideo.TabIndex = 2;
             this.buttonProcessVideo.Text = "Process Video";
             this.buttonProcessVideo.UseVisualStyleBackColor = true;
+            // 
+            // buttonManageProfiles
+            // 
+            this.buttonManageProfiles.Location = new System.Drawing.Point(4, 321);
+            this.buttonManageProfiles.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonManageProfiles.Name = "buttonManageProfiles";
+            this.buttonManageProfiles.Size = new System.Drawing.Size(160, 30);
+            this.buttonManageProfiles.TabIndex = 4;
+            this.buttonManageProfiles.Text = "Manage profiles...";
+            this.buttonManageProfiles.UseVisualStyleBackColor = true;
+            // 
+            // labelOpenIrisVersion
+            // 
+            this.labelOpenIrisVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelOpenIrisVersion.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.labelOpenIrisVersion.Location = new System.Drawing.Point(1155, 721);
+            this.labelOpenIrisVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelOpenIrisVersion.Name = "labelOpenIrisVersion";
+            this.labelOpenIrisVersion.Size = new System.Drawing.Size(400, 22);
+            this.labelOpenIrisVersion.TabIndex = 5;
+            this.labelOpenIrisVersion.Text = "OpenIris";
+            this.labelOpenIrisVersion.TextAlign = System.Drawing.ContentAlignment.BottomRight;
             // 
             // tabSetup
             // 
@@ -940,7 +962,8 @@ namespace OpenIris.UI
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer2.IsSplitterFixed = true;
             this.splitContainer2.Location = new System.Drawing.Point(360, 2);
             this.splitContainer2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.splitContainer2.Name = "splitContainer2";
@@ -980,43 +1003,18 @@ namespace OpenIris.UI
             // 
             this.tableLayoutPanel6.ColumnCount = 1;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.Controls.Add(this.imageBoxIrisLeft, 0, 2);
-            this.tableLayoutPanel6.Controls.Add(this.imageBoxIrisRefeferenceLeft, 0, 1);
             this.tableLayoutPanel6.Controls.Add(this.imageBoxLeftEye, 0, 0);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(599, 3);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-            this.tableLayoutPanel6.RowCount = 3;
+            this.tableLayoutPanel6.RowCount = 1;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
             this.tableLayoutPanel6.Size = new System.Drawing.Size(590, 471);
             this.tableLayoutPanel6.TabIndex = 1;
             // 
-            // imageBoxIrisLeft
-            // 
-            this.imageBoxIrisLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBoxIrisLeft.Location = new System.Drawing.Point(4, 427);
-            this.imageBoxIrisLeft.Margin = new System.Windows.Forms.Padding(4);
-            this.imageBoxIrisLeft.Name = "imageBoxIrisLeft";
-            this.imageBoxIrisLeft.Size = new System.Drawing.Size(582, 40);
-            this.imageBoxIrisLeft.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.imageBoxIrisLeft.TabIndex = 38;
-            this.imageBoxIrisLeft.TabStop = false;
-            // 
-            // imageBoxIrisRefeferenceLeft
-            // 
-            this.imageBoxIrisRefeferenceLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBoxIrisRefeferenceLeft.Location = new System.Drawing.Point(4, 379);
-            this.imageBoxIrisRefeferenceLeft.Margin = new System.Windows.Forms.Padding(4);
-            this.imageBoxIrisRefeferenceLeft.Name = "imageBoxIrisRefeferenceLeft";
-            this.imageBoxIrisRefeferenceLeft.Size = new System.Drawing.Size(582, 40);
-            this.imageBoxIrisRefeferenceLeft.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.imageBoxIrisRefeferenceLeft.TabIndex = 37;
-            this.imageBoxIrisRefeferenceLeft.TabStop = false;
-            // 
             // imageBoxLeftEye
             // 
+            this.imageBoxLeftEye.AlignTop = true;
             this.imageBoxLeftEye.Caption = "Left eye";
             this.imageBoxLeftEye.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxLeftEye.Location = new System.Drawing.Point(4, 4);
@@ -1031,43 +1029,18 @@ namespace OpenIris.UI
             // 
             this.tableLayoutPanel4.ColumnCount = 1;
             this.tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.Controls.Add(this.imageBoxIrisRight, 0, 2);
-            this.tableLayoutPanel4.Controls.Add(this.imageBoxIrisRefeferenceRight, 0, 1);
             this.tableLayoutPanel4.Controls.Add(this.imageBoxRightEye, 0, 0);
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
-            this.tableLayoutPanel4.RowCount = 3;
+            this.tableLayoutPanel4.RowCount = 1;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
-            this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
             this.tableLayoutPanel4.Size = new System.Drawing.Size(590, 471);
             this.tableLayoutPanel4.TabIndex = 0;
             // 
-            // imageBoxIrisRight
-            // 
-            this.imageBoxIrisRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBoxIrisRight.Location = new System.Drawing.Point(4, 427);
-            this.imageBoxIrisRight.Margin = new System.Windows.Forms.Padding(4);
-            this.imageBoxIrisRight.Name = "imageBoxIrisRight";
-            this.imageBoxIrisRight.Size = new System.Drawing.Size(582, 40);
-            this.imageBoxIrisRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.imageBoxIrisRight.TabIndex = 38;
-            this.imageBoxIrisRight.TabStop = false;
-            // 
-            // imageBoxIrisRefeferenceRight
-            // 
-            this.imageBoxIrisRefeferenceRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.imageBoxIrisRefeferenceRight.Location = new System.Drawing.Point(4, 379);
-            this.imageBoxIrisRefeferenceRight.Margin = new System.Windows.Forms.Padding(4);
-            this.imageBoxIrisRefeferenceRight.Name = "imageBoxIrisRefeferenceRight";
-            this.imageBoxIrisRefeferenceRight.Size = new System.Drawing.Size(582, 40);
-            this.imageBoxIrisRefeferenceRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.imageBoxIrisRefeferenceRight.TabIndex = 37;
-            this.imageBoxIrisRefeferenceRight.TabStop = false;
-            // 
             // imageBoxRightEye
             // 
+            this.imageBoxRightEye.AlignTop = true;
             this.imageBoxRightEye.Caption = "Right eye";
             this.imageBoxRightEye.Dock = System.Windows.Forms.DockStyle.Fill;
             this.imageBoxRightEye.Location = new System.Drawing.Point(4, 4);
@@ -1468,6 +1441,8 @@ namespace OpenIris.UI
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.TabPage tabPageStart;
         private System.Windows.Forms.Button buttonStartTracking;
+        private System.Windows.Forms.Button buttonManageProfiles;
+        private System.Windows.Forms.Label labelOpenIrisVersion;
         private System.Windows.Forms.Button buttonProcessVideo;
         private System.Windows.Forms.Button buttonPlayVideo;
         private System.Windows.Forms.Label label5;
@@ -1514,10 +1489,6 @@ namespace OpenIris.UI
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel6;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
-        private OpenIris.UI.ImageView imageBoxIrisRefeferenceRight;
-        private OpenIris.UI.ImageView imageBoxIrisRight;
-        private OpenIris.UI.ImageView imageBoxIrisRefeferenceLeft;
-        private OpenIris.UI.ImageView imageBoxIrisLeft;
         private System.Windows.Forms.ToolStripMenuItem convertVideoToMP4ToolStripMenuItem;
         private System.Windows.Forms.Button buttonReduceExposure;
         private System.Windows.Forms.Button buttonIncreaseExposure;

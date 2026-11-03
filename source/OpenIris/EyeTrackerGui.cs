@@ -9,6 +9,7 @@ namespace OpenIris.UI
     using Emgu.CV;
 #nullable enable
 
+    using Emgu.CV.CvEnum;
     using Emgu.CV.Structure;
     using Emgu.CV.UI;
     using OpenIris;
@@ -35,6 +36,7 @@ namespace OpenIris.UI
         private readonly EyeTrackerUICommands eyeTrackerUICommands;
         private readonly Timer timerRefreshUI;
         private readonly Timer resizeLayoutTimer;
+        private double imagesAspect;
         private readonly LogTraceListener log;
 
         private readonly EyeCollection<ImageView> imageBoxes;
@@ -55,6 +57,10 @@ namespace OpenIris.UI
         {
             InitializeComponent();
 
+            // The version, without the build metadata after the +: 0.2.0-alpha.4, for example.
+            var version = (Attribute.GetCustomAttribute(typeof(EyeTrackerGui).Assembly, typeof(System.Reflection.AssemblyInformationalVersionAttribute)) as System.Reflection.AssemblyInformationalVersionAttribute)?.InformationalVersion;
+            labelOpenIrisVersion.Text = "OpenIris " + version?.Split('+')[0];
+
             // Use the program's icon (OpenIris.ico) for the window and the taskbar too.
             Icon = System.Drawing.Icon.ExtractAssociatedIcon(System.Windows.Forms.Application.ExecutablePath);
 
@@ -66,6 +72,8 @@ namespace OpenIris.UI
             holdTimer.Tick += HoldTimer_Tick;
 
             imageBoxes = new EyeCollection<ImageView>(imageBoxLeftEye, imageBoxRightEye);
+            splitContainer2.Resize += (o, e) => FitImagesHeight();
+            imageBoxRightEye.SizeChanged += (o, e) => FitImagesHeight();
 
             log = new LogTraceListener(richTextBox1, richTextBoxLogLarge);
 
@@ -176,6 +184,7 @@ namespace OpenIris.UI
                 eyeTrackerUICommands.StartTrackingCommand.Bind(buttonStartTracking);
 
                 eyeTrackerUICommands.EditSettingsCommand.Bind(configurationToolStripMenuItem);
+                eyeTrackerUICommands.EditSettingsCommand.Bind(buttonManageProfiles);
 
                 //eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeUp);
                 //eyeTrackerUICommands.MoveCamerasCommand.Bind(buttonMoveRightEyeDown);
@@ -377,7 +386,7 @@ namespace OpenIris.UI
             }
 
             profileComboBox.SelectedItem = settings.Profile;
-            labelProfileSystem.Text = $"System: {settings.EyeTrackerSystem}";
+            labelProfileSystem.Text = $"System: {settings.EyeTrackerSystem}\nCalibration: {settings.CalibrationMethod}\nPipeline: {settings.EyeTrackingPipeline}";
         }
 
         private void EyeTracker_Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -531,45 +540,22 @@ namespace OpenIris.UI
                     }
                 }
 
-                // Update Torsion images
-                var imageBoxIris = new EyeCollection<ImageView>(imageBoxIrisLeft, imageBoxIrisRight);
-                var imageBoxIrisReference = new EyeCollection<ImageView>(imageBoxIrisRefeferenceLeft, imageBoxIrisRefeferenceRight);
-
+                // Eye images, with the iris images below (current, then reference): one image that
+                // scales together.
                 foreach (var eye in eyes)
                 {
-                    Image<Gray, byte>? imageTorsion = null;
-                    Image<Gray, byte>? imageTorsionRef = null;
+                    if (eyeTracker.LastImagesAndData is null) continue;
 
-                    // Torsion image
-                    var torsionImage = eyeTracker.LastImagesAndData?.Images[eye]?.ImageTorsion;
-                    if (torsionImage?.Size.Width > 4)
-                    {
-                        imageTorsion = new Image<Gray, byte>(torsionImage.Size.Height, torsionImage.Size.Width);
-                        CvInvoke.Transpose(torsionImage, imageTorsion);
-                    }
+                    var eyeImage = pipelineUI?.pipelines?[eye]?.UpdatePipelineEyeImage(eye, eyeTracker.LastImagesAndData);
+                    using var irisReference = Transposed(eyeTracker.LastImagesAndData.Calibration.EyeCalibrationParameters[eye]?.ImageTorsionReference);
+                    using var iris = Transposed(eyeTracker.LastImagesAndData.Images[eye]?.ImageTorsion);
+                    using var combined = StackImages(eyeImage, iris, irisReference);
+                    imageBoxes[eye].Image = combined;
 
-                    // Torsion reference
-                    var torsionRef = eyeTracker.LastImagesAndData?.Calibration.EyeCalibrationParameters[eye]?.ImageTorsionReference;
-                    if (torsionRef?.Size.Width > 4)
+                    if (combined != null && Math.Abs((double)combined.Height / combined.Width - imagesAspect) > 0.005)
                     {
-                        imageTorsionRef = new Image<Gray, byte>(torsionRef.Size.Height, torsionRef.Size.Width);
-                        CvInvoke.Transpose(torsionRef, imageTorsionRef);
-                    }
-
-                    imageBoxIris[eye].Image = imageTorsion;
-                    imageBoxIrisReference[eye].Image = imageTorsionRef;
-                }
-
-                // Update pipeline UIs
-                foreach (var eye in eyes)
-                {
-                    if (eyeTracker.LastImagesAndData != null)
-                    {
-                        imageBoxes[eye].Image = pipelineUI?.pipelines?[eye]?.UpdatePipelineEyeImage(eye, eyeTracker.LastImagesAndData);
-                    }
-                    else
-                    {
-                      //  imageBoxes[eye].Image = null;
+                        imagesAspect = (double)combined.Height / combined.Width;
+                        FitImagesHeight();
                     }
                 }
             }
@@ -581,6 +567,102 @@ namespace OpenIris.UI
                     panel.ResumeLayout();
                 }
             }
+        }
+
+        /// <summary>
+        /// The iris image, horizontal, or null if there is none.
+        /// </summary>
+        private static Image<Gray, byte>? Transposed(Image<Gray, byte>? image)
+        {
+            if (image is null || image.Size.Width <= 4) return null;
+
+            var transposed = new Image<Gray, byte>(image.Size.Height, image.Size.Width);
+            CvInvoke.Transpose(image, transposed);
+            return transposed;
+        }
+
+        /// <summary>
+        /// The eye image with the other images below it, at its width, separated by a thin line of
+        /// the window color. Each image below gets 1/9 of the width in height (half the proportions
+        /// of the default iris image, 360x80), and the space stays empty when it is missing: the
+        /// layout does not change when, for example, the iris reference appears.
+        /// </summary>
+        private static Mat? StackImages(IInputArray? top, params IInputArray?[] below)
+        {
+            if (top is null) return null;
+
+            using var parts = new Emgu.CV.Util.VectorOfMat();
+            var temporary = new List<Mat>();
+            try
+            {
+                Mat ToBgr(Mat image)
+                {
+                    if (image.NumberOfChannels == 3) return image;
+                    var color = new Mat();
+                    CvInvoke.CvtColor(image, color, image.NumberOfChannels == 1 ? ColorConversion.Gray2Bgr : ColorConversion.Bgra2Bgr);
+                    temporary.Add(color);
+                    return color;
+                }
+
+                using var topArray = top.GetInputArray();
+                var first = ToBgr(topArray.GetMat());
+                var width = first.Width;
+                var background = SystemColors.Control;
+                var gapColor = new MCvScalar(background.B, background.G, background.R);
+                var gapHeight = Math.Max(2, width / 100);
+                var height = Math.Max(1, width / 9);
+                parts.Push(first);
+
+                Mat Blank(int rows)
+                {
+                    var blank = new Mat(rows, width, DepthType.Cv8U, 3);
+                    blank.SetTo(gapColor);
+                    temporary.Add(blank);
+                    return blank;
+                }
+
+                foreach (var image in below)
+                {
+                    parts.Push(Blank(gapHeight));
+
+                    using var array = image?.GetInputArray();
+                    var source = array?.GetMat();
+                    if (source is null || source.IsEmpty)
+                    {
+                        parts.Push(Blank(height));
+                        continue;
+                    }
+
+                    var resized = new Mat();
+                    temporary.Add(resized);
+                    CvInvoke.Resize(source, resized, new Size(width, height), 0, 0, Inter.Linear);
+                    parts.Push(ToBgr(resized));
+                }
+
+                var stacked = new Mat();
+                CvInvoke.VConcat(parts, stacked);
+                return stacked;
+            }
+            finally
+            {
+                foreach (var mat in temporary) mat.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Gives the eye images (with the iris images below) the height they need at their width; the
+        /// quick settings get the rest of the window.
+        /// </summary>
+        private void FitImagesHeight()
+        {
+            if (imagesAspect <= 0) return;
+
+            var box = imageBoxRightEye; // Both columns are the same width.
+            var around = splitContainer2.Panel1.Height - box.Height; // Margins.
+            var wanted = (int)Math.Ceiling(box.Width * imagesAspect) + around;
+            var largest = splitContainer2.Height - splitContainer2.Panel2MinSize - splitContainer2.SplitterWidth;
+            var distance = Math.Max(splitContainer2.Panel1MinSize, Math.Min(largest, wanted));
+            if (distance > 0 && distance != splitContainer2.SplitterDistance) splitContainer2.SplitterDistance = distance;
         }
 
         private void UpdateTabCalibration()

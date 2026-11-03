@@ -27,6 +27,19 @@ namespace OpenIris.ImageGrabbing
         public Size FrameSize { get; protected set; }
 
         /// <summary>
+        /// Gets the size of the whole sensor, in pixels. The frame size, unless the camera reads only a
+        /// window of the sensor.
+        /// </summary>
+        public virtual Size SensorSize => FrameSize;
+
+        /// <summary>
+        /// Gets or sets the intrinsics of the camera for the whole sensor, as the camera sends the images
+        /// (before the camera orientation). The eye tracking system sets them from its settings. Each
+        /// image gets them moved to its window and turned with the orientation (ImageEye.Intrinsics).
+        /// </summary>
+        public CameraIntrinsics Intrinsics { get; set; }
+
+        /// <summary>
         /// Gets left or right eye (or both).
         /// </summary>
         public Eye WhichEye { get; set; }
@@ -92,6 +105,7 @@ namespace OpenIris.ImageGrabbing
 
             // The whole frame, for cameras that don't say which part of the sensor they read.
             if (image.Roi.IsEmpty) image.Roi = new Rectangle(Point.Empty, image.Size);
+            image.Intrinsics = Intrinsics.Cropped(image.Roi.Location);
 
             image.CorrectOrientation(CameraOrientation);
 

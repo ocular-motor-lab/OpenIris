@@ -51,6 +51,12 @@ namespace SpinnakerInterface
         private string errortest;
 
         Vector2 maxROI_Offset, roiSize;
+        Size sensorSize;
+
+        /// <summary>
+        /// Gets the size of the whole sensor (the frame size is the window read).
+        /// </summary>
+        public override Size SensorSize => sensorSize.IsEmpty ? FrameSize : sensorSize;
         public Vector2 MaxROI_Offset { get { return maxROI_Offset; } set { maxROI_Offset = value; } }
 
         double maxGain;
@@ -344,6 +350,7 @@ namespace SpinnakerInterface
             cam.Height.Value = FrameSize.Height;
 
             Vector2 maxFrameSize = new Vector2(cam.WidthMax.Value, cam.HeightMax.Value);
+            sensorSize = new Size((int)cam.WidthMax.Value, (int)cam.HeightMax.Value);
             roiSize = new Vector2(FrameSize.Width, FrameSize.Height);
             maxROI_Offset = maxFrameSize - roiSize;
 

@@ -80,6 +80,62 @@ namespace OpenIris
         public EyeData ReferenceData { get; set; }
 
         /// <summary>
+        /// Gets or sets the intrinsics of the camera in the pixels of the images the eye model and the
+        /// reference are in (see ImageEye.Intrinsics), copied by the calibration session from the
+        /// frames. Empty if unknown, as in calibration files from before 0.2.
+        /// </summary>
+        public CameraIntrinsics Intrinsics { get; set; }
+
+        /// <summary>
+        /// How much the eye model and the reference move to be in the pixels of an image with the given
+        /// intrinsics: by how much its principal point moved, for example when the window of the camera
+        /// moved. Nothing if either intrinsics are unknown.
+        /// </summary>
+        /// <param name="intrinsics">Intrinsics of the image.</param>
+        public SizeF ShiftTo(CameraIntrinsics intrinsics) =>
+            Intrinsics.IsEmpty || intrinsics.IsEmpty ? SizeF.Empty : new SizeF(intrinsics.Cx - Intrinsics.Cx, intrinsics.Cy - Intrinsics.Cy);
+
+        /// <summary>
+        /// The eye model in the pixels of an image with the given intrinsics (see ShiftTo).
+        /// </summary>
+        /// <param name="intrinsics">Intrinsics of the image.</param>
+        public EyePhysicalModel EyeModelFor(CameraIntrinsics intrinsics)
+        {
+            var model = EyePhysicalModel;
+            if (model.IsEmpty) return model;
+
+            var shift = ShiftTo(intrinsics);
+            model.Center = new PointF(model.Center.X + shift.Width, model.Center.Y + shift.Height);
+            return model;
+        }
+
+        /// <summary>
+        /// The pupil of the reference in the pixels of an image with the given intrinsics (see ShiftTo).
+        /// </summary>
+        /// <param name="intrinsics">Intrinsics of the image.</param>
+        public PupilData ReferencePupilFor(CameraIntrinsics intrinsics)
+        {
+            var pupil = ReferenceData.Pupil;
+            if (pupil.IsEmpty) return pupil;
+
+            var shift = ShiftTo(intrinsics);
+            return new PupilData(new PointF(pupil.Center.X + shift.Width, pupil.Center.Y + shift.Height), pupil.Size, pupil.Angle);
+        }
+
+        /// <summary>
+        /// Moves the eye model to the pixels of an image with the given intrinsics, and keeps those
+        /// intrinsics. The reference is not moved. Nothing if the intrinsics are unknown.
+        /// </summary>
+        /// <param name="intrinsics">Intrinsics of the image.</param>
+        public void MoveEyeModelTo(CameraIntrinsics intrinsics)
+        {
+            if (intrinsics.IsEmpty) return;
+
+            EyePhysicalModel = EyeModelFor(intrinsics);
+            Intrinsics = intrinsics;
+        }
+
+        /// <summary>
         /// What the calibration found beyond the eye model and the reference, which changes the
         /// calibrated data as that calibration needs (for example the map of Remote Linear). Null for
         /// calibrations that only use the eye model and the reference.
@@ -196,6 +252,7 @@ namespace OpenIris
             {
                 WhichEye = WhichEye,
                 ImageSize = ImageSize,
+                Intrinsics = Intrinsics,
                 EyePhysicalModel = EyePhysicalModel,
                 ImageTorsionReference = ImageTorsionReference,
                 ReferenceImage = ReferenceImage,

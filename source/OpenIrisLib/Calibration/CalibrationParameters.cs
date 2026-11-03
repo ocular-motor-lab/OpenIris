@@ -173,6 +173,11 @@ namespace OpenIris
 
             if (eyeData.ProcessFrameResult == ProcessFrameResult.Good)
             {
+                // In the pixels of the calibration's images, if the window of the camera moved since
+                // (#61). A copy only then.
+                var shift = calibrationInfo.ShiftTo(eyeData.Intrinsics);
+                if (!shift.IsEmpty) eyeData = eyeData.Translated(new System.Drawing.SizeF(-shift.Width, -shift.Height));
+
                 var eyeModel = EyeCalibrationParameters[eyeData.WhichEye].EyePhysicalModel;
                 if (!calibrationInfo.HasEyeModel)
                 {

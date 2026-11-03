@@ -89,6 +89,15 @@ namespace OpenIris
         /// Written in the RoiX, RoiY, RoiWidth and RoiHeight columns of the data file.
         /// </summary>
         public Rectangle Roi { get; set; }
+
+        /// <summary>
+        /// Gets or sets the intrinsics of the camera in the pixels of this image: the camera's
+        /// intrinsics moved to the window it read, then changed by every crop, flip and transposition
+        /// of the image (the methods of this class do it). Empty if unknown, for example for images
+        /// from videos. The calibration uses them to follow the image when the window of the camera
+        /// moves (#61).
+        /// </summary>
+        public CameraIntrinsics Intrinsics { get; set; }
         
         /// <summary>
         /// Gets the size of the image of the eye in pixels.
@@ -117,7 +126,7 @@ namespace OpenIris
         /// <returns>The copy.</returns>
         public ImageEye Copy(Rectangle roi)
         {
-            return new ImageEye(Image.Copy(roi), WhichEye, TimeStamp, ImageSourceData) { Roi = PartOfRoi(roi) };
+            return new ImageEye(Image.Copy(roi), WhichEye, TimeStamp, ImageSourceData) { Roi = PartOfRoi(roi), Intrinsics = Intrinsics.Cropped(roi.Location) };
         }
 
         /// <summary>
@@ -126,7 +135,7 @@ namespace OpenIris
         /// <returns>The copy.</returns>
         public ImageEye Copy()
         {
-            return new ImageEye(Image.Copy(), WhichEye, TimeStamp, ImageSourceData) { Roi = Roi };
+            return new ImageEye(Image.Copy(), WhichEye, TimeStamp, ImageSourceData) { Roi = Roi, Intrinsics = Intrinsics };
         }
 
         /// <summary>
@@ -175,13 +184,18 @@ namespace OpenIris
             }
         }
 
-        private void FlipInPlace(FlipType flipType) => CvInvoke.Flip(Image, Image, flipType);
+        private void FlipInPlace(FlipType flipType)
+        {
+            Intrinsics = Intrinsics.Flipped(flipType, Size);
+            CvInvoke.Flip(Image, Image, flipType);
+        }
 
         /// <summary>
         /// Rotates the image 180 degrees.
         /// </summary>
         public void Rotate180()
         {
+            Intrinsics = Intrinsics.Flipped(FlipType.Both, Size);
             Image = Image.Flip(Emgu.CV.CvEnum.FlipType.Horizontal).Flip(Emgu.CV.CvEnum.FlipType.Vertical);
         }
 
@@ -190,6 +204,7 @@ namespace OpenIris
         /// </summary>
         public void FlipHorizontal()
         {
+            Intrinsics = Intrinsics.Flipped(FlipType.Horizontal, Size);
             Image = Image.Flip(Emgu.CV.CvEnum.FlipType.Horizontal);
         }
 
@@ -198,6 +213,7 @@ namespace OpenIris
         /// </summary>
         public void FlipVertical()
         {
+            Intrinsics = Intrinsics.Flipped(FlipType.Vertical, Size);
             Image = Image.Flip(Emgu.CV.CvEnum.FlipType.Vertical);
         }
 
@@ -209,6 +225,7 @@ namespace OpenIris
             var imageTemp = new Image<Gray, byte>(Size.Height, Size.Width);
             CvInvoke.Transpose(Image, imageTemp);
             Image = imageTemp;
+            Intrinsics = Intrinsics.Transposed();
         }
                 
         /// <summary>
@@ -219,6 +236,7 @@ namespace OpenIris
         public void Crop(Rectangle roi)
         {
             Image = Image.Copy(roi);
+            Intrinsics = Intrinsics.Cropped(roi.Location);
         }
 
         /// <summary>
@@ -233,8 +251,9 @@ namespace OpenIris
             CvInvoke.Transpose(Image, imageTemp);
             Image.ROI = new Rectangle();
             Image = imageTemp;
+            Intrinsics = Intrinsics.Cropped(roi.Location).Transposed();
 
-            return new ImageEye(imageTemp, WhichEye, TimeStamp, ImageSourceData) { Roi = PartOfRoi(roi) };
+            return new ImageEye(imageTemp, WhichEye, TimeStamp, ImageSourceData) { Roi = PartOfRoi(roi), Intrinsics = Intrinsics };
         }
                 
         /// <summary>

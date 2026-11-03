@@ -376,7 +376,11 @@ namespace OpenIris
 
                     EyeTrackerDebug.TrackTimeBeginPipeline(whichEye, image.TimeStamp);
                     (image.EyeData, image.ImageTorsion) = pipeline.Process(image, imagesAndData!.Calibration.EyeCalibrationParameters[whichEye]);
-                    if (image.EyeData is not null) image.EyeData.Roi = image.Roi;
+                    if (image.EyeData is not null)
+                    {
+                        image.EyeData.Roi = image.Roi;
+                        image.EyeData.Intrinsics = image.Intrinsics;
+                    }
                     EyeTrackerDebug.TrackTimeEndPipeline();
                 }
                 catch

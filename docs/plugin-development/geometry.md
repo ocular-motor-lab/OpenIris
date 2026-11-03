@@ -30,7 +30,8 @@ image, and up is up. "The image" below always means this oriented image, not the
   −0.5 to 0.5. Positions measured on resized images are mapped back with
   `ImageProcessingExtentionMethods.ResizedToOriginal`, which keeps this.
 - `ImageEye.Roi` is where the image is in the camera's full sensor image (an offset, in the same
-  pixel units), for cameras that read only part of the sensor.
+  pixel units), for cameras that read only part of the sensor. Its intrinsics
+  (`ImageEye.Intrinsics`, below) are in the image's own pixels.
 
 ## Ellipses
 
@@ -52,37 +53,32 @@ system's setting, `EyeTrackingSystemSettings.MmPerPix`, copied into each pipelin
 This is the usual model (scaled orthographic projection) when the camera-to-eye distance isn't
 known. Its error grows at large eccentricities with cameras close to the eye.
 
-**(planned) Intrinsics, as OpenCV's camera matrix**, settings of the eye tracking system, and
-copied into the calibration parameters (the eye model is in pixels, so it needs the camera model it
-was made with):
+**Intrinsics, as OpenCV's camera matrix** (`CameraIntrinsics`): K = [fx 0 cx; 0 fy cy; 0 0 1], in
+pixels.
 
-- The camera matrix K = [fx 0 cx; 0 fy cy; 0 0 1], in pixels, and distortion coefficients in
-  OpenCV's order (k1, k2, p1, p2, k3). A camera calibrated with OpenCV's checkerboard calibration
-  (`calibrateCamera`) can use its result directly; a tool to do it from OpenIris is
-  [#78](https://github.com/ocular-motor-lab/OpenIris/issues/78).
-- **Per physical camera**, not per eye: a list of camera calibrations in `EyeTrackingSystemSettings`,
-  each with the camera's identity (its serial number, or Left, Right, Single for cameras without
-  one), the sensor size it was measured at, and the intrinsics. It works for any number of cameras,
-  and a camera's calibration follows it if the cameras are swapped. An empty list falls back to
-  `MmPerPix` (below).
-- **Measured on the full sensor image, without binning**, as OpenCV's calibration gives them.
-  OpenIris converts them to the images it processes: the principal point shifts by the sensor
-  window's offset (`ImageEye.Roi`), the camera orientation moves it and swaps fx and fy for 90°
-  rotations (cx becomes width − 1 − cx when mirrored), and binning scales all four. So a camera
-  calibration stays valid when the window or the orientation changes.
-- **`MmPerPix` and the intrinsics don't conflict**: `MmPerPix` depends on the setup (the distance to
-  the eye), the intrinsics only on the camera and lens. With both, the distance follows
-  (Z = f · `MmPerPix`), a useful sanity check. There is no separate distance setting, which would
-  have to agree with the other two.
-- **Filled from `MmPerPix`** when nothing better is known: `MmPerPix` = Z / f, so one assumption,
-  the camera-to-eye distance Z per kind of system (about 40 mm for head-mounted cameras, about
-  600 mm for remote cameras and webcams), gives f = Z / `MmPerPix`; the principal point at the
-  image center, square pixels, no distortion. Z only shapes the perspective correction: as Z grows,
-  this becomes the weak perspective model above.
-- **From the field of view** when the system knows it: f = (width / 2) / tan(FOV / 2). The Webcam
-  system already does this for its head pose (`FacePose`, from `HorizontalFieldOfView`).
-- The iris (about 11.5-12 mm across in almost everyone) is at the eye's depth, so it carries the
-  same information as `MmPerPix`: a sanity check, not a way to find Z.
+- **Settings of the eye tracking system**, one for each eye's camera
+  (`EyeTrackingSystemSettings.IntrinsicsLeftCamera`, `IntrinsicsRightCamera`; a single camera uses
+  the left one), **for the whole sensor, as the camera sends the images** (before the camera
+  orientation), as OpenCV's checkerboard calibration (`calibrateCamera`) gives them. A tool to do it
+  from OpenIris is [#78](https://github.com/ocular-motor-lab/OpenIris/issues/78).
+- **Unknown (fx 0): from the pixel scale**, with weak perspective: f = `PixPerMm` ·
+  `DistanceCameraToEyeMm` (the pixels per mm at the eye's distance times that distance), and the
+  principal point at the center of the sensor (`CameraEye.SensorSize`: the whole sensor for cameras
+  that read a window of it, as Spinnaker reports it).
+- **Each image carries them in its own pixels** (`ImageEye.Intrinsics`, and `EyeData.Intrinsics`
+  for its data): the camera moves them to the window it read, and every crop, flip and transposition
+  of the image changes them the same way (the camera orientation, splitting one camera's image into
+  the two eyes). The focal lengths stay positive, as OpenCV expects: a flip mirrors the camera's axes,
+  which belongs in its extrinsics. Images from videos, and the eye images the Webcam system cuts out,
+  have none (unknown).
+- **The calibration keeps the intrinsics of its images** (`EyeCalibration.Intrinsics`, copied by the
+  calibration session from the frame where each stage completed): the eye model and the reference
+  are in those pixels. When an image's principal point is somewhere else, because the window of the
+  camera moved since, the eye model and the reference move with it
+  (`EyeCalibration.EyeModelFor`, `ReferencePupilFor`), and the calibrated data stays the same.
+  Tracking pipelines should use those two, with the image's intrinsics, instead of the eye model and
+  the reference directly. Calibrate again after changing the intrinsics in the settings.
+- **(planned)** Distortion coefficients, in OpenCV's order (k1, k2, p1, p2, k3), and binning.
 
 **(planned) The rig: where the cameras and the lights are.** The hardware is described in one
 common frame, **the rig**: whatever the hardware is fixed to (the goggles or headset for head-mounted
@@ -97,7 +93,7 @@ systems, effectively the head; the camera mount for remote systems). In it:
   Guestrin and Eizenman's theory of remote gaze estimation, IEEE Transactions on Biomedical
   Engineering, 2006).
 
-Like the intrinsics, the rig is a setting of the eye tracking system, copied into the calibration
+Like the intrinsics, the rig will be a setting of the eye tracking system, copied into the calibration
 parameters (a calibration may refine it), and every part is optional: without camera poses, each eye
 is on its own (weak perspective, as today); without lights, the reflections are used empirically (pupil
 minus reflection, Remote Linear's map), as today.
@@ -211,5 +207,6 @@ validation reports accuracy.
 | Eye model, reference | `EyeCalibration`, saved in the `.cal` file |
 | Calibrated eye and head data | `CalibratedEyeData`, `CalibratedHeadData` |
 | Head pose (Webcam) | `HeadData.FaceRotation`, `HeadData.FacePosition` |
-| (planned) Intrinsics, camera poses, lights | the eye tracking system's settings, copied into the calibration parameters |
+| Intrinsics | the eye tracking system's settings; each image's in its pixels (`ImageEye.Intrinsics`); the calibration's in `EyeCalibration.Intrinsics` |
+| (planned) Camera poses, lights | the eye tracking system's settings, copied into the calibration parameters |
 | Head model, head reference | `HeadCalibration`, saved in the `.cal` file |

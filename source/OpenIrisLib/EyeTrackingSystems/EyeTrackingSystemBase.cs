@@ -85,6 +85,12 @@ namespace OpenIris
         {
             var cameras = CreateAndStartCameras();
             imageSources = new EyeCollection<IImageEyeSource?>(cameras.Select(c => c as IImageEyeSource));
+
+            foreach (var camera in cameras ?? Enumerable.Empty<CameraEye?>())
+            {
+                if (camera is not null) camera.Intrinsics = Settings.IntrinsicsOf(camera);
+            }
+
             return cameras;
         }
 
@@ -322,6 +328,27 @@ namespace OpenIris
         [Category("Camera properties"), Description("Distance from the camera to the eye ( mm)")]
         public virtual double DistanceCameraToEyeMm { get => distanceCameraToEyeMm; set => SetProperty(ref distanceCameraToEyeMm, value, nameof(DistanceCameraToEyeMm)); }
         private double distanceCameraToEyeMm = 50; // default value
+
+        [Category("Camera properties"), Description("Intrinsics of the left eye's camera (or of the only camera) from a camera calibration, as OpenCV gives them, " +
+            "for the whole sensor and the images as the camera sends them (before the camera orientation). Unknown (Fx 0): from the sensor size, PixPerMm and DistanceCameraToEyeMm. " +
+            "Calibrate again after changing them.")]
+        [NeedsRestarting]
+        public CameraIntrinsics IntrinsicsLeftCamera { get => intrinsicsLeftCamera; set => SetProperty(ref intrinsicsLeftCamera, value, nameof(IntrinsicsLeftCamera)); }
+        private CameraIntrinsics intrinsicsLeftCamera;
+
+        [Category("Camera properties"), Description("Intrinsics of the right eye's camera, as for the left one.")]
+        [NeedsRestarting]
+        public CameraIntrinsics IntrinsicsRightCamera { get => intrinsicsRightCamera; set => SetProperty(ref intrinsicsRightCamera, value, nameof(IntrinsicsRightCamera)); }
+        private CameraIntrinsics intrinsicsRightCamera;
+
+        /// <summary>
+        /// The intrinsics of a camera: measured, from the settings, or else from the pixel scale.
+        /// </summary>
+        public CameraIntrinsics IntrinsicsOf(CameraEye camera)
+        {
+            var measured = camera.WhichEye == Eye.Right ? IntrinsicsRightCamera : IntrinsicsLeftCamera;
+            return measured.IsEmpty ? CameraIntrinsics.FromPixelScale(camera.SensorSize, PixPerMm, DistanceCameraToEyeMm) : measured;
+        }
 
         [Category("Camera properties"), Description("Camera frame rate")]
         [NeedsRestarting]

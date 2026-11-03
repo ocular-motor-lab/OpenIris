@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------
 // <copyright file="CalibrationSessionTests.cs">
 //     Copyright (c) 2026 Jorge Otero-Millan, University of California, Berkeley.
 //     Licensed under the GNU Affero General Public License v3.0. See LICENSE in the repository root.
@@ -73,6 +73,28 @@ namespace OpenIris.Tests
 
             Assert.AreEqual(new PointF(32, 22), calibration.EyeCalibrationParameters[Eye.Left].ReferenceData.Pupil.Center);
             Assert.AreEqual(new PointF(32, 22), calibration.EyeCalibrationParameters[Eye.Right].ReferenceData.Pupil.Center);
+        }
+
+        /// <summary>
+        /// The window of the camera moved 5 px right and 3 px down between Calibrate and Reset
+        /// reference: the new calibration is in the pixels of the new window, with the eye model where
+        /// it was on the sensor.
+        /// </summary>
+        [TestMethod]
+        public void ResetReferenceAfterTheWindowMoved()
+        {
+            var sensor = new CameraIntrinsics(400, 400, 360, 270);
+            using var session = new CalibrationSession(Eye.Both, "Auto", new CalibrationSettings());
+            var model = Run(session, session.StartCalibratingModel(TrackingSettings), () => Frame(Eye.Both, new CalibrationParameters(), new PointF(30, 20), intrinsics: sensor))!;
+            Assert.AreEqual(sensor, model.EyeCalibrationParameters[Eye.Left].Intrinsics, "The intrinsics of the frames.");
+
+            var moved = sensor.Cropped(new Point(5, 3));
+            var calibration = Run(session, session.StartCalibratingZeroReference(model, TrackingSettings), () => Frame(Eye.Both, model, new PointF(25, 17), intrinsics: moved));
+
+            var left = calibration.EyeCalibrationParameters[Eye.Left];
+            Assert.AreEqual(moved, left.Intrinsics);
+            Assert.AreEqual(new PointF(25, 17), left.EyePhysicalModel.Center);
+            Assert.AreEqual(new PointF(25, 17), left.ReferenceData.Pupil.Center);
         }
 
         [TestMethod]
@@ -160,10 +182,11 @@ namespace OpenIris.Tests
         /// <summary>
         /// A processed frame with every eye of the system tracked, its pupil at the given point.
         /// </summary>
-        private static EyeTrackerImagesAndData Frame(Eye eyes, CalibrationParameters calibration, PointF pupil, HeadData? head = null)
+        private static EyeTrackerImagesAndData Frame(Eye eyes, CalibrationParameters calibration, PointF pupil, HeadData? head = null, CameraIntrinsics intrinsics = default)
         {
             ImageEye? Image(Eye eye) => !Has(eyes, eye) ? null : new ImageEye(new Image<Gray, byte>(64, 48), eye, ImageEyeTimestamp.Empty, null)
             {
+                Intrinsics = intrinsics,
                 EyeData = new EyeData
                 {
                     WhichEye = eye,

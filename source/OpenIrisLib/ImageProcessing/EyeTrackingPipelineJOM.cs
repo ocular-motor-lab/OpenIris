@@ -71,8 +71,8 @@ namespace OpenIris
 
             // Copy the calibration variables just in case they change during the processing to avoid
             // inconsistencies The next frame will use the updated calibration
-            var eyeModel = eyeCalibrationParameters.EyePhysicalModel;
-            var referencePupil = eyeCalibrationParameters.ReferenceData.Pupil;
+            var eyeModel = eyeCalibrationParameters.EyeModelFor(imageEye.Intrinsics);
+            var referencePupil = eyeCalibrationParameters.ReferencePupilFor(imageEye.Intrinsics);
             var referenceTorsionImage = eyeCalibrationParameters.ImageTorsionReference;
             var eyeROI = imageEye.WhichEye == Eye.Left ? settings.CroppingLeftEye : settings.CroppingRightEye;
             var irisRadius = (imageEye.WhichEye == Eye.Left) ? settings.IrisRadiusPixLeft : settings.IrisRadiusPixRight;

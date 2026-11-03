@@ -439,7 +439,7 @@ namespace OpenIris
 
                     if (eyeData is null) continue;
 
-                    var eyeModel = images.dataAndImages.Calibration.EyeCalibrationParameters[eyeData.WhichEye].EyePhysicalModel;
+                    var eyeModel = images.dataAndImages.Calibration.EyeCalibrationParameters[eyeData.WhichEye].EyeModelFor(eyeData.Intrinsics);
                     if (processedVideoOptions.AddPupilCross) EyeImageOverlay.DrawCross(imageColor, eyeData);
                     if (processedVideoOptions.AddCRCross) EyeImageOverlay.DrawCR(imageColor, eyeData);
                     if (processedVideoOptions.AddEyelids) EyeImageOverlay.DrawEyelids(imageColor, eyeData, eyeModel);

@@ -87,6 +87,7 @@ namespace OpenIris
             var completed = await Run("the model", frame =>
             {
                 var (done, calibration) = calibrationPipeline.ProcessForCalibrationModel(frame, processingSettings);
+                if (done && calibration is not null) KeepIntrinsics(calibration, frame);
                 result = calibration;
                 return done;
             });
@@ -145,10 +146,15 @@ namespace OpenIris
                     var model = (imageEye?.EyeData is null) ?
                         EyePhysicalModel.GetDefault(imageEye?.Size ?? new System.Drawing.Size(), settings.MmPerPix) :
                         new EyePhysicalModel(imageEye.EyeData.Pupil.Center, imageEye.EyeData.Iris.Radius * 2.0f);
+
+                    // In the pixels of the calibration, as the models it has.
+                    var shift = tempCalibration.EyeCalibrationParameters[eye].ShiftTo(imageEye?.Intrinsics ?? default);
+                    model.Center = new System.Drawing.PointF(model.Center.X - shift.Width, model.Center.Y - shift.Height);
                     tempCalibration.EyeCalibrationParameters[eye].SetEyeModel(model);
                 }
 
                 var (done, calibration) = calibrationPipeline.ProcessForZeroReference(frame, tempCalibration, settings);
+                if (done && calibration is not null) KeepIntrinsics(calibration, frame);
                 result = calibration;
                 return done;
             });
@@ -166,6 +172,20 @@ namespace OpenIris
             withReference.TrackingSettings = settings;
             withReference.HeadCalibrationParameters ??= new HeadCalibration { ReferenceHeadData = new HeadData() };
             return withReference;
+        }
+
+        /// <summary>
+        /// The models and references a calibration gives are in the pixels of the images it got: the
+        /// calibration keeps the intrinsics of the images of the frame where the stage completed, with
+        /// the eye models moved to them if they were in other pixels (the window of the camera moved
+        /// since the model, before Reset reference). The references are from that frame (#61).
+        /// </summary>
+        private void KeepIntrinsics(CalibrationParameters calibration, EyeTrackerImagesAndData frame)
+        {
+            foreach (var eye in CalibrationPipelineBase.Eyes(whichEyeToCalibrate))
+            {
+                if (frame.Images[eye] is ImageEye image) calibration.EyeCalibrationParameters[eye].MoveEyeModelTo(image.Intrinsics);
+            }
         }
 
         /// <summary>

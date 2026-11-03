@@ -10,6 +10,7 @@ namespace OpenIris
 
     using System;
     using System.Drawing;
+    using System.Linq;
 
     /// <summary>
     /// Possible results of processing a frame.
@@ -119,6 +120,11 @@ namespace OpenIris
         /// </summary>
         public Rectangle Roi { get; set; }
 
+        /// <summary>
+        /// The intrinsics of the camera in the pixels of the image (see ImageEye.Intrinsics). Empty if
+        /// unknown.
+        /// </summary>
+        public CameraIntrinsics Intrinsics { get; set; }
 
         /// <summary>
         /// Creates a copy of the Data.
@@ -132,6 +138,7 @@ namespace OpenIris
                 Timestamp = Timestamp.Copy(),
                 ImageSize = ImageSize,
                 Roi = Roi,
+                Intrinsics = Intrinsics,
                 ProcessFrameResult = ProcessFrameResult,
 
                 Pupil = Pupil,
@@ -142,6 +149,28 @@ namespace OpenIris
                 DataQuality = DataQuality,
             };
 
+        }
+
+        /// <summary>
+        /// A copy with the positions (pupil, iris, reflections, eyelids) moved, for example into the
+        /// pixels of another window of the camera.
+        /// </summary>
+        /// <param name="offset">How much to move them, in pixels.</param>
+        public EyeData Translated(SizeF offset)
+        {
+            static PointF Move(PointF point, SizeF offset) => new PointF(point.X + offset.Width, point.Y + offset.Height);
+
+            var copy = Copy();
+            copy.Pupil = new PupilData(Move(Pupil.Center, offset), Pupil.Size, Pupil.Angle);
+            copy.Iris = new IrisData(Move(Iris.Center, offset), Iris.Radius);
+            copy.CornealReflections = CornealReflections?.Select(cr => new CornealReflectionData(Move(cr.Center, offset), cr.Size, cr.Angle)).ToArray();
+            if (copy.Eyelids is EyelidData eyelids)
+            {
+                for (int i = 0; i < eyelids.Upper.Length; i++) eyelids.Upper[i] = Move(eyelids.Upper[i], offset);
+                for (int i = 0; i < eyelids.Lower.Length; i++) eyelids.Lower[i] = Move(eyelids.Lower[i], offset);
+            }
+
+            return copy;
         }
     }
 }

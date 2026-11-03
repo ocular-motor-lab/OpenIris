@@ -145,6 +145,10 @@ See `OpenIrisWinForms\Calibration\CalibrationRemoteLinearUI.cs`.
   - **The reference** (`SetReference` takes a processed frame): the eye data where the subject looks
     straight ahead (`ReferenceData`), the torsion image (`ImageTorsionReference`), and the image of
     the frame itself (`ReferenceImage`), to see or reprocess later.
+  - **The intrinsics of the camera** in the pixels of the images the model and the reference are
+    in (`Intrinsics`), copied by OpenIris from the frames: the model and the reference follow the
+    images when the window of the camera moves. See
+    [Geometry and conventions](geometry.md#the-camera).
   - **The calibration's own data for this eye** (`CalibrationData`, below).
 - **The head** (`HeadCalibrationParameters`): its reference (`ReferenceHeadData`: the head angles are
   relative to it) and the head model (`HeadModel`: where the eyes are in the head).

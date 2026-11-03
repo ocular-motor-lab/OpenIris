@@ -40,7 +40,7 @@ namespace OpenIris
 
             var croppingRectangle = (imageEye.WhichEye == Eye.Left) ? settings.CroppingLeftEye : settings.CroppingRightEye;
 
-            DrawAllData(image, eyeData, calibrationParameters.EyePhysicalModel, thresholdDark, threshdoldBright, croppingRectangle, settings.MmPerPix);
+            DrawAllData(image, eyeData, calibrationParameters.EyeModelFor(imageEye.Intrinsics), thresholdDark, threshdoldBright, croppingRectangle, settings.MmPerPix);
             return image;
         }
 

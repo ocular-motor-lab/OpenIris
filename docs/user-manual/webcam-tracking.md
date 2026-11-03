@@ -36,6 +36,8 @@ A separate **Webcam face** window also opens, showing the whole webcam image wit
 Use it to check the framing and the lighting, and to see why tracking fails. It closes when tracking
 stops; turn it off with `ShowFaceView`.
 
+![Webcam tracking: the main window with the two eye images, and the Webcam face window](../images/user-manual/webcam-tracking.jpg)
+
 When the webcam starts, the log lists the webcams found and every format, resolution and frame
 rate the one in use can send, followed by what it opened with. If the frame rate is lower than
 expected, check there: many webcams give their high resolutions at full frame rate only in the

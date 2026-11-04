@@ -69,7 +69,6 @@ namespace OpenIris.UI
             this.loadCalibrationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveCalibrationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openSoundRecorderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openLogFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.batchAnalysisToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.convertVideoToMP4ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -388,7 +387,6 @@ namespace OpenIris.UI
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openSoundRecorderToolStripMenuItem,
             this.openLogFolderToolStripMenuItem,
             this.batchAnalysisToolStripMenuItem,
             this.convertVideoToMP4ToolStripMenuItem,
@@ -399,12 +397,6 @@ namespace OpenIris.UI
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(58, 24);
             this.toolsToolStripMenuItem.Text = "Tools";
-            // 
-            // openSoundRecorderToolStripMenuItem
-            // 
-            this.openSoundRecorderToolStripMenuItem.Name = "openSoundRecorderToolStripMenuItem";
-            this.openSoundRecorderToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
-            this.openSoundRecorderToolStripMenuItem.Text = "Open Sound Recorder";
             // 
             // openLogFolderToolStripMenuItem
             // 
@@ -1419,7 +1411,6 @@ namespace OpenIris.UI
         private System.Windows.Forms.ToolStripMenuItem saveCalibrationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadCalibrationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem openSoundRecorderToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private EyeTrackerTrace eyeTrackerTrace;
         private System.Windows.Forms.ToolStripMenuItem openLogFolderToolStripMenuItem;

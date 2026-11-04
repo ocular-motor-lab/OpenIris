@@ -33,7 +33,11 @@ each camera.
   steps**, for example a small manual micrometer stage (10 to 13 mm travel, 0.01 mm marks) or
   spacers of known thickness. It must move along the head's forward axis: any tilt of the stage
   shows as tilt of the cameras. Without it, the tool still measures the pixels per mm and the roll,
-  and assumes the distance.
+  and assumes the distance. Then measure the distance by hand, from the page to the camera's
+  center of projection: that is inside the lens, near its aperture (the iris ring), not the front
+  of the lens or the sensor. Through a mirror, measure along the path of the light. The focal length
+  is only as good as this distance (5 mm off at 60 mm is 8% off); the pixels per mm and the roll
+  don't depend on it.
 
 ## Calibrating
 

@@ -46,7 +46,8 @@ namespace OpenIris.UI
             "4. Start tracking. Focus as for recordings. Found dots are green and the center of each grid is a red cross: it must be in view.\r\n\r\n" +
             "5. Capture at position 0. To measure the distance and the angles of the cameras, also move the page forward and back in known " +
             "steps (for example -1.5 and +1.5 mm, with a micrometer stage or spacers) while it stays in focus, entering each position " +
-            "before capturing. Forward is away from the face, toward the cameras.\r\n\r\n" +
+            "before capturing. Forward is away from the face, toward the cameras. With one position only, enter the distance from the page " +
+            "to the lens: measure to its aperture (the iris ring), not to the front of the lens or the sensor.\r\n\r\n" +
             "6. Calculate. The errors should be a small fraction of a pixel. Apply the results to the settings or save the report, " +
             "then restart tracking and calibrate the eyes again.";
 
@@ -512,7 +513,9 @@ namespace OpenIris.UI
             if (results.Count == 0) return;
 
             var settings = eyeTracker.Settings.EyeTrackingSystemSettings;
-            var cameras = settings.CameraIntrinsics?.Count ?? settings.CameraExtrinsics?.Count ?? (eyeTracker.EyeTrackingSystem?.imageSources?.Count ?? 2);
+            // Empty in the settings (<CameraIntrinsics />) until set: count the cameras of the system.
+            var cameras = new[] { eyeTracker.EyeTrackingSystem?.imageSources?.Count, settings.CameraIntrinsics?.Count, settings.CameraExtrinsics?.Count }
+                .FirstOrDefault(n => n is 1 or 2) ?? (results.ContainsKey(Eye.Both) ? 1 : 2);
             var pixPerMm = results.Values.Average(r => r.PixPerMm);
 
             var message = new StringBuilder($"Set in the settings of {eyeTracker.Settings.EyeTrackerSystem}:\r\n\r\n");

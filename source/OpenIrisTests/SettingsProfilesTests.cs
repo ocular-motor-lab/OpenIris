@@ -201,5 +201,34 @@ namespace OpenIris.Tests
             Assert.AreEqual("Unsaved change", EyeTrackerSettings.LoadFromFolder(folder, "Copy").SessionName, "A copy has the changes not saved yet.");
             Assert.AreNotEqual("Unsaved change", EyeTrackerSettings.LoadFromFolder(folder, "Fresh").SessionName, "A new profile has the default settings.");
         }
+
+        [TestMethod]
+        public void ProfilesCanBeExportedAndImported()
+        {
+            var settings = EyeTrackerSettings.LoadFromFolder(folder);
+            settings.SessionName = "Unsaved change";
+            settings.DataFolder = @"D:\ThisComputer";
+
+            var exported = Path.Combine(folder, "Exported.xml");
+            settings.ExportProfile(EyeTrackerSettings.DefaultProfileName, exported);
+            Assert.IsFalse(File.ReadAllText(exported).Contains("DataFolder"), "The settings of this computer aren't exported.");
+
+            settings.ImportProfile(exported, "Imported");
+            Assert.ThrowsException<ArgumentException>(() => settings.ImportProfile(exported, "imported"));
+            File.WriteAllText(Path.Combine(folder, "Other.xml"), "<Something />");
+            Assert.ThrowsException<InvalidOperationException>(() => settings.ImportProfile(Path.Combine(folder, "Other.xml"), "Other"));
+
+            // The settings file of older versions has the settings of the computer too: not imported.
+            var old = Path.Combine(folder, "EyeTrackerSettings.xml");
+            new EyeTrackerSettings { SessionName = "Old", DataFolder = @"D:\OtherComputer" }.Save(old);
+            settings.ImportProfile(old, "Old");
+
+            Assert.AreEqual(EyeTrackerSettings.DefaultProfileName, settings.Profile, "Imported profiles don't become the active one.");
+            CollectionAssert.AreEqual(new[] { "Default", "Imported", "Old" }, settings.Profiles);
+            Assert.AreEqual("Unsaved change", EyeTrackerSettings.LoadFromFolder(folder, "Imported").SessionName, "Exported with the changes not saved yet.");
+            var oldImported = EyeTrackerSettings.LoadFromFolder(folder, "Old");
+            Assert.AreEqual("Old", oldImported.SessionName);
+            Assert.AreEqual(@"D:\ThisComputer", oldImported.DataFolder, "The settings of this computer stay.");
+        }
     }
 }

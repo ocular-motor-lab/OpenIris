@@ -34,7 +34,11 @@ asks to stop tracking (and recording) first. In the **Profiles** tab:
 - **New…** creates a profile for an eye tracking system, with its default settings;
 - **Duplicate…** copies the selected profile, for example to try other settings while keeping the
   ones that work;
-- **Rename…** and **Delete** (any but the active one).
+- **Rename…** and **Delete** (any but the active one);
+- **Export…** saves the selected profile to a file, to take it to another computer or keep a copy;
+- **Import…** adds a profile from an exported file, with the name you choose. It doesn't become the
+  active one. It also takes the settings file of older versions of OpenIris
+  (`EyeTrackerSettings.xml`).
 
 OpenIris comes with these profiles, to start from:
 
@@ -70,8 +74,8 @@ The files, in the OpenIris folder:
 | `OpenIrisSettings.xml` | The shared settings and the active profile. |
 | `Settings\NAME.xml` | One file per profile, with all the other settings. |
 
-A profile file can be copied to another computer: it doesn't change that computer's data folder or
-ports. The first time, OpenIris turns the settings of older versions (`EyeTrackerSettings.xml`) into
+Exported profiles don't have the settings of the computer: importing one doesn't change that
+computer's data folder or ports. The first time, OpenIris turns the settings of older versions (`EyeTrackerSettings.xml`) into
 the profile **Default**, and leaves the old file as it was.
 
 ## General settings

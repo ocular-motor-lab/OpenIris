@@ -350,6 +350,43 @@ namespace OpenIris
             OnPropertyChanged(this, nameof(Profiles));
         }
 
+        /// <summary>
+        /// Writes a profile to a file, to import it in another computer or keep it. Without the
+        /// settings of this computer.
+        /// </summary>
+        /// <param name="name">Name of the profile.</param>
+        /// <param name="file">File to write.</param>
+        public void ExportProfile(string name, string file)
+        {
+            if (!Profiles.Contains(name, StringComparer.OrdinalIgnoreCase)) throw new ArgumentException($"There is no settings profile '{name}'.");
+
+            // The active profile may have changes that aren't in its file yet.
+            if (string.Equals(name, Profile, StringComparison.OrdinalIgnoreCase)) Save();
+
+            File.Copy(ProfileFile(name), file, overwrite: true);
+            Trace.WriteLine($"Exported the settings profile '{name}' to {file}.");
+        }
+
+        /// <summary>
+        /// Adds a profile from a file exported from this or another computer. It doesn't become the
+        /// active one. Also takes the settings file of older versions (EyeTrackerSettings.xml), without
+        /// its settings of the computer.
+        /// </summary>
+        /// <param name="file">File with the profile.</param>
+        /// <param name="name">Name of the new profile.</param>
+        public void ImportProfile(string file, string name)
+        {
+            CheckNewProfileName(name);
+            if (RootElement(file) != nameof(EyeTrackerSettings)) throw new InvalidOperationException($"{Path.GetFileName(file)} is not a settings profile of OpenIris.");
+
+            var settings = ReadProfile(file) ?? throw new InvalidOperationException($"The settings profile {Path.GetFileName(file)} could not be read. See the log.");
+
+            // Written again, not copied: it is checked, and has only the settings of a profile.
+            WriteProfile(name.Trim(), settings);
+            Trace.WriteLine($"Imported the settings profile '{name.Trim()}' from {file}.");
+            OnPropertyChanged(this, nameof(Profiles));
+        }
+
         private void WriteProfile(string name, EyeTrackerSettings settings)
         {
             Directory.CreateDirectory(ProfilesFolder);

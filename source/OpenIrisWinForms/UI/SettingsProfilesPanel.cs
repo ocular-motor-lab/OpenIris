@@ -27,6 +27,7 @@ namespace OpenIris.UI
         private readonly Button useButton;
         private readonly Button renameButton;
         private readonly Button deleteButton;
+        private readonly Button exportButton;
         private readonly PropertyGrid profileSettingsGrid;
         private readonly PropertyGrid computerSettingsGrid;
 
@@ -57,8 +58,11 @@ namespace OpenIris.UI
             var duplicateButton = NewButton("Duplicate...", DuplicateSelected);
             renameButton = NewButton("Rename...", RenameSelected);
             deleteButton = NewButton("Delete", DeleteSelected);
+            exportButton = NewButton("Export...", ExportSelected);
+            var importButton = NewButton("Import...", Import);
+            exportButton.Margin = new Padding(8, 12, 0, 6);
             var buttons = new FlowLayoutPanel { Dock = DockStyle.Right, FlowDirection = FlowDirection.TopDown, AutoSize = true, WrapContents = false };
-            buttons.Controls.AddRange(new Control[] { useButton, newButton, duplicateButton, renameButton, deleteButton });
+            buttons.Controls.AddRange(new Control[] { useButton, newButton, duplicateButton, renameButton, deleteButton, exportButton, importButton });
 
             var hint = new Label
             {
@@ -72,7 +76,7 @@ namespace OpenIris.UI
             // As many lines as the width needs (an AutoSize label docked at the bottom stays one line).
             hint.Resize += (o, e) => hint.Height = hint.GetPreferredSize(new Size(hint.Width, 0)).Height;
 
-            var profilesBox = new GroupBox { Text = "Profiles", Dock = DockStyle.Top, Height = 260, Padding = new Padding(8) };
+            var profilesBox = new GroupBox { Text = "Profiles", Dock = DockStyle.Top, Height = 340, Padding = new Padding(8) };
             profilesBox.Controls.Add(profilesList);
             profilesBox.Controls.Add(buttons);
             profilesBox.Controls.Add(hint);
@@ -148,6 +152,7 @@ namespace OpenIris.UI
             useButton.Enabled = Selected != null && !IsActive(Selected);
             renameButton.Enabled = Selected != null;
             deleteButton.Enabled = Selected != null && !IsActive(Selected);
+            exportButton.Enabled = Selected != null;
         }
 
         private void DrawProfile(object sender, DrawItemEventArgs e)
@@ -215,6 +220,44 @@ namespace OpenIris.UI
             if (MessageBox.Show(this, $"Delete the settings profile '{profile}'?", "Delete profile", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
             {
                 Try(() => eyeTracker.Settings.DeleteProfile(profile));
+            }
+        }
+
+        private void ExportSelected()
+        {
+            if (!(Selected is string profile)) return;
+
+            using var dialog = new SaveFileDialog
+            {
+                Title = $"Export the settings profile '{profile}'",
+                FileName = profile + ".xml",
+                Filter = "OpenIris settings profile (*.xml)|*.xml",
+            };
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                Try(() => eyeTracker.Settings.ExportProfile(profile, dialog.FileName));
+            }
+        }
+
+        private void Import()
+        {
+            using var dialog = new OpenFileDialog
+            {
+                Title = "Import a settings profile",
+                Filter = "OpenIris settings profile (*.xml)|*.xml|All files (*.*)|*.*",
+            };
+            if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+            // The name of the file, unless there is a profile with that name already.
+            var name = Path.GetFileNameWithoutExtension(dialog.FileName);
+            var suggestion = name;
+            for (var i = 2; eyeTracker.Settings.Profiles.Contains(suggestion, StringComparer.OrdinalIgnoreCase); i++) suggestion = $"{name} {i}";
+
+            var newName = TextInputDialog.Show(this, "Import profile", $"Name of the profile imported from {Path.GetFileName(dialog.FileName)}:", suggestion);
+            if (newName != null)
+            {
+                Try(() => eyeTracker.Settings.ImportProfile(dialog.FileName, newName));
+                Select(newName);
             }
         }
 

@@ -19,38 +19,63 @@ namespace OpenIris
 
     /// <summary>
     /// A printed dot grid for the camera calibration (Tools > Camera calibration): square grids of
-    /// dots with a fiducial of missing dots at the center, where the eye goes: the center dot, the two
-    /// to its right and the one above it. The arms have different lengths, so the fiducial gives the
-    /// numbering of the dots, the orientation and whether the image is mirrored. The PDF comes from
-    /// tools/make-calibration-target.py: keep both in step.
+    /// dots, one for each eye, with a fiducial of missing dots at the center, where the eye goes: the
+    /// center dot, some to its right and some above it. How many says which grid and which eye: UpArm
+    /// above, UpArm + 1 to the right for the left eye, UpArm + 2 for the right eye. The arms have
+    /// different lengths, so the fiducial also gives the numbering of the dots, the orientation and
+    /// whether the image is mirrored. The PDF comes from tools/make-calibration-target.py: keep both
+    /// in step.
     /// </summary>
     public sealed class CameraCalibrationTarget
     {
         /// <summary>
-        /// The missing dots of the fiducial, as (column, row) from the center, rows growing downward.
+        /// The length of the printed rulers, to measure the scale of the print, in mm.
         /// </summary>
-        public static readonly IReadOnlyList<(int Column, int Row)> Fiducial = new[] { (0, 0), (1, 0), (2, 0), (0, -1) };
+        public const double RulerMm = 150;
+
+        /// <summary>
+        /// The distance between the centers of the grids of the two eyes on the page, in mm.
+        /// </summary>
+        public const double DistanceBetweenEyesMm = 63;
 
         /// <summary>
         /// The grids of the printed page (OpenIris-calibration-targets.pdf).
         /// </summary>
         public static readonly IReadOnlyList<CameraCalibrationTarget> Printed = new[]
         {
-            new CameraCalibrationTarget("A", 1.0, 0.5, 31),
-            new CameraCalibrationTarget("B", 1.5, 0.75, 21),
-            new CameraCalibrationTarget("C", 0.75, 0.375, 41),
+            new CameraCalibrationTarget("A", 1.0, 0.5, 31, 1),
+            new CameraCalibrationTarget("B", 1.5, 0.75, 21, 2),
+            new CameraCalibrationTarget("C", 0.75, 0.375, 41, 3),
         };
 
         /// <summary>
         /// Initializes a grid.
         /// </summary>
-        public CameraCalibrationTarget(string name, double pitchMm, double dotDiameterMm, int dotsPerSide)
+        public CameraCalibrationTarget(string name, double pitchMm, double dotDiameterMm, int dotsPerSide, int upArm)
         {
             Name = name;
             PitchMm = pitchMm;
             DotDiameterMm = dotDiameterMm;
             DotsPerSide = dotsPerSide;
+            UpArm = upArm;
         }
+
+        /// <summary>Gets the number of missing dots above the center of the fiducial.</summary>
+        public int UpArm { get; }
+
+        /// <summary>
+        /// The number of missing dots to the right of the center of the fiducial for an eye.
+        /// </summary>
+        public int RightArm(Eye eye) => UpArm + (eye == Eye.Right ? 2 : 1);
+
+        /// <summary>
+        /// The missing dots of the fiducial for an eye, as (column, row) from the center, rows growing downward.
+        /// </summary>
+        public IReadOnlyList<(int Column, int Row)> Fiducial(Eye eye) =>
+            new[] { (0, 0) }
+                .Concat(Enumerable.Range(1, RightArm(eye)).Select(k => (k, 0)))
+                .Concat(Enumerable.Range(1, UpArm).Select(k => (0, -k)))
+                .ToArray();
 
         /// <summary>Gets the name of the grid on the printed page.</summary>
         public string Name { get; }
@@ -76,8 +101,11 @@ namespace OpenIris
     /// </summary>
     public sealed class DotGrid
     {
-        internal DotGrid(PointF[] positions, (int Column, int Row)[] indices, bool fiducialFound, bool mirrored, PointF center, double pitchPixels)
+        internal DotGrid(PointF[] positions, (int Column, int Row)[] indices, bool fiducialFound, bool mirrored, PointF center, double pitchPixels,
+            CameraCalibrationTarget? target = null, Eye eye = Eye.Both)
         {
+            Target = target;
+            Eye = eye;
             Positions = positions;
             Indices = indices;
             FiducialFound = fiducialFound;
@@ -85,6 +113,12 @@ namespace OpenIris
             Center = center;
             PitchPixels = pitchPixels;
         }
+
+        /// <summary>Gets which printed grid it is, from the fiducial (null if not found).</summary>
+        public CameraCalibrationTarget? Target { get; }
+
+        /// <summary>Gets which eye the grid is for, from the fiducial (Both if not found).</summary>
+        public Eye Eye { get; }
 
         /// <summary>Gets the centers of the dots, in pixels of the image.</summary>
         public PointF[] Positions { get; }
@@ -139,7 +173,7 @@ namespace OpenIris
                 return new DotGrid(positions, indices, false, false, AffineAt(positions, indices, (0, 0)), pitch);
             }
 
-            var (h, u, v) = fiducial.Value;
+            var (h, u, v, target, eye) = fiducial.Value;
             var printed = indices
                 .Select(i => (Dot(Sub(i, h), u), -Dot(Sub(i, h), v)))
                 .ToArray();
@@ -149,7 +183,7 @@ namespace OpenIris
             var up = Add(Scale(a, v.Item1), Scale(b, v.Item2));
             var mirrored = right.X * up.Y - right.Y * up.X > 0;
 
-            return new DotGrid(positions, printed, true, mirrored, AffineAt(positions, printed, (0, 0)), pitch);
+            return new DotGrid(positions, printed, true, mirrored, AffineAt(positions, printed, (0, 0)), pitch, target, eye);
         }
 
         // Dark round blobs: local threshold, contours, then centroids weighted by how dark each pixel is.
@@ -217,17 +251,21 @@ namespace OpenIris
             return centers;
         }
 
-        // The fiducial: four missing dots h, h + u, h + 2u (printed right) and h + v (printed up), each
-        // surrounded by dots, so the edge of the view doesn't count.
-        private static ((int, int) Center, (int, int) Right, (int, int) Up)? FindFiducial(HashSet<(int, int)> occupied)
+        // The fiducial of one of the printed grids: missing dots h, h + k u (printed right) and h + k v
+        // (printed up), all surrounded by dots, so the edge of the view doesn't count.
+        private static ((int, int) Center, (int, int) Right, (int, int) Up, CameraCalibrationTarget Target, Eye Eye)? FindFiducial(HashSet<(int, int)> occupied)
         {
+            var patterns = CameraCalibrationTarget.Printed
+                .SelectMany(t => new[] { Eye.Left, Eye.Right }.Select(e => (Target: t, Eye: e, Right: t.RightArm(e), Up: t.UpArm)))
+                .ToArray();
+
             var steps = new[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
             var minX = occupied.Min(i => i.Item1);
             var maxX = occupied.Max(i => i.Item1);
             var minY = occupied.Min(i => i.Item2);
             var maxY = occupied.Max(i => i.Item2);
 
-            var found = new List<((int, int), (int, int), (int, int))>();
+            var found = new List<((int, int), (int, int), (int, int), CameraCalibrationTarget, Eye)>();
             for (int x = minX; x <= maxX; x++)
             {
                 for (int y = minY; y <= maxY; y++)
@@ -237,16 +275,24 @@ namespace OpenIris
 
                     foreach (var u in steps)
                     {
+                        if (occupied.Contains(Add(h, u))) continue;
+
                         foreach (var v in new[] { (-u.Item2, u.Item1), (u.Item2, -u.Item1) })
                         {
-                            var holes = new[] { h, Add(h, u), Add(h, Scale(u, 2)), Add(h, v) };
-                            if (holes.Any(occupied.Contains)) continue;
+                            foreach (var pattern in patterns)
+                            {
+                                var holes = new[] { h }
+                                    .Concat(Enumerable.Range(1, pattern.Right).Select(k => Add(h, Scale(u, k))))
+                                    .Concat(Enumerable.Range(1, pattern.Up).Select(k => Add(h, Scale(v, k))))
+                                    .ToArray();
+                                if (holes.Any(occupied.Contains)) continue;
 
-                            var surrounded = holes
-                                .SelectMany(hole => steps.Select(s => Add(hole, s)))
-                                .Where(p => !holes.Contains(p))
-                                .All(occupied.Contains);
-                            if (surrounded) found.Add((h, u, v));
+                                var surrounded = holes
+                                    .SelectMany(hole => steps.Select(s => Add(hole, s)))
+                                    .Where(p => !holes.Contains(p))
+                                    .All(occupied.Contains);
+                                if (surrounded) found.Add((h, u, v, pattern.Target, pattern.Eye));
+                            }
                         }
                     }
                 }

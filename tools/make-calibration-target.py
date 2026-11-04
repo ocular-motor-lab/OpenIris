@@ -1,11 +1,18 @@
 """Dot-grid calibration targets for OpenIris eye cameras, as a vector PDF (US Letter, print at 100%).
 
-Each grid has an L-shaped fiducial of missing dots at its center: the center dot, the two to its right
-and the one above it. The center is where the eye goes. The arms have different lengths, so the camera
-calibration tool (Tools > Camera calibration) can number the dots and tell orientation and mirroring.
-It knows these grids (CameraCalibrationTarget): keep both in step.
+Three sizes of grid (A, B, C), each as a pair for the left and right eye, 63 mm apart (a typical adult
+interpupillary distance), so one page held in front of the face serves both cameras. The page faces
+the cameras, so the subject's right eye is on the left of the page.
 
-    python tools/make-calibration-target.py source/OpenIrisWinForms/Resources/OpenIris-calibration-targets.pdf
+Each grid has an L-shaped fiducial of missing dots at its center, where the eye goes: the center, L
+dots to its right and U dots above it. U is the grid (A 1, B 2, C 3) and L is U + 1 for the left eye,
+U + 2 for the right eye, so the camera calibration tool (Tools > Camera calibration) knows which grid
+and which eye it sees. The arms have different lengths, so it can also tell orientation and
+mirroring. CameraCalibrationTarget has the same grids: keep both in step.
+
+    python tools/make-calibration-target.py docs/downloads/OpenIris-calibration-targets.pdf
+
+OpenIrisWinForms embeds that file, and the website serves it.
 """
 import sys
 import zlib
@@ -13,6 +20,11 @@ import zlib
 MM = 72 / 25.4
 PAGE_W, PAGE_H = 215.9, 279.4
 K = 0.5522847498
+IPD = 63.0
+RULER = 150
+
+# name, pitch, dot diameter, dots per side, up arm of the fiducial
+GRIDS = [("A", 1.0, 0.5, 31, 1), ("B", 1.5, 0.75, 21, 2), ("C", 0.75, 0.375, 41, 3)]
 
 ops = []
 
@@ -38,21 +50,29 @@ def text(x, y, s, size=8):
     ops.append(f"BT /F1 {size} Tf {x * MM:.3f} {(PAGE_H - y) * MM:.3f} Td ({s}) Tj ET")
 
 
-def grid(cx, cy, pitch, diameter, n, label):
+def grid(cx, cy, name, pitch, diameter, n, up, right_eye):
     half = n // 2
-    missing = {(0, 0), (1, 0), (2, 0), (0, -1)}  # center, two right, one up (rows grow downward)
+    right = up + (2 if right_eye else 1)
+    # Rows grow downward: up is -row.
+    missing = {(0, 0)} | {(k, 0) for k in range(1, right + 1)} | {(0, -k) for k in range(1, up + 1)}
     for row in range(-half, half + 1):
         for col in range(-half, half + 1):
             if (col, row) not in missing:
                 circle(cx + col * pitch, cy + row * pitch, diameter / 2)
     span = 2 * half * pitch
-    # Caliper marks: short lines on the outer dot rows/columns, exactly span apart.
-    for d in (-half * pitch, half * pitch):
-        line(cx + d, cy - span / 2 - 3, cx + d, cy - span / 2 - 1.5)
-        line(cx - span / 2 - 3, cy + d, cx - span / 2 - 1.5, cy + d)
-    text(cx - span / 2, cy + span / 2 + 4, label, 7)
-    text(cx - span / 2, cy + span / 2 + 7,
-         f"{n} x {n} dots, outer dots {span:.0f} mm apart", 7)
+    eye = "RIGHT" if right_eye else "LEFT"
+    text(cx - span / 2, cy + span / 2 + 4, f"{name}: subject's {eye} eye", 8)
+    text(cx - span / 2, cy + span / 2 + 7.5, f"pitch {pitch} mm, dots {diameter} mm, {n} x {n}", 6.5)
+
+
+def pair(cy, name, pitch, diameter, n, up):
+    mid = PAGE_W / 2
+    grid(mid - IPD / 2, cy, name, pitch, diameter, n, up, right_eye=True)
+    grid(mid + IPD / 2, cy, name, pitch, diameter, n, up, right_eye=False)
+    # The midline, for the nose.
+    for y in range(int(cy - 12), int(cy + 12), 3):
+        line(mid, y, mid, y + 1.5, 0.2)
+    text(mid - 4, cy + 16, "midline", 6)
 
 
 def ruler(x, y, length, vertical):
@@ -69,20 +89,18 @@ def ruler(x, y, length, vertical):
 
 
 text(15, 15, "OpenIris camera calibration targets", 12)
-text(15, 21, "Print at 100% / Actual size (no fit to page, no scaling). Laser printer, matte paper.", 8)
-text(15, 25, "Measure the rulers and the outer dots with calipers and enter the measured pitch (printers scale x and y differently).", 8)
-text(15, 29, "The missing dots mark the center (where the eye goes): the center, two to its right and one above it. Glue flat on a rigid plate.", 8)
+text(15, 21, "Print at 100% / Actual size (no fit to page, no scaling), laser printer, matte paper. Glue flat on something rigid.", 8)
+text(15, 25, f"Measure both {RULER} mm rulers with calipers and enter what they measure in the tool (printers scale a little, differently in x and y).", 8)
+text(15, 29, f"Hold the page facing the cameras, level, midline on the nose: each eye behind the center (missing dots) of its grid, {IPD:.0f} mm apart.", 8)
+text(15, 33, "Use one size (A, B or C) for both eyes. For another eye distance, cut the grids apart.", 8)
 
-grid(50, 70, 1.0, 0.5, 31, "A: pitch 1.0 mm, dots 0.5 mm")
-grid(140, 70, 1.0, 0.5, 31, "A: pitch 1.0 mm, dots 0.5 mm (spare)")
-grid(50, 150, 1.5, 0.75, 21, "B: pitch 1.5 mm, dots 0.75 mm (more blur tolerant)")
-grid(140, 150, 0.75, 0.375, 41, "C: pitch 0.75 mm, dots 0.375 mm (finer)")
+for i, (name, pitch, diameter, n, up) in enumerate(GRIDS):
+    pair(62 + 63 * i, name, pitch, diameter, n, up)
 
-ruler(15, 215, 150, vertical=False)
-text(15, 220, "150 mm", 7)
-ruler(203, 100, 150, vertical=True)
-text(190, 254, "150 mm", 7)
-text(15, 230, "Outer dots of every grid are 30 mm apart: measured pitch = measured span / gaps (A 30, B 20, C 40).", 7)
+ruler((PAGE_W - RULER) / 2, 240, RULER, vertical=False)
+text((PAGE_W - RULER) / 2, 245, f"{RULER} mm (horizontal)", 7)
+ruler(200, 50, RULER, vertical=True)
+text(172, 50 + RULER + 5, f"{RULER} mm (vertical)", 7)
 
 content = zlib.compress("\n".join(["0 g 0 G 1 J"] + ops).encode("latin-1"), 9)
 objects = [

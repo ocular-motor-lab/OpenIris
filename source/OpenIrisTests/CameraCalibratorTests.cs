@@ -17,7 +17,7 @@ namespace OpenIris.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     /// <summary>
-    /// The camera calibration tool with images of the dot grid rendered through a known camera: a
+    /// The camera calibration tool with images of the dot grids rendered through a known camera: a
     /// window of the sensor, tilted below the eye and rolled, a bit out of focus and noisy.
     /// </summary>
     [TestClass]
@@ -34,6 +34,11 @@ namespace OpenIris.Tests
             Quaternion.CreateFromAxisAngle(Vector3.UnitY, 15 * (float)Math.PI / 180) *
             Quaternion.CreateFromAxisAngle(Vector3.UnitX, 5 * (float)Math.PI / 180), 70);
 
+        // The target is 10 mm in front of the eye center, which the camera sees 15 deg from straight ahead.
+        private static readonly double TruePixPerMm = F / (70 - 10 * Math.Cos(15 * Math.PI / 180));
+
+        private static CameraCalibrationTarget A => CameraCalibrationTarget.Printed[0];
+
         private static CameraExtrinsics Turned(Quaternion headTurn, float distanceMm)
         {
             var q = CameraExtrinsics.Facing(distanceMm).Rotation * Quaternion.Inverse(headTurn);
@@ -44,33 +49,37 @@ namespace OpenIris.Tests
             return new CameraExtrinsics(rvec.X, rvec.Y, rvec.Z, 0, 0, distanceMm);
         }
 
-        // The grid A at a position along the head's forward axis, as the camera sees it in its window.
-        private static CameraCalibrationCapture Render(double positionMm, CameraCalibrationOptions options)
+        private static PointF[] Project(IEnumerable<MCvPoint3D32f> points)
         {
             var imageK = CameraK.Cropped(Window.Location);
+            using var rvec = new Matrix<double>(new double[] { TrueExtrinsics.Rx, TrueExtrinsics.Ry, TrueExtrinsics.Rz });
+            using var tvec = new Matrix<double>(new double[] { TrueExtrinsics.Tx, TrueExtrinsics.Ty, TrueExtrinsics.Tz });
+            using var k = new Matrix<double>(new double[,] { { imageK.Fx, 0, imageK.Cx }, { 0, imageK.Fy, imageK.Cy }, { 0, 0, 1 } });
+            using var noDistortion = new Matrix<double>(1, 5);
+            return CvInvoke.ProjectPoints(points.ToArray(), rvec, tvec, k, noDistortion, null, 0);
+        }
+
+        // A grid at a position along the head's forward axis, 10 mm in front of the eye center, as
+        // the camera sees it in its window. The printer may scale it.
+        private static CameraCalibrationCapture Render(double positionMm, CameraCalibrationTarget target, Eye eye, double printScaleX = 1, double printScaleY = 1)
+        {
             const int Super = 4;
             using var big = new Image<Gray, byte>(Window.Width * Super, Window.Height * Super, new Gray(200));
 
-            var target = options.Target;
+            var fiducial = target.Fiducial(eye);
             var half = target.DotsPerSide / 2;
             var points = new List<MCvPoint3D32f>();
             for (int row = -half; row <= half; row++)
             {
                 for (int column = -half; column <= half; column++)
                 {
-                    if (CameraCalibrationTarget.Fiducial.Contains((column, row))) continue;
-                    points.Add(new MCvPoint3D32f((float)(options.EyeCenterBehindTargetMm + positionMm), (float)(column * options.PitchXMm), (float)(-row * options.PitchYMm)));
+                    if (fiducial.Contains((column, row))) continue;
+                    points.Add(new MCvPoint3D32f((float)(10 + positionMm), (float)(column * target.PitchMm * printScaleX), (float)(-row * target.PitchMm * printScaleY)));
                 }
             }
 
-            using var rvec = new Matrix<double>(new double[] { TrueExtrinsics.Rx, TrueExtrinsics.Ry, TrueExtrinsics.Rz });
-            using var tvec = new Matrix<double>(new double[] { TrueExtrinsics.Tx, TrueExtrinsics.Ty, TrueExtrinsics.Tz });
-            using var k = new Matrix<double>(new double[,] { { imageK.Fx, 0, imageK.Cx }, { 0, imageK.Fy, imageK.Cy }, { 0, 0, 1 } });
-            using var noDistortion = new Matrix<double>(1, 5);
-            var projected = CvInvoke.ProjectPoints(points.ToArray(), rvec, tvec, k, noDistortion, null, 0);
-
             var radius = target.DotDiameterMm / 2 * F / 70 * Super;
-            foreach (var p in projected)
+            foreach (var p in Project(points))
             {
                 // In 1/16 of a pixel (shift 4), so the centers aren't rounded.
                 var center = new Point((int)Math.Round(((p.X + 0.5) * Super - 0.5) * 16), (int)Math.Round(((p.Y + 0.5) * Super - 0.5) * 16));
@@ -86,9 +95,9 @@ namespace OpenIris.Tests
 
             var grid = DotGrid.Find(image);
             Assert.IsNotNull(grid, "Dots found");
-            Assert.IsTrue(grid!.FiducialFound, "Fiducial found");
+            Assert.IsTrue(grid!.FiducialFound, $"Fiducial of {target.Name} {eye} found");
             Assert.IsFalse(grid.Mirrored, "Not mirrored");
-            return new CameraCalibrationCapture(positionMm, grid, image.Size, imageK, 1);
+            return new CameraCalibrationCapture(positionMm, grid, image.Size, CameraK.Cropped(Window.Location), 1);
         }
 
         private static double AngleBetween(Quaternion a, Quaternion b) =>
@@ -100,37 +109,50 @@ namespace OpenIris.Tests
         [TestMethod]
         public void FindsAndNumbersTheDots()
         {
-            var options = new CameraCalibrationOptions();
-            var capture = Render(0, options);
+            var capture = Render(0, A, Eye.Left);
 
             // The window sees about 31 x 19 mm of the 30 mm grid.
             Assert.IsTrue(capture.Grid.Count > 400, $"Dots found: {capture.Grid.Count}");
             Assert.AreEqual(capture.Grid.Count, capture.Grid.Indices.Distinct().Count(), "Each dot numbered once");
-            Assert.IsFalse(capture.Grid.Indices.Any(i => CameraCalibrationTarget.Fiducial.Contains(i)), "No dot where the fiducial is");
+            Assert.IsFalse(capture.Grid.Indices.Any(i => A.Fiducial(Eye.Left).Contains(i)), "No dot where the fiducial is");
 
             // The dot to the left of the center is where the camera puts it.
-            var eye = new MCvPoint3D32f((float)options.EyeCenterBehindTargetMm, (float)-options.PitchXMm, 0);
-            var imageK = CameraK.Cropped(Window.Location);
-            using var rvec = new Matrix<double>(new double[] { TrueExtrinsics.Rx, TrueExtrinsics.Ry, TrueExtrinsics.Rz });
-            using var tvec = new Matrix<double>(new double[] { TrueExtrinsics.Tx, TrueExtrinsics.Ty, TrueExtrinsics.Tz });
-            using var k = new Matrix<double>(new double[,] { { imageK.Fx, 0, imageK.Cx }, { 0, imageK.Fy, imageK.Cy }, { 0, 0, 1 } });
-            using var noDistortion = new Matrix<double>(1, 5);
-            var expected = CvInvoke.ProjectPoints(new[] { eye }, rvec, tvec, k, noDistortion, null, 0)[0];
+            var expected = Project(new[] { new MCvPoint3D32f(10, (float)-A.PitchMm, 0) })[0];
             var found = capture.Grid.Positions[Array.IndexOf(capture.Grid.Indices, (-1, 0))];
             Assert.IsTrue(Math.Abs(found.X - expected.X) < 0.2 && Math.Abs(found.Y - expected.Y) < 0.2, $"Dot left of center at {found}, expected {expected}");
         }
 
         /// <summary>
+        /// The fiducial says which grid of the page it is, and for which eye.
+        /// </summary>
+        [TestMethod]
+        public void RecognizesEachGridAndEye()
+        {
+            foreach (var target in CameraCalibrationTarget.Printed)
+            {
+                foreach (var eye in new[] { Eye.Left, Eye.Right })
+                {
+                    var grid = Render(0, target, eye).Grid;
+                    Assert.AreSame(target, grid.Target, $"Grid {target.Name} {eye}");
+                    Assert.AreEqual(eye, grid.Eye, $"Grid {target.Name} {eye}");
+                }
+            }
+        }
+
+        /// <summary>
         /// With the target moved in steps of 1.5 mm, the focal length, the pose of the camera and the
-        /// pixels per mm come back.
+        /// pixels per mm come back, also from a print scaled differently in x and y once the rulers
+        /// are measured.
         /// </summary>
         [TestMethod]
         public void RecoversTheCameraFromDepthSteps()
         {
-            var options = new CameraCalibrationOptions();
-            var captures = new[] { -1.5, 0, 1.5 }.Select(z => Render(z, options)).ToArray();
+            // About what a printer does: 1 mm off over the 150 mm rulers.
+            const double ScaleX = 1.0067, ScaleY = 0.995;
+            var options = new CameraCalibrationOptions { RulerXMm = 150 * ScaleX, RulerYMm = 150 * ScaleY };
+            var captures = new[] { -1.5, 0, 1.5 }.Select(z => Render(z, A, Eye.Right, ScaleX, ScaleY)).ToArray();
 
-            var result = CameraCalibrator.Calibrate(captures, CameraK, options, "Test camera");
+            var result = CameraCalibrator.Calibrate(captures, CameraK, options, Eye.Right, "Test camera");
             Console.WriteLine(result.Report);
 
             Assert.IsTrue(result.DistanceMeasured);
@@ -141,10 +163,7 @@ namespace OpenIris.Tests
             var angle = AngleBetween(TrueExtrinsics.Rotation, result.Extrinsics.Rotation);
             Assert.IsTrue(angle < 0.5, $"Rotation off by {angle} deg");
             Assert.AreEqual(70, result.Extrinsics.Tz, 1.5, "Distance");
-
-            // The target is 10 mm in front of the eye center, which the camera sees 15 deg from straight ahead.
-            var expectedPixPerMm = F / (70 - options.EyeCenterBehindTargetMm * Math.Cos(15 * Math.PI / 180));
-            Assert.AreEqual(expectedPixPerMm, result.PixPerMm, expectedPixPerMm * 0.01, "Pixels per mm");
+            Assert.AreEqual(TruePixPerMm, result.PixPerMm, TruePixPerMm * 0.01, "Pixels per mm");
             StringAssert.Contains(result.Report, "below straight ahead");
             StringAssert.Contains(result.Report, "CameraIntrinsics: Fx");
         }
@@ -157,14 +176,25 @@ namespace OpenIris.Tests
         public void OnePositionAssumesTheDistance()
         {
             var options = new CameraCalibrationOptions { AssumedDistanceMm = 60 };
-            var captures = new[] { Render(0, options), Render(0, options) };
+            var captures = new[] { Render(0, A, Eye.Left), Render(0, A, Eye.Left) };
 
-            var result = CameraCalibrator.Calibrate(captures, CameraK, options, "Test camera");
+            var result = CameraCalibrator.Calibrate(captures, CameraK, options, Eye.Left, "Test camera");
 
             Assert.IsFalse(result.DistanceMeasured);
-            var expectedPixPerMm = F / (70 - options.EyeCenterBehindTargetMm * Math.Cos(15 * Math.PI / 180));
-            Assert.AreEqual(expectedPixPerMm, result.PixPerMm, expectedPixPerMm * 0.02, "Pixels per mm");
+            Assert.AreEqual(TruePixPerMm, result.PixPerMm, TruePixPerMm * 0.02, "Pixels per mm");
             StringAssert.Contains(result.Report, "ASSUMED");
+        }
+
+        /// <summary>
+        /// A camera that sees the grid of the other eye (cameras swapped) is noticed.
+        /// </summary>
+        [TestMethod]
+        public void NoticesSwappedCameras()
+        {
+            var captures = new[] { Render(0, A, Eye.Right) };
+            var error = Assert.ThrowsException<InvalidOperationException>(() =>
+                CameraCalibrator.Calibrate(captures, CameraK, new CameraCalibrationOptions(), Eye.Left, "Test camera"));
+            StringAssert.Contains(error.Message, "swapped");
         }
 
         /// <summary>
@@ -173,25 +203,26 @@ namespace OpenIris.Tests
         [TestMethod]
         public void NoticesAMirroredImage()
         {
-            var options = new CameraCalibrationOptions();
-            var capture = Render(0, options);
-            var mirrored = DotGrid.Find(RenderMirrored(options));
+            var capture = Render(0, A, Eye.Left);
+            var mirrored = DotGrid.Find(RenderMirrored(A, Eye.Left));
             Assert.IsNotNull(mirrored);
             Assert.IsTrue(mirrored!.FiducialFound);
             Assert.IsTrue(mirrored.Mirrored);
+            Assert.AreEqual(Eye.Left, mirrored.Eye);
             Assert.ThrowsException<InvalidOperationException>(() => CameraCalibrator.Calibrate(
-                new[] { new CameraCalibrationCapture(0, mirrored, capture.ImageSize, capture.ImageIntrinsics, 1) }, CameraK, options, "Test camera"));
+                new[] { new CameraCalibrationCapture(0, mirrored, capture.ImageSize, capture.ImageIntrinsics, 1) }, CameraK, new CameraCalibrationOptions(), Eye.Left, "Test camera"));
         }
 
-        private static Image<Gray, byte> RenderMirrored(CameraCalibrationOptions options)
+        private static Image<Gray, byte> RenderMirrored(CameraCalibrationTarget target, Eye eye)
         {
             var image = new Image<Gray, byte>(Window.Width, Window.Height, new Gray(200));
-            var half = options.Target.DotsPerSide / 2;
+            var fiducial = target.Fiducial(eye);
+            var half = target.DotsPerSide / 2;
             for (int row = -half; row <= half; row++)
             {
                 for (int column = -half; column <= half; column++)
                 {
-                    if (CameraCalibrationTarget.Fiducial.Contains((column, row))) continue;
+                    if (fiducial.Contains((column, row))) continue;
                     var center = new Point(Window.Width / 2 - 20 * column, Window.Height / 2 + 20 * row);
                     CvInvoke.Circle(image, center, 5, new MCvScalar(40), -1, LineType.AntiAlias);
                 }

@@ -55,18 +55,21 @@ namespace OpenIris
     }
 
     /// <summary>
-    /// What the camera calibration needs besides the views: the measured grid and where the eye is.
+    /// What the camera calibration needs besides the views: the scale of the print and where the eye is.
     /// </summary>
     public sealed class CameraCalibrationOptions
     {
-        /// <summary>Gets or sets the grid used.</summary>
-        public CameraCalibrationTarget Target { get; set; } = CameraCalibrationTarget.Printed[0];
+        /// <summary>
+        /// Gets or sets what the horizontal ruler of the printed page measures, in mm (150 if the
+        /// printer doesn't scale).
+        /// </summary>
+        public double RulerXMm { get; set; } = CameraCalibrationTarget.RulerMm;
 
-        /// <summary>Gets or sets the measured distance between the outer dots, horizontally, in mm.</summary>
-        public double MeasuredSpanXMm { get; set; } = 30;
-
-        /// <summary>Gets or sets the measured distance between the outer dots, vertically, in mm.</summary>
-        public double MeasuredSpanYMm { get; set; } = 30;
+        /// <summary>
+        /// Gets or sets what the vertical ruler of the printed page measures, in mm (150 if the
+        /// printer doesn't scale).
+        /// </summary>
+        public double RulerYMm { get; set; } = CameraCalibrationTarget.RulerMm;
 
         /// <summary>
         /// Gets or sets how far the center of rotation of the eye is behind the target at position 0,
@@ -83,11 +86,11 @@ namespace OpenIris
         /// <summary>Gets or sets whether to estimate the radial distortion (k1).</summary>
         public bool EstimateDistortion { get; set; } = true;
 
-        /// <summary>Gets the measured distance between dots, horizontally, in mm.</summary>
-        public double PitchXMm => MeasuredSpanXMm / (Target.DotsPerSide - 1);
+        /// <summary>Gets the distance between dots of a grid as printed, horizontally, in mm.</summary>
+        public double PitchXMm(CameraCalibrationTarget target) => target.PitchMm * RulerXMm / CameraCalibrationTarget.RulerMm;
 
-        /// <summary>Gets the measured distance between dots, vertically, in mm.</summary>
-        public double PitchYMm => MeasuredSpanYMm / (Target.DotsPerSide - 1);
+        /// <summary>Gets the distance between dots of a grid as printed, vertically, in mm.</summary>
+        public double PitchYMm(CameraCalibrationTarget target) => target.PitchMm * RulerYMm / CameraCalibrationTarget.RulerMm;
     }
 
     /// <summary>
@@ -146,11 +149,12 @@ namespace OpenIris
         /// <summary>
         /// Calibrates a camera.
         /// </summary>
-        /// <param name="captures">The views, all with the fiducial found and not mirrored.</param>
+        /// <param name="captures">The views, all of the same grid, with the fiducial found and not mirrored.</param>
         /// <param name="cameraIntrinsics">The intrinsics the camera has now, for the whole sensor (CameraEye.Intrinsics): the principal point is kept.</param>
-        /// <param name="options">The measured grid and where the eye is.</param>
+        /// <param name="options">The scale of the print and where the eye is.</param>
+        /// <param name="eye">The eye the camera looks at: it must see that eye's grid (Both: any).</param>
         /// <param name="title">What is calibrated, for the report (system, eye, camera).</param>
-        public static CameraCalibrationResult Calibrate(IReadOnlyList<CameraCalibrationCapture> captures, CameraIntrinsics cameraIntrinsics, CameraCalibrationOptions options, string title)
+        public static CameraCalibrationResult Calibrate(IReadOnlyList<CameraCalibrationCapture> captures, CameraIntrinsics cameraIntrinsics, CameraCalibrationOptions options, Eye eye, string title)
         {
             if (captures.Count == 0) throw new InvalidOperationException("Capture at least one view of the target.");
             if (cameraIntrinsics.IsEmpty || captures.Any(c => c.ImageIntrinsics.IsEmpty))
@@ -160,13 +164,19 @@ namespace OpenIris
             if (captures.Any(c => c.Grid.Mirrored))
                 throw new InvalidOperationException("The target looks mirrored: check the camera orientation in the settings.");
 
+            var target = captures[0].Grid.Target!;
+            if (captures.Any(c => c.Grid.Target != target))
+                throw new InvalidOperationException("Use the same grid (A, B or C) in all the views.");
+            if (eye != Eye.Both && captures.Any(c => c.Grid.Eye != eye))
+                throw new InvalidOperationException($"The {eye.ToString().ToLowerInvariant()} camera sees the grid of the other eye: are the cameras swapped?");
+
             // All views in one frame with the principal point at the middle of the first image, so the
             // window of the camera may move between views (OpenCV wants it inside the image).
             var imageSize = captures[0].ImageSize;
             var principal = new PointF(imageSize.Width / 2f, imageSize.Height / 2f);
 
-            var pitchX = options.PitchXMm;
-            var pitchY = options.PitchYMm;
+            var pitchX = options.PitchXMm(target);
+            var pitchY = options.PitchYMm(target);
             var objectPoints = new List<MCvPoint3D32f>();
             var imagePoints = new List<PointF>();
             var ranges = new List<(int Start, int Count)>();
@@ -237,7 +247,7 @@ namespace OpenIris
             var targetCenter = Vector3.Transform(ToVector3(HeadPoint(options, 0, 0, 0)), extrinsics.Rotation) + new Vector3(extrinsics.Tx, extrinsics.Ty, extrinsics.Tz);
             var pixPerMm = f / targetCenter.Z;
 
-            var report = MakeReport(title, captures, options, intrinsics, extrinsics, pixPerMm, k1, rms, rmsPerCapture, distanceMeasured);
+            var report = MakeReport(title, captures, options, target, intrinsics, extrinsics, pixPerMm, k1, rms, rmsPerCapture, distanceMeasured);
             return new CameraCalibrationResult(intrinsics, extrinsics, pixPerMm, k1, rms, rmsPerCapture, distanceMeasured, report);
         }
 
@@ -266,7 +276,7 @@ namespace OpenIris
         }
 
         private static string MakeReport(string title, IReadOnlyList<CameraCalibrationCapture> captures, CameraCalibrationOptions options,
-            CameraIntrinsics intrinsics, CameraExtrinsics extrinsics, double pixPerMm, double k1, double rms, double[] rmsPerCapture, bool distanceMeasured)
+            CameraCalibrationTarget target, CameraIntrinsics intrinsics, CameraExtrinsics extrinsics, double pixPerMm, double k1, double rms, double[] rmsPerCapture, bool distanceMeasured)
         {
             var c = CultureInfo.InvariantCulture;
             var r = new StringBuilder();
@@ -287,8 +297,9 @@ namespace OpenIris
             Line(DateTime.Now.ToString("yyyy-MM-dd HH:mm", c));
             Line();
             Line("Target");
-            Line(string.Format(c, "  Grid {0}, {1} x {1} dots, designed pitch {2} mm", options.Target.Name, options.Target.DotsPerSide, options.Target.PitchMm));
-            Line(string.Format(c, "  Measured outer dots {0:0.00} x {1:0.00} mm: pitch {2:0.0000} x {3:0.0000} mm", options.MeasuredSpanXMm, options.MeasuredSpanYMm, options.PitchXMm, options.PitchYMm));
+            Line(string.Format(c, "  Grid {0} for the {1} eye, {2} x {2} dots, designed pitch {3} mm", target.Name, captures[0].Grid.Eye.ToString().ToLowerInvariant(), target.DotsPerSide, target.PitchMm));
+            Line(string.Format(c, "  Rulers measured {0:0.00} x {1:0.00} mm ({2} mm as designed): pitch {3:0.0000} x {4:0.0000} mm",
+                options.RulerXMm, options.RulerYMm, CameraCalibrationTarget.RulerMm, options.PitchXMm(target), options.PitchYMm(target)));
             Line(string.Format(c, "  Eye's center of rotation {0:0.0} mm behind the target at position 0", options.EyeCenterBehindTargetMm));
             Line();
             Line("Views");

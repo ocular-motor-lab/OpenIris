@@ -46,8 +46,9 @@
     <Compile Update="UI\VideoPlayerUI.cs" SubType="UserControl" />
   </ItemGroup>
   <ItemGroup>
-    <!-- The printable dot grids of the camera calibration tool, from tools/make-calibration-target.py. -->
-    <EmbeddedResource Include="Resources\OpenIris-calibration-targets.pdf" LogicalName="OpenIris.Resources.OpenIris-calibration-targets.pdf" />
+    <!-- The printable dot grids of the camera calibration tool, from tools/make-calibration-target.py.
+         In docs so the website has it too. -->
+    <EmbeddedResource Include="..\..\docs\downloads\OpenIris-calibration-targets.pdf" LogicalName="OpenIris.Resources.OpenIris-calibration-targets.pdf" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj" />

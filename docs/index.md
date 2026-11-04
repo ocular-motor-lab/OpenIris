@@ -17,6 +17,7 @@ hide:
 [Get started](user-manual/installation.md){ .md-button .md-button--primary }
 [User manual](user-manual/README.md){ .md-button }
 [Write a plugin](plugin-development/creating-a-plugin.md){ .md-button }
+[Report a bug](https://github.com/ocular-motor-lab/OpenIris/issues){ .md-button }
 
 </div>
 
@@ -84,5 +85,7 @@ Symposium on Eye Tracking Research and Applications (ETRA '24)*. Article 17, 1â€
 [doi:10.1145/3649902.3653348](https://doi.org/10.1145/3649902.3653348)
 
 OpenIris is open source, under the [GNU AGPL v3](https://github.com/ocular-motor-lab/OpenIris/blob/main/LICENSE),
-and developed on [GitHub](https://github.com/ocular-motor-lab/OpenIris). Questions and ideas are
+and developed on [GitHub](https://github.com/ocular-motor-lab/OpenIris). Found a bug? Please
+[report it on GitHub](https://github.com/ocular-motor-lab/OpenIris/issues): see
+[what to include](user-manual/troubleshooting.md#reporting-a-problem). Questions and ideas are
 welcome in [Discussions](https://github.com/ocular-motor-lab/OpenIris/discussions).

@@ -52,12 +52,20 @@ OpenIris computer, and that your program doesn't wait for a reply after commands
 
 ## OpenIris closed without warning
 
-Look at the end of the log file for a line starting with `FATAL ERROR:`, and send it to us with a
-description of what you were doing. If there is no such line, Windows can save a crash report: see
+Look at the end of the log file for a line starting with `FATAL ERROR:`, and
+[report it on GitHub](#reporting-a-problem) with a description of what you were doing. If there is no such line, Windows can save a crash report: see
 [When OpenIris crashes](../plugin-development/contributing.md#when-openiris-crashes).
 
 ## Reporting a problem
 
-Open an issue at
-[github.com/ocular-motor-lab/OpenIris/issues](https://github.com/ocular-motor-lab/OpenIris/issues),
-with the OpenIris version (**Help > About**), the eye tracking system, what you did, and the log.
+Report bugs on GitHub: open an issue at
+[github.com/ocular-motor-lab/OpenIris/issues](https://github.com/ocular-motor-lab/OpenIris/issues)
+(you need a free GitHub account). First look whether someone already reported it. Include:
+
+- the OpenIris version (**Help > About**),
+- the eye tracking system and cameras,
+- what you did, what you expected, and what happened instead,
+- the log (**Tools > Open log folder**), and a screenshot if it helps.
+
+Questions that aren't bugs are welcome in
+[Discussions](https://github.com/ocular-motor-lab/OpenIris/discussions).

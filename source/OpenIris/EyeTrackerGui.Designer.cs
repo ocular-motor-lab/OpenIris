@@ -76,6 +76,7 @@ namespace OpenIris.UI
             this.showIPNetworkInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trimVideosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.labelVideosToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cameraCalibrationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -393,7 +394,8 @@ namespace OpenIris.UI
             this.convertVideoToRGBToolStripMenuItem,
             this.showIPNetworkInfoToolStripMenuItem,
             this.trimVideosToolStripMenuItem,
-            this.labelVideosToolStripMenuItem});
+            this.labelVideosToolStripMenuItem,
+            this.cameraCalibrationToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(58, 24);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -427,6 +429,12 @@ namespace OpenIris.UI
             this.labelVideosToolStripMenuItem.Name = "labelVideosToolStripMenuItem";
             this.labelVideosToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
             this.labelVideosToolStripMenuItem.Text = "Label videos by hand";
+            //
+            // cameraCalibrationToolStripMenuItem
+            //
+            this.cameraCalibrationToolStripMenuItem.Name = "cameraCalibrationToolStripMenuItem";
+            this.cameraCalibrationToolStripMenuItem.Size = new System.Drawing.Size(238, 26);
+            this.cameraCalibrationToolStripMenuItem.Text = "Camera calibration";
             //
             // showIPNetworkInfoToolStripMenuItem
             // 
@@ -1444,6 +1452,7 @@ namespace OpenIris.UI
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.ToolStripMenuItem trimVideosToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem labelVideosToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cameraCalibrationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cancelCalibrationToolStripMenuItem;
         private System.Windows.Forms.ImageList imageList2;
         private System.Windows.Forms.Panel panel1;

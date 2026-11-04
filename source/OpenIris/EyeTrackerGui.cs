@@ -217,6 +217,7 @@ namespace OpenIris.UI
 
                 eyeTrackerUICommands.TrimVideosCommand.Bind(trimVideosToolStripMenuItem);
                 eyeTrackerUICommands.LabelVideosCommand.Bind(labelVideosToolStripMenuItem);
+                eyeTrackerUICommands.CameraCalibrationCommand.Bind(cameraCalibrationToolStripMenuItem);
                 eyeTrackerUICommands.ConvertVideoToRGBCommand.Bind(convertVideoToRGBToolStripMenuItem);
                 eyeTrackerUICommands.ConvertVideoToMp4.Bind(convertVideoToMP4ToolStripMenuItem); 
 

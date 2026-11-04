@@ -11,12 +11,14 @@ OpenIris, see the [plugin development manual](../plugin-development/README.md).)
 4. [The data file](data-file.md): every column of the data, and how to read it in MATLAB or
    Python.
 5. [Calibration](calibration.md)
-6. [Playing and processing videos](processing-videos.md)
-7. [Webcam tracking](webcam-tracking.md): eye tracking with an ordinary webcam, no special hardware.
-8. [Labeling videos by hand](manual-labeling.md): marking the pupil or anything else frame by
+6. [Camera calibration](camera-calibration.md): measuring the eye cameras (pixels per mm, focal
+   length, position and angles) with a printed dot grid, with the tool in the Tools menu.
+7. [Playing and processing videos](processing-videos.md)
+8. [Webcam tracking](webcam-tracking.md): eye tracking with an ordinary webcam, no special hardware.
+9. [Labeling videos by hand](manual-labeling.md): marking the pupil or anything else frame by
    frame, with the tool in the Tools menu.
-9. [Remote control](remote-control.md): controlling OpenIris from MATLAB, Python or your stimulus
+10. [Remote control](remote-control.md): controlling OpenIris from MATLAB, Python or your stimulus
    program.
-10. [Plugins](plugins.md): recommended plugins, such as OpenIrisDPI, and how to install them.
-11. [Hardware](hardware.md): cameras, IR filters and illuminators, synchronization, 3D-printed parts.
-12. [Troubleshooting](troubleshooting.md)
+11. [Plugins](plugins.md): recommended plugins, such as OpenIrisDPI, and how to install them.
+12. [Hardware](hardware.md): cameras, IR filters and illuminators, synchronization, 3D-printed parts.
+13. [Troubleshooting](troubleshooting.md)

@@ -58,6 +58,7 @@ namespace OpenIris
 
         public EyeTrackerUICommand TrimVideosCommand;
         public EyeTrackerUICommand LabelVideosCommand;
+        public EyeTrackerUICommand CameraCalibrationCommand;
         public EyeTrackerUICommand ConvertVideoToRGBCommand;
         public EyeTrackerUICommand ConvertVideoToMp4;
 
@@ -264,6 +265,10 @@ namespace OpenIris
 
                     new ManualLabelingForm(options.VideoFileNames, eyeTracker.Settings).Show();
                 },
+                canExecute: () => true);
+
+            CameraCalibrationCommand = new EyeTrackerUICommand(
+                execute: async _ => new CameraCalibrationForm(eyeTracker).Show(),
                 canExecute: () => true);
 
             ConvertVideoToMp4 = new EyeTrackerUICommand(

@@ -26,6 +26,7 @@ nav:
       - Tracking and recording: user-manual/tracking-and-recording.md
       - The data file: user-manual/data-file.md
       - Calibration: user-manual/calibration.md
+      - Camera calibration: user-manual/camera-calibration.md
       - Playing and processing videos: user-manual/processing-videos.md
       - Webcam tracking: user-manual/webcam-tracking.md
       - Labeling videos by hand: user-manual/manual-labeling.md

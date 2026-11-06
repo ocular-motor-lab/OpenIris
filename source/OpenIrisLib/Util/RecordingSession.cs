@@ -42,7 +42,7 @@ namespace OpenIris
         private VideoWriter? processedVideoWriter;
         private readonly System.Collections.Generic.Dictionary<Eye, VideoFrameBuffer> rawFrameBuffers = new();
         private Size rawVideoSize;
-        private readonly int[] rawVideoFrameCounts = new int[2];
+        private readonly int[] rawVideoFrameCounts = new int[3]; // Left, Right, Both (one camera for both eyes)
         private StreamWriter? rawVideoFramesFile;
         private VideoFrameBuffer? processedFrameBuffer;
         private StreamWriter? eventFile;
@@ -417,7 +417,16 @@ namespace OpenIris
                 if (!rawFrameBuffers.TryGetValue(image.WhichEye, out var buffer)) rawFrameBuffers[image.WhichEye] = buffer = new VideoFrameBuffer();
                 VideoTools.WriteFrame(writer, image.Image, buffer);
 
-                positions[(int)image.WhichEye] = rawVideoFrameCounts[(int)image.WhichEye]++.ToString(CultureInfo.InvariantCulture);
+                var position = rawVideoFrameCounts[(int)image.WhichEye]++.ToString(CultureInfo.InvariantCulture);
+                if (image.WhichEye == Eye.Both)
+                {
+                    // One camera for both eyes: the same frame of the same video for both.
+                    positions[0] = positions[1] = position;
+                }
+                else
+                {
+                    positions[(int)image.WhichEye] = position;
+                }
             }
 
             rawVideoFramesFile?.WriteLine($"{imagesEye.images.GetFrameNumber()} {positions[0]} {positions[1]}");

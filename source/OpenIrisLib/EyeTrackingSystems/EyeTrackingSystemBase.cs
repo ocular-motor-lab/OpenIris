@@ -71,10 +71,28 @@ namespace OpenIris
         }
 
         /// <summary>
-        /// 
+        /// Called when tracking stops. By default, stops and frees the cameras the system created.
+        /// Without it they stay connected until the garbage collector frees them, from its own thread,
+        /// maybe while a new camera object uses the same camera: that crashed OpenIris inside the
+        /// FlyCapture SDK. Systems that free their cameras themselves override this.
         /// </summary>
         public virtual void Dispose()
         {
+            foreach (var camera in (imageSources ?? Enumerable.Empty<IImageEyeSource?>()).OfType<CameraEye>().Distinct())
+            {
+                try
+                {
+                    camera.Stop();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine("ERROR stopping a camera: " + ex.Message);
+                }
+
+                camera.Dispose();
+            }
+
+            imageSources = null;
         }
 
         /// <summary>

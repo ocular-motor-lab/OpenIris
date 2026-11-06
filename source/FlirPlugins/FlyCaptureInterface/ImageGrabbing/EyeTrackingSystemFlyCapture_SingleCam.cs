@@ -39,10 +39,7 @@ namespace SpinnakerInterface
             }
             catch (Exception ex)
             {
-                if (camera != null)
-                {
-                   camera.Stop();
-                }
+                camera?.Dispose();
 
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs. " + ex.Message, ex);
             }

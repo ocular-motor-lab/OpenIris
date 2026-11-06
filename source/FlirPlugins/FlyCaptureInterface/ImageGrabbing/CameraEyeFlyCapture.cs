@@ -120,6 +120,19 @@ namespace OpenIris.ImageGrabbing
         {
             if (disposing)
             {
+                // Stopped and disconnected here, not by the finalizer of the ManagedCamera, which
+                // crashed in the SDK (access violation) once a newer camera object used the camera.
+                Stop();
+
+                try
+                {
+                    if (camera.IsConnected()) camera.Disconnect();
+                }
+                catch (FC2Exception ex)
+                {
+                    Trace.WriteLine("Error disconnecting the camera. " + ex.Message);
+                }
+
                 camera.Dispose();
             }
         }

@@ -68,7 +68,7 @@ namespace OpenIris
             }
             catch (Exception ex)
             {
-                camera?.Stop();
+                camera?.Dispose();
 
                 throw new InvalidOperationException("Error starting cameras captures or setting GPIOs.", ex);
             }
@@ -129,6 +129,13 @@ namespace OpenIris
         /// <returns>List of image eye source objects.</returns>
         protected override EyeCollection<VideoEye?> CreateVideos(EyeCollection<string?> filenames)
         {
+            // The recordings of this system: one video of the whole camera frame, both eyes, with the
+            // camera's embedded info (frame counter at byte 24) in the first pixels. PreProcessImages splits it.
+            if (filenames.Count == 1)
+            {
+                return new EyeCollection<VideoEye?>(new VideoEyeFlyCapture(Eye.Both, filenames[Eye.Both], VideoEyeFlyCapture.PositionOfEmbeddedInfo.TopLeftHorizontal, 24));
+            }
+
             VideoEyeFlyCapture? videoLeftEye = null;
             VideoEyeFlyCapture? videoRightEye = null;
 

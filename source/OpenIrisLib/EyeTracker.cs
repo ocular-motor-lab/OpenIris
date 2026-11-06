@@ -515,12 +515,17 @@ namespace OpenIris
                     IncreaseContrast = false,
                     AddEyelids = false,
                 });
-                using var recordingTask = RecordingSession.Start(Calibration, Settings, RecordingSession.Describe(this, options));
+                var recordingTask = RecordingSession.Start(Calibration, Settings, RecordingSession.Describe(this, options));
 
                 // Play video and wait until it finishes. This will also start the tracking
-                using var playingVideoTask = PlayVideo(options);
+                var playingVideoTask = PlayVideo(options);
 
-                if (VideoPlayer is null) throw new InvalidOperationException("Video Player failed");
+                if (VideoPlayer is null)
+                {
+                    // Playing failed before the player was created: its error says why.
+                    await playingVideoTask;
+                    throw new InvalidOperationException("Video Player failed");
+                }
 
                 // Stop recoridng When the video finishes up to the last frame that needed to be recorded.
                 VideoPlayer.VideoFinished += (_, e) => RecordingSession?.Stop(VideoPlayer.FrameRange.End);

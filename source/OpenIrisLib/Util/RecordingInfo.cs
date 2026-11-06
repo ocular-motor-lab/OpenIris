@@ -103,8 +103,16 @@ namespace OpenIris
                 if (videos is not null)
                 {
                     Section("Processing videos");
-                    Line("Left video", videos.VideoFileNames[Eye.Left] ?? "none", 2);
-                    Line("Right video", videos.VideoFileNames[Eye.Right] ?? "none", 2);
+                    if (videos.VideoFileNames.Count == 1)
+                    {
+                        // Systems with one camera for both eyes.
+                        Line("Video", videos.VideoFileNames[Eye.Both] ?? "none", 2);
+                    }
+                    else
+                    {
+                        Line("Left video", videos.VideoFileNames[Eye.Left] ?? "none", 2);
+                        Line("Right video", videos.VideoFileNames[Eye.Right] ?? "none", 2);
+                    }
                     Line("Recorded with", videos.EyeTrackingSystem, 2);
                     Line("Calibration file", string.IsNullOrEmpty(videos.CalibrationFileName) ? "none" : videos.CalibrationFileName, 2);
                     Line("Frames", videos.CustomRange.IsEmpty ? "all" : $"{videos.CustomRange.Begin} to {videos.CustomRange.End}", 2);

@@ -37,5 +37,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: failed-baselines-${{ matrix.configuration }}
-          path: source/OpenIrisTests/bin/${{ matrix.configuration }}/actual/
+          path: bin/OpenIrisTests/${{ matrix.configuration }}/actual/
           if-no-files-found: ignore

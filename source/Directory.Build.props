@@ -18,6 +18,14 @@
     <OpenIrisPluginsDir>$(OpenIrisBinDir)Plugins\</OpenIrisPluginsDir>
     <OutputPath>$(OpenIrisBinDir)</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Intermediate files (obj) in the solution's bin folder too, one folder per project, not next to the
+         sources. Has to be set here: the SDK uses it before it reads the project file. -->
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)..\bin\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <!-- GitVersion 5 passes this path to gitversion.exe without quotes, so it can't have spaces (the full path
+         has them): relative to the project folder, where MSBuild runs. -->
+    <!-- Old obj and bin folders next to the sources aren't sources. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj\**;bin\**</DefaultItemExcludes>
+    <GitVersionOutputFile>$([MSBuild]::MakeRelative($([MSBuild]::EnsureTrailingSlash($(MSBuildProjectDirectory))), $(BaseIntermediateOutputPath)))gitversion.json</GitVersionOutputFile>
     <!-- Don't copy ZedGraph's (an Emgu.CV.UI dependency) translated resources. -->
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>

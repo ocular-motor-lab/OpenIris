@@ -41,7 +41,7 @@ dotnet test source/OpenIrisTests/OpenIrisTests.csproj --no-build -c Debug -p:Pla
 ## When a baseline test fails
 
 The failure message lists the first values that changed, and the complete new output is written
-to `bin\<Configuration>\actual\`. If the change was not intended, it's a regression. If it was
+to `bin\OpenIrisTests\<Configuration>\actual\` (at the root of the repository). If the change was not intended, it's a regression. If it was
 intended (for example, an improvement to a tracker), accept the new results by running the tests
 with the environment variable `OPENIRIS_UPDATE_BASELINES=1`, then commit the updated CSV files:
 

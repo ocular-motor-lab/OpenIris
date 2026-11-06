@@ -8,8 +8,8 @@
     <!-- So NuGet copies the native OpenCV (runtimes\win-x64\native) next to the tests, as for OpenIris.exe. -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <!-- Tests build into their own folder, not next to OpenIris.exe. -->
-    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <!-- Tests build into their own folder in the solution's bin, not next to OpenIris.exe. -->
+    <OutputPath>$(MSBuildThisFileDirectory)..\..\bin\OpenIrisTests\$(Configuration)\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

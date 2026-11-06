@@ -32,6 +32,46 @@ namespace OpenIris.UI
             typeof(Control).GetField("defaultFont", BindingFlags.Static | BindingFlags.NonPublic)?.SetValue(null, DefaultFont);
 
             ToolStripManager.Renderer = new ToolStripProfessionalRenderer(new FlatColorTable()) { RoundedEdges = false };
+
+            Application.AddMessageFilter(new HideFocusCuesOnClick());
+        }
+
+        /// <summary>
+        /// Hides the dotted focus rectangles (focus cues) when a window is clicked, as Windows 10/11 apps do.
+        /// Windows shows them in a window once the keyboard was used in it, or if it was opened from the
+        /// keyboard (Enter, F5 in Visual Studio), and then a clicked tab, button or check box gets one.
+        /// Tab and Alt show them again, for the keyboard.
+        /// </summary>
+        private class HideFocusCuesOnClick : IMessageFilter
+        {
+            private const int WM_LBUTTONDOWN = 0x0201;
+            private const int WM_RBUTTONDOWN = 0x0204;
+            private const int WM_CHANGEUISTATE = 0x0127;
+            private const int WM_QUERYUISTATE = 0x0129;
+            private const int UIS_SET = 1;
+            private const int UISF_HIDEFOCUS = 0x1;
+            private const int GA_ROOT = 2;
+
+            public bool PreFilterMessage(ref Message m)
+            {
+                if (m.Msg != WM_LBUTTONDOWN && m.Msg != WM_RBUTTONDOWN) return false;
+
+                // Before the click is handled, so the control it focuses paints without the rectangle.
+                // The top-level window passes the new state to all its controls.
+                var window = GetAncestor(m.HWnd, GA_ROOT);
+                if (window != System.IntPtr.Zero && ((int)SendMessage(window, WM_QUERYUISTATE, System.IntPtr.Zero, System.IntPtr.Zero) & UISF_HIDEFOCUS) == 0)
+                {
+                    SendMessage(window, WM_CHANGEUISTATE, (System.IntPtr)(UIS_SET | (UISF_HIDEFOCUS << 16)), System.IntPtr.Zero);
+                }
+
+                return false;
+            }
+
+            [System.Runtime.InteropServices.DllImport("user32.dll")]
+            private static extern System.IntPtr GetAncestor(System.IntPtr hwnd, int flags);
+
+            [System.Runtime.InteropServices.DllImport("user32.dll")]
+            private static extern System.IntPtr SendMessage(System.IntPtr hwnd, int msg, System.IntPtr wParam, System.IntPtr lParam);
         }
 
         /// <summary>

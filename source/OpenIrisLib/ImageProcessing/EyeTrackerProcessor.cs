@@ -129,6 +129,7 @@ namespace OpenIris
             started = true;
 
             var processingTasks = new List<Task>();
+            var events = new List<AutoResetEvent?>();
             var errorHandler = new TaskErrorHandler(Stop);
 
             try
@@ -141,10 +142,13 @@ namespace OpenIris
                     {
                         // Create variables for each of the threads
                         //
-                        // Not using a using statement here because the ProcessInputLoop will dispose
-                        // of this events. Otherwise they get disposed before the WhenAll
+                        // The events are disposed in the finally below, after all the tasks have
+                        // finished. Disposing them any earlier (for instance at the end of ProcessLoop)
+                        // races with the eye loops, which may still call Set or WaitOne on them.
                         var newImagesEvents = new EyeCollection<AutoResetEvent?>(new(false), new(false));
                         var eyeDoneEvents = new EyeCollection<AutoResetEvent?>(new(false), new(false));
+                        events.AddRange(newImagesEvents);
+                        events.AddRange(eyeDoneEvents);
                         EyeCollection<EyeTrackingPipelineBase?>?  pipelines = null;
                         EyeTrackerImagesAndData? currentImagesAndData = null;
 
@@ -169,6 +173,7 @@ namespace OpenIris
             finally
             {
                 processingTasks.ForEach(t => t?.Dispose());
+                events.ForEach(e => e?.Dispose());
                 inputBuffer = null;
                 outputWaitingList = null;
             }
@@ -305,28 +310,10 @@ namespace OpenIris
 
                 currentImagesAndData = null;
 
-                // Let the left and right tasks go so they can finish.
+                // Let the left and right tasks go so they can finish. The events are disposed
+                // by Start once all the tasks are done.
                 newImagesEvent[Eye.Left]?.Set();
                 newImagesEvent[Eye.Right]?.Set();
-
-                // Make the events null first to make sure nobody waits on them again
-                // Then dispose them.
-
-                var tempEvent = newImagesEvent[Eye.Left];
-                newImagesEvent[Eye.Left] = null;
-                tempEvent?.Dispose();
-
-                tempEvent = newImagesEvent[Eye.Right];
-                newImagesEvent[Eye.Right] = null;
-                tempEvent?.Dispose();
-                
-                tempEvent = eyeDoneEvent[Eye.Left];
-                eyeDoneEvent[Eye.Left] = null;
-                tempEvent?.Dispose();
-
-                tempEvent = eyeDoneEvent[Eye.Right];
-                eyeDoneEvent[Eye.Right] = null;
-                tempEvent?.Dispose();
             }
         }
 

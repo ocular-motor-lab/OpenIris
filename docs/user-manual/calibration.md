@@ -45,6 +45,7 @@ reference, taken while the subject looks straight ahead.
   | Pupil minus corneal reflection (the default; less sensitive to the camera moving on the head) | Pupil | CR1 |
   | Pupil alone, for example the webcam, which has no corneal reflections (the iris center) | Pupil | None |
   | Dual Purkinje (DPI): first corneal reflection minus the fourth Purkinje image | CR1 | the reflection with the 4th image, for example CR5 |
+  | Webcam, from the appearance of both eyes instead of the iris (experimental, see [Webcam tracking](webcam-tracking.md#appearance-gaze)) | Appearance | ignored |
 
   The ready-made **Webcam** profile already uses the pupil alone.
 

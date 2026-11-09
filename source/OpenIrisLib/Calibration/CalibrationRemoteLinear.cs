@@ -75,7 +75,8 @@ namespace OpenIris.Calibration
     }
 
     /// <summary>
-    /// An enum for differnet signal sources
+    /// What the N-point calibration maps to the gaze: a point of the eye (the signal is a source minus a
+    /// reference), or the embedding of a gaze network.
     /// </summary>
     public enum EyeSignalSource
     {
@@ -85,7 +86,13 @@ namespace OpenIris.Calibration
         CR2,
         CR3,
         CR4,
-        CR5
+        CR5,
+
+        /// <summary>
+        /// The embedding of the webcam's gaze network (<see cref="EyeData.Appearance"/>), mapped to the
+        /// targets by an <see cref="AppearanceGazeMap"/>. Only as the source: the reference is ignored.
+        /// </summary>
+        Appearance,
     }
 
     /// <summary>
@@ -260,7 +267,7 @@ namespace OpenIris.Calibration
         /// The map fitted for each eye, which goes into the calibration and is applied to the data.
         /// Null for an eye whose fit failed.
         /// </summary>
-        public EyeCollection<LinearGazeMap?> Maps { get; } = new EyeCollection<LinearGazeMap?>(null, null);
+        public EyeCollection<EyeCalibrationData?> Maps { get; } = new EyeCollection<EyeCalibrationData?>(null, null);
 
         /// <summary>
         /// Completes the calibration: fits the map of each eye from the median of each fixation.
@@ -271,9 +278,26 @@ namespace OpenIris.Calibration
         {
             foreach (var eye in new[] { Eye.Left, Eye.Right })
             {
-                Maps[eye] = Fit(eye, source, reference);
+                Maps[eye] = source == EyeSignalSource.Appearance ? FitAppearance(eye) : Fit(eye, source, reference);
                 if (Maps[eye] is null) Trace.WriteLine($"N-point calibration: no map for the {eye.ToString().ToLower()} eye (fewer than 3 targets with data, or the data was singular).");
             }
+        }
+
+        /// <summary>
+        /// The map from the embedding of the gaze network, fitted on every frame of the targets.
+        /// </summary>
+        private AppearanceGazeMap? FitAppearance(Eye eye)
+        {
+            var targets = calibration_data
+                .Select(fixation => (target: fixation.fixation_point, frames: (IReadOnlyList<AppearanceEmbedding>)fixation.fixation_data
+                    .Where(data => data.WhichEye == eye && data.Appearance != null)
+                    .Select(data => data.Appearance!)
+                    .ToList()))
+                .Where(t => t.frames.Count > 0)
+                .ToList();
+
+            // As the linear map: at least three targets.
+            return targets.Count < 3 ? null : AppearanceGazeMap.Fit(targets);
         }
 
         private LinearGazeMap? Fit(Eye eye, EyeSignalSource source, EyeSignalSource reference)
@@ -509,7 +533,7 @@ namespace OpenIris.Calibration
         /// Handles incoming messages from the client
         /// 
         /// Messages: 
-        /// SetSource:n  -> Sets SignalSource     (0=None, 1=Pupil, 2=CR1, 3=CR2, 4=CR3, 5=CR4, 6=CR5)
+        /// SetSource:n  -> Sets SignalSource     (0=None, 1=Pupil, 2=CR1, 3=CR2, 4=CR3, 5=CR4, 6=CR5, 7=Appearance)
         /// SetRef:n     -> Sets SignalReference  (0=None, 1=Pupil, 2=CR1, 3=CR2, 4=CR3, 5=CR4, 6=CR5)
         /// FixStart:x,y -> Start collecting data for a fixation, with the ground-truth point at x,y
         /// FixStop      -> Finish collecting data for the previous fixation
@@ -653,11 +677,11 @@ namespace OpenIris.Calibration
         public double CollectSeconds { get => collectSeconds; set => SetProperty(ref collectSeconds, value, nameof(CollectSeconds)); }
         private double collectSeconds = 1.0;
 
-        [Category("Sources"), Description("Source of eye position.")]
+        [Category("Sources"), Description("Source of eye position: the pupil or a reflection (minus the reference), or Appearance, the gaze network of the Webcam iris pipeline (its setting AppearanceGaze must be on; the reference is then ignored).")]
         public EyeSignalSource SignalSource { get => signalSource; set => SetProperty(ref signalSource, value, nameof(SignalSource)); }
         private EyeSignalSource signalSource = EyeSignalSource.Pupil;
 
-        [Category("Sources"), Description("Source of eye reference.")]
+        [Category("Sources"), Description("Point subtracted from the source, None for the source alone. Ignored with the source Appearance.")]
         public EyeSignalSource SignalReference { get => signalReference; set => SetProperty(ref signalReference, value, nameof(SignalReference)); }
         private EyeSignalSource signalReference = EyeSignalSource.CR1;
     }

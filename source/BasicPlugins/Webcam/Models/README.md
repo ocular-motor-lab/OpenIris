@@ -26,5 +26,22 @@ has. They are copied to `Plugins\WebcamModels\`.
   [MediaPipePyTorch](https://github.com/zmurez/MediaPipePyTorch).
 
 Then each was rewritten with `convert_for_opencv.py`, because the ONNX reader of OpenCV 4.1.1 (the
-version in OpenIris's EmguCV) doesn't accept them as they are. The script checks with ONNX Runtime
+version in OpenIris's EmguCV at the time; it is 4.12 now) doesn't accept them as they are. The script checks with ONNX Runtime
 that the outputs don't change. EmguCV gives the same outputs as ONNX Runtime to within 1e-4.
+
+## Appearance gaze
+
+`eye_embedding.onnx` is the eye-embedding network 1.0.0 of [saccade.js](https://saccade.jspsych.org)
+(MIT license, copy in `LICENSE-MIT-saccadejs.txt`), used when the setting `AppearanceGaze` of the
+Webcam iris pipeline is on.
+
+| File | Network | Input | Output |
+| --- | --- | --- | --- |
+| `eye_embedding.onnx` | saccade.js eye-embedding 1.0.0 (CNN and transformer) | 1×36×144×1, gray 0 to 255: both eyes, cut out around face mesh points 226, 446, 27, 257, 23 and 253, stretched and equalized (CLAHE) | `embedding`, 128 numbers; `cal_weight`, how much to trust the frame, 0 to 1 |
+
+It is `https://saccade.jspsych.org/models/eye-embedding/1.0.0/eye_embedding.onnx` (SHA-256
+`5a1a111e37f97bd50fcffccbf6498bf377700d27cd4e3ea5bc5d237541a3c73a`, also in the npm package
+`@saccadejs/core` 1.0.0), rewritten with `convert_eye_embedding.py`: its Gelu nodes are in ONNX
+Runtime's own domain, which OpenCV doesn't read, so they become the same formula in standard nodes.
+EmguCV (OpenCV 4.12) gives the same outputs as ONNX Runtime with the original to within 1e-4
+(`AppearanceTests`). It takes about 100 ms per frame in OpenCV, half that in ONNX Runtime.

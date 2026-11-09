@@ -146,5 +146,11 @@ namespace OpenIris
         /// Pose of the head in the webcam image (see FacePose), or null if the face was not found.
         /// </summary>
         public HeadData? HeadPose { get; set; }
+
+        /// <summary>
+        /// The strip of both eyes for the gaze network (the same object for both eyes), or null if the
+        /// setting AppearanceGaze is off or the face was not found.
+        /// </summary>
+        public AppearanceInput? Appearance { get; set; }
     }
 }

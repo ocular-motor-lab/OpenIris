@@ -127,6 +127,14 @@ namespace OpenIris
         public CameraIntrinsics Intrinsics { get; set; }
 
         /// <summary>
+        /// What a gaze network found in the image of both eyes (the webcam's appearance-based gaze),
+        /// or null. The same for both eyes of a frame. Not saved in the data files, nor in the
+        /// calibration file (which keeps the data of the reference).
+        /// </summary>
+        [System.Xml.Serialization.XmlIgnore]
+        public AppearanceEmbedding? Appearance { get; set; }
+
+        /// <summary>
         /// Creates a copy of the Data.
         /// </summary>
         /// <returns></returns>
@@ -147,6 +155,7 @@ namespace OpenIris
                 TorsionAngle = TorsionAngle,
                 Eyelids = Eyelids?.Copy(),
                 DataQuality = DataQuality,
+                Appearance = Appearance,
             };
 
         }

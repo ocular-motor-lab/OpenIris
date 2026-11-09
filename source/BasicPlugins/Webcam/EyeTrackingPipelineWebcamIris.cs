@@ -23,10 +23,11 @@ namespace OpenIris
     /// In visible light the pupil is hard to see, so the iris center stands in for the pupil center
     /// and the iris diameter for the pupil size.
     /// </remarks>
-    [Export(typeof(EyeTrackingPipelineBase)), PluginDescription("Webcam iris", typeof(EyeTrackingPipelineSettings))]
+    [Export(typeof(EyeTrackingPipelineBase)), PluginDescription("Webcam iris", typeof(EyeTrackingPipelineWebcamIrisSettings))]
     public sealed class EyeTrackingPipelineWebcamIris : EyeTrackingPipelineBase
     {
         private IrisLandmarks? irisLandmarks;
+        private AppearanceNetwork? appearanceNetwork;
 
         public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
@@ -59,6 +60,11 @@ namespace OpenIris
                     Upper = eye.UpperEyelid,
                     Lower = eye.LowerEyelid,
                 },
+
+                // The gaze network, run by the first eye to get here.
+                Appearance = (Settings as EyeTrackingPipelineWebcamIrisSettings)?.AppearanceGaze == true
+                    ? (imageEye.ImageSourceData as EyeCrop)?.Appearance?.GetEmbedding(() => appearanceNetwork ??= new AppearanceNetwork())
+                    : null,
             };
 
             return (data, null);
@@ -67,7 +73,22 @@ namespace OpenIris
         public override void Dispose()
         {
             irisLandmarks?.Dispose();
+            appearanceNetwork?.Dispose();
             base.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Settings of the Webcam iris pipeline.
+    /// </summary>
+    [Serializable]
+    public class EyeTrackingPipelineWebcamIrisSettings : EyeTrackingPipelineSettings
+    {
+        [System.ComponentModel.Category("Appearance gaze"), System.ComponentModel.Description(
+            "Also run the eye-embedding network of saccade.js on an image of both eyes, for the N-point calibration with the signal " +
+            "source Appearance, which maps the network's output to the gaze instead of the iris. Slow, about 100 ms per frame: raise " +
+            "MaxNumberOfProcessingThreads (7 threads process about 12 frames per second on 16 cores), or process recorded videos.")]
+        public bool AppearanceGaze { get => appearanceGaze; set => SetProperty(ref appearanceGaze, value, nameof(AppearanceGaze)); }
+        private bool appearanceGaze;
     }
 }

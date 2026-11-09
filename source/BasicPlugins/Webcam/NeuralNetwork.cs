@@ -38,11 +38,7 @@ namespace OpenIris
         /// <param name="outputNames">Names of the outputs to read.</param>
         public NeuralNetwork(string fileName, int size, params string[] outputNames)
         {
-            var folder = Path.Combine(Path.GetDirectoryName(typeof(NeuralNetwork).Assembly.Location), "WebcamModels");
-            var path = Path.Combine(folder, fileName);
-            if (!File.Exists(path)) throw new FileNotFoundException($"The webcam tracking model {fileName} is missing. It should be in {folder}.", path);
-
-            net = DnnInvoke.ReadNetFromONNX(path);
+            net = DnnInvoke.ReadNetFromONNX(ModelPath(fileName));
             Size = size;
             this.outputNames = outputNames;
 
@@ -56,6 +52,18 @@ namespace OpenIris
         /// Width and height of the input image.
         /// </summary>
         public int Size { get; }
+
+        /// <summary>
+        /// Path of a network in Plugins\WebcamModels.
+        /// </summary>
+        /// <exception cref="FileNotFoundException">If it isn't there.</exception>
+        public static string ModelPath(string fileName)
+        {
+            var folder = Path.Combine(Path.GetDirectoryName(typeof(NeuralNetwork).Assembly.Location), "WebcamModels");
+            var path = Path.Combine(folder, fileName);
+            if (!File.Exists(path)) throw new FileNotFoundException($"The webcam tracking model {fileName} is missing. It should be in {folder}.", path);
+            return path;
+        }
 
         /// <summary>
         /// Runs the network on a grayscale image of Size x Size, repeated in the three color channels.

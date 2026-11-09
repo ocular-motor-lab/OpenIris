@@ -25,6 +25,7 @@ namespace OpenIris
     /// </remarks>
     [Serializable]
     [XmlInclude(typeof(LinearGazeMap))]
+    [XmlInclude(typeof(AppearanceGazeMap))]
     public abstract class EyeCalibrationData
     {
         /// <summary>

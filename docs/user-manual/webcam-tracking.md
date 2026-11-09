@@ -63,6 +63,35 @@ Because the eye images follow the head, head movements mostly don't change the i
 Recordings save the whole webcam image. They can be [processed again](processing-videos.md)
 choosing the Webcam system.
 
+### Appearance gaze
+
+> [!WARNING]
+> Experimental, and not tested with a live webcam yet.
+
+Instead of the iris position, the gaze can come from the appearance of both eyes, with the
+eye-embedding network of [saccade.js](https://saccade.jspsych.org). It looks at an image of both eyes
+(144 × 36 pixels, cut out around points of the face mesh) and gives a list of 128 numbers that
+change with where the eyes look. Those numbers mean nothing until they are calibrated: an
+[N-point calibration](calibration.md#n-point) with **SignalSource** `Appearance` maps them to the
+targets, as saccade.js does (a ridge regression on every frame of every target), and the calibrated
+horizontal and vertical positions (`H`, `V`) come from it. Both eyes get the same gaze. The 128
+numbers are not saved in the data file, so to calibrate a recording again it has to be
+[processed again](processing-videos.md).
+
+To use it:
+
+1. Turn on `AppearanceGaze` in the settings of the `Webcam iris` pipeline.
+2. The network is slow: with the face and the irises, a frame takes about 250 ms. Raise
+   `MaxNumberOfProcessingThreads` so frames are processed in parallel (the face is still followed
+   one frame at a time). On a computer with 16 cores, 7 threads process about 12 frames per second
+   (the 20 seconds of the iPhone sample video in about 50 seconds), so live tracking at 30 frames
+   per second drops frames. Record the video and [process it](processing-videos.md) afterwards
+   for every frame.
+3. Calibrate with N-point and **SignalSource** `Appearance`, with at least 9 targets.
+
+saccade.js reports no accuracy for the network, and suggests measuring it for each participant.
+Validate after calibrating.
+
 ### Head pose
 
 From the face it finds, OpenIris also estimates the pose of the head, fitting a generic face to six
@@ -90,6 +119,6 @@ In frames where the face isn't found, the head columns are `NaN`.
   reliable. The eyelid positions show when the eye is closed.
 - **Glasses** with strong reflections and faces turned far to the side make tracking worse.
 
-The networks are licensed under the Apache License 2.0, a copy of which is in
-`Plugins\WebcamModels\`. Where they come from and how they were converted is described in
+The MediaPipe networks are licensed under the Apache License 2.0, and saccade.js's network under
+the MIT license; copies of both are in `Plugins\WebcamModels\`. Where they come from and how they were converted is described in
 `source\BasicPlugins\Webcam\Models\README.md`.

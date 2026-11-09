@@ -59,26 +59,39 @@ namespace OpenIris
             if (face is null) return images;
 
             var settings = (EyeTrackingSystemWebcamSettings)Settings;
+
+            // The tracker follows the face from frame to frame: one frame at a time, also with more than
+            // one processing thread. The gaze network runs later, in the pipelines, in parallel.
+            EyeCollection<ImageEye?> eyes;
             lock (trackerLock)
             {
                 tracker ??= new WebcamEyeLocator(settings.EyeImageSize);
-            }
+                eyes = tracker.Process(face);
 
-            var eyes = tracker.Process(face);
-
-            // The head pose, carried with the eye images to PostProcessImagesAndData.
-            if (tracker.LastMesh is PointF[] mesh)
-            {
-                var points = new[] { FaceMesh.NoseTip, FaceMesh.Chin, FaceMesh.RightEyeOuterCorner, FaceMesh.LeftEyeOuterCorner, FaceMesh.MouthRightCorner, FaceMesh.MouthLeftCorner }
-                    .Select(i => mesh[i]).ToArray();
-                var pose = FacePose.Estimate(points, face.Size, settings.HorizontalFieldOfView);
-                foreach (var eye in eyes)
+                if (tracker.LastMesh is PointF[] mesh)
                 {
-                    if (eye?.ImageSourceData is EyeCrop crop) crop.HeadPose = pose;
-                }
-            }
+                    // The head pose, carried with the eye images to PostProcessImagesAndData.
+                    var points = new[] { FaceMesh.NoseTip, FaceMesh.Chin, FaceMesh.RightEyeOuterCorner, FaceMesh.LeftEyeOuterCorner, FaceMesh.MouthRightCorner, FaceMesh.MouthLeftCorner }
+                        .Select(i => mesh[i]).ToArray();
+                    var pose = FacePose.Estimate(points, face.Size, settings.HorizontalFieldOfView);
 
-            FaceProcessed?.Invoke(face.Image, tracker, eyes);
+                    // The strip of both eyes for the gaze network, the same for both eyes. Always cut (it is
+                    // quick): the pipeline decides whether to run the network (its setting AppearanceGaze),
+                    // because when a video is processed this runs with the default settings of the system.
+                    var appearance = AppearanceStrip.Cut(face.Image, mesh) is Image<Gray, byte> strip ? new AppearanceInput(strip) : null;
+
+                    foreach (var eye in eyes)
+                    {
+                        if (eye?.ImageSourceData is EyeCrop crop)
+                        {
+                            crop.HeadPose = pose;
+                            crop.Appearance = appearance;
+                        }
+                    }
+                }
+
+                FaceProcessed?.Invoke(face.Image, tracker, eyes);
+            }
             if (Settings.Eye == Eye.Left) eyes[Eye.Right] = null;
             if (Settings.Eye == Eye.Right) eyes[Eye.Left] = null;
             return eyes;

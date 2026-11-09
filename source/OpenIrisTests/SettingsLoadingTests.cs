@@ -115,6 +115,34 @@ namespace OpenIris.Tests
         /// The pipelines convert sizes in mm into pixels with the eye tracking system's pixel scale. A
         /// pipeline chosen for the first time used to keep the default (0.1 mm per pixel) instead.
         /// </summary>
+        /// <summary>
+        /// Settings saved when a pipeline didn't have its own settings type yet (as the Webcam iris
+        /// pipeline before AppearanceGaze) come back with its type, keeping the saved values.
+        /// </summary>
+        [TestMethod]
+        public void PipelineSettingsSavedWithABaseTypeAreUpgraded()
+        {
+            PipelineHarness.EnsurePluginsLoaded();
+            var path = Path.Combine(Path.GetTempPath(), "OpenIrisSettingsTest-" + System.Guid.NewGuid().ToString("N") + ".xml");
+
+            try
+            {
+                var original = new EyeTrackerSettings();
+                original.EyeTrackingPipeline = "JOM";
+                original.AllTrackingPipelinesSettings["JOM"] = new EyeTrackingPipelineSettings { CroppingLeftEye = new System.Drawing.Rectangle(1, 2, 3, 4) };
+                original.Save(path);
+
+                var loaded = EyeTrackerSettings.Load(path);
+
+                Assert.IsInstanceOfType(loaded.TrackingPipelineSettings, typeof(EyeTrackingPipelineJOMSettings));
+                Assert.AreEqual(new System.Drawing.Rectangle(1, 2, 3, 4), loaded.TrackingPipelineSettings.CroppingLeftEye, "The saved value is kept.");
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+
         [TestMethod]
         public void PipelinesGetTheSystemsPixelScale()
         {

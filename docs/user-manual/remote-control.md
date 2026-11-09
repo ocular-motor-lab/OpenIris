@@ -195,7 +195,8 @@ Other messages:
 | `SetSource:n` | Which signal is used as eye position. |
 | `SetRef:n` | Which signal is subtracted as reference. |
 
-For both, `n` is 0 = none, 1 = pupil, 2 to 6 = corneal reflection 1 to 5. The defaults are pupil
+For both, `n` is 0 = none, 1 = pupil, 2 to 6 = corneal reflection 1 to 5, and for the source only, 7 =
+appearance (the webcam's [appearance gaze](webcam-tracking.md#appearance-gaze); the reference is then ignored). The defaults are pupil
 for the source and the first corneal reflection for the reference. For the pupil alone (a webcam),
 send `SetRef:0`; for dual Purkinje, the first reflection minus the one with the fourth Purkinje image
 (see [Calibration](calibration.md#which-method-to-use)).

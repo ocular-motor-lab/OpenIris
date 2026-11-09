@@ -103,11 +103,29 @@ namespace OpenIris
                     return;
                 }
 
+                // Settings saved when the pipeline had fewer of them, with a type it now derives from (for
+                // example the Webcam iris pipeline before it had its own): the pipeline's own type now,
+                // keeping the saved values.
+                EyeTrackingPipelineSettings? upgraded = null;
+                if (AllTrackingPipelinesSettings.TryGetValue(value, out var saved) &&
+                    EyeTrackerPluginManager.EyeTrackingPipelineFactory?.GetDefaultSettings(value) is EyeTrackingPipelineSettings defaults &&
+                    defaults.GetType().IsSubclassOf(saved.GetType()))
+                {
+                    foreach (var property in saved.GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance)
+                        .Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0))
+                    {
+                        property.SetValue(defaults, property.GetValue(saved));
+                    }
+
+                    upgraded = defaults;
+                    AllTrackingPipelinesSettings.Remove(value);
+                }
+
                 // If the dictionary does not contain the settings for the current eye tracking
                 // system, get the defaults and add them.
                 if (!AllTrackingPipelinesSettings.ContainsKey(value))
                 {
-                    var trackingSettings = (EyeTrackingPipelineSettings?)EyeTrackerPluginManager.EyeTrackingPipelineFactory?.GetDefaultSettings(value)
+                    var trackingSettings = upgraded ?? (EyeTrackingPipelineSettings?)EyeTrackerPluginManager.EyeTrackingPipelineFactory?.GetDefaultSettings(value)
                         ?? throw new InvalidOperationException("Bad EyeTrackingPipelineFactory");
 
                     AllTrackingPipelinesSettings.Add(value, trackingSettings);

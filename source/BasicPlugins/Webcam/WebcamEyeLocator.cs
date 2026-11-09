@@ -28,6 +28,9 @@ namespace OpenIris
     {
         private const float MinFaceScore = 0.5f;
 
+        // How far back a frame can come and still be the same video, not a new start.
+        private const ulong MaxFramesOutOfOrder = 30;
+
         /// <summary>
         /// Size of the region given to the face mesh, in multiples of the size of the face.
         /// </summary>
@@ -71,9 +74,15 @@ namespace OpenIris
         {
             var timestamp = image.TimeStamp;
 
-            // A video went back: start again.
-            if (timestamp.FrameNumber < lastFrameNumber) faceRegion = null;
-            lastFrameNumber = timestamp.FrameNumber;
+            // A video went back: start again. With more than one processing thread, frames can come a
+            // little out of order.
+            if (timestamp.FrameNumber + MaxFramesOutOfOrder < lastFrameNumber)
+            {
+                faceRegion = null;
+                lastFrameNumber = timestamp.FrameNumber;
+            }
+
+            lastFrameNumber = Math.Max(lastFrameNumber, timestamp.FrameNumber);
 
             LastScore = 0;
             LastFaceRegion = null;

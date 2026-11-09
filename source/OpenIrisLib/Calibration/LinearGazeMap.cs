@@ -79,6 +79,9 @@ namespace OpenIris
         {
             if (which == EyeSignalSource.None) return new PointF(0, 0);
 
+            // Not a point of the eye: it goes through an AppearanceGazeMap.
+            if (which == EyeSignalSource.Appearance) return null;
+
             PointF point;
             if (which == EyeSignalSource.Pupil)
             {

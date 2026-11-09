@@ -49,30 +49,12 @@ namespace OpenIris.UI
                     Y0 = (int)(img_hgt * y / (float)pic_hgt);
                     break;
                 case PictureBoxSizeMode.Zoom:
-                    float pic_aspect = pic_wid / (float)pic_hgt;
-                    float img_aspect = img_wid / (float)img_wid;
-                    if (pic_aspect > img_aspect)
-                    {
-                        // The PictureBox is wider/shorter than the image.
-                        Y0 = (int)(img_hgt * y / (float)pic_hgt);
-
-                        // The image fills the height of the PictureBox.
-                        // Get its width.
-                        float scaled_width = img_wid * pic_hgt / img_hgt;
-                        float dx = (pic_wid - scaled_width) / 2;
-                        X0 = (int)((x - dx) * img_hgt / (float)pic_hgt);
-                    }
-                    else
-                    {
-                        // The PictureBox is taller/thinner than the image.
-                        X0 = (int)(img_wid * x / (float)pic_wid);
-
-                        // The image fills the height of the PictureBox.
-                        // Get its height.
-                        float scaled_height = img_hgt * pic_wid / img_wid;
-                        float dy = (pic_hgt - scaled_height) / 2;
-                        Y0 = (int)((y - dy) * img_wid / pic_wid);
-                    }
+                    // The image fills the width or the height, keeping its proportions, centered.
+                    float scale = System.Math.Min(pic_wid / (float)img_wid, pic_hgt / (float)img_hgt);
+                    float dx = (pic_wid - (img_wid * scale)) / 2;
+                    float dy = (pic_hgt - (img_hgt * scale)) / 2;
+                    X0 = (int)((x - dx) / scale);
+                    Y0 = (int)((y - dy) / scale);
                     break;
             }
 

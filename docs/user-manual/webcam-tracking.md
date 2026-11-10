@@ -26,8 +26,8 @@ and the iris diameter for the pupil size, in the data file.
 1. Connect the webcam and place it below or above the screen, facing the subject, about 50–70 cm
    away. The face should fill a good part of the image: the more pixels on the eyes, the better.
 2. Light the face evenly from the front. Avoid a bright window behind the subject.
-3. Select the **Webcam** [profile](configuration.md#settings-profiles) on the main window. It uses
-   the `Webcam` eye tracking system and the `Webcam iris` pipeline.
+3. Select the **WebcamMediaPipe** [profile](configuration.md#settings-profiles) on the main window. It
+   uses the `Webcam` eye tracking system and the `Webcam iris` pipeline.
 4. Start tracking. The two eye images appear once the face is found, with the iris circle and the
    eyelids drawn on them.
 
@@ -80,14 +80,16 @@ numbers are not saved in the data file, so to calibrate a recording again it has
 
 To use it:
 
-1. Turn on `AppearanceGaze` in the settings of the `Webcam iris` pipeline.
+1. Select the **WebcamSaccadeJS** profile. It is the WebcamMediaPipe profile with `AppearanceGaze`
+   on in the settings of the `Webcam iris` pipeline, and the N-point calibration set up as below.
 2. The network is slow: with the face and the irises, a frame takes about 250 ms. Raise
    `MaxNumberOfProcessingThreads` so frames are processed in parallel (the face is still followed
    one frame at a time). On a computer with 16 cores, 7 threads process about 12 frames per second
    (the 20 seconds of the iPhone sample video in about 50 seconds), so live tracking at 30 frames
    per second drops frames. Record the video and [process it](processing-videos.md) afterwards
    for every frame.
-3. Calibrate with N-point and **SignalSource** `Appearance`, with at least 9 targets.
+3. Calibrate: N-point with **SignalSource** `Appearance`, 13 targets shown by OpenIris (Local mode,
+   on the display `StimulusDisplay` of the Webcam system). Use at least 9 targets.
 
 saccade.js reports no accuracy for the network, and suggests measuring it for each participant.
 Validate after calibrating.

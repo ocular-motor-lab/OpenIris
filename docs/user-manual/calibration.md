@@ -47,7 +47,8 @@ reference, taken while the subject looks straight ahead.
   | Dual Purkinje (DPI): first corneal reflection minus the fourth Purkinje image | CR1 | the reflection with the 4th image, for example CR5 |
   | Webcam, from the appearance of both eyes instead of the iris (experimental, see [Webcam tracking](webcam-tracking.md#appearance-gaze)) | Appearance | ignored |
 
-  The ready-made **Webcam** profile already uses the pupil alone.
+  The ready-made **WebcamMediaPipe** profile already uses the pupil alone, and **WebcamSaccadeJS** the
+  appearance.
 
 ### N-point
 

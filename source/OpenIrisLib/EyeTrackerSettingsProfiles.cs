@@ -103,7 +103,7 @@ namespace OpenIris
         private static readonly (string name, string system, string pipeline, Action<EyeTrackerSettings> setUp)[] ReadyMadeProfiles =
         {
             ("Simulation", "Simulation", "JOM", s => { }),
-            ("Webcam", "Webcam", "Webcam iris", s =>
+            ("WebcamMediaPipe", "Webcam", "Webcam iris", s =>
             {
                 // No corneal reflections with a webcam: N-point fits the pupil (the iris center) alone.
                 s.CalibrationMethod = OpenIris.Calibration.CalibrationPipelineRemoteLinear.MethodName;
@@ -114,6 +114,21 @@ namespace OpenIris
                 }
 
                 s.CalibrationMethod = "Auto";
+            }),
+            ("WebcamSaccadeJS", "Webcam", "Webcam iris", s =>
+            {
+                // The gaze from saccade.js's network (the pipeline's AppearanceGaze, set by name: the
+                // settings type is in the Webcam plugin), which only means something after an N-point
+                // calibration on it, with the targets shown by OpenIris.
+                s.TrackingPipelineSettings.GetType().GetProperty("AppearanceGaze")?.SetValue(s.TrackingPipelineSettings, true);
+                s.CalibrationMethod = OpenIris.Calibration.CalibrationPipelineRemoteLinear.MethodName;
+                if (s.CalibrationSettings is OpenIris.Calibration.CalibrationSettingsRemoteLinear remoteLinear)
+                {
+                    remoteLinear.SignalSource = OpenIris.Calibration.EyeSignalSource.Appearance;
+                    remoteLinear.SignalReference = OpenIris.Calibration.EyeSignalSource.None;
+                    remoteLinear.Mode = OpenIris.Calibration.NPointMode.Local;
+                    remoteLinear.Targets = OpenIris.Calibration.NPointTargets.Thirteen;
+                }
             }),
             ("Synthetic Eyes", "Synthetic Eyes", "JOM", s =>
             {

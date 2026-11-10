@@ -45,7 +45,8 @@ OpenIris comes with these profiles, to start from:
 | Profile | System and settings |
 | --- | --- |
 | **Simulation** | The Simulation system, which plays sample videos: no cameras needed. The default. |
-| **Webcam** | The Webcam system and the Webcam iris pipeline (see [Webcam tracking](webcam-tracking.md)). |
+| **WebcamMediaPipe** | The Webcam system and the Webcam iris pipeline: the gaze from the iris (see [Webcam tracking](webcam-tracking.md)). |
+| **WebcamSaccadeJS** | The same, with the gaze from saccade.js's network instead, after an N-point calibration (see [Appearance gaze](webcam-tracking.md#appearance-gaze)). Experimental. |
 | **Synthetic Eyes** | Drawn eyes that you rotate from a window, to test tracking and calibration with a known answer: no cameras needed. |
 | **Spinnaker Dual Camera** | Two FLIR cameras at 500 Hz, the JOM pipeline without torsion. |
 | **Spinnaker Dual Camera torsion** | Two FLIR cameras at 250 Hz, the JOM pipeline with torsion. |

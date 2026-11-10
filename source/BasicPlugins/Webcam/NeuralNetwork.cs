@@ -55,8 +55,18 @@ namespace OpenIris
             input = new float[3 * size * size];
             inputHandle = GCHandle.Alloc(input, GCHandleType.Pinned);
 
-            var onnx = OnnxModel.Get(fileName);
-            if (onnx.OnGraphicsCard)
+            OnnxModel? onnx = null;
+            try
+            {
+                onnx = OnnxModel.Get(fileName);
+            }
+            catch (Exception ex) when (!(ex is System.IO.FileNotFoundException))
+            {
+                // ONNX Runtime itself doesn't load: OpenCV still can.
+                Trace.WriteLine($"Webcam models: ONNX Runtime failed for {fileName} ({ex.Message}).");
+            }
+
+            if (onnx?.OnGraphicsCard == true)
             {
                 model = onnx;
                 tensor = new DenseTensor<float>(input, new[] { 1, 3, size, size });

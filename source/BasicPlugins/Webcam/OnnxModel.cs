@@ -29,25 +29,41 @@ namespace OpenIris
         private static readonly Dictionary<string, OnnxModel> Models = new Dictionary<string, OnnxModel>(StringComparer.OrdinalIgnoreCase);
         private static bool nativeLoaded;
 
+        // onnxruntime.dll loads DirectML.dll (Windows' own) only when it is used: check that it is there.
+        private static readonly Lazy<bool> DirectMLLoads = new Lazy<bool>(() =>
+        {
+            var loaded = LoadLibrary("DirectML.dll") != IntPtr.Zero;
+            if (!loaded) Trace.WriteLine("Webcam models: Windows has no DirectML.dll, so the networks run on the processor.");
+            return loaded;
+        });
+
+        private static bool DirectMLAvailable => DirectMLLoads.Value;
+
         private readonly InferenceSession session;
         private readonly object runLock = new object();
 
         private OnnxModel(string fileName)
         {
             var path = ModelPath(fileName);
-            try
+            InferenceSession? onGraphicsCard = null;
+            if (DirectMLAvailable)
             {
-                // DirectML needs these two (see ONNX Runtime's DirectML documentation).
-                using var options = new SessionOptions { EnableMemoryPattern = false, ExecutionMode = ExecutionMode.ORT_SEQUENTIAL };
-                options.AppendExecutionProvider_DML(0);
-                session = new InferenceSession(path, options);
-                OnGraphicsCard = true;
+                try
+                {
+                    // DirectML needs these two (see ONNX Runtime's DirectML documentation).
+                    using var options = new SessionOptions { EnableMemoryPattern = false, ExecutionMode = ExecutionMode.ORT_SEQUENTIAL };
+                    options.AppendExecutionProvider_DML(0);
+                    onGraphicsCard = new InferenceSession(path, options);
+                }
+                catch (Exception ex)
+                {
+                    // Any failure (no DirectX 12 graphics card, an old DirectML...): the processor.
+                    Trace.WriteLine($"Webcam models: {fileName} can't run on the graphics card ({ex.Message}).");
+                }
             }
-            catch (Exception ex) when (ex is OnnxRuntimeException || ex is EntryPointNotFoundException || ex is DllNotFoundException)
-            {
-                Trace.WriteLine($"Webcam models: DirectML is not available for {fileName} ({ex.Message}).");
-                session = new InferenceSession(path);
-            }
+
+            OnGraphicsCard = onGraphicsCard != null;
+            session = onGraphicsCard ?? new InferenceSession(path);
 
             InputName = session.InputMetadata.Keys.First();
             if (OnGraphicsCard) Trace.WriteLine($"Webcam models: {fileName} runs on the graphics card (DirectML).");

@@ -90,7 +90,7 @@ namespace OpenIris.Tests
                 options.AppendExecutionProvider_DML(0);
                 session = new InferenceSession(model, options);
             }
-            catch (OnnxRuntimeException ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("No DirectML, on the processor: " + ex.Message);
                 session = new InferenceSession(model);

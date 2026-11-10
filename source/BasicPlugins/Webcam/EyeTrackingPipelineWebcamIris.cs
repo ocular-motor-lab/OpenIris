@@ -27,7 +27,6 @@ namespace OpenIris
     public sealed class EyeTrackingPipelineWebcamIris : EyeTrackingPipelineBase
     {
         private IrisLandmarks? irisLandmarks;
-        private AppearanceNetwork? appearanceNetwork;
 
         public override (EyeData data, Image<Gray, byte>? imateTorsion) Process(ImageEye imageEye, EyeCalibration eyeCalibrationParameters)
         {
@@ -63,7 +62,7 @@ namespace OpenIris
 
                 // The gaze network, run by the first eye to get here.
                 Appearance = (Settings as EyeTrackingPipelineWebcamIrisSettings)?.AppearanceGaze == true
-                    ? (imageEye.ImageSourceData as EyeCrop)?.Appearance?.GetEmbedding(() => appearanceNetwork ??= new AppearanceNetwork())
+                    ? (imageEye.ImageSourceData as EyeCrop)?.Appearance?.GetEmbedding(() => AppearanceNetwork.Shared)
                     : null,
             };
 
@@ -73,7 +72,6 @@ namespace OpenIris
         public override void Dispose()
         {
             irisLandmarks?.Dispose();
-            appearanceNetwork?.Dispose();
             base.Dispose();
         }
     }
@@ -86,8 +84,8 @@ namespace OpenIris
     {
         [System.ComponentModel.Category("Appearance gaze"), System.ComponentModel.Description(
             "Also run the eye-embedding network of saccade.js on an image of both eyes, for the N-point calibration with the signal " +
-            "source Appearance, which maps the network's output to the gaze instead of the iris. Slow, about 100 ms per frame: raise " +
-            "MaxNumberOfProcessingThreads (7 threads process about 12 frames per second on 16 cores), or process recorded videos.")]
+            "source Appearance, which maps the network's output to the gaze instead of the iris. About 5 ms per frame on the graphics " +
+            "card (DirectML); without one, on the processor, about 50 ms: then raise MaxNumberOfProcessingThreads.")]
         public bool AppearanceGaze { get => appearanceGaze; set => SetProperty(ref appearanceGaze, value, nameof(AppearanceGaze)); }
         private bool appearanceGaze;
     }

@@ -10,6 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Emgu.CV" />
     <PackageReference Include="Emgu.CV.Bitmap" />
+    <!-- ONNX Runtime, for the appearance gaze. OpenIris has it in lib\. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.Managed" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="SyntheticEyes\SyntheticEyesUI.cs" SubType="Form" />
@@ -19,8 +21,9 @@
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Neural networks of the webcam system and pipeline, in Plugins\WebcamModels\. See its README.md. -->
-    <None Include="Webcam\Models\*.onnx;Webcam\Models\README.md;Webcam\Models\LICENSE-Apache-2.0.txt;Webcam\Models\LICENSE-MIT-saccadejs.txt" Link="WebcamModels\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Neural networks of the webcam system and pipeline, in Plugins\WebcamModels\, and the licenses of the
+         networks and of ONNX Runtime (which runs saccade.js's). See its README.md. -->
+    <None Include="Webcam\Models\*.onnx;Webcam\Models\*.txt;Webcam\Models\README.md" Link="WebcamModels\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenIrisLib\OpenIrisLib.csproj">

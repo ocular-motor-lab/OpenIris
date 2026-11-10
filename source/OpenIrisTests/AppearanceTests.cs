@@ -11,13 +11,11 @@ namespace OpenIris.Tests
     using System.Drawing;
     using System.IO;
     using System.Linq;
-    using System.Runtime.InteropServices;
     using System.Text.Json;
     using Emgu.CV;
-    using Emgu.CV.CvEnum;
-    using Emgu.CV.Dnn;
     using Emgu.CV.Structure;
-    using Emgu.CV.Util;
+    using Microsoft.ML.OnnxRuntime;
+    using Microsoft.ML.OnnxRuntime.Tensors;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using OpenIris.Calibration;
 
@@ -70,42 +68,44 @@ namespace OpenIris.Tests
         }
 
         /// <summary>
-        /// OpenCV (EmguCV) runs the network converted for it (BasicPlugins\Webcam\Models) as ONNX Runtime
-        /// runs the original.
+        /// ONNX Runtime runs the network (BasicPlugins\Webcam\Models) on the graphics card with DirectML as
+        /// on the processor: the outputs of the original network with ONNX Runtime in Python. On the processor
+        /// if there is no DirectML (GitHub's computers). The input as AppearanceNetwork makes it.
         /// </summary>
         [TestMethod]
-        public void NetworkGivesTheSameOutputsAsOnnxRuntime()
+        public void NetworkGivesTheSameOutputsOnTheGraphicsCard()
         {
             using var reference = JsonDocument.Parse(File.ReadAllText(Path.Combine(Data, "embedding_reference.json")));
             var expected = reference.RootElement.GetProperty("embedding").EnumerateArray().Select(v => v.GetSingle()).ToArray();
             var expectedWeight = reference.RootElement.GetProperty("cal_weight").GetSingle();
 
             var model = Path.Combine(PipelineHarness.SourceFolder, "..", "BasicPlugins", "Webcam", "Models", "eye_embedding.onnx");
-            using var net = DnnInvoke.ReadNetFromONNX(model);
             using var strip = new Image<Gray, byte>(Path.Combine(Data, "pipe_clahe.png"));
+            var input = new DenseTensor<float>(strip.Data.Cast<byte>().Select(b => (float)b).ToArray(), new[] { 1, AppearanceStrip.Height, AppearanceStrip.Width, 1 });
 
-            var input = strip.Data.Cast<byte>().Select(b => (float)b).ToArray();
-            var handle = GCHandle.Alloc(input, GCHandleType.Pinned);
+            InferenceSession session;
             try
             {
-                using var blob = new Mat(new[] { 1, AppearanceStrip.Height, AppearanceStrip.Width, 1 }, DepthType.Cv32F, handle.AddrOfPinnedObject());
-                using var outputs = new VectorOfMat();
-                net.SetInput(blob);
-                net.Forward(outputs, new[] { "embedding", "cal_weight" });
+                using var options = new SessionOptions { EnableMemoryPattern = false, ExecutionMode = ExecutionMode.ORT_SEQUENTIAL };
+                options.AppendExecutionProvider_DML(0);
+                session = new InferenceSession(model, options);
+            }
+            catch (OnnxRuntimeException ex)
+            {
+                Console.WriteLine("No DirectML, on the processor: " + ex.Message);
+                session = new InferenceSession(model);
+            }
 
-                var embedding = new float[outputs[0].Total.ToInt32()];
-                Marshal.Copy(outputs[0].DataPointer, embedding, 0, embedding.Length);
-                var weight = new float[1];
-                Marshal.Copy(outputs[1].DataPointer, weight, 0, 1);
+            using (session)
+            using (var results = session.Run(new[] { NamedOnnxValue.CreateFromTensor("eye_image", input) }))
+            {
+                var embedding = results.First(r => r.Name == "embedding").AsEnumerable<float>().ToArray();
+                var weight = results.First(r => r.Name == "cal_weight").AsEnumerable<float>().First();
 
                 Assert.AreEqual(expected.Length, embedding.Length);
                 var worst = expected.Zip(embedding, (a, b) => Math.Abs(a - b)).Max();
                 Assert.IsTrue(worst < 1e-4, $"Largest difference {worst}.");
-                Assert.AreEqual(expectedWeight, weight[0], 1e-5);
-            }
-            finally
-            {
-                handle.Free();
+                Assert.AreEqual(expectedWeight, weight, 1e-5);
             }
         }
 

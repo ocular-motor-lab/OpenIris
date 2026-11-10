@@ -41,7 +41,13 @@ Webcam iris pipeline is on.
 
 It is `https://saccade.jspsych.org/models/eye-embedding/1.0.0/eye_embedding.onnx` (SHA-256
 `5a1a111e37f97bd50fcffccbf6498bf377700d27cd4e3ea5bc5d237541a3c73a`, also in the npm package
-`@saccadejs/core` 1.0.0), rewritten with `convert_eye_embedding.py`: its Gelu nodes are in ONNX
-Runtime's own domain, which OpenCV doesn't read, so they become the same formula in standard nodes.
-EmguCV (OpenCV 4.12) gives the same outputs as ONNX Runtime with the original to within 1e-4
-(`AppearanceTests`). It takes about 100 ms per frame in OpenCV, half that in ONNX Runtime.
+`@saccadejs/core` 1.0.0), unchanged. It runs with ONNX Runtime, not OpenCV: on the graphics card with
+DirectML (about 5 ms per frame), or on the processor (about 50 ms). OpenCV takes 100 to 200 ms, and
+can't read its Gelu nodes, which are in ONNX Runtime's own domain. On the graphics card it gives
+the same outputs as on the processor to within 1e-4 (`AppearanceTests`).
+
+ONNX Runtime (MIT license, copy in `LICENSE-MIT-onnxruntime.txt`, with its third-party notices in
+`ThirdPartyNotices-onnxruntime.txt`) comes from the NuGet package `Microsoft.ML.OnnxRuntime.DirectML`
+1.24.4, in OpenIris's `lib\`. `DirectML.dll` is not shipped: ONNX Runtime uses Windows' own, in
+`System32` (tested with 1.15.6, in Windows 11). If it can't create the network on the graphics card,
+the network runs on the processor, and the log says so.

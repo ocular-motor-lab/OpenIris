@@ -20,6 +20,9 @@
     <PackageReference Include="Emgu.CV.runtime.windows" />
     <PackageReference Include="Emgu.CV.Bitmap" />
     <PackageReference Include="System.Text.Json" />
+    <!-- ONNX Runtime, for the webcam's appearance gaze network (AppearanceTests), as for OpenIris.exe. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" ExcludeAssets="native" />
+    <PackageReference Include="Microsoft.AI.DirectML" ExcludeAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.ComponentModel.Composition" />

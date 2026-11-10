@@ -24,6 +24,11 @@
     <!-- OpenIrisLib's web server. Referenced here too so the binding redirects it needs
          (System.ValueTuple, for Swan.Lite) go into OpenIris.exe.config. -->
     <PackageReference Include="EmbedIO" />
+    <!-- ONNX Runtime with DirectML, for the webcam's appearance gaze: onnxruntime.dll in lib\, copied by the
+         package itself (ExcludeAssets avoids a second copy in lib\x64\). DirectML.dll is Windows' own, not the
+         package's copy. -->
+    <PackageReference Include="Microsoft.ML.OnnxRuntime.DirectML" ExcludeAssets="native" />
+    <PackageReference Include="Microsoft.AI.DirectML" ExcludeAssets="all" />
     <PackageReference Include="GitVersion.MsBuild" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>

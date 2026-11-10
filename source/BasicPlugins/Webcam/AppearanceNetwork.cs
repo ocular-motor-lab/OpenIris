@@ -9,39 +9,69 @@ namespace OpenIris
 #nullable enable
 
     using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using Emgu.CV;
-    using Emgu.CV.CvEnum;
-    using Emgu.CV.Dnn;
     using Emgu.CV.Structure;
-    using Emgu.CV.Util;
+    using Microsoft.ML.OnnxRuntime;
+    using Microsoft.ML.OnnxRuntime.Tensors;
 
     /// <summary>
     /// The eye-embedding network of saccade.js (eye_embedding.onnx in Plugins\WebcamModels, see its
     /// README.md): from the strip of both eyes (<see cref="AppearanceStrip"/>) to an embedding that the
-    /// N-point calibration maps to the gaze. About 100 ms per frame. Not thread safe: use one object per
-    /// thread.
+    /// N-point calibration maps to the gaze. It runs with ONNX Runtime on the graphics card (DirectML,
+    /// about 5 ms per frame), or on the processor if that fails (about 50 ms). One for all the
+    /// processing threads (<see cref="Shared"/>), loaded the first time it is needed and kept while
+    /// OpenIris runs: loading takes a while, and with DirectML each copy holds memory on the graphics
+    /// card. Runs one frame at a time.
     /// </summary>
     internal sealed class AppearanceNetwork : IDisposable
     {
-        private readonly Net net;
-        private readonly float[] input = new float[AppearanceStrip.Width * AppearanceStrip.Height];
-        private readonly GCHandle inputHandle;
-        private readonly Mat inputBlob;
-        private readonly Mat inputImage;
-        private readonly VectorOfMat outputBlobs = new VectorOfMat();
-        private readonly string[] outputNames = { "embedding", "cal_weight" };
+        private static readonly object LoadLock = new object();
+        private static readonly Lazy<AppearanceNetwork> SharedNetwork = new Lazy<AppearanceNetwork>(() => new AppearanceNetwork());
+        private static bool nativeLoaded;
+
+        private readonly object runLock = new object();
+
+        private readonly InferenceSession session;
+        private readonly DenseTensor<float> input = new DenseTensor<float>(new[] { 1, AppearanceStrip.Height, AppearanceStrip.Width, 1 });
+        private readonly NamedOnnxValue[] inputs;
 
         public AppearanceNetwork()
         {
-            net = DnnInvoke.ReadNetFromONNX(NeuralNetwork.ModelPath("eye_embedding.onnx"));
+            LoadNativeOnnxRuntime();
+            var model = NeuralNetwork.ModelPath("eye_embedding.onnx");
+            inputs = new[] { NamedOnnxValue.CreateFromTensor("eye_image", input) };
 
-            // The input, 1 x 36 x 144 x 1 (the pixels in order, 0 to 255), and an image over the same
-            // memory to write it.
-            inputHandle = GCHandle.Alloc(input, GCHandleType.Pinned);
-            inputBlob = new Mat(new[] { 1, AppearanceStrip.Height, AppearanceStrip.Width, 1 }, DepthType.Cv32F, inputHandle.AddrOfPinnedObject());
-            inputImage = new Mat(AppearanceStrip.Height, AppearanceStrip.Width, DepthType.Cv32F, 1, inputHandle.AddrOfPinnedObject(), AppearanceStrip.Width * sizeof(float));
+            try
+            {
+                // DirectML needs these two (see ONNX Runtime's DirectML documentation).
+                using var options = new SessionOptions { EnableMemoryPattern = false, ExecutionMode = ExecutionMode.ORT_SEQUENTIAL };
+                options.AppendExecutionProvider_DML(0);
+                session = new InferenceSession(model, options);
+                Device = "graphics card (DirectML)";
+            }
+            catch (Exception ex) when (ex is OnnxRuntimeException || ex is EntryPointNotFoundException || ex is DllNotFoundException)
+            {
+                Trace.WriteLine($"Appearance gaze: DirectML is not available ({ex.Message}). The network runs on the processor.");
+                session = new InferenceSession(model);
+                Device = "processor";
+            }
+
+            Trace.WriteLine($"Appearance gaze: saccade.js's network on the {Device}.");
         }
+
+        /// <summary>
+        /// The network for all the processing threads.
+        /// </summary>
+        public static AppearanceNetwork Shared => SharedNetwork.Value;
+
+        /// <summary>
+        /// Where the network runs.
+        /// </summary>
+        public string Device { get; }
 
         /// <summary>
         /// Runs the network on a strip of both eyes.
@@ -50,25 +80,50 @@ namespace OpenIris
         {
             if (strip.Width != AppearanceStrip.Width || strip.Height != AppearanceStrip.Height) throw new ArgumentException($"The strip must be {AppearanceStrip.Width}x{AppearanceStrip.Height}.", nameof(strip));
 
-            strip.Mat.ConvertTo(inputImage, DepthType.Cv32F);
-            net.SetInput(inputBlob);
-            net.Forward(outputBlobs, outputNames);
+            lock (runLock)
+            {
+                // The pixels in order, 0 to 255, as 1 x 36 x 144 x 1.
+                var data = strip.Data;
+                var buffer = input.Buffer.Span;
+                for (int y = 0, i = 0; y < AppearanceStrip.Height; y++)
+                {
+                    for (int x = 0; x < AppearanceStrip.Width; x++, i++) buffer[i] = data[y, x, 0];
+                }
 
-            var embedding = new float[outputBlobs[0].Total.ToInt32()];
-            Marshal.Copy(outputBlobs[0].DataPointer, embedding, 0, embedding.Length);
-            var weight = new float[1];
-            Marshal.Copy(outputBlobs[1].DataPointer, weight, 0, 1);
-            return new AppearanceEmbedding(embedding, weight[0]);
+                using var results = session.Run(inputs);
+                var embedding = results.First(r => r.Name == "embedding").AsEnumerable<float>().ToArray();
+                var weight = results.First(r => r.Name == "cal_weight").AsEnumerable<float>().First();
+                return new AppearanceEmbedding(embedding, weight);
+            }
         }
 
         public void Dispose()
         {
-            outputBlobs.Dispose();
-            inputImage.Dispose();
-            inputBlob.Dispose();
-            inputHandle.Free();
-            net.Dispose();
+            session.Dispose();
         }
+
+        /// <summary>
+        /// Loads onnxruntime.dll from lib\, next to Microsoft.ML.OnnxRuntime.dll: .NET Framework only
+        /// looks for it next to OpenIris.exe. DirectML.dll is Windows' own.
+        /// </summary>
+        private static void LoadNativeOnnxRuntime()
+        {
+            lock (LoadLock)
+            {
+                if (nativeLoaded) return;
+
+                var folder = Path.GetDirectoryName(typeof(InferenceSession).Assembly.Location);
+                foreach (var candidate in new[] { Path.Combine(folder, "onnxruntime.dll"), Path.Combine(folder, "x64", "onnxruntime.dll") })
+                {
+                    if (File.Exists(candidate) && LoadLibrary(candidate) != IntPtr.Zero) break;
+                }
+
+                nativeLoaded = true;
+            }
+        }
+
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
+        private static extern IntPtr LoadLibrary(string fileName);
     }
 
     /// <summary>

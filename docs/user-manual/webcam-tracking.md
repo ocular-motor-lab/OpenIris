@@ -82,12 +82,11 @@ To use it:
 
 1. Select the **WebcamSaccadeJS** profile. It is the WebcamMediaPipe profile with `AppearanceGaze`
    on in the settings of the `Webcam iris` pipeline, and the N-point calibration set up as below.
-2. The network is slow: with the face and the irises, a frame takes about 250 ms. Raise
-   `MaxNumberOfProcessingThreads` so frames are processed in parallel (the face is still followed
-   one frame at a time). On a computer with 16 cores, 7 threads process about 12 frames per second
-   (the 20 seconds of the iPhone sample video in about 50 seconds), so live tracking at 30 frames
-   per second drops frames. Record the video and [process it](processing-videos.md) afterwards
-   for every frame.
+2. The network runs on the graphics card, with DirectML (part of Windows 10 and 11, for any
+   DirectX 12 graphics card): about 5 ms per frame, so it barely slows tracking down. The log says
+   where it runs. Without a graphics card it runs on the processor, about 50 ms per frame or more:
+   then raise `MaxNumberOfProcessingThreads` so frames are processed in parallel, or record the video
+   and [process it](processing-videos.md) afterwards.
 3. Calibrate: N-point with **SignalSource** `Appearance`, 13 targets shown by OpenIris (Local mode,
    on the display `StimulusDisplay` of the Webcam system). Use at least 9 targets.
 
@@ -122,5 +121,6 @@ In frames where the face isn't found, the head columns are `NaN`.
 - **Glasses** with strong reflections and faces turned far to the side make tracking worse.
 
 The MediaPipe networks are licensed under the Apache License 2.0, and saccade.js's network under
-the MIT license; copies of both are in `Plugins\WebcamModels\`. Where they come from and how they were converted is described in
+the MIT license; copies of both are in `Plugins\WebcamModels\`. saccade.js's network runs with
+[ONNX Runtime](https://onnxruntime.ai) (MIT license). Where they come from and how they were converted is described in
 `source\BasicPlugins\Webcam\Models\README.md`.

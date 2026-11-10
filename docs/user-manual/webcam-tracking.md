@@ -18,6 +18,9 @@ It uses neural networks from Google's [MediaPipe](https://github.com/google-ai-e
    images of a head-mounted eye tracker: the eye stays still in them when the head moves.
 4. The iris network finds the iris and the eyelids in each eye image.
 
+The networks run on the graphics card when there is one that can (with DirectML, part of Windows 10
+and 11, for any DirectX 12 graphics card), and otherwise on the processor. The log says which.
+
 In visible light the pupil is hard to see, so the **iris** center stands in for the pupil center,
 and the iris diameter for the pupil size, in the data file.
 
@@ -82,9 +85,8 @@ To use it:
 
 1. Select the **WebcamSaccadeJS** profile. It is the WebcamMediaPipe profile with `AppearanceGaze`
    on in the settings of the `Webcam iris` pipeline, and the N-point calibration set up as below.
-2. The network runs on the graphics card, with DirectML (part of Windows 10 and 11, for any
-   DirectX 12 graphics card): about 5 ms per frame, so it barely slows tracking down. The log says
-   where it runs. Without a graphics card it runs on the processor, about 50 ms per frame or more:
+2. The network runs on the graphics card: about 5 ms per frame, so it barely slows tracking down.
+   Without a graphics card it runs on the processor, about 50 ms per frame or more:
    then raise `MaxNumberOfProcessingThreads` so frames are processed in parallel, or record the video
    and [process it](processing-videos.md) afterwards.
 3. Calibrate: N-point with **SignalSource** `Appearance`, 13 targets shown by OpenIris (Local mode,
@@ -113,7 +115,8 @@ In frames where the face isn't found, the head columns are `NaN`.
 
 - **Precision**: with 640×480 images, the eyes are only about 30 pixels wide, so expect noisy
   data. Higher resolutions help.
-- **Frame rate**: about 30 fps. Finding the face takes ~15 ms per frame and each iris ~10 ms.
+- **Frame rate**: about 30 fps, the webcam's. On the graphics card a frame takes about 13 ms to
+  process; on the processor about 27 ms (finding the face ~15 ms, each iris ~10 ms).
 - **Timing**: webcams don't give timestamps or frame counters, so OpenIris uses the time each image
   arrives, and can't tell when the webcam itself dropped frames.
 - **Blinks**: the networks always return an eye, so during a blink the iris position is not

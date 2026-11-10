@@ -9,26 +9,36 @@ namespace OpenIris
 #nullable enable
 
     using System;
-    using System.IO;
+    using System.Diagnostics;
     using System.Runtime.InteropServices;
     using Emgu.CV;
     using Emgu.CV.CvEnum;
     using Emgu.CV.Dnn;
     using Emgu.CV.Structure;
     using Emgu.CV.Util;
+    using Microsoft.ML.OnnxRuntime.Tensors;
 
     /// <summary>
-    /// One of the ONNX networks in Plugins\WebcamModels, run with OpenCV's DNN module. Not thread
-    /// safe: use one object per thread.
+    /// One of MediaPipe's networks in Plugins\WebcamModels, which take a square RGB image
+    /// (1x3xSizexSize). On the graphics card with ONNX Runtime and DirectML if it can (<see cref="OnnxModel"/>,
+    /// one for all the objects of the same file), about 2 ms; otherwise with OpenCV's DNN module, which
+    /// on the processor is faster than ONNX Runtime for these networks (about 10 ms). Not thread safe:
+    /// use one object per thread.
     /// </summary>
     internal sealed class NeuralNetwork : IDisposable
     {
-        private readonly Net net;
         private readonly string[] outputNames;
         private readonly float[] input;
         private readonly GCHandle inputHandle;
-        private readonly Mat inputBlob;
-        private readonly VectorOfMat outputBlobs = new VectorOfMat();
+
+        // On the graphics card.
+        private readonly OnnxModel? model;
+        private readonly DenseTensor<float>? tensor;
+
+        // On the processor.
+        private readonly Net? net;
+        private readonly Mat? inputBlob;
+        private readonly VectorOfMat? outputBlobs;
 
         /// <summary>
         /// Loads a network that takes a square RGB image (1x3xSizexSize).
@@ -38,32 +48,32 @@ namespace OpenIris
         /// <param name="outputNames">Names of the outputs to read.</param>
         public NeuralNetwork(string fileName, int size, params string[] outputNames)
         {
-            net = DnnInvoke.ReadNetFromONNX(ModelPath(fileName));
             Size = size;
             this.outputNames = outputNames;
 
-            // The input blob wraps this array, so filling the array sets the input.
+            // The input tensor or blob wraps this array, so filling the array sets the input.
             input = new float[3 * size * size];
             inputHandle = GCHandle.Alloc(input, GCHandleType.Pinned);
-            inputBlob = new Mat(new[] { 1, 3, size, size }, DepthType.Cv32F, inputHandle.AddrOfPinnedObject());
+
+            var onnx = OnnxModel.Get(fileName);
+            if (onnx.OnGraphicsCard)
+            {
+                model = onnx;
+                tensor = new DenseTensor<float>(input, new[] { 1, 3, size, size });
+            }
+            else
+            {
+                Trace.WriteLine($"Webcam models: {fileName} runs on the processor (OpenCV).");
+                net = DnnInvoke.ReadNetFromONNX(OnnxModel.ModelPath(fileName));
+                inputBlob = new Mat(new[] { 1, 3, size, size }, DepthType.Cv32F, inputHandle.AddrOfPinnedObject());
+                outputBlobs = new VectorOfMat();
+            }
         }
 
         /// <summary>
         /// Width and height of the input image.
         /// </summary>
         public int Size { get; }
-
-        /// <summary>
-        /// Path of a network in Plugins\WebcamModels.
-        /// </summary>
-        /// <exception cref="FileNotFoundException">If it isn't there.</exception>
-        public static string ModelPath(string fileName)
-        {
-            var folder = Path.Combine(Path.GetDirectoryName(typeof(NeuralNetwork).Assembly.Location), "WebcamModels");
-            var path = Path.Combine(folder, fileName);
-            if (!File.Exists(path)) throw new FileNotFoundException($"The webcam tracking model {fileName} is missing. It should be in {folder}.", path);
-            return path;
-        }
 
         /// <summary>
         /// Runs the network on a grayscale image of Size x Size, repeated in the three color channels.
@@ -91,13 +101,15 @@ namespace OpenIris
                 }
             }
 
-            net.SetInput(inputBlob);
+            if (model != null) return model.Run(tensor!, outputNames);
+
+            net!.SetInput(inputBlob);
             net.Forward(outputBlobs, outputNames);
 
             var outputs = new float[outputNames.Length][];
             for (int i = 0; i < outputNames.Length; i++)
             {
-                var blob = outputBlobs[i];
+                var blob = outputBlobs![i];
                 outputs[i] = new float[blob.Total.ToInt32()];
                 Marshal.Copy(blob.DataPointer, outputs[i], 0, outputs[i].Length);
             }
@@ -107,10 +119,11 @@ namespace OpenIris
 
         public void Dispose()
         {
-            outputBlobs.Dispose();
-            inputBlob.Dispose();
+            // The ONNX Runtime model is shared and stays loaded (OnnxModel).
+            outputBlobs?.Dispose();
+            inputBlob?.Dispose();
+            net?.Dispose();
             inputHandle.Free();
-            net.Dispose();
         }
     }
 }

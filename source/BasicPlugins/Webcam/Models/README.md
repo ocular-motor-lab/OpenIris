@@ -3,8 +3,10 @@
 The Webcam eye tracking system and the Webcam iris pipeline use three neural networks from Google's
 [MediaPipe](https://github.com/google-ai-edge/mediapipe), licensed under the Apache License 2.0
 (copy in `LICENSE-Apache-2.0.txt`). The files here are modified: converted to ONNX and rewritten
-for OpenCV, as described below. They run with OpenCV's DNN module (in EmguCV), so they need nothing beyond what OpenIris already
-has. They are copied to `Plugins\WebcamModels\`.
+for OpenCV, as described below. They run on the graphics card with ONNX Runtime and DirectML (about
+2 ms each), or, if that isn't possible, with OpenCV's DNN module (in EmguCV), which on the processor
+is faster than ONNX Runtime for them (about 10 ms each). On the graphics card the results differ from
+OpenCV's by about 1e-5, and tracking is as precise. They are copied to `Plugins\WebcamModels\`.
 
 | File | MediaPipe network | Input | Output |
 | --- | --- | --- | --- |

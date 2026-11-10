@@ -7,6 +7,9 @@
 - **A fast computer for high frame rates.** What you need depends on the frame rate and image size.
   For binocular recordings at 500 Hz, we recommend a recent Intel Core i9 (or similar) with a base
   frequency above 3 GHz.
+- **For webcam tracking, a graphics card helps** (any DirectX 12 card): its neural networks run
+  there, with the DirectML that comes with Windows 10 and 11, about twice as fast. Without one they
+  run on the processor. See [Webcam tracking](webcam-tracking.md).
 - **For FLIR cameras:** install the [Spinnaker SDK](https://www.flir.com/products/spinnaker-sdk/)
   before running OpenIris, including its .NET libraries (the **Application Development** option of
   the installer). OpenIris uses the version you install. It also includes SpinView, which is very

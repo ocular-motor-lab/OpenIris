@@ -181,7 +181,9 @@ images show the eye as someone facing the subject sees it, with y down.
 - **Manual** lets the user set the eye model on the image, for cameras that see the eye at an angle.
 - **N-point** (`CalibrationPipelineRemoteLinear`, called Remote Linear before 0.2) fits a linear
   transformation from the eye signal to the target positions (`LinearGazeMap`), which then gives the
-  horizontal and vertical positions instead of the eye model (see below). The targets come in
+  horizontal and vertical positions instead of the eye model (see below). With the signal source
+  `Appearance` it fits instead a ridge regression from the embedding of a gaze network
+  (`EyeData.Appearance`, filled by the Webcam iris pipeline) to the targets (`AppearanceGazeMap`). The targets come in
   messages (Remote mode), or the pipeline shows them itself (`NPointSequence`): its `Target` is what
   to draw now, which the local targets window (`NPointTargetsForm`) and the web client's display page
   (through `/ws/calibration`) draw. A pipeline can stop the calibration itself with `Cancelled`.

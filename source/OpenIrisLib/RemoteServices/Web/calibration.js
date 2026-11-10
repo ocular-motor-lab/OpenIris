@@ -52,6 +52,8 @@ async function api(method, path, body) {
 // This page shows and controls the targets itself: the N-point calibration in its Remote mode.
 const METHOD = "N-point";
 const SIGNALS = ["None", "Pupil", "CR1", "CR2", "CR3", "CR4"];
+// The webcam's gaze network (WebcamSaccadeJS): only as the source.
+const SOURCES = [...SIGNALS, "Appearance"];
 
 async function getSettings() {
   const map = {};
@@ -472,10 +474,10 @@ async function refreshInfo() {
     const ready = usingIt && settings["Calibration.Mode"] === "Remote";
     $("fits").textContent = (ready ? "" : notSelected(status, settings) + " ") +
       (status.Tracking ? "" : "OpenIris is not tracking.");
-    for (const [id, name, fallback] of [["source", "Calibration.SignalSource", "Pupil"], ["reference", "Calibration.SignalReference", "CR1"]]) {
+    for (const [id, name, fallback, list] of [["source", "Calibration.SignalSource", "Pupil", SOURCES], ["reference", "Calibration.SignalReference", "CR1", SIGNALS]]) {
       const select = $(id);
       const current = select.value || (usingIt ? settings[name] : null) || fallback;
-      select.replaceChildren(...SIGNALS.map((s) => new Option(s === "None" ? "Nothing" : s, s, false, s === current)));
+      select.replaceChildren(...list.map((s) => new Option(s === "None" ? "Nothing" : s, s, false, s === current)));
     }
   } catch (error) {
     showError(error);

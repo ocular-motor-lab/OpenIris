@@ -249,6 +249,9 @@ the right angles, and the number of targets (5, 9 or 13), how far out they go, a
 lasts. The positions are in degrees, up and right positive. At the end the subject looks at the
 center target, which becomes the zero reference.
 
+Choose the signal under **Eye signal** and **Minus**: the pupil minus a reflection, the pupil alone, or, with the
+WebcamSaccadeJS profile, **Appearance** (the webcam's [appearance gaze](webcam-tracking.md#appearance-gaze)).
+
 The result shows each target with the position the calibration gives for each eye. **Validate**
 shows the targets again (in a new random order) and compares them with the gaze: the mean and
 maximum error of each eye, in degrees, is the accuracy to report. The calibration error is lower than
